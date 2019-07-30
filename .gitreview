@@ -1,0 +1,5 @@
+[gerrit]
+host=gerrit.acumos.org
+port=29418
+project=license-usage-manager.git
+defaultbranch=master
