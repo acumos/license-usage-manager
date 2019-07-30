@@ -1,0 +1,52 @@
+---
+project: 'License Management integration with Acumos'
+project_creation_date: '2019-07-30'
+project_category: ''
+lifecycle_state: 'Incubation'
+project_lead: &acumos_license-usage-manager_ptl
+    name: 'Michelle Martens'
+    email: 'mm8916@att.com'
+    company: 'ATT'
+    timezone: 'America/New_York'
+    id: 'Michelle'
+primary_contact: *acumos_license-usage-manager_ptl
+issue_tracking:
+    type: 'jira'
+    url: 'https://jira.acumos.org/projects/ACUMOS'
+    key: 'ACUMOS'
+mailing_list:
+    type: 'groups.io'
+    url: 'lists.acumos.org'
+    tag: '<[sub-project_name]>'
+realtime_discussion:
+    type: 'irc'
+    server: 'freenode.net'
+    channel: '#acumos'
+meetings:
+    - type: 'zoom'
+      agenda: ''
+      url: ''
+      server: 'n/a'
+      channel: 'n/a'
+      repeats: 'n/a'
+      time: 'n/a'
+repositories:
+    - 'license-usage-manager'
+committers:
+    - <<: *acumos_license-usage-manager_ptl
+    - name: 'Alex Shatov'
+      email: 'alexs@att.com'
+      company: 'ATT'
+      id: 'alex_sh'
+      timezone: 'America/New_York'
+    - name: 'Justin Early'
+      company: 'Ericsson Software Technology'
+      email: 'justin.early@est.tech'
+      id: 'justin14'
+      timezone: 'America/Los_Angeles'
+tsc:
+    approval: ''
+    changes:
+        - type: ''
+          name: ''
+          link: ''
