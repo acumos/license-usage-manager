@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0d167fba_f92ff474",
+        "filename": "lum_server/api/lum_server-API.yaml",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 290
+      },
+      "writtenOn": "2019-08-05T16:48:26Z",
+      "side": 1,
+      "message": "getting codegen warning there is no servers block https://swagger.io/docs/specification/api-host-and-base-path/ \n\n\u0027host\u0027 (OAS 2.0) or \u0027servers\u0027 (OAS 3.0) not defined in the spec. Default to [http://localhost] for server URL [http://localhost/]",
+      "revId": "656b3bb42c21712a415c8b379e750e626f64e9f5",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "14e84c59_e323c5d6",
+        "filename": "lum_server/api/lum_server-API.yaml",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 290
+      },
+      "writtenOn": "2019-08-05T16:48:26Z",
+      "side": 1,
+      "message": "codegen warning Empty operationId found for path: get /api/v1/asset-assign-rules/{swMgtSystemId}. Renamed to auto-generated operationId: apiV1AssetAssignRulesSwMgtSystemIdGet",
+      "revId": "656b3bb42c21712a415c8b379e750e626f64e9f5",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4342c3ba_b64dc18f",
+        "filename": "lum_server/api/lum_server-API.yaml",
+        "patchSetId": 1
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 290
+      },
+      "writtenOn": "2019-08-05T16:48:26Z",
+      "side": 1,
+      "message": "openapi code gen gives strange error when using allOf with $ref and inline properties .. code gen prefers #allOf with multiple $ref per this message --  [WARNING] allOf with multiple schemas defined. Using only the first one: BaseRequestTop. To fully utilize allOf, please use $ref instead of inline schema definition",
+      "revId": "656b3bb42c21712a415c8b379e750e626f64e9f5",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "55b5d8e5_b2289f62",
+        "filename": "lum_server/api/lum_server-API.yaml",
+        "patchSetId": 1
+      },
+      "lineNbr": 663,
+      "author": {
+        "id": 290
+      },
+      "writtenOn": "2019-08-05T16:48:26Z",
+      "side": 1,
+      "message": "code gen gave warning: Empty operationId found for path: get /api/v1/asset-usage/{assetUsageId}. Renamed to auto-generated operationId: apiV1AssetUsageAssetUsageIdGet -- to prevent weird method names we should use operationId",
+      "revId": "656b3bb42c21712a415c8b379e750e626f64e9f5",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    }
+  ]
+}
