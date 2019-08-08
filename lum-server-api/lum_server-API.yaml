@@ -1422,6 +1422,14 @@ components:
           default: []
           nullable: true
           items:
-            oneOf:
-              - $ref: '#/components/schemas/AssetUsageResponse'
-              - $ref: '#/components/schemas/AssetUsageEventResponse'
+            $ref: '#/components/schemas/AssetUsageResponse' 
+        assetUsageEvents:
+          description: all assetUsage request records for supplier softwareLicensorId
+          type: array
+          default: []
+          nullable: true
+          items:
+            $ref: '#/components/schemas/AssetUsageEventResponse'
+
+
+
