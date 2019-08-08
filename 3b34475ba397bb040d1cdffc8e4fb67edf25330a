@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b9fde45e_b1fb75b9",
+        "filename": "lum-server-api/lum_server-API.yaml",
+        "patchSetId": 9
+      },
+      "lineNbr": 1425,
+      "author": {
+        "id": 290
+      },
+      "writtenOn": "2019-08-08T23:17:46Z",
+      "side": 1,
+      "message": "There are issues with oneOf in java code gen...\n\nCan we try this approach with 2 different arrays?\n\n        assetUsages:\n          description: all assetUsage request records for supplier softwareLicensorId\n          type: array\n          default: []\n          nullable: true\n          items:\n            $ref: \u0027#/components/schemas/AssetUsageResponse\u0027 \n        assetUsageEvents:\n          description: all assetUsage request records for supplier softwareLicensorId\n          type: array\n          default: []\n          nullable: true\n          items:\n            $ref: \u0027#/components/schemas/AssetUsageEventResponse\u0027",
+      "revId": "3b34475ba397bb040d1cdffc8e4fb67edf25330a",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    }
+  ]
+}
