@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<!--
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<!--<![CDATA[
 	===============LICENSE_START=======================================================
 	Acumos
 	===================================================================================
@@ -18,7 +19,7 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 	===============LICENSE_END=========================================================
-	-->
+	]]>-->
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.acumos.license-manager</groupId>
 	<artifactId>license-manager-parent</artifactId>
@@ -29,7 +30,7 @@
 	<modules>
 		<!-- Child modules do NOT name this parent. -->
 		<module>lum-java-client</module>
-  </modules>
+	</modules>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -65,6 +66,13 @@
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>3.0.0</version>
 				<configuration>
+					<tags>
+						<tag>
+							<name>http.response.details</name>
+							<placement>a</placement>
+							<head>Http Response Details:</head>
+						</tag>
+					</tags>
 					<!-- Silence error javax.interceptor.InterceptorBinding not found -->
 					<additionalDependencies>
 						<additionalDependency>
