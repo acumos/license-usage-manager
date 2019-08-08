@@ -64,7 +64,14 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>3.0.0</version>
-				<configuration>
+        <configuration>
+          <tags>
+            <tag>
+              <name>http.response.details</name>
+              <placement>a</placement>
+              <head>Http Response Details:</head>
+            </tag>
+          </tags>   
 					<!-- Silence error javax.interceptor.InterceptorBinding not found -->
 					<additionalDependencies>
 						<additionalDependency>
