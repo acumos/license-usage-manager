@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "e1eb6d9f_c918bab0",
+        "filename": "lum-java-client/pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 4
+      },
+      "writtenOn": "2019-08-09T14:20:08Z",
+      "side": 1,
+      "message": "You can block the Eclipse formatter from mangling your header by starting it:\n\n   \u003c!--\u003c![CDATA[\n\nand closing it:\n\n]]\u003e--\u003e",
+      "range": {
+        "startLine": 2,
+        "startChar": 1,
+        "endLine": 2,
+        "endChar": 7
+      },
+      "revId": "ae6e8f45cd9e031562983cbe0671e6706882cedd",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "b35d6a82_863d72cb",
         "filename": "pom.xml",
         "patchSetId": 3
@@ -18,6 +41,29 @@
         "startChar": 0,
         "endLine": 74,
         "endChar": 17
+      },
+      "revId": "ae6e8f45cd9e031562983cbe0671e6706882cedd",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "69359f9a_e45befb8",
+        "filename": "pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 4
+      },
+      "writtenOn": "2019-08-09T14:20:08Z",
+      "side": 1,
+      "message": "Please be consistent, either spaces or tabs, don\u0027t mix.",
+      "range": {
+        "startLine": 67,
+        "startChar": 0,
+        "endLine": 74,
+        "endChar": 6
       },
       "revId": "ae6e8f45cd9e031562983cbe0671e6706882cedd",
       "serverId": "655300a2-7a56-4504-9153-881edd907bea",
