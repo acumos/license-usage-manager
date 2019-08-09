@@ -18,7 +18,7 @@
 openapi: '3.0.2'
 
 info:
-  version: "0.9.1"
+  version: "0.11.0"
   title: "License Usage Manager (LUM) API"
   license:
     name: "Apache 2.0"
@@ -252,7 +252,8 @@ paths:
       - name: assetUsageAgreementId
         required: true
         in: path
-        description: urlencoded UID key to assetUsageAgreement in IRI or URI format
+        description: urlencoded UID key to assetUsageAgreement in IRI or URI format.
+          possible format "http://software-licensor/<softwareLicensorId>/agreement/<agreement-uuid>"
         schema:
           type: string
 
@@ -523,23 +524,14 @@ components:
     SWIDCreators:
       description: collection of creators for swidTag
       type: object
-      required: [softwareCreators]
+      required: [swCreators]
       properties:
-        softwareCreators:
-          description: collection of creators for swidTag
+        swCreators:
+          description: collection of userId values of the creators for swidTag
           type: array
           default: []
           items:
-            type: object
-            properties:
-              userId:
-                description: identifier of the user that created the software piece
-                type: string
-
-              userInfo:
-                description: more info about the creator user
-                type: object
-                nullable: true
+            type: string
 
     SetSwidTagCreatorsRequest:
       description: request to set swidTag Creators
@@ -692,7 +684,9 @@ components:
 
       properties:
         swidTag:
-          $ref: '#/components/schemas/SWIDBody'
+          allOf:
+            - $ref: '#/components/schemas/SWIDBody'
+            - $ref: '#/components/schemas/SWIDCreators'
 
     SWIDResponse:
       description: response to swidTag request
@@ -754,7 +748,9 @@ components:
     LicenseProfile:
       description: terms and conditions define the rights for the usage of software asset
       type: object
-      required: [licenseProfileId]
+      required:
+        - licenseProfileId
+        - isRtuRequired
       properties:
         licenseProfileId:
           description: identifier of the software licenseProfile -- FK to licenseProfile
@@ -766,8 +762,7 @@ components:
           type: object
 
         isRtuRequired:
-          description: whether requires the right-to-use or it is Free or Open Source Software
-            -- if true, it requires RTU (right-to-use) to be provided for usage
+          description: whether requires the right-to-use for usage, when false goes directly to rtuUsage
           type: boolean
           default: true
 
@@ -776,7 +771,7 @@ components:
           type: string
 
         licenseName:
-          description: name the license in free text
+          description: name of the license in free text
           type: string
 
         licenseDescription:
@@ -791,12 +786,12 @@ components:
       description: properties populated by LUM server
       properties:
         licenseProfileRevision:
-          description: 1,2,3,... revision of the licenseProfile - updates are allowed
+          description: 1,2,3,... revision of the licenseProfile - updates are allowed - auto-incremented by LUM
           type: integer
           format: int64
 
         licenseActive:
-          description: whether the licenseProfile is currently active - not closed and not revoked
+          description: whether the license profile is currently active - not closed and not expired and not revoked
           type: boolean
           default: true
 
@@ -1275,26 +1270,6 @@ components:
         assetUsageDenial:
           $ref: '#/components/schemas/AssetUsageDenials'
 
-    IncludedAssetUsageDenial:
-      description: included denials for the response to assetUsageReq request
-      type: object
-      required: [assetUsage]
-      properties:
-        assetUsage:
-          description: assetUsage info
-          type: object
-          properties:
-            includedAssetUsage:
-              description: list of included swTagId and assetUsageId
-              type: array
-              default: []
-              nullable: true
-              items:
-                allOf:
-                  - $ref: '#/components/schemas/AssetUsageEntitled'
-                  - $ref: '#/components/schemas/IncludedAssetUsageTop'
-                  - $ref: '#/components/schemas/AssetUsageDenial'
-
     AssetUsageDenialOrEntitlement:
       description: either denial or entitlement for denied response to assetUsageReq request.
 
@@ -1416,12 +1391,17 @@ components:
         softwareLicensorId:
           description: supplier or owner of the software
           type: string
-        assetUsageTracking:
-          description: all assetUsage request records for supplier softwareLicensorId
+        assetUsages:
+          description: list of either denial or entitlement responses to assetUsageReq request
           type: array
           default: []
           nullable: true
           items:
-            oneOf:
-              - $ref: '#/components/schemas/AssetUsageResponse'
-              - $ref: '#/components/schemas/AssetUsageEventResponse'
+            $ref: '#/components/schemas/AssetUsageResponse'
+        assetUsageEvents:
+          description: list of asset-usage events
+          type: array
+          default: []
+          nullable: true
+          items:
+            $ref: '#/components/schemas/AssetUsageEventResponse'
