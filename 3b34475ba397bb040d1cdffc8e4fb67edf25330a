@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "e14b7ef3_dd2f28b1",
+        "filename": "lum-server-api/lum_server-API.yaml",
+        "patchSetId": 9
+      },
+      "lineNbr": 763,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-08-09T11:53:07Z",
+      "side": 1,
+      "message": "we do need the licenseProfileId - PK to licenseProfile record in LUM",
+      "parentUuid": "97e647b3_83f5067c",
+      "revId": "3b34475ba397bb040d1cdffc8e4fb67edf25330a",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "b9fde45e_b1fb75b9",
         "filename": "lum-server-api/lum_server-API.yaml",
         "patchSetId": 9
