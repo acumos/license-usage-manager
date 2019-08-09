@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b35d6a82_863d72cb",
+        "filename": "pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-08-09T14:18:53Z",
+      "side": 1,
+      "message": "optional - you have spaces instead of tabs here",
+      "range": {
+        "startLine": 67,
+        "startChar": 0,
+        "endLine": 74,
+        "endChar": 17
+      },
+      "revId": "ae6e8f45cd9e031562983cbe0671e6706882cedd",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    }
+  ]
+}
