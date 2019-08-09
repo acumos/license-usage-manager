@@ -51,6 +51,24 @@
       "revId": "3b34475ba397bb040d1cdffc8e4fb67edf25330a",
       "serverId": "655300a2-7a56-4504-9153-881edd907bea",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ee89a52e_8353964c",
+        "filename": "lum-server-api/lum_server-API.yaml",
+        "patchSetId": 9
+      },
+      "lineNbr": 1425,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-08-09T17:20:22Z",
+      "side": 1,
+      "message": "fixed later in https://gerrit.acumos.org/r/c/license-usage-manager/+/4986",
+      "parentUuid": "b9fde45e_b1fb75b9",
+      "revId": "3b34475ba397bb040d1cdffc8e4fb67edf25330a",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
     }
   ]
 }
