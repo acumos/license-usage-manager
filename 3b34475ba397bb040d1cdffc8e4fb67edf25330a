@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "97e647b3_83f5067c",
+        "filename": "lum-server-api/lum_server-API.yaml",
+        "patchSetId": 9
+      },
+      "lineNbr": 763,
+      "author": {
+        "id": 290
+      },
+      "writtenOn": "2019-08-09T06:50:04Z",
+      "side": 1,
+      "message": "Do we need licenseProfileId you don\u0027t require a FK anymore for licenseProfileId... I think the request property here is isRtuRequired -- everything else is optional",
+      "revId": "3b34475ba397bb040d1cdffc8e4fb67edf25330a",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "b9fde45e_b1fb75b9",
         "filename": "lum-server-api/lum_server-API.yaml",
         "patchSetId": 9
