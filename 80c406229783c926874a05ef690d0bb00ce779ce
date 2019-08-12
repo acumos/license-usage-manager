@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "04bb1efd_f18b74c3",
+        "filename": "lum-server-api/lum_server-API.yaml",
+        "patchSetId": 5
+      },
+      "lineNbr": 256,
+      "author": {
+        "id": 4
+      },
+      "writtenOn": "2019-08-12T14:38:44Z",
+      "side": 1,
+      "message": "I don\u0027t think this breaks the string over two lines the way you expect.\n\nAlso see https://stackoverflow.com/questions/3790454/how-do-i-break-a-string-over-multiple-lines",
+      "range": {
+        "startLine": 256,
+        "startChar": 0,
+        "endLine": 256,
+        "endChar": 6
+      },
+      "revId": "80c406229783c926874a05ef690d0bb00ce779ce",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    }
+  ]
+}
