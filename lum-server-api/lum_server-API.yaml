@@ -18,7 +18,7 @@
 openapi: '3.0.2'
 
 info:
-  version: "0.9.1"
+  version: "0.15.0"
   title: "License Usage Manager (LUM) API"
   license:
     name: "Apache 2.0"
@@ -41,67 +41,35 @@ tags:
   - name: "asset-usage-tracking"
     description: "reports of all requests with decisions per supplier"
   - name: "info"
-    description: "LUM version and links"
+    description: "LUM healthcheck and info"
 
 paths:
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
   /api/healthcheck:
     get:
       tags: ["info"]
-      description: returns version information and links to API
-      operationId: getInfo
+      description: returns healthcheck information
+      operationId: getHealthcheck
       responses:
-
         200:
           description: success
           content:
             'application/json':
               schema:
-                type: object
-                properties:
-                  serverName:
-                    description: LUM - License Usage Manager
-                    type: string
-                    default: "lum"
-                  apiVersion:
-                    description: version of API supported by this server
-                    type: string
-                    default: "v1"
-                  serverVersion:
-                    description: version of software running on this server
-                    type: string
-                  serverId:
-                    description: identifier of the instance of the server
-                    type: string
-                    format: uuid
-                  links:
-                    description: links to API resources
-                    type: object
-                    properties:
-                      info:
-                        description: path for the server information endpoint
-                        type: string
-                      swid-tag:
-                        description: path for the swidTag endpoint
-                        type: string
-                      swid-tag-creators:
-                        description: path for the creators of swidTag endpoint
-                        type: string
-                      asset-usage-agreement:
-                        description: path for the asset-usage-agreement endpoint
-                        type: string
-                      asset-usage-agreement-restriction:
-                        description: path for the asset-usage-agreement-restriction endpoint
-                        type: string
-                      asset-usage:
-                        description: path for the asset-usage endpoint
-                        type: string
-                      asset-usage-event:
-                        description: path for the asset-usage-event endpoint
-                        type: string
-                      asset-usage-tracking:
-                        description: path for the asset-usage-tracking endpoint
-                        type: string
+                $ref: '#/components/schemas/HealthcheckResponse'
+
+  /:
+    get:
+      tags: ["info"]
+      description: returns healthcheck information
+      operationId: getInfo
+      responses:
+        200:
+          description: success
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/HealthcheckResponse'
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
   /api/v1/swid-tag/{swTagId}:
@@ -125,6 +93,36 @@ paths:
             'application/json':
               schema:
                 $ref: '#/components/schemas/GetSwidTagResponse'
+
+        204:
+          description: swidTag not found
+          headers:
+            requestId:
+              description: request id
+              schema:
+                type: string
+                format: uuid
+            requested:
+              description: timestamp of the request
+              schema:
+                type: string
+                format: date-time
+            swTagId:
+              description: echo back swTagId
+              schema:
+                type: string
+            status:
+              description: saying that the record not found
+              schema:
+                type: string
+                default: "swidTag not found"
+
+        224:
+          description: swid-tag revoked
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/RevokeSwidTagResponse'
 
     put:
       tags: ["swid-tag"]
@@ -150,10 +148,40 @@ paths:
       tags: ["swid-tag"]
       description: revoke the swidTag for swTagId
       operationId: revokeSwidTag
+      requestBody:
+        description: request to revoke the swidTag for swTagId
+        required: true
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/RevokeRequest'
 
       responses:
         204:
-          description: success
+          description: swidTag not found
+          headers:
+            requestId:
+              description: request id
+              schema:
+                type: string
+                format: uuid
+            requested:
+              description: timestamp of the request
+              schema:
+                type: string
+                format: date-time
+            swTagId:
+              description: echo back swTagId
+              schema:
+                type: string
+            status:
+              description: saying that the record not found
+              schema:
+                type: string
+                default: "swidTag not found"
+
+        224:
+          description: swid-tag revoked
           content:
             'application/json':
               schema:
@@ -189,6 +217,30 @@ paths:
             'application/json':
               schema:
                 $ref: '#/components/schemas/SetSwidTagCreatorsResponse'
+
+        204:
+          description: swidTag not found
+          headers:
+            requestId:
+              description: request id
+              schema:
+                type: string
+                format: uuid
+            requested:
+              description: timestamp of the request
+              schema:
+                type: string
+                format: date-time
+            swTagId:
+              description: echo back swTagId
+              schema:
+                type: string
+            status:
+              description: saying that the record not found
+              schema:
+                type: string
+                default: "swidTag not found"
+
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
   /api/v1/asset-usage-agreement/{assetUsageAgreementId}:
@@ -237,10 +289,40 @@ paths:
       tags: ["asset-usage-agreement"]
       description: revoke the assetUsageAgreement for assetUsageAgreementId
       operationId: revokeAssetUsageAgreement
+      requestBody:
+        description: request to revoke the assetUsageAgreement for assetUsageAgreementId
+        required: true
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/RevokeRequest'
 
       responses:
         204:
-          description: success
+          description: assetUsageAgreement not found
+          headers:
+            requestId:
+              description: request id
+              schema:
+                type: string
+                format: uuid
+            requested:
+              description: timestamp of the request
+              schema:
+                type: string
+                format: date-time
+            assetUsageAgreementId:
+              description: echo back UID key to assetUsageAgreement in IRI or URI format
+              schema:
+                type: string
+            status:
+              description: saying that the record not found
+              schema:
+                type: string
+                default: "assetUsageAgreement not found"
+
+        224:
+          description: agreement revoked
           content:
             'application/json':
               schema:
@@ -252,7 +334,8 @@ paths:
       - name: assetUsageAgreementId
         required: true
         in: path
-        description: urlencoded UID key to assetUsageAgreement in IRI or URI format
+        description: urlencoded UID key to assetUsageAgreement in IRI or URI format.
+          possible format "http://software-licensor/<softwareLicensorId>/agreement/<agreement-uuid>"
         schema:
           type: string
 
@@ -291,12 +374,44 @@ paths:
 
     delete:
       tags: ["asset-usage-agreement-restriction"]
-      description: revoke the subscriber company restriction on assetUsageAgreement for assetUsageAgreementId
+      description: revoke the subscriber company restriction
+        on assetUsageAgreement for assetUsageAgreementId
       operationId: revokeAssetUsageAgreementRestriction
+      requestBody:
+        description: request to revoke the subscriber company restriction
+          on assetUsageAgreement for assetUsageAgreementId
+        required: true
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/RevokeRequest'
 
       responses:
         204:
-          description: success
+          description: assetUsageAgreement not found
+          headers:
+            requestId:
+              description: request id
+              schema:
+                type: string
+                format: uuid
+            requested:
+              description: timestamp of the request
+              schema:
+                type: string
+                format: date-time
+            assetUsageAgreementId:
+              description: echo back UID key to assetUsageAgreement in IRI or URI format
+              schema:
+                type: string
+            status:
+              description: saying that the record not found
+              schema:
+                type: string
+                default: "assetUsageAgreement not found"
+
+        224:
+          description: agreement restriction revoked
           content:
             'application/json':
               schema:
@@ -361,10 +476,26 @@ paths:
 
         204:
           description: assetUsage not found
-          content:
-            'application/json':
+          headers:
+            requestId:
+              description: request id
               schema:
-                $ref: '#/components/schemas/GetAssetUsageNotFoundResponse'
+                type: string
+                format: uuid
+            requested:
+              description: timestamp of the request
+              schema:
+                type: string
+                format: date-time
+            assetUsageId:
+              description: UID key to assetUsage in IRI or URI format
+              schema:
+                type: string
+            status:
+              description: saying that the assetUsage record not found
+              schema:
+                type: string
+                default: "assetUsage not found"
 
         402:
           description: denied assetUsage.
@@ -449,11 +580,6 @@ components:
   schemas:
     BaseRequestTop:
       description: base request header
-      type: object
-      required:
-        - requestId
-        - requested
-
       properties:
         requestId:
           description: GUID unique identifier of the request
@@ -476,16 +602,6 @@ components:
           description: identifier of the user
           type: string
 
-        userRole:
-          description: role of the user for tracking purposes
-          type: string
-
-        userInfo:
-          description: more info about the user
-          type: object
-          nullable: true
-
-
     RequestTop:
       description: request and response header
       type: object
@@ -506,6 +622,49 @@ components:
           description: component inside the system that sent the request like "model-runner"
           type: string
 
+    RevokeRequest:
+      description: request to revoke any record to conatin the userId
+      allOf:
+        - $ref: '#/components/schemas/BaseRequestTop'
+        - $ref: '#/components/schemas/RequestTopUser'
+
+    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+    Healthcheck:
+      description: healthcheck info
+      required: [healthcheck]
+      properties:
+        healthcheck:
+          properties:
+            serverName:
+              description: LUM - License Usage Manager
+              type: string
+              default: "lum-server"
+            serverVersion:
+              description: version of software running on this server
+              type: string
+            apiVersion:
+              description: version of API supported by this server
+              type: string
+            serverRunInstanceId:
+              description: identifier of the running instance of the server
+              type: string
+              format: uuid
+            serverStarted:
+              description: when the instance of the server started to run
+              type: string
+              format: date-time
+            serverUptime:
+              description: how long the instance of the server running
+              type: string
+            pathToOpenapiUi:
+              description: path for the openapi-ui endpoint that contains links to API resources
+              type: string
+
+    HealthcheckResponse:
+      description: request to revoke any record to conatin the userId
+      allOf:
+        - $ref: '#/components/schemas/BaseRequestTop'
+        - $ref: '#/components/schemas/Healthcheck'
 
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
     SwTagIdTop:
@@ -523,23 +682,14 @@ components:
     SWIDCreators:
       description: collection of creators for swidTag
       type: object
-      required: [softwareCreators]
+      required: [swCreators]
       properties:
-        softwareCreators:
-          description: collection of creators for swidTag
+        swCreators:
+          description: collection of userId values of the creators for swidTag
           type: array
           default: []
           items:
-            type: object
-            properties:
-              userId:
-                description: identifier of the user that created the software piece
-                type: string
-
-              userInfo:
-                description: more info about the creator user
-                type: object
-                nullable: true
+            type: string
 
     SetSwidTagCreatorsRequest:
       description: request to set swidTag Creators
@@ -654,6 +804,11 @@ components:
     SWIDHousekeeping:
       description: properties populated by LUM server
       properties:
+        swidTagRevision:
+          description: 1,2,3,... revision of the swidTag - updates are allowed - auto-incremented by LUM
+          type: integer
+          format: int64
+
         swidTagActive:
           description: whether swidTag is not revoked-closed
           type: boolean
@@ -692,7 +847,9 @@ components:
 
       properties:
         swidTag:
-          $ref: '#/components/schemas/SWIDBody'
+          allOf:
+            - $ref: '#/components/schemas/SWIDBody'
+            - $ref: '#/components/schemas/SWIDCreators'
 
     SWIDResponse:
       description: response to swidTag request
@@ -754,7 +911,9 @@ components:
     LicenseProfile:
       description: terms and conditions define the rights for the usage of software asset
       type: object
-      required: [licenseProfileId]
+      required:
+        - licenseProfileId
+        - isRtuRequired
       properties:
         licenseProfileId:
           description: identifier of the software licenseProfile -- FK to licenseProfile
@@ -766,8 +925,7 @@ components:
           type: object
 
         isRtuRequired:
-          description: whether requires the right-to-use or it is Free or Open Source Software
-            -- if true, it requires RTU (right-to-use) to be provided for usage
+          description: whether requires the right-to-use for usage, when false goes directly to rtuUsage
           type: boolean
           default: true
 
@@ -776,7 +934,7 @@ components:
           type: string
 
         licenseName:
-          description: name the license in free text
+          description: name of the license in free text
           type: string
 
         licenseDescription:
@@ -791,12 +949,12 @@ components:
       description: properties populated by LUM server
       properties:
         licenseProfileRevision:
-          description: 1,2,3,... revision of the licenseProfile - updates are allowed
+          description: 1,2,3,... revision of the licenseProfile - updates are allowed - auto-incremented by LUM
           type: integer
           format: int64
 
         licenseActive:
-          description: whether the licenseProfile is currently active - not closed and not revoked
+          description: whether the license profile is currently active - not closed and not expired and not revoked
           type: boolean
           default: true
 
@@ -848,41 +1006,92 @@ components:
             - $ref: '#/components/schemas/LicenseProfileHousekeeping'
 
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-    AgreementRequest:
+    AgreementTop:
       description: data for assetUsageAgreement record and rights-to-use under that
-      type: object
-      required: [assetUsageAgreement]
-
-      properties:
-        assetUsageAgreement:
-          description: ODRL based assetUsageAgreement data - https://www.w3.org/TR/odrl-model/#policy-agreement
-          type: object
-
-    AgreementResponse:
-      description: data for assetUsageAgreement record and rights-to-use under that
-      type: object
       required:
-        - softwareLicensorId
-        - assetUsageAgreementId
-        - assetUsageAgreement
-
+        - agreement
       properties:
-        softwareLicensorId:
-          description: supplier or owner of the software
-          type: string
-        assetUsageAgreementId:
-          description: urlencoded UID key to assetUsageAgreement in IRI or URI format
-          type: string
-        assetUsageAgreement:
-          description: ODRL based assetUsageAgreement data - https://www.w3.org/TR/odrl-model/#policy-agreement
-          type: object
+        agreement:
+          description: agreement body
+          required:
+            - softwareLicensorId
+            - assetUsageAgreementId
+
+          properties:
+            softwareLicensorId:
+              description: supplier or owner of the software
+              type: string
+            assetUsageAgreementId:
+              description: urlencoded UID key to assetUsageAgreement in IRI or URI format
+              type: string
+
+    Agreement:
+      description: data for assetUsageAgreement record and rights-to-use under that
+      required:
+        - agreement
+      properties:
+        agreement:
+          description: agreement body
+          required:
+            - assetUsageAgreement
+
+          properties:
+            assetUsageAgreement:
+              description: ODRL based assetUsageAgreement data - https://www.w3.org/TR/odrl-model/#policy-agreement
+              type: object
+
+    AgreementHousekeeping:
+      description: properties populated by LUM server
+      required:
+        - agreement
+      properties:
+        agreement:
+          description: agreement body
+          properties:
+            agreementRevision:
+              description: 1,2,3,... revision of the Agreement - updates are allowed - auto-incremented by LUM
+              type: integer
+              format: int64
+
+            agreementActive:
+              description: whether swidTag is not revoked-closed
+              type: boolean
+
+            creator:
+              description: userId of the creator
+              type: string
+            created:
+              description: date-time-stamp for the record creation
+              type: string
+              format: date-time
+
+            modifier:
+              description: userId of the modifier
+              type: string
+            modified:
+              description: date-time-stamp for the record update
+              type: string
+              format: date-time
+
+            closer:
+              description: userId of the closer
+              type: string
+            closed:
+              description: date-time-stamp of the record closure
+              type: string
+              format: date-time
+            closureReason:
+              description: reason for the closure - revoked, expired, etc.
+              type: string
+
 
     AgreementRevokedResponse:
       description: response to revoke the agreement
       type: object
       required:
-        - status
+        - softwareLicensorId
         - assetUsageAgreementId
+        - status
       properties:
         softwareLicensorId:
           description: supplier or owner of the software
@@ -899,21 +1108,28 @@ components:
       description: response to assetUsageAgreement request
       allOf:
         - $ref: '#/components/schemas/BaseRequestTop'
-        - $ref: '#/components/schemas/AgreementResponse'
+        - $ref: '#/components/schemas/AgreementTop'
+        - $ref: '#/components/schemas/Agreement'
+        - $ref: '#/components/schemas/AgreementRestriction'
+        - $ref: '#/components/schemas/AgreementHousekeeping'
 
     PutAssetUsageAgreementRequest:
       description: request to set assetUsageAgreement
       allOf:
         - $ref: '#/components/schemas/BaseRequestTop'
         - $ref: '#/components/schemas/RequestTopUser'
-        - $ref: '#/components/schemas/AgreementRequest'
+        - $ref: '#/components/schemas/AgreementTop'
+        - $ref: '#/components/schemas/Agreement'
 
     PutAssetUsageAgreementResponse:
       description: response to assetUsageAgreement request
       allOf:
         - $ref: '#/components/schemas/BaseRequestTop'
         - $ref: '#/components/schemas/RequestTopUser'
-        - $ref: '#/components/schemas/AgreementResponse'
+        - $ref: '#/components/schemas/AgreementTop'
+        - $ref: '#/components/schemas/Agreement'
+        - $ref: '#/components/schemas/AgreementRestriction'
+        - $ref: '#/components/schemas/AgreementHousekeeping'
 
     RevokeAgreementResponse:
       description: response to revoke the assetUsageAgreement
@@ -922,41 +1138,27 @@ components:
         - $ref: '#/components/schemas/AgreementRevokedResponse'
 
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-    AgreementRestrictionRequest:
+    AgreementRestriction:
       description: data for assetUsageAgreementRestriction record with all the subscriber company restrictions
-      type: object
-      required: [assetUsageAgreementRestriction]
-
-      properties:
-        assetUsageAgreementRestriction:
-          description: ODRL based assetUsageAgreementRestriction data - https://www.w3.org/TR/odrl-model/#policy-agreement
-          type: object
-
-    AgreementRestrictionResponse:
-      description: data for assetUsageAgreementRestriction record with all the subscriber company restrictions
-      type: object
       required:
-        - softwareLicensorId
-        - assetUsageAgreementId
-        - assetUsageAgreementRestriction
-
+        - agreement
       properties:
-        softwareLicensorId:
-          description: supplier or owner of the software
-          type: string
-        assetUsageAgreementId:
-          description: urlencoded UID key to assetUsageAgreement in IRI or URI format
-          type: string
-        assetUsageAgreementRestriction:
-          description: ODRL based assetUsageAgreementRestriction data - https://www.w3.org/TR/odrl-model/#policy-agreement
-          type: object
+        agreement:
+          description: agreement body
+          required:
+            - assetUsageAgreementRestriction
+          properties:
+            assetUsageAgreementRestriction:
+              description: ODRL based assetUsageAgreementRestriction data - https://www.w3.org/TR/odrl-model/#policy-agreement
+              type: object
 
     AgreementRestrictionRevokedResponse:
       description: response to revoke the agreement restriction
       type: object
       required:
-        - status
+        - softwareLicensorId
         - assetUsageAgreementId
+        - status
       properties:
         softwareLicensorId:
           description: supplier or owner of the software
@@ -973,21 +1175,28 @@ components:
       description: response to assetUsageAgreementRestriction request
       allOf:
         - $ref: '#/components/schemas/BaseRequestTop'
-        - $ref: '#/components/schemas/AgreementRestrictionResponse'
+        - $ref: '#/components/schemas/AgreementTop'
+        - $ref: '#/components/schemas/Agreement'
+        - $ref: '#/components/schemas/AgreementRestriction'
+        - $ref: '#/components/schemas/AgreementHousekeeping'
 
     PutAssetUsageAgreementRestrictionRequest:
       description: request to set assetUsageAgreementRestriction
       allOf:
         - $ref: '#/components/schemas/BaseRequestTop'
         - $ref: '#/components/schemas/RequestTopUser'
-        - $ref: '#/components/schemas/AgreementRestrictionRequest'
+        - $ref: '#/components/schemas/AgreementTop'
+        - $ref: '#/components/schemas/AgreementRestriction'
 
     PutAssetUsageAgreementRestrictionResponse:
       description: response to assetUsageAgreementRestriction request
       allOf:
         - $ref: '#/components/schemas/BaseRequestTop'
         - $ref: '#/components/schemas/RequestTopUser'
-        - $ref: '#/components/schemas/AgreementRestrictionResponse'
+        - $ref: '#/components/schemas/AgreementTop'
+        - $ref: '#/components/schemas/Agreement'
+        - $ref: '#/components/schemas/AgreementRestriction'
+        - $ref: '#/components/schemas/AgreementHousekeeping'
 
     RevokeAssetUsageAgreementRestrictionResponse:
       description: response to revoke the assetUsageAgreementRestriction
@@ -1012,7 +1221,9 @@ components:
         The optional includedNodeId is to identify the instances
         of multiple same includedSwTagId
       type: object
-      required: [includedSwTagId]
+      required:
+        - includedSwTagId
+        - includedAssetUsageId
 
       properties:
         includedSwTagId:
@@ -1043,6 +1254,7 @@ components:
       type: object
       required:
         - swTagId
+        - assetUsageId
         - action
 
       properties:
@@ -1275,26 +1487,6 @@ components:
         assetUsageDenial:
           $ref: '#/components/schemas/AssetUsageDenials'
 
-    IncludedAssetUsageDenial:
-      description: included denials for the response to assetUsageReq request
-      type: object
-      required: [assetUsage]
-      properties:
-        assetUsage:
-          description: assetUsage info
-          type: object
-          properties:
-            includedAssetUsage:
-              description: list of included swTagId and assetUsageId
-              type: array
-              default: []
-              nullable: true
-              items:
-                allOf:
-                  - $ref: '#/components/schemas/AssetUsageEntitled'
-                  - $ref: '#/components/schemas/IncludedAssetUsageTop'
-                  - $ref: '#/components/schemas/AssetUsageDenial'
-
     AssetUsageDenialOrEntitlement:
       description: either denial or entitlement for denied response to assetUsageReq request.
 
@@ -1336,16 +1528,16 @@ components:
                   - $ref: '#/components/schemas/IncludedAssetUsageTop'
                   - $ref: '#/components/schemas/AssetUsageDenialOrEntitlement'
 
-    AssetUsageNotFoundResponse:
-      description: response to not found the asset-usage
-      type: object
-      required:
-        - status
-      properties:
-        status:
-          description: status of assetUsage request
-          type: string
-          default: "assetUsage not found"
+    # AssetUsageNotFoundResponse:
+    #   description: response to not found the asset-usage
+    #   type: object
+    #   required:
+    #     - status
+    #   properties:
+    #     status:
+    #       description: status of assetUsage request
+    #       type: string
+    #       default: "assetUsage not found"
 
     PutAssetUsageRequest:
       description: request for entitlement on assetUsage
@@ -1376,12 +1568,12 @@ components:
         - $ref: '#/components/schemas/AssetUsageMixedResponse'
         - $ref: '#/components/schemas/IncludedAssetUsageMixedResponse'
 
-    GetAssetUsageNotFoundResponse:
-      description: not found - response to assetUsage request
-      allOf:
-        - $ref: '#/components/schemas/BaseRequestTop'
-        - $ref: '#/components/schemas/AssetUsageResponseTop'
-        - $ref: '#/components/schemas/AssetUsageNotFoundResponse'
+    # GetAssetUsageNotFoundResponse:
+    #   description: not found - response to assetUsage request
+    #   allOf:
+    #     - $ref: '#/components/schemas/BaseRequestTop'
+    #     - $ref: '#/components/schemas/AssetUsageResponseTop'
+    #     - $ref: '#/components/schemas/AssetUsageNotFoundResponse'
 
     AssetUsageEventRequest:
       description: notification of asset-usage event to be tracked by LUM with no decision on the entitlement of the action
@@ -1416,20 +1608,17 @@ components:
         softwareLicensorId:
           description: supplier or owner of the software
           type: string
-        assetUsageTracking:
-          description: all assetUsage request records for supplier softwareLicensorId
+        assetUsages:
+          description: list of either denial or entitlement responses to assetUsageReq request
           type: array
           default: []
           nullable: true
           items:
-            $ref: '#/components/schemas/AssetUsageResponse' 
+            $ref: '#/components/schemas/AssetUsageResponse'
         assetUsageEvents:
-          description: all assetUsage request records for supplier softwareLicensorId
+          description: list of asset-usage events
           type: array
           default: []
           nullable: true
           items:
             $ref: '#/components/schemas/AssetUsageEventResponse'
-
-
-
