@@ -63,6 +63,24 @@
       "revId": "80c406229783c926874a05ef690d0bb00ce779ce",
       "serverId": "655300a2-7a56-4504-9153-881edd907bea",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "01b12265_d77da47d",
+        "filename": "lum-server-api/lum_server-API.yaml",
+        "patchSetId": 5
+      },
+      "lineNbr": 756,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-08-26T20:53:13Z",
+      "side": 1,
+      "message": "yep - that is the FK to the licenseProfile table in LUM database",
+      "parentUuid": "64888ace_319c7b52",
+      "revId": "80c406229783c926874a05ef690d0bb00ce779ce",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": false
     }
   ]
 }
