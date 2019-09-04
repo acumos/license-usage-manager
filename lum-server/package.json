@@ -1,0 +1,17 @@
+{
+  "name": "lum-server",
+  "description": "License Usage Manager (LUM) for Acumos and ONAP",
+  "version": "0.21.0",
+  "main": "lum-server.js",
+  "dependencies": {
+    "express": "^4.17.1",
+    "express-promise-router": "^3.0.3",
+    "pg": "latest",
+    "swagger-ui-express": "latest",
+    "uuid": "^3.3.2",
+    "winston": "latest",
+    "yamljs": "latest"
+  },
+  "author": "Alex Shatov",
+  "license": "(Apache-2.0)"
+}
