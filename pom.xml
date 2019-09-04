@@ -29,7 +29,7 @@
 	<description>License Usage Management Project</description>
 	<modules>
 		<!-- Child modules do NOT name this parent. -->
-		<module>lum-java-client</module>
+		<module>lum-java-rest-client</module>
 	</modules>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
