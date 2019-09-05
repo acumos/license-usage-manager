@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5aca1143_c13f822b",
+        "filename": "lum-server-api/lum-server-API.yaml",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 290
+      },
+      "writtenOn": "2019-09-05T23:57:33Z",
+      "side": 0,
+      "message": "should we change to default port number 2080 -- default port in config.js",
+      "revId": "c74d3583c44b5552e41b7fe133a14cc09b6a9d2b",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    }
+  ]
+}

@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c73d824b_0d1d56f9",
+        "filename": "Dockerfile",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 290
+      },
+      "writtenOn": "2019-09-05T23:57:33Z",
+      "side": 1,
+      "message": "This dockerfile needs to be under lum-server directory and built there. Any reason you put it here other than to access lum-server-api from top level. Will simplify the CI/CD setup",
+      "revId": "ff22c2c0e0261814f68431131fee5c0b3215385e",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f8d8adf2_19a30b78",
+        "filename": "Dockerfile",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 290
+      },
+      "writtenOn": "2019-09-05T23:57:33Z",
+      "side": 1,
+      "message": "Should be using alpine based node package\nAlso prefer LTS version https://nodejs.org/en/\nnode:10.16.3-alpine is preferred",
+      "revId": "ff22c2c0e0261814f68431131fee5c0b3215385e",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5347578a_4c892f3c",
+        "filename": "Dockerfile",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 290
+      },
+      "writtenOn": "2019-09-05T23:57:33Z",
+      "side": 1,
+      "message": "better to create separate layer for npm modules",
+      "revId": "ff22c2c0e0261814f68431131fee5c0b3215385e",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3eeeadc5_68cf36a1",
+        "filename": "lum-db/initdb/10_insert_data.sql",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 290
+      },
+      "writtenOn": "2019-09-05T23:57:33Z",
+      "side": 1,
+      "message": "I am noticing this is not required property to send in payload. Since LUM may server multiple projects do we need to update api to require this field.",
+      "revId": "ff22c2c0e0261814f68431131fee5c0b3215385e",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c812d141_bbbbf948",
+        "filename": "lum-db/run-lumdb.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 290
+      },
+      "writtenOn": "2019-09-05T23:57:33Z",
+      "side": 1,
+      "message": "not sure about this location -- had issues with initdb not correctly initializing had to use a postgres client -- docker run -it --rm jbergknoff/postgresql-client postgresql://lumdb:lumdb@172.17.0.3:5432/lumdb   to connect and then run the table init scripts",
+      "revId": "ff22c2c0e0261814f68431131fee5c0b3215385e",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "70c97c89_6abf3fa9",
+        "filename": "lum-db/run-lumdb.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 290
+      },
+      "writtenOn": "2019-09-05T23:57:33Z",
+      "side": 1,
+      "message": "password should be generated - uuidgen is used in system-integration",
+      "revId": "ff22c2c0e0261814f68431131fee5c0b3215385e",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "97fd378e_e1df18f4",
+        "filename": "lum-db/run-lumdb.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 290
+      },
+      "writtenOn": "2019-09-05T23:57:33Z",
+      "side": 1,
+      "message": "Should we use specific version of postgres vs latest? also should be using alpine based image if possible for minimal footprint. possibly postgres:11.5-alpine?",
+      "revId": "ff22c2c0e0261814f68431131fee5c0b3215385e",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "46063c8b_36a63ded",
+        "filename": "lum-server/package.json",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 290
+      },
+      "writtenOn": "2019-09-05T23:57:33Z",
+      "side": 1,
+      "message": "1. should avoid using latest versions -- can cause unpredictable results\n2. should be using a package-lock.json file to prevent unpredictable results.\n3. please add scripts block for quick way to start server...\n\n  \"scripts\": {\n    \"postinstall\": \"mkdir -p ./lum-server-api/ \u0026\u0026 cp ../lum-server-api/lum-server-API.yaml ./lum-server-api/\", \n    \"start\": \"node lum-server.js\",\n    \"lint\": \"./node_modules/.bin/eslint  .\"\n  },\n\nto avoid having to create docker image constantly.\n\n4. add eslint to this project to ensure good js practices are followed...\n\nadd .eslintrc.yaml into lum-server\n\n-----------starts below this line---------\nenv:\n  browser: false\n  commonjs: true\n  es6: true\n  node: true\nextends: \u0027eslint:recommended\u0027\nglobals:\n  Atomics: readonly\n  SharedArrayBuffer: readonly\n  lumServer: writable\nparserOptions:\n  ecmaVersion: 2018\nrules: {}\n-----------ends above this line---------\n\n\nadd \n\n  \"devDependencies\": {\n    \"eslint\": \"^6.3.0\"\n  }\n\nto package.json\n\n\nI was noticing about 30 problems with eslint -- numerous possible race conditions \n\n5. I don\u0027t believe we add author in maven pom.xml and we should not be adding to package.json .. will need to add all people contributing to this list.",
+      "revId": "ff22c2c0e0261814f68431131fee5c0b3215385e",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    }
+  ]
+}
