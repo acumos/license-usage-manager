@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "372e0ba9_e458fb25",
+        "filename": "Dockerfile",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-09-06T22:22:41Z",
+      "side": 1,
+      "message": "the docker file would fail to copy from the parent folder to bring the ../lum-server-api",
+      "parentUuid": "c73d824b_0d1d56f9",
+      "revId": "ff22c2c0e0261814f68431131fee5c0b3215385e",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f8d8adf2_19a30b78",
         "filename": "Dockerfile",
         "patchSetId": 1
@@ -132,6 +150,24 @@
       "writtenOn": "2019-09-05T23:57:33Z",
       "side": 1,
       "message": "1. should avoid using latest versions -- can cause unpredictable results\n2. should be using a package-lock.json file to prevent unpredictable results.\n3. please add scripts block for quick way to start server...\n\n  \"scripts\": {\n    \"postinstall\": \"mkdir -p ./lum-server-api/ \u0026\u0026 cp ../lum-server-api/lum-server-API.yaml ./lum-server-api/\", \n    \"start\": \"node lum-server.js\",\n    \"lint\": \"./node_modules/.bin/eslint  .\"\n  },\n\nto avoid having to create docker image constantly.\n\n4. add eslint to this project to ensure good js practices are followed...\n\nadd .eslintrc.yaml into lum-server\n\n-----------starts below this line---------\nenv:\n  browser: false\n  commonjs: true\n  es6: true\n  node: true\nextends: \u0027eslint:recommended\u0027\nglobals:\n  Atomics: readonly\n  SharedArrayBuffer: readonly\n  lumServer: writable\nparserOptions:\n  ecmaVersion: 2018\nrules: {}\n-----------ends above this line---------\n\n\nadd \n\n  \"devDependencies\": {\n    \"eslint\": \"^6.3.0\"\n  }\n\nto package.json\n\n\nI was noticing about 30 problems with eslint -- numerous possible race conditions \n\n5. I don\u0027t believe we add author in maven pom.xml and we should not be adding to package.json .. will need to add all people contributing to this list.",
+      "revId": "ff22c2c0e0261814f68431131fee5c0b3215385e",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "099cabd3_7d8159c8",
+        "filename": "lum-server/package.json",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-09-06T22:22:41Z",
+      "side": 1,
+      "message": "1. the patch #2 has specific versions - crossed in the air\n2. what about npm-shrinkwrap.json instead of package-lock.json ?\n3. RE: \"postinstall\": \"mkdir -p ./lum-server-api/ \u0026\u0026 cp ../lum-server-api/lum-server-API.yaml ./lum-server-api/\" -- this only works outside Dockerfile - I will have to look into that\n4. I will add the lint\n5. I do not mind pom.xml not to have the author because pom is not the source code per se because pom is just the CI/CD vehicle.  \n\nAs a contrast, package.json is about the actual business product and it is expected to have the author and optionally the contributors.  \nhttps://docs.npmjs.com/files/package.json#people-fields-author-contributors\nThe “author” is one person. “contributors” is an array of people.",
+      "parentUuid": "46063c8b_36a63ded",
       "revId": "ff22c2c0e0261814f68431131fee5c0b3215385e",
       "serverId": "655300a2-7a56-4504-9153-881edd907bea",
       "unresolved": true
