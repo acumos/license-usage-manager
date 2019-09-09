@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fb0b4a4b_53df8ec7",
+        "filename": "lum-db/run-lumdb.sh",
+        "patchSetId": 5
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 290
+      },
+      "writtenOn": "2019-09-09T18:06:41Z",
+      "side": 1,
+      "message": "This doesn\u0027t work gives errors when running. Please change to this:\nPGHOME\u003d${PWD}\n\nAlso please add a .gitignore to exclude the database folders from being added to git\n\n\nlum-db/.gitignore\n\nlogs\npgdata",
+      "revId": "26bc9844dded8a9724879d53931a7e784d814b69",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e1fa7bd0_73281aa2",
+        "filename": "lum-db/run-lumdb.sh",
+        "patchSetId": 5
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 290
+      },
+      "writtenOn": "2019-09-09T18:06:41Z",
+      "side": 1,
+      "message": "When running this I am getting error \ninitdb: could not look up effective user ID 501: user does not exist",
+      "revId": "26bc9844dded8a9724879d53931a7e784d814b69",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    }
+  ]
+}
