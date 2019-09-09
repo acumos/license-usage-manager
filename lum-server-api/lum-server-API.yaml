@@ -18,7 +18,7 @@
 openapi: '3.0.2'
 
 info:
-  version: "0.20.0"
+  version: "0.23.0"
   title: "License Usage Manager (LUM) API"
   license:
     name: "Apache 2.0"
@@ -26,7 +26,7 @@ info:
   description: RESTfull-ish API for License Usage Manager - json based
 
 servers:
-  - url: http://localhost
+  - url: http://localhost:2080
     description: License Usage Manager (LUM) server
 
 tags:
@@ -508,7 +508,7 @@ paths:
 
             - If usageEntitled = false, assetUsageDenial is provided for that assetUsage
 
-            - If usageEntitled = true, entitlement is provided for that assetUsage
+            - If usageEntitled = true and isRtuRequired = true, entitlement is provided for that assetUsage
           content:
             'application/json':
               schema:
@@ -719,6 +719,9 @@ components:
             nodeVersion:
               description: version of node.js this server runs under
               type: string
+            pgVersion:
+              description: version of postgres database this server runs with
+              type: string
             serverRunInstanceId:
               description: identifier of the running instance of the server
               type: string
@@ -789,6 +792,7 @@ components:
         - swPersistentId
         - swVersion
         - licenseProfileId
+        - softwareLicensorId
 
       properties:
         swTagId:
@@ -1247,9 +1251,7 @@ components:
           type: string
 
     IncludedAssetUsageTop:
-      description: asset-usage of a single included asset.
-        The optional includedNodeId is to identify the instances
-        of multiple same includedSwTagId
+      description: asset-usage of a single included asset
       type: object
       required:
         - includedSwTagId
@@ -1263,14 +1265,6 @@ components:
             it is FK to swidTag
           type: string
 
-        includedNodeId:
-          description: |
-            unique identifier of the node in composition for the software piece
-            with includedSwTagId that is included by or composed into the current software piece.
-            It is required to identify two or more software pieces with the same includedSwTagId
-          type: string
-          nullable: true
-
         includedAssetUsageId:
           description: |
             unique identifier of the asset-usage record for the software asset
@@ -1278,26 +1272,6 @@ components:
             UID key to assetUsage in IRI or URI format
           type: string
           nullable: true
-
-    IncludedSwidTagRevision:
-      description: response to assetUsageReq request per each assetUsage
-      properties:
-        includedSwidTagRevision:
-          description: 1,2,3,... revision of the swidTag - updates are allowed - auto-incremented by LUM
-          type: integer
-          format: int64
-
-        includedLicenseProfileId:
-          description: GUID FK to licenseProfile
-          type: string
-          format: uuid
-        includedLicenseProfileRevision:
-          description: 1,2,3,... revision of the licenseProfile
-          type: integer
-          format: int64
-        includedSoftwareLicensorId:
-          description: supplier or owner of the software
-          type: string
 
     AssetUsageRequestTop:
       description: request for entitlement on the assetUsage or to record the asset-usage event
@@ -1383,10 +1357,6 @@ components:
             description: value of the item that came from req or NOW() or +1 for asset-assignment
             type: string
 
-          deniedConstraint:
-            description: data from usageConstraint or matchingConstraint record that caused the denial
-            type: object
-
           deniedAssetUsageAgreementId:
             description: id of Asset-Usage-AssetUsageAgreement that caused the denial or not match
             type: string
@@ -1396,9 +1366,18 @@ components:
             type: integer
             format: int64
 
-          deniedSoftwareLicensorId:
-            description: supplier or owner of the software that caused the denial or not match
+          deniedRightToUseId:
+            description: id of rightToUse that caused the denial
             type: string
+
+          deniedRightToUseRevision:
+            description: 1,2,3,... revision of the rightToUse - auto-incremented by LUM
+            type: integer
+            format: int64
+
+          deniedConstraint:
+            description: data from usageConstraint or matchingConstraint record that caused the denial
+            type: object
 
     AssetUsageEventBody:
       description: body of the notification of asset-usage event to be tracked by LUM with no decision on the entitlement of the action
@@ -1440,6 +1419,10 @@ components:
               description: 1,2,3,... revision of the licenseProfile
               type: integer
               format: int64
+            isRtuRequired:
+              description: whether requires the right-to-use for usage, when false goes directly to rtuUsage
+              type: boolean
+              default: true
             softwareLicensorId:
               description: supplier or owner of the software
               type: string
@@ -1468,9 +1451,6 @@ components:
           type: integer
           format: int64
 
-    SwidTagRevision:
-      description: response to assetUsageReq request per each assetUsage
-      properties:
         swidTagRevision:
           description: 1,2,3,... revision of the swidTag - updates are allowed - auto-incremented by LUM
           type: integer
@@ -1484,6 +1464,10 @@ components:
           description: 1,2,3,... revision of the licenseProfile
           type: integer
           format: int64
+        isRtuRequired:
+          description: whether requires the right-to-use for usage, when false goes directly to rtuUsage
+          type: boolean
+          default: true
         softwareLicensorId:
           description: supplier or owner of the software
           type: string
@@ -1496,9 +1480,8 @@ components:
         assetUsage:
           description: assetUsage info
           allOf:
-            - $ref: '#/components/schemas/AssetUsageEntitled'
             - $ref: '#/components/schemas/AssetUsageRequestTop'
-            - $ref: '#/components/schemas/SwidTagRevision'
+            - $ref: '#/components/schemas/AssetUsageEntitled'
 
     AssetUsageEntitlement:
       description: entitled response to assetUsageReq request per single asset-usage
@@ -1507,20 +1490,14 @@ components:
         entitlement:
           description: entitlement details
           properties:
-            assetAssigned:
-              description: whether the new assetUsageId got assigned (true) for this request
-                or it was previously assigned (false) or it is released (false)
-              type: boolean
-              default: false
-
-            assignedAssetActive:
-              description: whether the asset is currently assigned (true) or released (false)
-              type: boolean
-              default: true
-
             rightToUseId:
-              description: rightToUseId for the assetUsage. FK to rightToUse
+              description: id for the rightToUse
               type: string
+
+            rightToUseRevision:
+              description: 1,2,3,... revision of the rightToUse - auto-incremented by LUM
+              type: integer
+              format: int64
 
             assetUsageAgreementId:
               description: UID key to assetUsageAgreement in IRI or URI format. FK to assetUsageAgreement
@@ -1530,10 +1507,6 @@ components:
               description: 1,2,3,... revision of the AssetUsageAgreement - updates are allowed - auto-incremented by LUM
               type: integer
               format: int64
-
-            softwareLicensorId:
-              description: supplier or owner of the software
-              type: string
 
             licenseKeys:
               description: list of licenseKey values
@@ -1555,9 +1528,8 @@ components:
           nullable: true
           items:
             allOf:
-              - $ref: '#/components/schemas/AssetUsageEntitled'
               - $ref: '#/components/schemas/IncludedAssetUsageTop'
-              - $ref: '#/components/schemas/IncludedSwidTagRevision'
+              - $ref: '#/components/schemas/AssetUsageEntitled'
               - $ref: '#/components/schemas/AssetUsageEntitlement'
 
 
@@ -1617,21 +1589,9 @@ components:
               nullable: true
               items:
                 allOf:
-                  - $ref: '#/components/schemas/AssetUsageEntitled'
                   - $ref: '#/components/schemas/IncludedAssetUsageTop'
-                  - $ref: '#/components/schemas/IncludedSwidTagRevision'
+                  - $ref: '#/components/schemas/AssetUsageEntitled'
                   - $ref: '#/components/schemas/AssetUsageDenialOrEntitlement'
-
-    # AssetUsageNotFoundResponse:
-    #   description: response to not found the asset-usage
-    #   type: object
-    #   required:
-    #     - status
-    #   properties:
-    #     status:
-    #       description: status of assetUsage request
-    #       type: string
-    #       default: "assetUsage not found"
 
     PutAssetUsageRequest:
       description: request for entitlement on assetUsage
