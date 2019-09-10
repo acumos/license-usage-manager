@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6ef666ca_e05319f6",
+        "filename": "lum-server-api/lum-server-API.yaml",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-09-10T18:41:04Z",
+      "side": 1,
+      "message": "should bump the version to 0.23.1 here and in all the related places",
+      "range": {
+        "startLine": 21,
+        "startChar": 12,
+        "endLine": 21,
+        "endChar": 18
+      },
+      "revId": "40cc2beb1f2ddd35c901ec81e669d7b55d687d8b",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    }
+  ]
+}
