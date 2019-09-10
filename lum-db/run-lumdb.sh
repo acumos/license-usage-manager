@@ -18,9 +18,11 @@
 
 PGVER=11.5
 
-PGHOME=.
+PGHOME=${PWD}
 PGPASSWORD=$(uuidgen)
 PGIMAGE=postgres:${PGVER}-alpine
+
+echo Home: ${PGHOME}
 
 APPNAME=lumdb-pg
 

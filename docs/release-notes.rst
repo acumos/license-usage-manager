@@ -23,6 +23,11 @@ License Usage Manager Release Notes
 Version 0.23.0, 09 September 2019
 ---------------------------------
 
+lum-java-client
+  - Fixed allOfWarnings - required changes to swagger
+  - Setup NodeJS server to work without docker for quicker debugging
+  - adding .gitignore to not include local folders / files that are only for development
+
 first incarnation of the lum-server with basic functionality of API
 
 - improved API definition for lum-server (`ACUMOS-3342 <https://jira.acumos.org/browse/ACUMOS-3342>`_)
