@@ -922,24 +922,31 @@ components:
       description: request to put swidTag
       type: object
       required: [swidTag]
-
       properties:
         swidTag:
-          allOf:
-            - $ref: '#/components/schemas/SWIDBody'
-            - $ref: '#/components/schemas/SWIDCreators'
+          $ref: '#/components/schemas/SWIDBodyAndCreator'
+    
+    SWIDBodyAndCreator:
+      description: swidTag and Swid tag creator owner
+      allOf:
+        - $ref: '#/components/schemas/SWIDBody'
+        - $ref: '#/components/schemas/SWIDCreators'
 
     SWIDResponse:
       description: response to swidTag request
       type: object
       required: [swidTag]
-
       properties:
         swidTag:
-          allOf:
-            - $ref: '#/components/schemas/SWIDBody'
-            - $ref: '#/components/schemas/SWIDCreators'
-            - $ref: '#/components/schemas/SWIDHousekeeping'
+          $ref: '#/components/schemas/SWIDBodyCreatorHousekeeping'
+
+    SWIDBodyCreatorHousekeeping:
+      description: swidTag and Swid tag creator owner and house keeping
+      allOf:
+        - $ref: '#/components/schemas/SWIDBody'
+        - $ref: '#/components/schemas/SWIDCreators'
+        - $ref: '#/components/schemas/SWIDHousekeeping'
+
 
     SWIDRevokedResponse:
       description: response to revoke the swidTag
@@ -1079,10 +1086,15 @@ components:
 
       properties:
         licenseProfile:
-          allOf:
-            - $ref: '#/components/schemas/LicenseProfile'
-            - $ref: '#/components/schemas/LicenseProfileHousekeeping'
+          $ref: '#/components/schemas/LicenseProfileHouseKeepingMixin'
 
+
+    LicenseProfileHouseKeepingMixin:
+      description: swidTag and Swid tag creator owner and house keeping
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/LicenseProfile'
+        - $ref: '#/components/schemas/LicenseProfileHousekeeping'
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
     AssetUsageAgreementTop:
       description: data for assetUsageAgreement record and rights-to-use under that
@@ -1321,13 +1333,18 @@ components:
       description: request for entitlement on the assetUsage
       type: object
       required: [assetUsageReq]
-
       properties:
         assetUsageReq:
           description: request for entitlement on the assetUsage
-          allOf:
-            - $ref: '#/components/schemas/AssetUsageRequestTop'
-            - $ref: '#/components/schemas/AssetUsageIncludedRequestTop'
+          $ref: '#/components/schemas/AssetUseageRequestTopMixin'
+
+
+    AssetUseageRequestTopMixin:
+      description: mixin for asset usage request
+      type: object
+      allOf:
+          - $ref: '#/components/schemas/AssetUsageRequestTop'
+          - $ref: '#/components/schemas/AssetUsageIncludedRequestTop'
 
     AssetUsageDenials:
       description: collection of denial info to assetUsageReq request
@@ -1396,9 +1413,16 @@ components:
       properties:
         assetUsageEvent:
           description: notification of asset-usage event to be tracked by LUM with no decision on the entitlement of the action
-          allOf:
-            - $ref: '#/components/schemas/AssetUsageRequestTop'
-            - $ref: '#/components/schemas/AssetUsageEventBody'
+          $ref: '#/components/schemas/AssetUsageEventMixin'
+    
+
+    AssetUsageEventMixin:
+      description: Asset usage event mixin
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/AssetUsageRequestTop'
+        - $ref: '#/components/schemas/AssetUsageEventBody'
+
 
     AssetUsageEventSeqResponse:
       description: send back the assetUsageSeq in assetUsageEvent
@@ -1479,9 +1503,14 @@ components:
       properties:
         assetUsage:
           description: assetUsage info
-          allOf:
-            - $ref: '#/components/schemas/AssetUsageRequestTop'
-            - $ref: '#/components/schemas/AssetUsageEntitled'
+          $ref: '#/components/schemas/AssetUsageEntitledMixin'
+
+
+    AssetUsageEntitledMixin:
+      description: AssetUsageEntitledMixin
+      allOf:
+        - $ref: '#/components/schemas/AssetUsageRequestTop'
+        - $ref: '#/components/schemas/AssetUsageEntitled'
 
     AssetUsageEntitlement:
       description: entitled response to assetUsageReq request per single asset-usage
@@ -1527,10 +1556,13 @@ components:
           default: []
           nullable: true
           items:
-            allOf:
-              - $ref: '#/components/schemas/IncludedAssetUsageTop'
-              - $ref: '#/components/schemas/AssetUsageEntitled'
-              - $ref: '#/components/schemas/AssetUsageEntitlement'
+            $ref: '#/components/schemas/IncludedAssetUsageMixin'
+
+    IncludedAssetUsageMixin:
+      allOf:
+        - $ref: '#/components/schemas/IncludedAssetUsageTop'
+        - $ref: '#/components/schemas/AssetUsageEntitled'
+        - $ref: '#/components/schemas/AssetUsageEntitlement'
 
 
     AssetUsageSuccessResponse:
@@ -1541,9 +1573,12 @@ components:
       properties:
         assetUsage:
           description: assetUsage info
-          allOf:
-            - $ref: '#/components/schemas/AssetUsageEntitlement'
-            - $ref: '#/components/schemas/IncludedAssetUsageSuccess'
+          $ref: '#/components/schemas/AssetUsageSuccessMixin'
+
+    AssetUsageSuccessMixin:
+      allOf:
+        - $ref: '#/components/schemas/AssetUsageEntitlement'
+        - $ref: '#/components/schemas/IncludedAssetUsageSuccess'
 
     AssetUsageDenial:
       description: denials for the response to assetUsageReq request
@@ -1558,7 +1593,6 @@ components:
         - If usageEntitled = false, assetUsageDenial is provided for that assetUsage
 
         - If usageEntitled = true, entitlement is provided for that assetUsage
-      type: object
       # oneOf:
       allOf:
           - $ref: '#/components/schemas/AssetUsageDenial'
