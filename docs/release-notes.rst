@@ -20,11 +20,19 @@
 License Usage Manager Release Notes
 ===================================
 
-Version 0.23.0, 09 September 2019
+Version 0.23.1, 11 September 2019
 ---------------------------------
 
 lum-java-client
   - Fixed allOfWarnings - required changes to swagger
+- bumped version to 0.23.1 for all components
+- Removed user from lum-db setup
+- Add support for development without docker
+  
+Version 0.23.0, 09 September 2019
+---------------------------------
+
+local dev setup fixes
   - Setup NodeJS server to work without docker for quicker debugging
   - adding .gitignore to not include local folders / files that are only for development
 
