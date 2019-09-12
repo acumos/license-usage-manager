@@ -51,8 +51,8 @@ module.exports = {
         const keys = new SqlParams();
         keys.setKeyValues("licenseProfileId", res.locals.dbdata.licenseProfiles);
         const selectFields = new SqlParams();
-        selectFields.addParams(licenseProfileReq);
-        selectFields.addParams(licenseProfileHouse);
+        selectFields.addFields(licenseProfileReq);
+        selectFields.addFields(licenseProfileHouse);
 
         const sqlCmd = `SELECT ${keys.keyName}, ${selectFields.fields} FROM "licenseProfile"
                         WHERE ${keys.keyName} IN (${keys.idxValues}) FOR SHARE`;
@@ -75,18 +75,18 @@ module.exports = {
         utils.logInfo(res, `in putLicenseProfile(${res.locals.params.licenseProfileId})`);
 
         const keys = new SqlParams();
-        keys.addParam("licenseProfileId", res.locals.params.licenseProfileId);
+        keys.addField("licenseProfileId", res.locals.params.licenseProfileId);
         const putFields = new SqlParams(keys.nextOffsetIdx);
-        putFields.addParamsFromBody(licenseProfileReq, utils.getFromReqByPath(res, "licenseProfile"));
+        putFields.addFieldsFromBody(licenseProfileReq, utils.getFromReqByPath(res, "licenseProfile"));
         const houseFields = new SqlParams(putFields.nextOffsetIdx);
-        houseFields.addParam("licenseActive", true);
-        houseFields.addParam("modifier", res.locals.params.userId);
-        houseFields.addParam("closer", null);
-        houseFields.addParam("closed", null);
-        houseFields.addParam("closureReason", null);
+        houseFields.addField("licenseActive", true);
+        houseFields.addField("modifier", res.locals.params.userId);
+        houseFields.addField("closer", null);
+        houseFields.addField("closed", null);
+        houseFields.addField("closureReason", null);
 
         const insFields = new SqlParams(houseFields.nextOffsetIdx);
-        insFields.addParam("creator", res.locals.params.userId);
+        insFields.addField("creator", res.locals.params.userId);
 
         const sqlCmd = `INSERT INTO "licenseProfile" AS lp
             (${keys.fields} ${putFields.fields} ${houseFields.fields} ${insFields.fields}, "created", "modified")
@@ -111,13 +111,13 @@ module.exports = {
         utils.logInfo(res, `in activateLicenseProfile(${res.locals.params.swTagId})`);
 
         const keys = new SqlParams();
-        keys.addParam("swTagId", res.locals.params.swTagId);
+        keys.addField("swTagId", res.locals.params.swTagId);
         const houseFields = new SqlParams(keys.nextOffsetIdx);
-        houseFields.addParam("licenseActive", true);
-        houseFields.addParam("modifier", res.locals.params.userId);
-        houseFields.addParam("closer", null);
-        houseFields.addParam("closed", null);
-        houseFields.addParam("closureReason", null);
+        houseFields.addField("licenseActive", true);
+        houseFields.addField("modifier", res.locals.params.userId);
+        houseFields.addField("closer", null);
+        houseFields.addField("closed", null);
+        houseFields.addField("closureReason", null);
 
         const sqlCmd = `WITH swt AS (SELECT "licenseProfileId" FROM "swidTag" WHERE ${keys.where} FOR SHARE)
             UPDATE "licenseProfile" AS lp

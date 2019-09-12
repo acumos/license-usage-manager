@@ -21,10 +21,12 @@ const {performance} = require('perf_hooks');
 module.exports = {
     /**
      * measuring time for performance
+     * @returns {} performance.now()
      */
     now() {return performance.now();},
     /**
      * uuid version 4
+     * @returns {string} uuid version 4
      */
     uuid() {return uuid();},
     /**
@@ -39,8 +41,18 @@ module.exports = {
      */
     hidePass(key, value) {return (key && key.startsWith("pass") && "*") || value;},
     /**
+     * remove new line symbols from the text
+     * @param  {} text
+     * @returns {string} text in one line
+     */
+    makeOneLine(text) {
+        if (typeof(text) === 'string') {return text.replace(/(\r\n\s*|\n\s*|\r\s*)/gm, " ").trimEnd();}
+        return text;
+    },
+    /**
      * convert milliSecs to human readable format in days and time
      * @param  {} milliSecs
+     * @returns {string}
      */
     milliSecsToString(milliSecs) {
         var seconds = Math.floor(milliSecs / 1000);     milliSecs  -= seconds * 1000;
@@ -53,6 +65,7 @@ module.exports = {
     /**
      * postgres step info for logging
      * @param  {} res
+     * @returns {string} postgres step info
      */
     getPgStepInfo(res) {
         const pg = res.locals.pg;
@@ -93,6 +106,7 @@ module.exports = {
      * safely retrieve a field from any object - body
      * @param  {} body
      * @param  {} ...pathInReq
+     * @returns {} field value
      */
     getFieldByPath(body, ...pathInReq) {
         if (!body || !pathInReq.length) {return;}
@@ -106,19 +120,21 @@ module.exports = {
      * safely retrieve a field from req.body stored in res.locals.reqBody
      * @param  {} res
      * @param  {} ...pathInReq
+     * @returns {} field value
      */
     getFromReqByPath(res, ...pathInReq) {
         return this.getFieldByPath(res.locals.reqBody, ...pathInReq);
     },
     /**
      * copy fields with names listed in params from resultBody into target object
-     * @param  {} target - copy to target
-     * @param  {} params - array of field names
-     * @param  {} resultBody - copy existing fields from resultBody
+     * @param  {} target object to copy into
+     * @param  {} params array of field names to copy
+     * @param  {} sourceBody copy existing fields keyed in params from sourceBody to target
      */
-    copyTo(target, params, resultBody) {
+    copyTo(target, params, sourceBody) {
+        if (!sourceBody) {return;}
         for (const paramName in params) {
-            const value = resultBody[paramName];
+            const value = sourceBody[paramName];
             if (typeof value !== 'undefined') {
                 target[paramName] = value;
             }

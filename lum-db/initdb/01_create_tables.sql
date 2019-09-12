@@ -20,7 +20,6 @@
 SELECT version();
 
 DROP TABLE IF EXISTS "snapshot";
-DROP TABLE IF EXISTS "assetUsageDenial";
 DROP TABLE IF EXISTS "assetUsageHistory";
 DROP TABLE IF EXISTS "includedAssetUsage";
 DROP TABLE IF EXISTS "assetUsage";
@@ -62,7 +61,7 @@ CREATE TABLE "licenseProfile" (
     "licenseDescription"        TEXT NULL,
     "licenseNotes"              TEXT NULL,
     --housekeeping--
-    "licenseProfileRevision"    INTEGER NOT NULL DEFAULT 1,
+    "licenseProfileRevision"    BIGINT NOT NULL DEFAULT 1,
     "licenseActive"             BOOLEAN NOT NULL DEFAULT TRUE,
     "creator"                   TEXT NOT NULL DEFAULT USER,
     "created"                   TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
@@ -104,7 +103,7 @@ CREATE TABLE "swidTag" (
     "swProductName"         TEXT NULL,
     "swidTagDetails"        JSONB NULL,
     --housekeeping--
-    "swidTagRevision"       INTEGER NOT NULL DEFAULT 1,
+    "swidTagRevision"       BIGINT NOT NULL DEFAULT 1,
     "swidTagActive"         BOOLEAN NOT NULL DEFAULT TRUE,
     "creator"               TEXT NOT NULL DEFAULT USER,
     "created"               TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
@@ -148,7 +147,7 @@ CREATE TABLE "assetUsageAgreement" (
     "agreement"                     JSONB NOT NULL,
     "agreementRestriction"          JSONB NULL,
     --housekeeping--
-    "assetUsageAgreementRevision"   INTEGER NOT NULL DEFAULT 1,
+    "assetUsageAgreementRevision"   BIGINT NOT NULL DEFAULT 1,
     "assetUsageAgreementActive"     BOOLEAN NOT NULL DEFAULT TRUE,
     "creator"                       TEXT NOT NULL DEFAULT USER,
     "created"                       TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
@@ -193,7 +192,7 @@ CREATE TABLE "rightToUse" (
     "rtuUsageStarted"           TIMESTAMP WITH TIME ZONE NULL,
     "rtuUsageEnds"              TIMESTAMP WITH TIME ZONE NULL,
     --housekeeping--
-    "rightToUseRevision"        INTEGER NOT NULL DEFAULT 1,
+    "rightToUseRevision"        BIGINT NOT NULL DEFAULT 1,
     "rightToUseActive"          BOOLEAN NOT NULL DEFAULT TRUE,
     "creator"                   TEXT NOT NULL DEFAULT USER,
     "created"                   TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
@@ -274,8 +273,8 @@ CREATE TABLE "swToRtu" (
     "action"                TEXT NOT NULL,
     "rightToUseId"          TEXT NOT NULL REFERENCES "rightToUse" ("rightToUseId") ON DELETE CASCADE ON UPDATE CASCADE,
     --matching up to revision--
-    "swidTagRevision"       INTEGER NOT NULL,
-    "rightToUseRevision"    INTEGER NOT NULL,
+    "swidTagRevision"       BIGINT NOT NULL,
+    "rightToUseRevision"    BIGINT NOT NULL,
     PRIMARY KEY ("swTagId", "rightToUseId")
 );
 CREATE INDEX "idxSwToRtu" ON "swToRtu" ("rightToUseId", "action", "swTagId");
@@ -327,7 +326,7 @@ CREATE TABLE "rtuUsage" (
     "licenseKeys"           TEXT[] NULL,
     "logicalConstraints"    JSONB NULL,
     --housekeeping--
-    "rtuUsageRevision"      INTEGER NOT NULL DEFAULT 1,
+    "rtuUsageRevision"      BIGINT NOT NULL DEFAULT 1,
     "rtuUsageActive"        BOOLEAN NOT NULL DEFAULT TRUE,
     "creator"               TEXT NOT NULL DEFAULT USER,
     "created"               TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
@@ -403,10 +402,10 @@ CREATE TABLE "assetUsage" (
     "assetUsageId"                  TEXT NOT NULL PRIMARY KEY,
     "isIncludedAsset"               BOOLEAN NOT NULL DEFAULT FALSE,
     --tails of history--
-    "assetUsageSeqTail"             INTEGER NOT NULL DEFAULT 0,
-    "assetUsageSeqTailEntitled"     INTEGER NULL,
-    "assetUsageSeqTailEntitlement"  INTEGER NULL,
-    "assetUsageSeqTailEvent"        INTEGER NULL,
+    "assetUsageSeqTail"             BIGINT NOT NULL DEFAULT 0,
+    "assetUsageSeqTailEntitled"     BIGINT NULL,
+    "assetUsageSeqTailEntitlement"  BIGINT NULL,
+    "assetUsageSeqTailEvent"        BIGINT NULL,
     --housekeeping--
     "creator"                       TEXT NOT NULL DEFAULT USER,
     "created"                       TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
@@ -443,28 +442,27 @@ COMMENT ON COLUMN "includedAssetUsage"."created" IS 'when action happened - reco
 
 CREATE TABLE "assetUsageHistory" (
     "assetUsageId"                  TEXT NOT NULL REFERENCES "assetUsage" ("assetUsageId"),
-    "assetUsageSeq"                 INTEGER NOT NULL DEFAULT 1,
+    "assetUsageSeq"                 BIGINT NOT NULL DEFAULT 1,
     "assetUsageType"                TEXT NOT NULL DEFAULT 'assetUsage',
     "assetUsageReqId"               UUID NOT NULL REFERENCES "assetUsageReq" ("assetUsageReqId"),
     "softwareLicensorId"            TEXT NULL,
     "swTagId"                       TEXT NULL,
-    "swidTagRevision"               INTEGER NULL,
+    "swidTagRevision"               BIGINT NULL,
     "licenseProfileId"              UUID NULL,
-    "licenseProfileRevision"        INTEGER NULL,
+    "licenseProfileRevision"        BIGINT NULL,
     "isRtuRequired"                 BOOLEAN NULL,
     "rtuUsageId"                    TEXT NULL,
     "action"                        TEXT NOT NULL,
     "rightToUseId"                  TEXT NULL,
-    "rightToUseRevision"            INTEGER NULL,
+    "rightToUseRevision"            BIGINT NULL,
     "assetUsageAgreementId"         TEXT NULL,
-    "assetUsageAgreementRevision"   INTEGER NULL,
+    "assetUsageAgreementRevision"   BIGINT NULL,
     "swMgtSystemId"                 TEXT NULL,
     "swMgtSystemInstanceId"         TEXT NULL,
     "swMgtSystemComponent"          TEXT NULL,
     --results--
     "usageEntitled"                 BOOLEAN NULL,
     "licenseKeys"                   TEXT[] NULL,
-    "assetUsageDenialSeqTail"       INTEGER NOT NULL DEFAULT 0,
     --housekeeping--
     "creator"                       TEXT NOT NULL DEFAULT USER,
     "created"                       TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
@@ -494,51 +492,14 @@ COMMENT ON COLUMN "assetUsageHistory"."swMgtSystemInstanceId" IS 'system instanc
 COMMENT ON COLUMN "assetUsageHistory"."swMgtSystemComponent" IS 'component inside the system that sent the request like "model-runner"';
 COMMENT ON COLUMN "assetUsageHistory"."usageEntitled" IS 'whether the asset-usage entitled (true) or not (false)';
 COMMENT ON COLUMN "assetUsageHistory"."licenseKeys" IS '[licenseKey] - copied from rtuUsage - list of license-keys provided by supplier are consumed by the software to unlock the functionality';
-COMMENT ON COLUMN "assetUsageHistory"."assetUsageDenialSeqTail" IS 'count of denials - sequential number 1,2,3,... - auto-incremented by LUM';
 COMMENT ON COLUMN "assetUsageHistory"."creator" IS 'userId of the record creator';
 COMMENT ON COLUMN "assetUsageHistory"."created" IS 'when action happened - record created';
-
-CREATE TABLE "assetUsageDenial" (
-    "assetUsageId"                      TEXT NOT NULL,
-    "assetUsageSeq"                     INTEGER NOT NULL,
-    "assetUsageDenialSeq"               INTEGER NOT NULL DEFAULT 1,
-    --denial details - can be more than one violation that caused the denial--
-    "denialType"                        TEXT NOT NULL,
-    "denialReason"                      TEXT NOT NULL,
-    "denialReqItemName"                 TEXT NULL,
-    "denialReqItemValue"                TEXT NULL,
-    "deniedAssetUsageAgreementId"       TEXT NULL,
-    "deniedAssetUsageAgreementRevision" INTEGER NULL,
-    "deniedRightToUseId"                TEXT NULL,
-    "deniedRightToUseRevision"          INTEGER NULL,
-    "deniedConstraint"                  JSON NULL,
-    --housekeeping--
-    "creator"                           TEXT NOT NULL DEFAULT USER,
-    "created"                           TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    PRIMARY KEY ("assetUsageId", "assetUsageSeq", "assetUsageDenialSeq"),
-    FOREIGN KEY ("assetUsageId", "assetUsageSeq") REFERENCES "assetUsageHistory" ("assetUsageId", "assetUsageSeq")
-);
-COMMENT ON TABLE "assetUsageDenial" IS 'denials per history of the usage of the software asset';
-COMMENT ON COLUMN "assetUsageDenial"."assetUsageId" IS 'identifier of the assetUsage - FK1 to record on assetUsageHistory';
-COMMENT ON COLUMN "assetUsageDenial"."assetUsageSeq" IS 'sequential number 1,2,3,... - FK2 to record on assetUsageHistory';
-COMMENT ON COLUMN "assetUsageDenial"."assetUsageDenialSeq" IS 'sequential number 1,2,3,... - auto-incremented by LUM';
-COMMENT ON COLUMN "assetUsageDenial"."denialType" IS 'ENUM {usageConstraint, swTagIdNotFound, agreementNotFound, matchingConstraintOnAssignee, matchingConstraintOnRule}';
-COMMENT ON COLUMN "assetUsageDenial"."denialReason" IS 'human readable explanation why denied the entitlement';
-COMMENT ON COLUMN "assetUsageDenial"."denialReqItemName" IS 'name of the item that came from req or NOW() or +1 for asset-assignment';
-COMMENT ON COLUMN "assetUsageDenial"."denialReqItemValue" IS 'value of the item that came from req or NOW() or +1 for asset-assignment';
-COMMENT ON COLUMN "assetUsageDenial"."deniedAssetUsageAgreementId" IS 'id of Asset-Usage-Agreement that caused the denial';
-COMMENT ON COLUMN "assetUsageDenial"."deniedAssetUsageAgreementRevision" IS '1,2,3,... revision of the assetUsageAgreement';
-COMMENT ON COLUMN "assetUsageDenial"."deniedRightToUseId" IS 'id of rightToUse that caused the denial';
-COMMENT ON COLUMN "assetUsageDenial"."deniedRightToUseRevision" IS '1,2,3,... revision of the rightToUse';
-COMMENT ON COLUMN "assetUsageDenial"."deniedConstraint" IS 'whole record from usageConstraint or matchingConstraint that caused the denial';
-COMMENT ON COLUMN "assetUsageDenial"."creator" IS 'userId of the record creator';
-COMMENT ON COLUMN "assetUsageDenial"."created" IS 'when denial happened - record created';
 
 -- snapshot --
 CREATE TABLE "snapshot" (
     "snapshotType"      TEXT NOT NULL,
     "snapshotKey"       TEXT NOT NULL,
-    "snapshotRevision"  INTEGER NOT NULL,
+    "snapshotRevision"  BIGINT NOT NULL,
     "snapshotBody"      JSON NOT NULL,
     --housekeeping--
     "creator"           TEXT NOT NULL DEFAULT USER,

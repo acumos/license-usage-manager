@@ -18,7 +18,7 @@
 
 PGVER=11.5
 
-PGHOME=${PWD}
+PGHOME="$( cd "$(dirname "${BASH_SOURCE[0]}")" > /dev/null 2>&1 && pwd -P )"
 PGPASSWORD=$(uuidgen)
 PGIMAGE=postgres:${PGVER}-alpine
 

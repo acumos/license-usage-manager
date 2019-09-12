@@ -16,7 +16,7 @@
 # ============LICENSE_END============================================
 # Dockerfile for lum-server
 
-FROM node:12.10-alpine
+FROM node:10.16.3-alpine
 
 ENV SRVDIR lum-server
 ENV APIDIR lum-server-api
@@ -31,7 +31,6 @@ ENV LOGDIR ${USRDIR}/logs
 COPY ${SRVDIR}/*.js     ${APPDIR}/
 COPY ${SRVDIR}/*.json   ${APPDIR}/
 COPY ${SRVDIR}/*.txt    ${APPDIR}/
-COPY ${SRVDIR}/.*.yaml  ${APPDIR}/
 COPY ${SRVDIR}/etc/     ${APPDIR}/etc/
 COPY ${SRVDIR}/src/     ${APPDIR}/src/
 COPY ${APIDIR}/         ${APPDIR}/${APIDIR}/
@@ -48,7 +47,7 @@ RUN mkdir -p ${LOGDIR} \
  && addgroup ${APPUSER} \
  && adduser -S -h ${USRDIR} -G ${APPUSER} ${APPUSER} \
  && chown -R ${APPUSER}:${APPUSER} ${USRDIR} \
- && ls -lA ${APPDIR}/*.js* ${APPDIR}/*.txt ${APPDIR}/.*.yaml \
+ && ls -lA ${APPDIR}/*.js* ${APPDIR}/*.txt \
  && ls -lAR ${APPDIR}/etc/ ${APPDIR}/${APIDIR}/ ${APPDIR}/src/ \
  && pwd
 
