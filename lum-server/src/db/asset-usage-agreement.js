@@ -47,11 +47,11 @@ module.exports = {
         utils.logInfo(res, `in getAssetUsageAgreement(${res.locals.params.assetUsageAgreementId})`);
 
         const keys = new SqlParams();
-        keys.addParam("assetUsageAgreementId", res.locals.params.assetUsageAgreementId);
+        keys.addField("assetUsageAgreementId", res.locals.params.assetUsageAgreementId);
         const selectFields = new SqlParams();
-        selectFields.addParams(assetUsageAgreementReq);
-        selectFields.addParams(agreementRestrictionReq);
-        selectFields.addParams(agreementHouse);
+        selectFields.addFields(assetUsageAgreementReq);
+        selectFields.addFields(agreementRestrictionReq);
+        selectFields.addFields(agreementHouse);
 
         const sqlCmd = `SELECT ${keys.fields}, ${selectFields.fields} FROM "assetUsageAgreement" WHERE ${keys.where} FOR SHARE`;
         const result = await pgclient.sqlQuery(res, sqlCmd, keys.values);
@@ -71,10 +71,10 @@ module.exports = {
     async revokeAssetUsageAgreement(res) {
         utils.logInfo(res, `in revokeAssetUsageAgreement(${res.locals.params.assetUsageAgreementId})`);
         const keys = new SqlParams();
-        keys.addParam("assetUsageAgreementId", res.locals.params.assetUsageAgreementId);
+        keys.addField("assetUsageAgreementId", res.locals.params.assetUsageAgreementId);
         const putFields = new SqlParams(keys.nextOffsetIdx);
-        putFields.addParam("closer", res.locals.params.userId);
-        putFields.addParam("closureReason", "revoked");
+        putFields.addField("closer", res.locals.params.userId);
+        putFields.addField("closureReason", "revoked");
 
         const sqlCmd = `UPDATE "assetUsageAgreement" SET "assetUsageAgreementRevision" = "assetUsageAgreementRevision" + 1,
             "assetUsageAgreementActive" = FALSE, "closed" = NOW() ${putFields.updates} WHERE ${keys.where} RETURNING *`;
@@ -94,18 +94,18 @@ module.exports = {
         utils.logInfo(res, `in putAssetUsageAgreement(${res.locals.params.assetUsageAgreementId})`);
 
         const keys = new SqlParams();
-        keys.addParam("assetUsageAgreementId", res.locals.params.assetUsageAgreementId);
+        keys.addField("assetUsageAgreementId", res.locals.params.assetUsageAgreementId);
         const putFields = new SqlParams(keys.nextOffsetIdx);
-        putFields.addParamsFromBody(assetUsageAgreementReq, utils.getFromReqByPath(res, "assetUsageAgreement"));
+        putFields.addFieldsFromBody(assetUsageAgreementReq, utils.getFromReqByPath(res, "assetUsageAgreement"));
         const houseFields = new SqlParams(putFields.nextOffsetIdx);
-        houseFields.addParam("assetUsageAgreementActive", true);
-        houseFields.addParam("modifier", res.locals.params.userId);
-        houseFields.addParam("closer", null);
-        houseFields.addParam("closed", null);
-        houseFields.addParam("closureReason", null);
+        houseFields.addField("assetUsageAgreementActive", true);
+        houseFields.addField("modifier", res.locals.params.userId);
+        houseFields.addField("closer", null);
+        houseFields.addField("closed", null);
+        houseFields.addField("closureReason", null);
 
         const insFields = new SqlParams(houseFields.nextOffsetIdx);
-        insFields.addParam("creator", res.locals.params.userId);
+        insFields.addField("creator", res.locals.params.userId);
 
         const sqlCmd = `INSERT INTO "assetUsageAgreement" AS aua
             (${keys.fields} ${putFields.fields} ${houseFields.fields} ${insFields.fields}, "created", "modified")
@@ -131,11 +131,11 @@ module.exports = {
         utils.logInfo(res, `in putAssetUsageAgreementRestriction(${res.locals.params.assetUsageAgreementId})`);
 
         const keys = new SqlParams();
-        keys.addParam("assetUsageAgreementId", res.locals.params.assetUsageAgreementId);
+        keys.addField("assetUsageAgreementId", res.locals.params.assetUsageAgreementId);
         const putFields = new SqlParams(keys.nextOffsetIdx);
-        putFields.addParam("agreementRestriction", utils.getFromReqByPath(res, "assetUsageAgreement", "agreementRestriction"));
+        putFields.addField("agreementRestriction", utils.getFromReqByPath(res, "assetUsageAgreement", "agreementRestriction"));
         const houseFields = new SqlParams(putFields.nextOffsetIdx);
-        houseFields.addParam("modifier", res.locals.params.userId);
+        houseFields.addField("modifier", res.locals.params.userId);
 
         const sqlCmd = `UPDATE "assetUsageAgreement" AS aua
             SET "assetUsageAgreementRevision" = aua."assetUsageAgreementRevision" + 1 ${putFields.updates} ${houseFields.updates}, "modified" = NOW()
@@ -156,11 +156,11 @@ module.exports = {
         utils.logInfo(res, `in revokeAssetUsageAgreementRestriction(${res.locals.params.assetUsageAgreementId})`);
 
         const keys = new SqlParams();
-        keys.addParam("assetUsageAgreementId", res.locals.params.assetUsageAgreementId);
+        keys.addField("assetUsageAgreementId", res.locals.params.assetUsageAgreementId);
         const putFields = new SqlParams(keys.nextOffsetIdx);
-        putFields.addParam("agreementRestriction", null);
+        putFields.addField("agreementRestriction", null);
         const houseFields = new SqlParams(putFields.nextOffsetIdx);
-        houseFields.addParam("modifier", res.locals.params.userId);
+        houseFields.addField("modifier", res.locals.params.userId);
 
         const sqlCmd = `UPDATE "assetUsageAgreement" AS aua
             SET "assetUsageAgreementRevision" = aua."assetUsageAgreementRevision" + 1 ${putFields.updates} ${houseFields.updates}, "modified" = NOW()

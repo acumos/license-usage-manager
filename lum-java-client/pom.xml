@@ -18,13 +18,13 @@
 	limitations under the License.
 	===============LICENSE_END=========================================================
 	]]>-->
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" 
-	xmlns="http://maven.apache.org/POM/4.0.0" 
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.acumos.license-usage-manager</groupId>
 	<artifactId>lum-java-rest-client</artifactId>
-	<version>0.23.1-SNAPSHOT</version>
+	<version>0.24.0-SNAPSHOT</version>
 	<name>LUM Java Rest Client</name>
 	<properties>
 		<default.package>org.acumos.lum</default.package>

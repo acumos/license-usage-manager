@@ -15,7 +15,8 @@
 // ============LICENSE_END=========================================================
 
 const winston = require("winston")
-    , fs = require("fs");
+    , fs = require("fs")
+    , utils = require('./utils');
 
 const logFolder = __dirname + '/../../logs';
 try {if (!fs.existsSync(logFolder)) {fs.mkdirSync(logFolder);}}
@@ -28,8 +29,8 @@ const logFormatText = winston.format.printf(({level, message, timestamp}) => {
 
 const logWrapper = (original) => {
     return (...args) => original(args.map(arg => {
-            if (typeof(arg) === 'object') {return JSON.stringify(arg);}
-            if (typeof(arg) === 'string') {return arg.replace(/(\r\n\s*|\n\s*|\r\s*)/gm, " ").trimEnd();}
+            if (typeof arg === 'object') {return JSON.stringify(arg);}
+            if (typeof arg === 'string') {return utils.makeOneLine(arg);}
             return arg;
         }).join(" "));
 };

@@ -56,9 +56,9 @@ module.exports = {
         const keys = new SqlParams();
         keys.setKeyValues("swTagId", res.locals.dbdata.swidTags);
         const selectFields = new SqlParams();
-        selectFields.addParams(swidTagReq);
-        selectFields.addParam("swCatalogs", true);
-        selectFields.addParams(swidTagHouse);
+        selectFields.addFields(swidTagReq);
+        selectFields.addField("swCatalogs", true);
+        selectFields.addFields(swidTagHouse);
 
         const sqlCmd = `SELECT ${keys.keyName}, ${selectFields.fields} FROM "swidTag"
                         WHERE ${keys.keyName} IN (${keys.idxValues}) FOR SHARE`;
@@ -72,10 +72,10 @@ module.exports = {
     async revokeSwidTag(res) {
         utils.logInfo(res, `in revokeSwidTag(${res.locals.params.swTagId})`);
         const keys = new SqlParams();
-        keys.addParam("swTagId", res.locals.params.swTagId);
+        keys.addField("swTagId", res.locals.params.swTagId);
         const putFields = new SqlParams(keys.nextOffsetIdx);
-        putFields.addParam("closer", res.locals.params.userId);
-        putFields.addParam("closureReason", "revoked");
+        putFields.addField("closer", res.locals.params.userId);
+        putFields.addField("closureReason", "revoked");
 
         const sqlCmd = `UPDATE "swidTag" SET "swidTagRevision" = "swidTagRevision" + 1,
             "swidTagActive" = FALSE, "closed" = NOW() ${putFields.updates} WHERE ${keys.where} RETURNING *`;
@@ -97,20 +97,20 @@ module.exports = {
         const swidTag = utils.getFromReqByPath(res, "swidTag");
 
         const keys = new SqlParams();
-        keys.addParam("swTagId", res.locals.params.swTagId);
+        keys.addField("swTagId", res.locals.params.swTagId);
         const putFields = new SqlParams(keys.nextOffsetIdx);
-        putFields.addParamsFromBody(swidTagReq, swidTag);
-        putFields.addParamJson("swCatalogs", swidTag.swCatalogs);
+        putFields.addFieldsFromBody(swidTagReq, swidTag);
+        putFields.addFieldJson("swCatalogs", swidTag.swCatalogs);
 
         const houseFields = new SqlParams(putFields.nextOffsetIdx);
-        houseFields.addParam("swidTagActive", true);
-        houseFields.addParam("modifier", res.locals.params.userId);
-        houseFields.addParam("closer", null);
-        houseFields.addParam("closed", null);
-        houseFields.addParam("closureReason", null);
+        houseFields.addField("swidTagActive", true);
+        houseFields.addField("modifier", res.locals.params.userId);
+        houseFields.addField("closer", null);
+        houseFields.addField("closed", null);
+        houseFields.addField("closureReason", null);
 
         const insFields = new SqlParams(houseFields.nextOffsetIdx);
-        insFields.addParam("creator", res.locals.params.userId);
+        insFields.addField("creator", res.locals.params.userId);
 
         const sqlCmd = `INSERT INTO "swidTag" AS swt
             (${keys.fields} ${putFields.fields} ${houseFields.fields} ${insFields.fields}, "created", "modified")
@@ -136,15 +136,15 @@ module.exports = {
         utils.logInfo(res, `in putSwidTagCreators(${res.locals.params.swTagId})`);
 
         const keys = new SqlParams();
-        keys.addParam("swTagId", res.locals.params.swTagId);
+        keys.addField("swTagId", res.locals.params.swTagId);
         const putFields = new SqlParams(keys.nextOffsetIdx);
-        putFields.addParam("swCreators", utils.getFromReqByPath(res, "swCreators"));
+        putFields.addField("swCreators", utils.getFromReqByPath(res, "swCreators"));
         const houseFields = new SqlParams(putFields.nextOffsetIdx);
-        houseFields.addParam("swidTagActive", true);
-        houseFields.addParam("modifier", res.locals.params.userId);
-        houseFields.addParam("closer", null);
-        houseFields.addParam("closed", null);
-        houseFields.addParam("closureReason", null);
+        houseFields.addField("swidTagActive", true);
+        houseFields.addField("modifier", res.locals.params.userId);
+        houseFields.addField("closer", null);
+        houseFields.addField("closed", null);
+        houseFields.addField("closureReason", null);
 
         const sqlCmd = `UPDATE "swidTag" AS swt
             SET "swidTagRevision" = swt."swidTagRevision" + 1 ${putFields.updates} ${houseFields.updates}, "modified" = NOW()
