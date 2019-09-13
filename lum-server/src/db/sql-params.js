@@ -13,14 +13,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // ============LICENSE_END=========================================================
-
+/**
+ * @file class for generating parts of Sql stamenents
+ */
 "use strict";
 
 module.exports = class SqlParams {
     /**
-     * SqlParams - collection of field names+values with the offsetIdx
+     * SqlParams - collection of field names+values or key(s) with the offsetIdx
      * to simplify building SQL statement
-     * @param  {} offsetIdx
+     * @param  {number} [offsetIdx] starting index offset when several SqlParams are chained.
+     *
+     *                  That is the nextOffsetIdx of the previous SqlParams object
      */
     constructor(offsetIdx) {
         this.offsetIdx = offsetIdx || 0;
@@ -29,51 +33,51 @@ module.exports = class SqlParams {
         this._keyName  = null;
     }
     /**
-     * base method to add any parameter that is defined
-     * @param  {} paramName
-     * @param  {} paramValue - null is ok
+     * base method to add any field that has the value defined
+     * @param  {string} fieldName name of the field
+     * @param  {} fieldValue value of the field, null is ok
      */
-    addParam(paramName, paramValue) {
-        if (typeof paramValue !== 'undefined') {
-            this._names.push(paramName);
-            this.values.push(paramValue);
+    addField(fieldName, fieldValue) {
+        if (typeof fieldValue !== 'undefined') {
+            this._names.push(fieldName);
+            this.values.push(fieldValue);
         }
     }
     /**
      * to pass array to json field in pg - need to stringify
-     * @param  {} paramName - name of the field
-     * @param  {} paramValue - value of the field
+     * @param  {string} fieldName name of the field
+     * @param  {} fieldValue value of the field
      */
-    addParamJson(paramName, paramValue) {
-        if (paramValue === null) {
-            this.addParam(paramName, paramValue);
-        } else if (typeof paramValue !== 'undefined') {
-            this.addParam(paramName, JSON.stringify(paramValue));
+    addFieldJson(fieldName, fieldValue) {
+        if (fieldValue === null) {
+            this.addField(fieldName, fieldValue);
+        } else if (typeof fieldValue !== 'undefined') {
+            this.addField(fieldName, JSON.stringify(fieldValue));
         }
     }
     /**
-     * pass the names of params - used for select
-     * @param  {} params
+     * pass the names of fields - used for select
+     * @param  {Object} fieldNames dict with field names as keys
      */
-    addParams(params) {
-        for (const paramName in params) {
-            this.addParam(paramName, true);
+    addFields(fieldNames) {
+        for (const fieldName in fieldNames) {
+            this.addField(fieldName, true);
         }
     }
     /**
-     * passing the value from body when the param name is in params
-     * @param  {} params
-     * @param  {} body
+     * passing the value from body when the param name is in fieldNames
+     * @param  {Object} fieldNames dict with field names as keys
+     * @param  {Object} body dict with field values per the field names from fieldNames
      */
-    addParamsFromBody(params, body) {
-        for (const paramName in params) {
-            this.addParam(paramName, body[paramName]);
+    addFieldsFromBody(fieldNames, body) {
+        for (const fieldName in fieldNames) {
+            this.addField(fieldName, body[fieldName]);
         }
     }
     /**
      * when have single key, but many values
-     * @param  {} keyName
-     * @param  {} keyValues
+     * @param  {string} keyName
+     * @param  {string[]|Object} keyValues either a list of values or dictionary with value in the key
      */
     setKeyValues(keyName, keyValues) {
         this._keyName = keyName;
@@ -99,14 +103,16 @@ module.exports = class SqlParams {
         return this.values.length;
     }
     /**
-     * chaining the sqlParams of different nature, but passing the values in a combined array
+     * chaining the SqlParams of different nature, but passing the values in a combined array
+     * @returns {number} offsetIdx + values.length
      */
     get nextOffsetIdx() {
         return this.offsetIdx + this.values.length;
     }
     /**
      * format the list of field names for select clause
-     * @param  {} prefix - table alias
+     * @param  {string} [prefix] table alias
+     * @returns {string} <prefix>."<name>", ...
      */
     getReturningFields(prefix) {
         prefix = (prefix && (prefix+'.')) || '';
@@ -114,56 +120,65 @@ module.exports = class SqlParams {
     }
     /**
      * wrapper to prepend the comma ',' before the list of values or names if needed
-     * @param  {} sqlClause
+     * @param  {string} sqlClause
+     * @returns {string} either ', ' + sqlClause or sqlClause
      */
     preComma(sqlClause) {
         return ((this.offsetIdx && this.values.length && ', ') || '') + sqlClause;
     }
     /**
      * comma separated list of names
+     * @returns {string} "<name>", ...
      */
     get names() {
         return Array.from(this._names, name => `"${name}"`).join();
     }
     /**
      * comma separated list of names with prepended comma if needed
+     * @returns {string} either ', "<name>", ...' or '"<name>", ...'
      */
     get fields() {
         return this.preComma(this.names);
     }
     /**
      * key name when only a single key is param
+     * @returns {string} "<keyName>"
      */
     get keyName() {
         return `"${this._keyName}"`;
     }
     /**
      * list of indexed params for the key values
+     * @returns {string} "($1),($2),($3),($4),..."
      */
     get idxKeyValues() {
         return Array.from(this.values.keys(), idx => `($${idx + 1 + this.offsetIdx})`).join();
     }
     /**
      * list of indexed params for the values
+     * @returns {string} either ', ($1),($2),($3),($4), ...' or "($1),($2),($3),($4), ..."
      */
     get idxValues() {
         return this.preComma(Array.from(this.values.keys(), idx => `($${idx + 1 + this.offsetIdx})`).join());
     }
     /**
      * list of SET items in UPDATE SQL statement
+     * @returns {string} either ', "<name>" = ($1), ...' or '"<name>" = ($1), ...'
      */
     get updates() {
         return this.preComma(Array.from(this.values.keys(), idx => `"${this._names[idx]}" = ($${idx + 1 + this.offsetIdx})`).join());
     }
     /**
      * list of ANDed WHERE items in SQL statement
+     * @returns {string} "<name>" = ($1) AND ...'
      */
     get where() {
         return Array.from(this.values.keys(), idx => `"${this._names[idx]}" = ($${idx + 1 + this.offsetIdx})`).join(' AND ');
     }
     /**
      * list of ANDed WHERE items in SQL statement with the table alias prefix
-     * @param  {} prefix
+     * @param  {string} [prefix]
+     * @returns {string} <prefix>."<name>" = ($1) AND ...'
      */
     getWhere(prefix) {
         prefix = (prefix && (prefix+'.')) || '';
@@ -172,7 +187,8 @@ module.exports = class SqlParams {
     /**
      * list of ORed WHERE items in SQL statement with the table alias prefix
      * used for checking whether any field is changed
-     * @param  {} prefix
+     * @param  {string} [prefix]
+     * @returns {string} <prefix>."<name>" IS DISTINCT FROM ($1) OR ...'
      */
     getWhereDistinct(prefix) {
         prefix = (prefix && (prefix+'.')) || '';

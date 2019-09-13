@@ -1,10 +1,10 @@
 {
   "name": "lum-server",
   "description": "License Usage Manager (LUM) for Acumos and ONAP",
-  "version": "0.23.1",
+  "version": "0.24.1",
   "main": "lum-server.js",
   "engines": {
-    "node": ">=12.9.1"
+    "node": ">=10.16.3"
   },
   "dependencies": {
     "express": "^4.17.1",
@@ -25,6 +25,26 @@
   ],
   "devDependencies": {
     "eslint": "^6.3.0"
+  },
+  "eslintConfig": {
+    "env": {
+      "commonjs": true,
+      "es6": true,
+      "node": true
+    },
+    "extends": "eslint:recommended",
+    "globals": {
+      "Atomics": "readonly",
+      "SharedArrayBuffer": "readonly",
+      "lumServer": "writable"
+    },
+    "parserOptions": {
+      "ecmaVersion": 2018
+    },
+    "rules": {
+      "require-atomic-updates": "off",
+      "no-process-exit": "error"
+    }
   },
   "scripts": {
     "start": "node lum-server.js",

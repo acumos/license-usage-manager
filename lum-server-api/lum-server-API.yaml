@@ -18,7 +18,7 @@
 openapi: '3.0.2'
 
 info:
-  version: "0.23.1"
+  version: "0.24.1"
   title: "License Usage Manager (LUM) API"
   license:
     name: "Apache 2.0"
@@ -925,7 +925,7 @@ components:
       properties:
         swidTag:
           $ref: '#/components/schemas/SWIDBodyAndCreator'
-    
+
     SWIDBodyAndCreator:
       description: swidTag and Swid tag creator owner
       allOf:
@@ -1038,7 +1038,7 @@ components:
           type: integer
           format: int64
 
-        licenseActive:
+        licenseProfileActive:
           description: whether the license profile is currently active - not closed and not expired and not revoked
           type: boolean
           default: true
@@ -1359,7 +1359,10 @@ components:
           - denialReason
         properties:
           denialType:
-            description: ENUM {usageConstraint, swTagIdNotFound, agreementNotFound, matchingConstraintOnAssignee, matchingConstraintOnRule}
+            description: ENUM {usageConstraint, swidTagNotFound, swidTagRevoked,
+              licenseProfileNotFound, licenseProfileRevoked,
+              agreementNotFound, agreementNotActive,
+              matchingConstraintOnAssignee, matchingConstraintOnRule}
             type: string
 
           denialReason:
@@ -1414,7 +1417,7 @@ components:
         assetUsageEvent:
           description: notification of asset-usage event to be tracked by LUM with no decision on the entitlement of the action
           $ref: '#/components/schemas/AssetUsageEventMixin'
-    
+
 
     AssetUsageEventMixin:
       description: Asset usage event mixin
