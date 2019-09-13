@@ -18,7 +18,7 @@ const utils = require('../utils');
 const healthcheck = require('./healthcheck');
 
 const resHeader = {requestId: "requestId", requested: "requested", status: "status"};
-const httpStatuses = {204: "not found", 224: "revoked"};
+const httpStatuses = {204: "not found", 224: "revoked", 402: "denied"};
 
 module.exports = {
     newReq(req, res, next) {
@@ -56,14 +56,14 @@ module.exports = {
         next();
     },
     respond(req, res, next) {
-        utils.logInfo(res, `response [${(utils.now() - res.locals.started).toFixed(3).padStart(7,' ')} ms]`, res.statusCode, res.locals.response, 'to', res.locals.requestHttp);
+        utils.logInfo(res, `response ${utils.calcReqTime(res)}`, res.statusCode, res.locals.response, 'to', res.locals.requestHttp);
         res.json(res.locals.response);
         next();
     },
     responseError(exception, req, res, next) {
         utils.logError(res, "responseError - exception on", exception, exception.stack);
         res.status(500);
-        utils.logInfo(res, `ERROR response [${(utils.now() - res.locals.started).toFixed(3).padStart(7,' ')} ms]`, res.statusCode, exception.stack, 'to', res.locals.requestHttp);
+        utils.logInfo(res, `ERROR response ${utils.calcReqTime(res)}`, res.statusCode, exception.stack, 'to', res.locals.requestHttp);
         healthcheck.calcUptime();
         res.json({
             "error":{
@@ -79,8 +79,11 @@ module.exports = {
     setHttpStatus(res, statusCode, recordlName) {
         if (res.statusCode && res.statusCode < statusCode) {
             res.status(statusCode);
-            res.locals.response.status = `${recordlName} ${httpStatuses[statusCode] || statusCode}`;
-            res.set(resHeader.status, res.locals.response.status);
+            const status = `${recordlName} ${httpStatuses[statusCode] || statusCode}`;
+            if (statusCode !== 402) {
+                res.locals.response.status = status;
+            }
+            res.set(resHeader.status, status);
             res.set(res.locals.params);
             utils.logInfo(res, "setHttpStatus", res.statusCode, res.locals.response);
         }

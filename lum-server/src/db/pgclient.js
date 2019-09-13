@@ -13,6 +13,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // ============LICENSE_END=========================================================
+/**
+ * @file all communication with the postgres database goes through this module
+ */
 
 "use strict";
 
@@ -56,8 +59,12 @@ function release(res) {
     if (res.locals.pg.client) {
         logRunStepInfo(res, "pg.client.release");
         res.locals.pg.client.release();
+        res.locals.pg.txRetryCount = 0;
         delete res.locals.pg.client;
-        if (res.locals.pg.txid)  {delete res.locals.pg.txid;}
+        if (res.locals.pg.txid)     {delete res.locals.pg.txid;}
+        if (res.locals.pg.txNow)    {delete res.locals.pg.txNow;}
+        if (res.locals.pg.txStep)   {delete res.locals.pg.txStep;}
+        if (res.locals.pg.runStep)  {delete res.locals.pg.runStep;}
     }
 }
 /**
@@ -70,11 +77,13 @@ async function begin(res) {
         await res.locals.pg.client.query(pgTx.begin);
         res.locals.pg.inTx = true;
 
-        const {rows} = await res.locals.pg.client.query("SELECT txid_current() AS txid, pg_backend_pid() AS pid");
+        const {rows} = await res.locals.pg.client.query(
+            "SELECT txid_current() AS txid, pg_backend_pid() AS pid, NOW() AS tx_now");
         if (rows.length) {
-            res.locals.pg.txid = ` txid(${rows[0].txid}) pid(${rows[0].pid})`;
+            res.locals.pg.txid  = ` txid(${rows[0].txid}) pid(${rows[0].pid})`;
+            res.locals.pg.txNow = rows[0].tx_now;
         }
-        logRunStepInfo(res);
+        logRunStepInfo(res, `NOW(${res.locals.pg.txNow.toISOString()})`);
     }
 }
 /**
@@ -163,9 +172,11 @@ module.exports = {
             for (res.locals.pg.txRetryCount = 1; res.locals.pg.txRetryCount <= lumServer.config.maxTxRetryCount; ++res.locals.pg.txRetryCount) {
                 try {
                     var iStep = 0;
-                    res.locals.pg.txStep = ` [${iStep}] begin`;
+                    res.locals.pg.txStep = ` [${iStep}] getPgVersion`;
                     await module.exports.getPgVersion(res);
+                    res.locals.pg.txStep = ` [${iStep}] connect`;
                     await connect(res);
+                    res.locals.pg.txStep = ` [${iStep}] begin`;
                     await begin(res);
                     for await (const txStep of txSteps) {
                         if (typeof txStep === 'function') {
@@ -179,6 +190,7 @@ module.exports = {
                     }
                     res.locals.pg.txStep = ` [${iStep}] commit`;
                     await commit(res);
+                    res.locals.pg.txStep = ` [${iStep}] release`;
                     release(res);
                     break;
                 } catch (error) {

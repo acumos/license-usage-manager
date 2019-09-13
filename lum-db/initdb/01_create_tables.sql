@@ -20,7 +20,6 @@
 SELECT version();
 
 DROP TABLE IF EXISTS "snapshot";
-DROP TABLE IF EXISTS "assetUsageDenial";
 DROP TABLE IF EXISTS "assetUsageHistory";
 DROP TABLE IF EXISTS "includedAssetUsage";
 DROP TABLE IF EXISTS "assetUsage";
@@ -63,7 +62,7 @@ CREATE TABLE "licenseProfile" (
     "licenseNotes"              TEXT NULL,
     --housekeeping--
     "licenseProfileRevision"    INTEGER NOT NULL DEFAULT 1,
-    "licenseActive"             BOOLEAN NOT NULL DEFAULT TRUE,
+    "licenseProfileActive"      BOOLEAN NOT NULL DEFAULT TRUE,
     "creator"                   TEXT NOT NULL DEFAULT USER,
     "created"                   TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     "modifier"                  TEXT NOT NULL DEFAULT USER,
@@ -81,7 +80,7 @@ COMMENT ON COLUMN "licenseProfile"."licenseName" IS 'name of the license in free
 COMMENT ON COLUMN "licenseProfile"."licenseDescription" IS 'desciption of the license in free text';
 COMMENT ON COLUMN "licenseProfile"."licenseNotes" IS 'any textual notes';
 COMMENT ON COLUMN "licenseProfile"."licenseProfileRevision" IS '1,2,3,... revision of the license - updates are allowed - auto-incremented by LUM';
-COMMENT ON COLUMN "licenseProfile"."licenseActive" IS 'whether the license profile is currently active - not closed and not expired and not revoked';
+COMMENT ON COLUMN "licenseProfile"."licenseProfileActive" IS 'whether the license profile is currently active - not closed and not expired and not revoked';
 COMMENT ON COLUMN "licenseProfile"."creator" IS 'userId of the creator';
 COMMENT ON COLUMN "licenseProfile"."created" IS 'when the record was created';
 COMMENT ON COLUMN "licenseProfile"."modifier" IS 'userId of the modifier';
@@ -463,8 +462,9 @@ CREATE TABLE "assetUsageHistory" (
     "swMgtSystemComponent"          TEXT NULL,
     --results--
     "usageEntitled"                 BOOLEAN NULL,
+    "isUsedBySwCreator"             BOOLEAN NULL,
     "licenseKeys"                   TEXT[] NULL,
-    "assetUsageDenialSeqTail"       INTEGER NOT NULL DEFAULT 0,
+    "assetUsageDenial"              JSON NULL,
     --housekeeping--
     "creator"                       TEXT NOT NULL DEFAULT USER,
     "created"                       TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
@@ -493,46 +493,11 @@ COMMENT ON COLUMN "assetUsageHistory"."swMgtSystemId" IS 'like Acumos';
 COMMENT ON COLUMN "assetUsageHistory"."swMgtSystemInstanceId" IS 'system instance id that manages the software pieces and sent the request - like "Acumos#22"';
 COMMENT ON COLUMN "assetUsageHistory"."swMgtSystemComponent" IS 'component inside the system that sent the request like "model-runner"';
 COMMENT ON COLUMN "assetUsageHistory"."usageEntitled" IS 'whether the asset-usage entitled (true) or not (false)';
+COMMENT ON COLUMN "assetUsageHistory"."isUsedBySwCreator" IS 'whether the userId listed in swCreators of the software';
 COMMENT ON COLUMN "assetUsageHistory"."licenseKeys" IS '[licenseKey] - copied from rtuUsage - list of license-keys provided by supplier are consumed by the software to unlock the functionality';
-COMMENT ON COLUMN "assetUsageHistory"."assetUsageDenialSeqTail" IS 'count of denials - sequential number 1,2,3,... - auto-incremented by LUM';
+COMMENT ON COLUMN "assetUsageHistory"."assetUsageDenial" IS 'denials of the usage of the software asset - see API';
 COMMENT ON COLUMN "assetUsageHistory"."creator" IS 'userId of the record creator';
 COMMENT ON COLUMN "assetUsageHistory"."created" IS 'when action happened - record created';
-
-CREATE TABLE "assetUsageDenial" (
-    "assetUsageId"                      TEXT NOT NULL,
-    "assetUsageSeq"                     INTEGER NOT NULL,
-    "assetUsageDenialSeq"               INTEGER NOT NULL DEFAULT 1,
-    --denial details - can be more than one violation that caused the denial--
-    "denialType"                        TEXT NOT NULL,
-    "denialReason"                      TEXT NOT NULL,
-    "denialReqItemName"                 TEXT NULL,
-    "denialReqItemValue"                TEXT NULL,
-    "deniedAssetUsageAgreementId"       TEXT NULL,
-    "deniedAssetUsageAgreementRevision" INTEGER NULL,
-    "deniedRightToUseId"                TEXT NULL,
-    "deniedRightToUseRevision"          INTEGER NULL,
-    "deniedConstraint"                  JSON NULL,
-    --housekeeping--
-    "creator"                           TEXT NOT NULL DEFAULT USER,
-    "created"                           TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    PRIMARY KEY ("assetUsageId", "assetUsageSeq", "assetUsageDenialSeq"),
-    FOREIGN KEY ("assetUsageId", "assetUsageSeq") REFERENCES "assetUsageHistory" ("assetUsageId", "assetUsageSeq")
-);
-COMMENT ON TABLE "assetUsageDenial" IS 'denials per history of the usage of the software asset';
-COMMENT ON COLUMN "assetUsageDenial"."assetUsageId" IS 'identifier of the assetUsage - FK1 to record on assetUsageHistory';
-COMMENT ON COLUMN "assetUsageDenial"."assetUsageSeq" IS 'sequential number 1,2,3,... - FK2 to record on assetUsageHistory';
-COMMENT ON COLUMN "assetUsageDenial"."assetUsageDenialSeq" IS 'sequential number 1,2,3,... - auto-incremented by LUM';
-COMMENT ON COLUMN "assetUsageDenial"."denialType" IS 'ENUM {usageConstraint, swTagIdNotFound, agreementNotFound, matchingConstraintOnAssignee, matchingConstraintOnRule}';
-COMMENT ON COLUMN "assetUsageDenial"."denialReason" IS 'human readable explanation why denied the entitlement';
-COMMENT ON COLUMN "assetUsageDenial"."denialReqItemName" IS 'name of the item that came from req or NOW() or +1 for asset-assignment';
-COMMENT ON COLUMN "assetUsageDenial"."denialReqItemValue" IS 'value of the item that came from req or NOW() or +1 for asset-assignment';
-COMMENT ON COLUMN "assetUsageDenial"."deniedAssetUsageAgreementId" IS 'id of Asset-Usage-Agreement that caused the denial';
-COMMENT ON COLUMN "assetUsageDenial"."deniedAssetUsageAgreementRevision" IS '1,2,3,... revision of the assetUsageAgreement';
-COMMENT ON COLUMN "assetUsageDenial"."deniedRightToUseId" IS 'id of rightToUse that caused the denial';
-COMMENT ON COLUMN "assetUsageDenial"."deniedRightToUseRevision" IS '1,2,3,... revision of the rightToUse';
-COMMENT ON COLUMN "assetUsageDenial"."deniedConstraint" IS 'whole record from usageConstraint or matchingConstraint that caused the denial';
-COMMENT ON COLUMN "assetUsageDenial"."creator" IS 'userId of the record creator';
-COMMENT ON COLUMN "assetUsageDenial"."created" IS 'when denial happened - record created';
 
 -- snapshot --
 CREATE TABLE "snapshot" (
