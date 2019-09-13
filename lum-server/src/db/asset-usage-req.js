@@ -53,13 +53,13 @@ module.exports = {
         utils.logInfo(res, `in putAssetUsageReq(${res.locals.requestId})`);
 
         const keys = new SqlParams();
-        keys.addParam("assetUsageReqId", res.locals.requestId);
+        keys.addField("assetUsageReqId", res.locals.requestId);
         const putFields = new SqlParams(keys.nextOffsetIdx);
-        putFields.addParam("action", res.locals.params.action);
-        putFields.addParam("assetUsageType", res.locals.params.assetUsageType);
-        putFields.addParam("requestHttp", res.locals.requestHttp);
-        putFields.addParam("request", res.locals.reqBody);
-        putFields.addParam("status", "started");
+        putFields.addField("action", res.locals.params.action);
+        putFields.addField("assetUsageType", res.locals.params.assetUsageType);
+        putFields.addField("requestHttp", res.locals.requestHttp);
+        putFields.addField("request", res.locals.reqBody);
+        putFields.addField("status", "started");
 
         const sqlCmd = `INSERT INTO "assetUsageReq"
             (${keys.fields} ${putFields.fields}, "requestStarted")
@@ -75,12 +75,12 @@ module.exports = {
         utils.logInfo(res, `in putAssetUsageResponse(${res.locals.requestId})`);
 
         const keys = new SqlParams();
-        keys.addParam("assetUsageReqId", res.locals.requestId);
+        keys.addField("assetUsageReqId", res.locals.requestId);
         const putFields = new SqlParams(keys.nextOffsetIdx);
-        putFields.addParam("responseHttpCode", res.statusCode);
-        putFields.addParam("response", res.locals.response);
-        putFields.addParam("usageEntitled", res.locals.response.usageEntitled);
-        putFields.addParam("status", "responseSent");
+        putFields.addField("responseHttpCode", res.statusCode);
+        putFields.addField("response", res.locals.response);
+        putFields.addField("usageEntitled", res.locals.response.usageEntitled);
+        putFields.addField("status", "responseSent");
 
         const sqlCmd = `UPDATE "assetUsageReq" AS aur
             SET "requestDone" = TRUE, "responseSent" = NOW() ${putFields.updates}

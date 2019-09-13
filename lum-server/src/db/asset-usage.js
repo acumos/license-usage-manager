@@ -21,8 +21,11 @@ const SqlParams = require('./sql-params');
 
 // const assetUsageKey = {"assetUsageId": true};
 // {required: true, type: "array", ref: "swCategory"};
-// const assetUsageReq = {
-//     "isIncludedAsset": true
+// const assetUsageReqFields = {
+//     "swTagId":          true,
+//     "assetUsageId":     true,
+//     "action":           true,
+//     "isIncludedAsset":  true
 // };
 
 // const assetUsageHouse = {
@@ -35,67 +38,45 @@ const SqlParams = require('./sql-params');
 //     "modifier"          : false,
 //     "modified"          : false
 // };
-const assetUsageHistory = {
+const assetUsageHistoryFields = {
     "swMgtSystemId"        : true,
     "swMgtSystemInstanceId": true,
     "swMgtSystemComponent" : true
 };
-const swidTagHistory = {
+const swidTagHistoryFields = {
     "softwareLicensorId": true,
     "swidTagRevision"   : true
 };
-const licenseProfileHistory = {
+const licenseProfileHistoryFields = {
     "licenseProfileId"      : true,
     "licenseProfileRevision": true,
     "isRtuRequired"         : true
 };
 
-async function registerIncludedAssetUsage(res) {
-    const assetUsage = res.locals.response.assetUsage;
-    const includedAssetUsageIds = assetUsage.includedAssetUsage.map(iau => iau.includedAssetUsageId);
-    if (!assetUsage.includedAssetUsage || !assetUsage.includedAssetUsage.length) {
-        utils.logInfo(res, `skipped registerIncludedAssetUsage(${assetUsage.assetUsageId}) - nothing included`);
-        return;
-    }
-    utils.logInfo(res, `in registerIncludedAssetUsage(${assetUsage.assetUsageId}) ${JSON.stringify(includedAssetUsageIds)}`);
-
-    const keys = new SqlParams();
-    keys.addParam("assetUsageId", assetUsage.assetUsageId);
-    const includedKey = new SqlParams(keys.nextOffsetIdx);
-    includedKey.setKeyValues("includedAssetUsageId", includedAssetUsageIds);
-    const insFields = new SqlParams(includedKey.nextOffsetIdx);
-    insFields.addParam("creator", res.locals.params.userId);
-
-    const sqlCmd = `INSERT INTO "includedAssetUsage" (${keys.fields}, ${includedKey.keyName} ${insFields.fields})
-            SELECT ${keys.idxValues}, UNNEST(ARRAY[${includedKey.idxKeyValues}]) ${insFields.idxValues}
-            ON CONFLICT (${keys.fields}, ${includedKey.keyName}) DO NOTHING`;
-    await pgclient.sqlQuery(res, sqlCmd, keys.values.concat(includedKey.values, insFields.values));
-
-    utils.logInfo(res, `out registerIncludedAssetUsage(${assetUsage.assetUsageId})`);
-}
 
 async function storeAssetUsage(res, assetUsage) {
-    const assetUsageId    = assetUsage.assetUsageId || assetUsage.includedAssetUsageId;
-    const swTagId         = assetUsage.swTagId      || assetUsage.includedSwTagId;
-    const isIncludedAsset = assetUsage.isIncludedAsset || !!assetUsage.includedAssetUsageId;
-    utils.logInfo(res, `in storeAssetUsage(${assetUsageId})`);
+    utils.logInfo(res, `in storeAssetUsage(${assetUsage.assetUsageId})`);
 
     const keys = new SqlParams();
-    keys.addParam("assetUsageId", assetUsageId);
+    keys.addField("assetUsageId", assetUsage.assetUsageId);
     const usageFields = new SqlParams(keys.nextOffsetIdx);
-    usageFields.addParam("isIncludedAsset", isIncludedAsset);
-    usageFields.addParam("modifier", res.locals.params.userId);
+    usageFields.addField("isIncludedAsset", assetUsage.isIncludedAsset);
+    usageFields.addField("modifier", res.locals.params.userId);
     const insFields = new SqlParams(usageFields.nextOffsetIdx);
-    insFields.addParam("creator", res.locals.params.userId);
+    insFields.addField("creator", res.locals.params.userId);
     const historyFields = new SqlParams(insFields.nextOffsetIdx);
-    historyFields.addParamsFromBody(assetUsageHistory, res.locals.reqBody);
-    historyFields.addParam("usageEntitled", assetUsage.usageEntitled);
-    historyFields.addParam("assetUsageReqId", res.locals.requestId);
-    historyFields.addParam("action", res.locals.params.action);
-    historyFields.addParam("assetUsageType", res.locals.params.assetUsageType);
-    historyFields.addParam("swTagId", swTagId);
-    historyFields.addParamsFromBody(swidTagHistory, assetUsage);
-    historyFields.addParamsFromBody(licenseProfileHistory, assetUsage);
+    historyFields.addFieldsFromBody(assetUsageHistoryFields, res.locals.reqBody);
+    historyFields.addField("usageEntitled", assetUsage.usageEntitled);
+    historyFields.addField("isSwCreator", assetUsage.isSwCreator);
+    historyFields.addField("assetUsageReqId", res.locals.requestId);
+    historyFields.addField("action", res.locals.params.action);
+    historyFields.addField("assetUsageType", res.locals.params.assetUsageType);
+    historyFields.addField("swTagId", assetUsage.swTagId);
+    historyFields.addFieldsFromBody(swidTagHistoryFields, assetUsage);
+    historyFields.addFieldsFromBody(licenseProfileHistoryFields, assetUsage);
+    if (assetUsage.assetUsageDenial.length) {
+        historyFields.addFieldJson("assetUsageDenial", assetUsage.assetUsageDenial);
+    }
 
     const sqlCmd = `WITH asset_usage AS (
             INSERT INTO "assetUsage" AS au
@@ -118,34 +99,125 @@ async function storeAssetUsage(res, assetUsage) {
     if (result.rows.length) {
         assetUsage.assetUsageSeq = result.rows[0].assetUsageSeq;
     }
-    utils.logInfo(res, `out storeAssetUsage(${assetUsageId})`);
+    utils.logInfo(res, `out storeAssetUsage(${assetUsage.assetUsageId})`);
 }
 
-async function calcAssetUsageEntitlement(res, assetUsage) {
-    const assetUsageId   = assetUsage.assetUsageId || assetUsage.includedAssetUsageId;
-    const swTagId        = assetUsage.swTagId || assetUsage.includedSwTagId;
-    const swidTag        = res.locals.dbdata.swidTags[swTagId] || {};
-    const licenseProfile = res.locals.dbdata.licenseProfiles[swidTag.licenseProfileId] || {};
+/**
+ * verify swidTag and licenseProfile are found for the asset-usage
+ * @param  {} res
+ * @param  {} assetUsage either assetUsage or includedAssetUsage
+ */
+async function verifyAssetUsageSwidTag(res, assetUsage) {
+    const swidTag        = res.locals.dbdata.swidTags[assetUsage.swTagId];
+    const licenseProfile = (swidTag && res.locals.dbdata.licenseProfiles[swidTag.licenseProfileId]) || null;
 
-    utils.copyTo(assetUsage, swidTagHistory, swidTag);
-    utils.copyTo(assetUsage, licenseProfileHistory, licenseProfile);
+    utils.copyTo(assetUsage, swidTagHistoryFields, swidTag);
+    utils.copyTo(assetUsage, licenseProfileHistoryFields, licenseProfile);
+    assetUsage.isSwCreator = !!(swidTag && swidTag.swCreators && swidTag.swCreators.includes(res.locals.params.userId));
 
-    if (assetUsage.isRtuRequired === false) {
-        assetUsage.usageEntitled = true;
-        utils.logInfo(res, `RTU not required - entitled calcAssetUsageEntitlement(${assetUsageId})`);
-        return assetUsage.usageEntitled;
+    if (!swidTag) {
+        utils.addDenial(assetUsage.assetUsageDenial, "swidTagNotFound",
+            `swid-tag not found for swTagId(${assetUsage.swTagId})`);
+    } else if (!swidTag.swidTagActive) {
+        utils.addDenial(assetUsage.assetUsageDenial, "swidTagRevoked",
+            `swid-tag ${swidTag.closureReason || 'revoked'} for swTagId(${assetUsage.swTagId})`);
     }
-    utils.logWarn(res, `TODO: RTU is required - implement calcAssetUsageEntitlement(${assetUsageId})`);
-    assetUsage.usageEntitled = true;
-    return assetUsage.usageEntitled;
+
+    if (!licenseProfile) {
+        utils.addDenial(assetUsage.assetUsageDenial, "licenseProfileNotFound",
+            `license-profile not found
+            for swTagId(${assetUsage.swTagId}) with licenseProfileId(${(swidTag || '').licenseProfileId || ''})`);
+    } else if (!licenseProfile.licenseProfileActive) {
+        utils.addDenial(assetUsage.assetUsageDenial, "licenseProfileRevoked",
+            `license-profile ${licenseProfile.closureReason || 'revoked'}
+            for swTagId(${assetUsage.swTagId}) with licenseProfileId(${(swidTag || '').licenseProfileId || ''})`);
+    }
+}
+
+/**
+ * find and check the RTU-permission for the assetUsage
+ * @param  {} res
+ * @param  {} assetUsage either assetUsage or includedAssetUsage
+ */
+async function checkRtu(res, assetUsage) {
+    if (assetUsage.isRtuRequired === false) {
+        utils.logInfo(res, `RTU not required - entitled checkRtu(${assetUsage.assetUsageId})`);
+        return;
+    }
+    if (assetUsage.isSwCreator) {
+        utils.logInfo(res, `RTU not required for software creator(${res.locals.params.userId}) -
+            entitled checkRtu(${assetUsage.assetUsageId})`);
+        return;
+    }
+    utils.logWarn(res, `TODO: RTU is required - implement checkRtu(${assetUsage.assetUsageId})`);
+    utils.addDenial(assetUsage.assetUsageDenial, "agreementNotFound",
+        `asset-usage-agreement not found for swTagId(${assetUsage.swTagId})`);
 }
 
 async function incrementUsageCounter(res, assetUsage) {
-    const assetUsageId  = assetUsage.assetUsageId || assetUsage.includedAssetUsageId;
-    utils.logWarn(res, `TODO: implement incrementUsageCounter(${assetUsageId})`);
+    utils.logWarn(res, `TODO: implement incrementUsageCounter(${assetUsage.assetUsageId})`);
 }
 
 module.exports = {
+    /**
+     * convert assetUsage or includedAssetUsage to shallow assetUsage object
+     * with precursors for assetUsageDenial and entitlement
+     * @param  {} assetUsage
+     */
+    convertToAssetUsage(assetUsage) {
+        return {
+            "swTagId":          (assetUsage.swTagId         || assetUsage.includedSwTagId),
+            "assetUsageId":     (assetUsage.assetUsageId    || assetUsage.includedAssetUsageId),
+            "action":           assetUsage.action,
+            "isIncludedAsset":  (assetUsage.isIncludedAsset || !!assetUsage.includedAssetUsageId),
+            "usageEntitled":            null,
+            "isSwCreator":              null,
+            "assetUsageSeq":            null,
+            "swidTagRevision":          null,
+            "licenseProfileId":         null,
+            "licenseProfileRevision":   null,
+            "isRtuRequired":            null,
+            "softwareLicensorId":       null,
+            "entitlement":              null,
+            "assetUsageDenial":         [],
+            "matchDenials":             []
+        };
+    },
+    /**
+     * remove the non-empty fields in assetUsage and rename fields when included
+     * @param  {} assetUsage current assetUsage or includedAssetUsage
+     */
+    convertToAssetUsageResponse(assetUsage) {
+        if (!assetUsage) {return assetUsage;}
+        delete assetUsage.isIncludedAsset;
+        delete assetUsage.matchDenials;
+        for (const [key, value] of Object.entries(assetUsage)) {
+            if (value == null) {
+                delete assetUsage[key];
+                continue;
+            }
+            if (key === "assetUsageDenial") {
+                if (!assetUsage.assetUsageDenial.length) {
+                    delete assetUsage.assetUsageDenial;
+                    continue;
+                }
+            }
+        }
+        if (assetUsage.isIncludedAsset) {
+            const includedAssetUsage = {
+                "includedSwTagId": assetUsage.swTagId,
+                "includedAssetUsageId": assetUsage.assetUsageId
+            };
+            delete assetUsage.assetUsageId;
+            delete assetUsage.swTagId;
+            return Object.assign(includedAssetUsage, assetUsage);
+        }
+        return assetUsage;
+    },
+    /**
+     * GET the last assetUsage record from database
+     * @param  {} res
+     */
     async getAssetUsage(res) {
         if (!response.isOk(res) || !res.locals.params.assetUsageId) {
             utils.logInfo(res, `skipped getAssetUsage(${res.locals.params.assetUsageId})`);
@@ -154,7 +226,7 @@ module.exports = {
         utils.logInfo(res, `in getAssetUsage(${res.locals.params.assetUsageId})`);
 
         const keys = new SqlParams();
-        keys.addParam("assetUsageId", res.locals.params.assetUsageId);
+        keys.addField("assetUsageId", res.locals.params.assetUsageId);
 
         const sqlCmd = `SELECT aur."responseHttpCode", aur."response"
             FROM "assetUsageReq" AS aur, "assetUsage" AS au, "assetUsageHistory" AS auh
@@ -169,47 +241,83 @@ module.exports = {
         }
         utils.logInfo(res, `out getAssetUsage(${res.locals.params.assetUsageId})`);
     },
+    /**
+     * main decision entry point to determine the asset-usage entitlement result
+     * @param  {} res
+     */
     async determineAssetUsageEntitlement(res) {
-        const assetUsage = res.locals.response.assetUsage;
-        if (!response.isOk(res) || !assetUsage.assetUsageId) {
-            utils.logInfo(res, `skipped determineAssetUsageEntitlement(${assetUsage.assetUsageId})`);
+        if (!response.isOk(res) || !res.locals.params.assetUsageId) {
+            utils.logInfo(res, `skipped determineAssetUsageEntitlement(${res.locals.params.assetUsageId})`);
             return;
         }
-        utils.logInfo(res, `in determineAssetUsageEntitlement(${assetUsage.assetUsageId})`);
+        utils.logInfo(res, `in determineAssetUsageEntitlement(${res.locals.params.assetUsageId})`);
 
-        res.locals.response.usageEntitled = await calcAssetUsageEntitlement(res, assetUsage);
-        for await (const includedAssetUsage of assetUsage.includedAssetUsage || []) {
-            const includedUsageEntitled = await calcAssetUsageEntitlement(res, includedAssetUsage);
-            if (!includedUsageEntitled) {
+        for await (const assetUsage of Object.values(res.locals.assetUsages)) {
+            verifyAssetUsageSwidTag(res, assetUsage);
+            await checkRtu(res, assetUsage);
+            assetUsage.usageEntitled = !assetUsage.assetUsageDenial.length;
+
+            if (res.locals.response.usageEntitled == null) {
+                res.locals.response.usageEntitled = assetUsage.usageEntitled;
+            } else if (!assetUsage.usageEntitled) {
                 res.locals.response.usageEntitled = false;
             }
         }
+        res.locals.response.usageEntitled = !!res.locals.response.usageEntitled;
         if (res.locals.response.usageEntitled) {
-            await incrementUsageCounter(res, assetUsage);
-            for await (const includedAssetUsage of assetUsage.includedAssetUsage || []) {
-                await incrementUsageCounter(res, includedAssetUsage);
+            for await (const assetUsage of Object.values(res.locals.assetUsages)) {
+                await incrementUsageCounter(res, assetUsage);
             }
         }
 
-
-        utils.logInfo(res, `out determineAssetUsageEntitlement(${assetUsage.assetUsageId})`);
+        utils.logInfo(res, `out determineAssetUsageEntitlement(${res.locals.params.assetUsageId})`);
     },
+    /**
+     * INSERT assetUsage records into database
+     * @param  {} res
+     */
     async putAssetUsage(res) {
-        const assetUsage = res.locals.response.assetUsage;
-        if (!response.isOk(res) || !assetUsage.assetUsageId) {
-            utils.logInfo(res, `skipped putAssetUsage(${assetUsage.assetUsageId})`);
+        if (!response.isOk(res) || !res.locals.params.assetUsageId) {
+            utils.logInfo(res, `skipped putAssetUsage(${res.locals.params.assetUsageId})`);
             return;
         }
-        utils.logInfo(res, `in putAssetUsage(${assetUsage.assetUsageId})`);
+        utils.logInfo(res, `in putAssetUsage(${res.locals.params.assetUsageId})`);
 
-        await storeAssetUsage(res, assetUsage);
-        for await (const includedAssetUsage of assetUsage.includedAssetUsage || []) {
-            await storeAssetUsage(res, includedAssetUsage);
+        for await (const assetUsage of Object.values(res.locals.assetUsages)) {
+            await storeAssetUsage(res, assetUsage);
         }
-        await registerIncludedAssetUsage(res);
 
-        utils.logInfo(res, `out putAssetUsage(${assetUsage.assetUsageId})`);
+        utils.logInfo(res, `out putAssetUsage(${res.locals.params.assetUsageId})`);
     },
+    /**
+     * INSERT included asset-usage ids into includedAssetUsage table in database
+     * @param  {} res
+     */
+    async registerIncludedAssetUsage(res) {
+        if (!res.locals.includedAssetUsageIds.length) {
+            utils.logInfo(res, `skipped registerIncludedAssetUsage(${res.locals.params.assetUsageId}) - nothing included`);
+            return;
+        }
+        utils.logInfo(res, `in registerIncludedAssetUsage(${res.locals.params.assetUsageId}) ${JSON.stringify(res.locals.includedAssetUsageIds)}`);
+
+        const keys = new SqlParams();
+        keys.addField("assetUsageId", res.locals.params.assetUsageId);
+        const includedKey = new SqlParams(keys.nextOffsetIdx);
+        includedKey.setKeyValues("includedAssetUsageId", res.locals.includedAssetUsageIds);
+        const insFields = new SqlParams(includedKey.nextOffsetIdx);
+        insFields.addField("creator", res.locals.params.userId);
+
+        const sqlCmd = `INSERT INTO "includedAssetUsage" (${keys.fields}, ${includedKey.keyName} ${insFields.fields})
+                SELECT ${keys.idxValues}, UNNEST(ARRAY[${includedKey.idxKeyValues}]) ${insFields.idxValues}
+                ON CONFLICT (${keys.fields}, ${includedKey.keyName}) DO NOTHING`;
+        await pgclient.sqlQuery(res, sqlCmd, keys.values.concat(includedKey.values, insFields.values));
+
+        utils.logInfo(res, `out registerIncludedAssetUsage(${res.locals.params.assetUsageId})`);
+    },
+    /**
+     * GET the last assetUsageEvent record from database
+     * @param  {} res
+     */
     async getAssetUsageEvent(res) {
         if (!response.isOk(res) || !res.locals.params.assetUsageId) {
             utils.logInfo(res, `skipped getAssetUsageEvent(${res.locals.params.assetUsageId})`);
@@ -218,7 +326,7 @@ module.exports = {
         utils.logInfo(res, `in getAssetUsageEvent(${res.locals.params.assetUsageId})`);
 
         const keys = new SqlParams();
-        keys.addParam("assetUsageId", res.locals.params.assetUsageId);
+        keys.addField("assetUsageId", res.locals.params.assetUsageId);
 
         const sqlCmd = `SELECT aur."responseHttpCode", aur."response"
             FROM "assetUsageReq" AS aur, "assetUsage" AS au, "assetUsageHistory" AS auh
@@ -233,6 +341,10 @@ module.exports = {
         }
         utils.logInfo(res, `out getAssetUsageEvent(${res.locals.params.assetUsageId})`);
     },
+    /**
+     * INSERT the assetUsageReq record for the event into database
+     * @param  {} res
+     */
     async putAssetUsageEvent(res) {
         if (!response.isOk(res) || !res.locals.params.assetUsageId) {
             utils.logInfo(res, `skipped putAssetUsageEvent(${res.locals.params.assetUsageId})`);
@@ -244,19 +356,19 @@ module.exports = {
         const licenseProfile = res.locals.dbdata.licenseProfiles[swidTag.licenseProfileId] || {};
 
         const keys = new SqlParams();
-        keys.addParam("assetUsageId", res.locals.params.assetUsageId);
+        keys.addField("assetUsageId", res.locals.params.assetUsageId);
         const houseFields = new SqlParams(keys.nextOffsetIdx);
-        houseFields.addParam("modifier", res.locals.params.userId);
+        houseFields.addField("modifier", res.locals.params.userId);
         const insFields = new SqlParams(houseFields.nextOffsetIdx);
-        insFields.addParam("creator", res.locals.params.userId);
+        insFields.addField("creator", res.locals.params.userId);
         const historyFields = new SqlParams(insFields.nextOffsetIdx);
-        historyFields.addParamsFromBody(assetUsageHistory, res.locals.reqBody);
-        historyFields.addParam("assetUsageReqId", res.locals.requestId);
-        historyFields.addParam("action", res.locals.params.action);
-        historyFields.addParam("assetUsageType", res.locals.params.assetUsageType);
-        historyFields.addParam("swTagId", res.locals.params.swTagId);
-        historyFields.addParamsFromBody(swidTagHistory, swidTag);
-        historyFields.addParamsFromBody(licenseProfileHistory, licenseProfile);
+        historyFields.addFieldsFromBody(assetUsageHistoryFields, res.locals.reqBody);
+        historyFields.addField("assetUsageReqId", res.locals.requestId);
+        historyFields.addField("action", res.locals.params.action);
+        historyFields.addField("assetUsageType", res.locals.params.assetUsageType);
+        historyFields.addField("swTagId", res.locals.params.swTagId);
+        historyFields.addFieldsFromBody(swidTagHistoryFields, swidTag);
+        historyFields.addFieldsFromBody(licenseProfileHistoryFields, licenseProfile);
 
         const sqlCmd = `WITH asset_usage AS (
                 INSERT INTO "assetUsage" AS au
@@ -279,10 +391,14 @@ module.exports = {
         if (result.rows.length) {
             res.locals.response.assetUsageEvent.assetUsageSeq = result.rows[0].assetUsageSeq;
         }
-        utils.copyTo(res.locals.response.assetUsageEvent, swidTagHistory, swidTag);
-        utils.copyTo(res.locals.response.assetUsageEvent, licenseProfileHistory, licenseProfile);
+        utils.copyTo(res.locals.response.assetUsageEvent, swidTagHistoryFields, swidTag);
+        utils.copyTo(res.locals.response.assetUsageEvent, licenseProfileHistoryFields, licenseProfile);
         utils.logInfo(res, `out putAssetUsageEvent(${res.locals.params.assetUsageId})`);
     },
+    /**
+     * GET assetUsageReq records per softwareLicensorId from the database
+     * @param  {} res
+     */
     async getAssetUsageTracking(res) {
         if (!response.isOk(res) || !res.locals.params.softwareLicensorId) {
             utils.logInfo(res, `skipped getAssetUsageTracking(${res.locals.params.softwareLicensorId})`);
@@ -291,7 +407,7 @@ module.exports = {
         utils.logInfo(res, `in getAssetUsageTracking(${res.locals.params.softwareLicensorId})`);
 
         const keys = new SqlParams();
-        keys.addParam("softwareLicensorId", res.locals.params.softwareLicensorId);
+        keys.addField("softwareLicensorId", res.locals.params.softwareLicensorId);
 
         const sqlCmd = `WITH req_ids AS (SELECT DISTINCT auh."assetUsageReqId" FROM "assetUsageHistory" AS auh WHERE ${keys.getWhere("auh")})
             SELECT aur."assetUsageType", aur."response" FROM "assetUsageReq" AS aur, req_ids
