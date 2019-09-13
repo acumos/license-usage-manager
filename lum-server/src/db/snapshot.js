@@ -23,12 +23,12 @@ module.exports = {
         utils.logInfo(res, `in addSnapshot(${snapshotType})`);
 
         const keys = new SqlParams();
-        keys.addParam("snapshotType", snapshotType);
-        keys.addParam("snapshotKey", snapshotKey);
-        keys.addParam("snapshotRevision", snapshotRevision);
+        keys.addField("snapshotType", snapshotType);
+        keys.addField("snapshotKey", snapshotKey);
+        keys.addField("snapshotRevision", snapshotRevision);
         const putFields = new SqlParams(keys.nextOffsetIdx);
-        putFields.addParam("snapshotBody", snapshotBody);
-        putFields.addParam("creator", res.locals.params.userId);
+        putFields.addField("snapshotBody", snapshotBody);
+        putFields.addField("creator", res.locals.params.userId);
 
         const sqlCmd = `INSERT INTO "snapshot" (${keys.fields} ${putFields.fields})
                         VALUES (${keys.idxValues} ${putFields.idxValues})

@@ -18,7 +18,7 @@
 
 PGVER=11.5
 
-PGHOME=${PWD}
+PGHOME="$( cd "$(dirname "${BASH_SOURCE[0]}")" > /dev/null 2>&1 && pwd -P )"
 PGPASSWORD=$(uuidgen)
 PGIMAGE=postgres:${PGVER}-alpine
 
@@ -47,13 +47,13 @@ fi
 echo "docker run ${APPNAME}"
 docker run -d \
     --name ${APPNAME} \
-    --user "$(id -u):$(id -g)" \
     -p 5432:5432 \
     -e POSTGRES_PASSWORD=${PGPASSWORD} \
+    --user "$(id -u):$(id -g)" \
     -v /etc/passwd:/etc/passwd:ro \
     -v /etc/group:/etc/group:ro \
     -v ${PGHOME}/pgdata:/var/lib/postgresql/data \
     -v ${PGHOME}/initdb:/docker-entrypoint-initdb.d \
-    ${PGIMAGE} -i
+    ${PGIMAGE} -i -c 'deadlock_timeout=5s'
 
 echo "$(date +%Y-%m-%d_%T.%N): done ${BASH_SOURCE[0]}"

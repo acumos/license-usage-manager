@@ -20,21 +20,43 @@
 License Usage Manager Release Notes
 ===================================
 
+Version 0.25.0, 13 September 2019
+---------------------------------
+
+lum-server
+
+- added first denials (`ACUMOS-3061 <https://jira.acumos.org/browse/ACUMOS-3061>`_)
+- return http status 402 for denied assetUsage
+- refactored iteration over the assetUsages
+- refactored SqlParams class
+- node:10.16.3-alpine
+- moved eslintrc into package.json as eslintConfig
+- removed assetUsageDenial table from DDL - denials are stored in assetUsageHistory
+- new denialType for licenseProfileNotFound
+- renamed denialType for swidTagNotFound from swTagIdNotFound
+- new denialType for revoked state of swidTag, licenseProfile
+- new denialType for not active state of assetUsageAgreement
+- unrestricted asset-usage flow for software creators (`ACUMOS-3063 <https://jira.acumos.org/browse/ACUMOS-3063>`_)
+- minor changes to API
+- jsdoc - work in progress
+
 Version 0.23.1, 11 September 2019
 ---------------------------------
 
 lum-java-client
-  - Fixed allOfWarnings - required changes to swagger
+
+- Fixed allOfWarnings - required changes to swagger
 - bumped version to 0.23.1 for all components
 - Removed user from lum-db setup
 - Add support for development without docker
-  
+
 Version 0.23.0, 09 September 2019
 ---------------------------------
 
 local dev setup fixes
-  - Setup NodeJS server to work without docker for quicker debugging
-  - adding .gitignore to not include local folders / files that are only for development
+
+- Setup NodeJS server to work without docker for quicker debugging
+- adding .gitignore to not include local folders / files that are only for development
 
 first incarnation of the lum-server with basic functionality of API
 
