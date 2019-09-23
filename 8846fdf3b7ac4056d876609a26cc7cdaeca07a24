@@ -16,6 +16,23 @@
       "revId": "8846fdf3b7ac4056d876609a26cc7cdaeca07a24",
       "serverId": "655300a2-7a56-4504-9153-881edd907bea",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3d1393f8_db89cd41",
+        "filename": "lum-server/package.json",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 4
+      },
+      "writtenOn": "2019-09-23T21:07:28Z",
+      "side": 0,
+      "message": "would you please restore this whitespace so that this file is not changed by this set?",
+      "revId": "8846fdf3b7ac4056d876609a26cc7cdaeca07a24",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
     }
   ]
 }
