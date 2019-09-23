@@ -1,0 +1,4 @@
+distribution_type: 'maven'
+version: '0.25.2'
+project: 'license-usage-manager'
+log_dir: 'license-usage-manager-maven-dl-stage-master/48/'

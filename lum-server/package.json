@@ -50,6 +50,5 @@
     "start": "node lum-server.js",
     "lint": "./node_modules/.bin/eslint  .",
     "openapi": "mkdir -p ./lum-server-api/ && cp ../lum-server-api/lum-server-API.yaml ./lum-server-api/"
-
   }
 }
