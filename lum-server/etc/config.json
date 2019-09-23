@@ -3,7 +3,7 @@
         "database": {
             "user": "lumdb",
             "password": "lumdb",
-            "host": "lumdb-pg",
+            "host": "lum-database",
             "database": "lumdb",
             "port": 5432,
             "max": 10,
