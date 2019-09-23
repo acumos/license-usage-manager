@@ -33,6 +33,24 @@
       "revId": "8846fdf3b7ac4056d876609a26cc7cdaeca07a24",
       "serverId": "655300a2-7a56-4504-9153-881edd907bea",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8ebcffcb_77151a7d",
+        "filename": "lum-server/package.json",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 290
+      },
+      "writtenOn": "2019-09-23T21:24:28Z",
+      "side": 0,
+      "message": "Done",
+      "parentUuid": "3d1393f8_db89cd41",
+      "revId": "8846fdf3b7ac4056d876609a26cc7cdaeca07a24",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": false
     }
   ]
 }
