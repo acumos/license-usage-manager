@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ab9b965e_ac6010b2",
+        "filename": "releases/0.25.2-maven.yaml",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 4
+      },
+      "writtenOn": "2019-09-23T20:46:40Z",
+      "side": 1,
+      "message": "Please remove all the single quotes, Yaml doesn\u0027t require quotes.  Add the three dashes at the top tho, they are not optional.",
+      "revId": "db8f796b1044b2e311fec6dee094166faca115c1",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    }
+  ]
+}

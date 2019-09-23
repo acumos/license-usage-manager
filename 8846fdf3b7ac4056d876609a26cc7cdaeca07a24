@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8ba52866_c89d5de1",
+        "filename": "lum-server/package.json",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 4
+      },
+      "writtenOn": "2019-09-23T20:46:40Z",
+      "side": 0,
+      "message": "Can you maybe remove this whitespace-only change so the changeset is just the release?",
+      "revId": "8846fdf3b7ac4056d876609a26cc7cdaeca07a24",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    }
+  ]
+}
