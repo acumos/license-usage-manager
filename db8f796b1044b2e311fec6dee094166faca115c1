@@ -16,6 +16,24 @@
       "revId": "db8f796b1044b2e311fec6dee094166faca115c1",
       "serverId": "655300a2-7a56-4504-9153-881edd907bea",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "efc6643d_089d517d",
+        "filename": "releases/0.25.2-maven.yaml",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 290
+      },
+      "writtenOn": "2019-09-23T21:24:28Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "ab9b965e_ac6010b2",
+      "revId": "db8f796b1044b2e311fec6dee094166faca115c1",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": false
     }
   ]
 }
