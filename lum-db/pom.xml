@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <!-- ===============LICENSE_START======================================================= Acumos ===================================================================================
+	Copyright (C) 2019 Nordix Foundation ===================================================================================
+	This Acumos software file is distributed by Nordix Foundation
+	under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+	This file is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License. ===============LICENSE_END=========================================================
+	-->
+  <modelVersion>4.0.0</modelVersion>
+
+	<groupId>org.acumos.license-usage-manager</groupId>
+  <artifactId>lum-database</artifactId>
+  <version>0.25.2-SNAPSHOT</version>
+  <packaging>docker</packaging>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <!-- Supplied by Jenkins -->
+    <build.number>0</build.number>
+    <wagonVersion>3.1.0</wagonVersion>
+    <!-- Not supplied to all jobs; e.g., Javadoc -->
+    <docker.pull.registry>nexus3.acumos.org:10001</docker.pull.registry>
+    <!-- Supplied by Jenkins -->
+    <docker.push.registry>${env.NEXUS3_PUSH_REGISTRY}</docker.push.registry>
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>license-maven-plugin</artifactId>
+        <version>1.14</version>
+        <configuration>
+          <licenseName>acumos</licenseName>
+          <licenseResolver>${project.baseUri}/src/license</licenseResolver>
+          <addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
+          <processStartTag>===============LICENSE_START================================================</processStartTag>
+          <processEndTag>===============LICENSE_END==================================================</processEndTag>
+          <sectionDelimiter>============================================================================</sectionDelimiter>
+          <inceptionYear>2019</inceptionYear>
+          <organizationName><![CDATA[Nordix Foundation.]]></organizationName>
+          <projectName>Acumos Apache-2.0</projectName>
+          <canUpdateCopyright>false</canUpdateCopyright>
+          <canUpdateDescription>false</canUpdateDescription>
+          <canUpdateLicense>true</canUpdateLicense>
+          <emptyLineAfterHeader>true</emptyLineAfterHeader>
+          <includes>
+            <include>**/*.ts</include>
+            <include>**/*.html</include>
+            <include>**/*.scss</include>
+            <include>**/*.js</include>
+            <include>**/*.xml</include>
+          </includes>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>io.fabric8</groupId>
+        <artifactId>docker-maven-plugin</artifactId>
+        <version>0.31.0</version>
+        <!-- enables using 'docker' packaging above -->
+        <extensions>true</extensions>
+
+        <configuration>
+          <verbose>true</verbose>
+          <pullRegistry>${docker.pull.registry}</pullRegistry>
+          <pushRegistry>${docker.push.registry}</pushRegistry>
+          <images>
+            <image>
+              <!-- Specify a tag to avoid default tag "latest" -->
+              <name>lum-database:${project.version}</name>
+              <build>
+
+                <!-- filter>@</filter-->
+                <contextDir>${project.basedir}</contextDir>
+                <dockerFile>Dockerfile</dockerFile>
+                <!-- <doc> -->
+                <tags>
+                  <!-- Add tag with build number -->
+                  <tag>${project.version}-b${build.number}</tag>
+                </tags>
+                <noCache>true</noCache>
+              </build>
+            </image>
+          </images>
+        </configuration>
+        <!-- build Docker images in install phase, push in deploy phase -->
+        <executions>
+          <execution>
+            <goals>
+              <goal>push</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

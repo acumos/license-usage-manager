@@ -21,7 +21,7 @@
 	===============LICENSE_END=========================================================
 	]]>-->
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.acumos.license-manager</groupId>
+	<groupId>org.acumos.license-usage-manager</groupId>
 	<artifactId>license-manager-parent</artifactId>
 	<version>0</version>
 	<packaging>pom</packaging>
@@ -30,6 +30,8 @@
 	<modules>
 		<!-- Child modules do NOT name this parent. -->
 		<module>lum-java-rest-client</module>
+		<module>lum-server</module>
+		<module>lum-db</module>
 	</modules>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
