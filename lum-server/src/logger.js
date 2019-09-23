@@ -1,5 +1,6 @@
 // ================================================================================
 // Copyright (c) 2019 AT&T Intellectual Property. All rights reserved.
+// Modifications Copyright (C) 2019 Nordix Foundation.
 // ================================================================================
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,21 +38,21 @@ const logWrapper = (original) => {
 
 module.exports = {
     initLogger(app_name) {
-        const logFile = logFolder + "/" + (app_name || '') + '_' + new Date().toISOString().substr(0,19).replace(/:/g,"") + ".log";
+        const transports = [
+            new (winston.transports.Console)()
+        ];
+        let logFile;
+        if (process.env.LOGDIR) {
+            logFile = logFolder + "/" + (app_name || '') + '_' + new Date().toISOString().substr(0, 19).replace(/:/g, "") + ".log";
+            transports.push(new (winston.transports.File)({ json: false, filename: logFile, maxsize: (100 * 1024 * 1024) }));
+        }
         const logger = winston.createLogger({
             format: winston.format.combine(
                 winston.format.timestamp(),
                 winston.format.errors({stack: true}),
                 logFormatText
             ),
-            transports: [
-                new (winston.transports.Console)(),
-                new (winston.transports.File)({
-                    json:false,
-                    filename: logFile,
-                    maxsize: (100 * 1024 * 1024),
-                })
-            ]
+            transports: transports
         });
 
         logger.error = logWrapper(logger.error);
@@ -63,7 +64,8 @@ module.exports = {
 
         lumServer.logger = logger;
         lumServer.logger.info("-----------------------------------------------------------------------");
-        lumServer.logger.info("logger started for", app_name, 'to', logFile);
+
+        lumServer.logger.info("logger started for", app_name, 'to', logFile? 'console': logFile);
         lumServer.logger.info("process.env", process.env);
     }
 };

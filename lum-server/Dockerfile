@@ -1,5 +1,6 @@
 # ===================================================================
 # Copyright (c) 2019 AT&T Intellectual Property. All rights reserved.
+# Modifications Copyright (C) 2019 Nordix Foundation. 
 # ===================================================================
 # Unless otherwise specified, all software contained herein is licensed
 # under the Apache License, Version 2.0 (the "License");
@@ -18,38 +19,29 @@
 
 FROM node:10.16.3-alpine
 
-ENV SRVDIR lum-server
-ENV APIDIR lum-server-api
-
 ENV INSROOT /opt/app
 ENV APPPORT 2080
 ENV APPUSER lum
 ENV USRDIR ${INSROOT}/${APPUSER}
 ENV APPDIR ${USRDIR}/${SRVDIR}
-ENV LOGDIR ${USRDIR}/logs
 
-COPY ${SRVDIR}/*.js     ${APPDIR}/
-COPY ${SRVDIR}/*.json   ${APPDIR}/
-COPY ${SRVDIR}/*.txt    ${APPDIR}/
-COPY ${SRVDIR}/etc/     ${APPDIR}/etc/
-COPY ${SRVDIR}/src/     ${APPDIR}/src/
-COPY ${APIDIR}/         ${APPDIR}/${APIDIR}/
+COPY ./*.js     ${APPDIR}/
+COPY ./*.json   ${APPDIR}/
+COPY ./*.txt    ${APPDIR}/
+COPY ./etc/     ${APPDIR}/etc/
+COPY ./src/     ${APPDIR}/src/
+COPY ./lum-server-api/   ${APPDIR}/lum-server-api/
 
 WORKDIR ${APPDIR}
-
 
 RUN npm install \
  && npm run lint \
  && npm prune --production \
  && npm remove -g npm
 
-RUN mkdir -p ${LOGDIR} \
- && addgroup ${APPUSER} \
+RUN addgroup ${APPUSER} \
  && adduser -S -h ${USRDIR} -G ${APPUSER} ${APPUSER} \
- && chown -R ${APPUSER}:${APPUSER} ${USRDIR} \
- && ls -lA ${APPDIR}/*.js* ${APPDIR}/*.txt \
- && ls -lAR ${APPDIR}/etc/ ${APPDIR}/${APIDIR}/ ${APPDIR}/src/ \
- && pwd
+ && chown -R ${APPUSER}:${APPUSER} ${USRDIR}
 
 USER ${APPUSER}
 
