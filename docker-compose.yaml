@@ -1,0 +1,23 @@
+---
+version: "3"
+services:
+  lum-database:
+    build: ./lum-db/
+    # replace username/repo:tag with your name and image details
+    image: lum-database:0.25.2-SNAPSHOT
+    ports:
+      - "5432:5432"
+    networks:
+      - webnet
+  lum-server: 
+    build: ./lum-server/
+    # replace username/repo:tag with your name and image details
+    image: lum-server:0.25.2-SNAPSHOT
+    depends_on: 
+      - lum-database
+    ports:
+      - "2080:2080"
+    networks:
+      - webnet
+networks:
+  webnet:

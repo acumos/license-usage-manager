@@ -182,7 +182,7 @@
 						</goals>
 
 						<configuration>
-							<inputSpec>${project.basedir}/../lum-server-api/lum-server-API.yaml</inputSpec>
+							<inputSpec>${project.basedir}/../lum-server/lum-server-api/lum-server-API.yaml</inputSpec>
 							<generatorName>java</generatorName>
 							<configOptions>
 								<sourceFolder>src/gen/java/main</sourceFolder>
