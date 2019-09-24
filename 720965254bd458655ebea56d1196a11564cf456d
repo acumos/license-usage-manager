@@ -95,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "55c3a739_725c9e6a",
+        "filename": "lum-server/Dockerfile",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-09-24T19:25:56Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "ce7df9e0_67de47f2",
+      "range": {
+        "startLine": 32,
+        "startChar": 41,
+        "endLine": 32,
+        "endChar": 50
+      },
+      "revId": "720965254bd458655ebea56d1196a11564cf456d",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c83841cf_35454068",
         "filename": "lum-server/Dockerfile",
         "patchSetId": 2
@@ -124,6 +148,24 @@
       "side": 1,
       "message": "sure I didn\u0027t want to break your workflow but if you agree to use this docker file then I will remove the one under root directory.",
       "parentUuid": "c83841cf_35454068",
+      "revId": "720965254bd458655ebea56d1196a11564cf456d",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7c434dc1_1e321e11",
+        "filename": "lum-server/Dockerfile",
+        "patchSetId": 2
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-09-24T19:25:56Z",
+      "side": 1,
+      "message": "removing the root Dockerfile will not break anything for me - let\u0027s have a single Dockerfile to avoid the confusion",
+      "parentUuid": "cf29c17f_ef95168f",
       "revId": "720965254bd458655ebea56d1196a11564cf456d",
       "serverId": "655300a2-7a56-4504-9153-881edd907bea",
       "unresolved": true
