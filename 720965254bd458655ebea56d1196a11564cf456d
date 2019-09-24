@@ -143,6 +143,30 @@
     },
     {
       "key": {
+        "uuid": "106c581d_0e101068",
+        "filename": "lum-server/Dockerfile",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 290
+      },
+      "writtenOn": "2019-09-24T22:23:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "55c3a739_725c9e6a",
+      "range": {
+        "startLine": 32,
+        "startChar": 41,
+        "endLine": 32,
+        "endChar": 50
+      },
+      "revId": "720965254bd458655ebea56d1196a11564cf456d",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c83841cf_35454068",
         "filename": "lum-server/Dockerfile",
         "patchSetId": 2
@@ -196,6 +220,24 @@
     },
     {
       "key": {
+        "uuid": "d8255414_7a093a61",
+        "filename": "lum-server/Dockerfile",
+        "patchSetId": 2
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 290
+      },
+      "writtenOn": "2019-09-24T22:23:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7c434dc1_1e321e11",
+      "revId": "720965254bd458655ebea56d1196a11564cf456d",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ecde14b4_b268fbff",
         "filename": "lum-server/pom.xml",
         "patchSetId": 2
@@ -216,6 +258,30 @@
       "revId": "720965254bd458655ebea56d1196a11564cf456d",
       "serverId": "655300a2-7a56-4504-9153-881edd907bea",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d34ddd66_73e0a512",
+        "filename": "lum-server/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 290
+      },
+      "writtenOn": "2019-09-24T22:23:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ecde14b4_b268fbff",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 1
+      },
+      "revId": "720965254bd458655ebea56d1196a11564cf456d",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": false
     }
   ]
 }
