@@ -2,6 +2,52 @@
   "comments": [
     {
       "key": {
+        "uuid": "3f0290af_e6120883",
+        "filename": "docker-compose.yaml",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 4
+      },
+      "writtenOn": "2019-09-24T19:21:36Z",
+      "side": 1,
+      "message": "Is this for testing?  Why is this here?",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 1
+      },
+      "revId": "720965254bd458655ebea56d1196a11564cf456d",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "05520ef6_307e2e2e",
+        "filename": "lum-db/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 4
+      },
+      "writtenOn": "2019-09-24T19:21:36Z",
+      "side": 1,
+      "message": "Please, please do NOT add a maven POM file to a non-maven project just to build a docker image.  Stick to a Dockerfile.",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 1
+      },
+      "revId": "720965254bd458655ebea56d1196a11564cf456d",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e0747457_47903e12",
         "filename": "lum-server/Dockerfile",
         "patchSetId": 2
@@ -78,6 +124,29 @@
       "side": 1,
       "message": "sure I didn\u0027t want to break your workflow but if you agree to use this docker file then I will remove the one under root directory.",
       "parentUuid": "c83841cf_35454068",
+      "revId": "720965254bd458655ebea56d1196a11564cf456d",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ecde14b4_b268fbff",
+        "filename": "lum-server/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 4
+      },
+      "writtenOn": "2019-09-24T19:21:36Z",
+      "side": 1,
+      "message": "What value does this add?  In my opinion this is not a sensible addition.",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 1
+      },
       "revId": "720965254bd458655ebea56d1196a11564cf456d",
       "serverId": "655300a2-7a56-4504-9153-881edd907bea",
       "unresolved": true
