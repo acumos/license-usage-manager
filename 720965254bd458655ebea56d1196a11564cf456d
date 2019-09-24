@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e0747457_47903e12",
+        "filename": "lum-server/Dockerfile",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-09-24T11:58:27Z",
+      "side": 1,
+      "message": "there is no APIDIR anymore and there is no need for /${APIDIR}\nCOPY ./lum-server-api/         ${APPDIR}/lum-server-api/",
+      "range": {
+        "startLine": 32,
+        "startChar": 41,
+        "endLine": 32,
+        "endChar": 50
+      },
+      "revId": "720965254bd458655ebea56d1196a11564cf456d",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c83841cf_35454068",
+        "filename": "lum-server/Dockerfile",
+        "patchSetId": 2
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-09-24T11:58:27Z",
+      "side": 1,
+      "message": "should we move the Dockerfile from top folder to here instead of having two copies of Dockerfile ?",
+      "revId": "720965254bd458655ebea56d1196a11564cf456d",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    }
+  ]
+}
