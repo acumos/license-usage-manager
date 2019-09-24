@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ce7df9e0_67de47f2",
+        "filename": "lum-server/Dockerfile",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 290
+      },
+      "writtenOn": "2019-09-24T19:13:30Z",
+      "side": 1,
+      "message": "good catch",
+      "parentUuid": "e0747457_47903e12",
+      "range": {
+        "startLine": 32,
+        "startChar": 41,
+        "endLine": 32,
+        "endChar": 50
+      },
+      "revId": "720965254bd458655ebea56d1196a11564cf456d",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "c83841cf_35454068",
         "filename": "lum-server/Dockerfile",
         "patchSetId": 2
@@ -36,6 +60,24 @@
       "writtenOn": "2019-09-24T11:58:27Z",
       "side": 1,
       "message": "should we move the Dockerfile from top folder to here instead of having two copies of Dockerfile ?",
+      "revId": "720965254bd458655ebea56d1196a11564cf456d",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cf29c17f_ef95168f",
+        "filename": "lum-server/Dockerfile",
+        "patchSetId": 2
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 290
+      },
+      "writtenOn": "2019-09-24T19:13:30Z",
+      "side": 1,
+      "message": "sure I didn\u0027t want to break your workflow but if you agree to use this docker file then I will remove the one under root directory.",
+      "parentUuid": "c83841cf_35454068",
       "revId": "720965254bd458655ebea56d1196a11564cf456d",
       "serverId": "655300a2-7a56-4504-9153-881edd907bea",
       "unresolved": true
