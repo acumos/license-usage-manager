@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "87b98d73_d5d412ec",
+        "filename": "pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 4
+      },
+      "writtenOn": "2019-09-24T23:47:03Z",
+      "side": 1,
+      "message": "Please consider if you might want to have just a single pom file in the client with all the required content.  It\u0027s a little silly to have a parent/submodule setup with just a single submodule. It\u0027s easy to configure a maven job to find that sole pom.",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 1
+      },
+      "revId": "1d57e17c6afcc379f473d5454e51ae5078dce644",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    }
+  ]
+}
