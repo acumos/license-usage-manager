@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e33bb1e6_2c433f37",
+        "filename": "lum-server/Dockerfile",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-09-25T09:03:42Z",
+      "side": 1,
+      "message": "I think that mkdir is not necessary - COPY will create the folder anyway",
+      "range": {
+        "startLine": 27,
+        "startChar": 0,
+        "endLine": 27,
+        "endChar": 39
+      },
+      "revId": "16ab41c3aa297b23e1d420141e2450b2a65ebd57",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e255a486_2770bdc8",
+        "filename": "lum-server/Dockerfile",
+        "patchSetId": 4
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-09-25T09:03:42Z",
+      "side": 1,
+      "message": "trim the space",
+      "range": {
+        "startLine": 44,
+        "startChar": 44,
+        "endLine": 44,
+        "endChar": 45
+      },
+      "revId": "16ab41c3aa297b23e1d420141e2450b2a65ebd57",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9d259571_c4c5b3b2",
+        "filename": "lum-server/src/logger.js",
+        "patchSetId": 4
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-09-25T09:03:42Z",
+      "side": 1,
+      "message": "transports.push(new (winston.transports.File)({json: false, filename: logFile, maxsize: (100 * 1024 * 1024)}));",
+      "range": {
+        "startLine": 46,
+        "startChar": 12,
+        "endLine": 50,
+        "endChar": 14
+      },
+      "revId": "16ab41c3aa297b23e1d420141e2450b2a65ebd57",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    }
+  ]
+}
