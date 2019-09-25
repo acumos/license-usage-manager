@@ -22,6 +22,30 @@
       "revId": "1d57e17c6afcc379f473d5454e51ae5078dce644",
       "serverId": "655300a2-7a56-4504-9153-881edd907bea",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6dcd2558_cd17ac42",
+        "filename": "pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 290
+      },
+      "writtenOn": "2019-09-25T04:41:23Z",
+      "side": 1,
+      "message": "Done - causes build to break. will need to sync up jenkins job merge and build",
+      "parentUuid": "87b98d73_d5d412ec",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 1
+      },
+      "revId": "1d57e17c6afcc379f473d5454e51ae5078dce644",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": false
     }
   ]
 }
