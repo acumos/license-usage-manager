@@ -24,8 +24,8 @@
     with jenkins maven javadoc job.
   -->
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.acumos.license-manager</groupId>
-  <artifactId>license-manager-parent</artifactId>
+  <groupId>org.acumos.license-usage-manager</groupId>
+  <artifactId>license-usage-manager-parent</artifactId>
   <version>0</version>
   <packaging>pom</packaging>
   <name>License Usage Manager - LUM</name>
