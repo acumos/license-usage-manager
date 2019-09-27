@@ -47,7 +47,7 @@ const putAssetUsageEvent = async (req, res, next) => {
     res.locals.params.action = assetUsageEvent.action;
     res.locals.params.swTagId = assetUsageEvent.swTagId;
     res.locals.dbdata.swidTags = {};
-    res.locals.dbdata.swidTags[res.locals.params.swTagId] = null;
+    utils.addSwidTag(res.locals.dbdata.swidTags, res.locals.params.swTagId);
     res.locals.dbdata.licenseProfiles = {};
 
     utils.logInfo(res, `api putAssetUsageEvent(${res.locals.params.assetUsageId}, ${res.locals.params.action})`);
@@ -56,6 +56,7 @@ const putAssetUsageEvent = async (req, res, next) => {
         dbSwidTag.getSwidTag,
         dbLicenseProfile.getLicenseProfile,
         dbAssetUsage.putAssetUsageEvent,
+        dbAssetUsage.putAssetUsageEventMetrics,
         dbAssetUsageReq.putAssetUsageResponse
         );
     next();

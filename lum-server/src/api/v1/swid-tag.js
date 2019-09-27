@@ -30,12 +30,12 @@ const setSwTagId = (req, res, next, swTagId) => {
 const getSwidTag = async (req, res, next) => {
     utils.logInfo(res, `api getSwidTag(${res.locals.params.swTagId})`);
     res.locals.dbdata.swidTags = {};
-    res.locals.dbdata.swidTags[res.locals.params.swTagId] = null;
+    utils.addSwidTag(res.locals.dbdata.swidTags, res.locals.params.swTagId);
     res.locals.dbdata.licenseProfiles = {};
 
     await pgclient.runTx(res, dbSwidTag.getSwidTag, dbLicenseProfile.getLicenseProfile);
 
-    const swidTag = res.locals.dbdata.swidTags[res.locals.params.swTagId];
+    const swidTag = (res.locals.dbdata.swidTags[res.locals.params.swTagId] || {}).swidTagBody;
     if (!swidTag) {
         response.setHttpStatus(res, 204, "swidTag");
     } else if (swidTag.swidTagActive === false) {

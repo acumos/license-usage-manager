@@ -15,7 +15,6 @@
 // ============LICENSE_END=========================================================
 
 const utils = require('../utils');
-const response = require('../api/response');
 const pgclient = require('./pgclient');
 const snapshot = require('./snapshot');
 const SqlParams = require('./sql-params');
@@ -42,7 +41,7 @@ const licenseProfileHouse = {
 
 module.exports = {
     async getLicenseProfile (res) {
-        if (!response.isOk(res) || Object.keys(res.locals.dbdata.licenseProfiles).every(lp => !lp)) {
+        if (Object.keys(res.locals.dbdata.licenseProfiles).every(lp => !lp)) {
             utils.logInfo(res, `skipped getLicenseProfile(${JSON.stringify(res.locals.dbdata.licenseProfiles)})`);
             return;
         }
@@ -62,13 +61,20 @@ module.exports = {
         }
         utils.logInfo(res, `out getLicenseProfile(${JSON.stringify(res.locals.dbdata.licenseProfiles)})`);
     },
-    async putLicenseProfile (res) {
-        if (!res.locals.params.licenseProfileId) {
-            res.locals.params.licenseProfileId = utils.getFromReqByPath(res, "licenseProfile", "licenseProfileId");
+    /**
+     * insert/update licenseProfile in database
+     * @param  {} res
+     */
+    async putLicenseProfile(res) {
+        const swidTag = utils.getFromReqByPath(res, "swidTag");
+        const licenseProfile = utils.getFromReqByPath(res, "licenseProfile");
+
+        if (!res.locals.params.licenseProfileId && licenseProfile) {
+            res.locals.params.licenseProfileId = (licenseProfile || {}).licenseProfileId;
             res.set(res.locals.params);
         }
 
-        if (!response.isOk(res) || !res.locals.params.licenseProfileId) {
+        if (!res.locals.params.licenseProfileId) {
             utils.logInfo(res, `skipped putLicenseProfile(${res.locals.params.licenseProfileId})`);
             return;
         }
@@ -76,35 +82,37 @@ module.exports = {
 
         const keys = new SqlParams();
         keys.addField("licenseProfileId", res.locals.params.licenseProfileId);
-        const putFields = new SqlParams(keys.nextOffsetIdx);
-        putFields.addFieldsFromBody(licenseProfileReq, utils.getFromReqByPath(res, "licenseProfile"));
-        const houseFields = new SqlParams(putFields.nextOffsetIdx);
+        const putFields = new SqlParams(keys);
+        putFields.addFieldsFromBody(licenseProfileReq, licenseProfile);
+        putFields.addField("softwareLicensorId", (swidTag || {}).softwareLicensorId);
+        const houseFields = new SqlParams(putFields);
         houseFields.addField("licenseProfileActive", true);
         houseFields.addField("modifier", res.locals.params.userId);
         houseFields.addField("closer", null);
         houseFields.addField("closed", null);
         houseFields.addField("closureReason", null);
 
-        const insFields = new SqlParams(houseFields.nextOffsetIdx);
+        const insFields = new SqlParams(houseFields);
         insFields.addField("creator", res.locals.params.userId);
 
         const sqlCmd = `INSERT INTO "licenseProfile" AS lp
             (${keys.fields} ${putFields.fields} ${houseFields.fields} ${insFields.fields}, "created", "modified")
             VALUES (${keys.idxValues} ${putFields.idxValues} ${houseFields.idxValues} ${insFields.idxValues}, NOW(), NOW())
-            ON CONFLICT ("licenseProfileId") DO UPDATE
+            ON CONFLICT (${keys.fields}) DO UPDATE
             SET "licenseProfileRevision" = lp."licenseProfileRevision" + 1 ${putFields.updates} ${houseFields.updates}, "modified" = NOW()
-            WHERE ${keys.getWhere("lp")} AND (lp."licenseProfileActive" = FALSE OR ${putFields.getWhereDistinct("lp")})
+            WHERE lp."licenseProfileActive" = FALSE OR ${putFields.getWhereDistinct("lp")}
             RETURNING *`;
-        const result = await pgclient.sqlQuery(res, sqlCmd,
-            keys.values.concat(putFields.values, houseFields.values, insFields.values));
+        const result = await pgclient.sqlQuery(res, sqlCmd, keys.getAllValues());
         if (result.rows.length) {
             const snapshotBody = result.rows[0];
-            await snapshot.addSnapshot(res, "licenseProfile", res.locals.params.licenseProfileId, snapshotBody.licenseProfileRevision, snapshotBody);
+            await snapshot.storeSnapshot(res, snapshotBody.softwareLicensorId,
+                "licenseProfile", res.locals.params.licenseProfileId,
+                snapshotBody.licenseProfileRevision, snapshotBody);
         }
         utils.logInfo(res, `out putLicenseProfile(${res.locals.params.licenseProfileId})`);
     },
     async activateLicenseProfile (res) {
-        if (!response.isOk(res) || !res.locals.params.swTagId) {
+        if (!res.locals.params.swTagId) {
             utils.logInfo(res, `skipped activateLicenseProfile(${res.locals.params.swTagId})`);
             return;
         }
@@ -112,7 +120,7 @@ module.exports = {
 
         const keys = new SqlParams();
         keys.addField("swTagId", res.locals.params.swTagId);
-        const houseFields = new SqlParams(keys.nextOffsetIdx);
+        const houseFields = new SqlParams(keys);
         houseFields.addField("licenseProfileActive", true);
         houseFields.addField("modifier", res.locals.params.userId);
         houseFields.addField("closer", null);
@@ -124,10 +132,12 @@ module.exports = {
             SET "licenseProfileRevision" = lp."licenseProfileRevision" + 1 ${houseFields.updates}, "modified" = NOW()
             FROM swt WHERE lp."licenseProfileId" = swt."licenseProfileId" AND lp."licenseProfileActive" = FALSE
             RETURNING *`;
-        const result = await pgclient.sqlQuery(res, sqlCmd, keys.values.concat(houseFields.values));
+        const result = await pgclient.sqlQuery(res, sqlCmd, keys.getAllValues());
         if (result.rows.length) {
             const snapshotBody = result.rows[0];
-            await snapshot.addSnapshot(res, "licenseProfile", res.locals.params.licenseProfileId, snapshotBody.licenseProfileRevision, snapshotBody);
+            await snapshot.storeSnapshot(res, snapshotBody.softwareLicensorId,
+                "licenseProfile", res.locals.params.licenseProfileId,
+                snapshotBody.licenseProfileRevision, snapshotBody);
         }
         utils.logInfo(res, `out activateLicenseProfile(${res.locals.params.swTagId})`);
     }

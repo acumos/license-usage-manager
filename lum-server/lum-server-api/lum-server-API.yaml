@@ -19,7 +19,7 @@
 openapi: '3.0.2'
 
 info:
-  version: "0.25.2"
+  version: "0.26.0"
   title: "License Usage Manager (LUM) API"
   license:
     name: "Apache 2.0"
@@ -315,6 +315,13 @@ paths:
             'application/json':
               schema:
                 $ref: '#/components/schemas/PutAssetUsageAgreementResponse'
+
+        460:
+          description: invalid input data
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
     delete:
       tags: ["asset-usage-agreement"]
@@ -737,11 +744,39 @@ components:
             pathToOpenapiUi:
               description: path for the openapi-ui endpoint that contains links to API resources
               type: string
+          example:
+            serverName: "lum-server"
+            serverVersion: "0.26.0"
+            apiVersion: "0.26.0"
+            nodeVersion: "10.16.3"
+            pgVersion: "PostgreSQL 11.5 on x86_64-pc-linux-musl, compiled by gcc (Alpine 8.3.0) 8.3.0, 64-bit"
+            serverRunInstanceId: "faa08408-59fd-44d2-b815-9ceb9b8fdf92"
+            serverStarted: "2019-09-26T19:10:01.721Z"
+            serverUptime": "20 days 21:05:03.450"
+            pathToOpenapiUi: "/ui/openapi"
 
     HealthcheckResponse:
       description: request to revoke any record to conatin the userId
       allOf:
         - $ref: '#/components/schemas/BaseRequestTop'
+        - $ref: '#/components/schemas/Healthcheck'
+
+    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+    ErrorBody:
+      description: error from lum-server
+      properties:
+        error:
+          description: error from lum-server
+          type: object
+          example:
+            code: "trouble"
+            message: "trouble happened"
+
+    ErrorResponse:
+      description: error from lum-server that also contains the healthcheck
+      allOf:
+        - $ref: '#/components/schemas/BaseRequestTop'
+        - $ref: '#/components/schemas/ErrorBody'
         - $ref: '#/components/schemas/Healthcheck'
 
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -1011,7 +1046,7 @@ components:
           type: object
 
         isRtuRequired:
-          description: whether requires the right-to-use for usage, when false goes directly to rtuUsage
+          description: whether requires the right-to-use for usage, when false goes directly to usageMetrics
           type: boolean
           default: true
 
@@ -1129,7 +1164,7 @@ components:
           properties:
             agreement:
               description: ODRL based agreement data - https://www.w3.org/TR/odrl-model/#policy-agreement
-              type: object
+              $ref: '#/components/schemas/ODRLAgreement'
 
     AssetUsageAgreementHousekeeping:
       description: properties populated by LUM server
@@ -1241,7 +1276,7 @@ components:
           properties:
             agreementRestriction:
               description: ODRL based assetUsageAgreementRestriction data - https://www.w3.org/TR/odrl-model/#policy-agreement
-              type: object
+              $ref: '#/components/schemas/ODRLAgreement'
 
     PutAssetUsageAgreementRestrictionRequest:
       description: request to set assetUsageAgreementRestriction
@@ -1360,26 +1395,19 @@ components:
           - denialReason
         properties:
           denialType:
-            description: ENUM {usageConstraint, swidTagNotFound, swidTagRevoked,
+            description: ENUM {swidTagNotFound, swidTagRevoked,
               licenseProfileNotFound, licenseProfileRevoked,
-              agreementNotFound, agreementNotActive,
-              matchingConstraintOnAssignee, matchingConstraintOnRule}
+              agreementNotFound, rightToUseRevoked, usageProhibited,
+              matchingConstraintOnAssignee, matchingConstraintOnTarget,
+              timingConstraint, usageConstraint}
             type: string
 
           denialReason:
             description: human readable explanation why denied entitlement
             type: string
 
-          denialReqItemName:
-            description: name of the item that came from req or NOW() or +1 for asset-assignment
-            type: string
-
-          denialReqItemValue:
-            description: value of the item that came from req or NOW() or +1 for asset-assignment
-            type: string
-
           deniedAssetUsageAgreementId:
-            description: id of Asset-Usage-AssetUsageAgreement that caused the denial or not match
+            description: uid of Asset-Usage-AssetUsageAgreement that caused the denial or not match
             type: string
 
           deniedAssetUsageAgreementRevision:
@@ -1396,8 +1424,20 @@ components:
             type: integer
             format: int64
 
+          denialReqItemName:
+            description: name of the item that came from req or NOW() or +1 for asset-assignment
+            type: string
+
+          denialReqItemValue:
+            description: value of the item that came from req or NOW() or +1 for asset-assignment.
+              It can be either string or number
+
           deniedConstraint:
-            description: data from usageConstraint or matchingConstraint record that caused the denial
+            description: data from usageConstraint or assignee refinement record that caused the denial
+            type: object
+
+          deniedMetrics:
+            description: current statistical data that caused the denial. It is optional and its structure can very
             type: object
 
     AssetUsageEventBody:
@@ -1448,7 +1488,7 @@ components:
               type: integer
               format: int64
             isRtuRequired:
-              description: whether requires the right-to-use for usage, when false goes directly to rtuUsage
+              description: whether requires the right-to-use for usage, when false goes directly to usageMetrics
               type: boolean
               default: true
             softwareLicensorId:
@@ -1498,7 +1538,7 @@ components:
           type: integer
           format: int64
         isRtuRequired:
-          description: whether requires the right-to-use for usage, when false goes directly to rtuUsage
+          description: whether requires the right-to-use for usage, when false goes directly to usageMetrics
           type: boolean
           default: true
         softwareLicensorId:
@@ -1529,7 +1569,7 @@ components:
           description: entitlement details
           properties:
             rightToUseId:
-              description: id for the rightToUse
+              description: uid for the rightToUse that is permission
               type: string
 
             rightToUseRevision:
@@ -1719,3 +1759,269 @@ components:
           nullable: true
           items:
             $ref: '#/components/schemas/AssetUsageEventResponse'
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+    ODRLConstraint:
+      description: 'ODRL based [constraint](https://www.w3.org/TR/odrl-model/#constraint-class)
+        see [RTU design](https://wiki.acumos.org/pages/viewpage.action?pageId=20547102)
+        examples
+          {"action": "acumos:download", "constraint": [{"leftOperand": "count", "operator": "lteq", "rightOperand": {"@value": "25", "@type": "xsd:integer"}}]}
+          {"action": "acumos:deploy", "constraint": [{"leftOperand": "count", "operator": "lteq", "rightOperand": {"@value": "35", "@type": "xsd:integer"}}]}
+          {"action": ["install", "acumos:run"], "constraint": [{"leftOperand": "count", "operator": "lteq", "rightOperand": {"@value": "45", "@type": "xsd:integer"}}]}
+          {"action": "acumos:train", "constraint": [{"leftOperand": "count", "operator": "lteq", "rightOperand": {"@value": "15", "@type": "xsd:integer"}}]}
+          {"action": "acumos:compose.include", "constraint": [{"leftOperand": "count", "operator": "lteq", "rightOperand": {"@value": "55", "@type": "xsd:integer"}}]}'
+
+      required:
+        - leftOperand
+        - operator
+        - rightOperand
+
+      properties:
+        leftOperand:
+          description: value to compare versus the expected value
+          type: string
+          enum:
+            - count
+            - date
+            - "lum:goodFor"
+
+        operator:
+          description: 'comparison operator between leftOperand and rightOperand
+            ENUM {}'
+          type: string
+          enum:
+            - lt
+            - lteq
+            - eq
+            - gt
+            - gteq
+
+        rightOperand:
+          description: 'string or stringified number like
+            "2019-08-01"
+            "5"
+            {"@value": "2019-08-01", "@type": "xsd:date"}
+            {"@value": "5", "@type": "xsd:integer"}'
+          type: object
+
+    ODRLAssigneeRefinement:
+      description: ODRL based [refinement](https://www.w3.org/TR/odrl-model/#constraint-class)
+        see [RTU design](https://wiki.acumos.org/pages/viewpage.action?pageId=20547102)
+      required:
+        - leftOperand
+        - operator
+        - rightOperand
+
+      properties:
+        leftOperand:
+          description: assignee refinement
+          type: string
+          enum:
+            - "lum:countUniqueUsers"
+
+        operator:
+          description: comparison operator between leftOperand and rightOperand
+          type: string
+          enum:
+            - "lteq"
+
+        rightOperand:
+          description: 'maximal counter of unique users - string or stringified number like
+            "5"
+            {"@value": "5", "@type": "xsd:integer"}'
+      example:
+        leftOperand: "lum:countUniqueUsers"
+        operator: "lteq"
+        rightOperand: "5"
+
+    ODRLAssignee:
+      description: filter the application of permission/prohibition
+        by the users - refinement on assignee - matching constraint on assignee
+      properties:
+        # source:
+        #   description: selection of the user counts
+        #     the source value is ignored by LUM because the source for LUM is all software by softwareLicensorId
+        #   type: string
+        refinement:
+          description: collection of constraints that limit the selection of the software users
+          type: array
+          default: []
+          items:
+            $ref: '#/components/schemas/ODRLAssigneeRefinement'
+
+    ODRLTargetRefinement:
+      description: "ODRL based [refinement on target](https://www.w3.org/TR/odrl-model/#constraint-class)
+        see [RTU design](https://wiki.acumos.org/pages/viewpage.action?pageId=20547102)"
+      required:
+        - leftOperand
+        - operator
+        - rightOperand
+
+      properties:
+        leftOperand:
+          description: field for refinement
+          type: string
+          enum:
+            - "lum:swPersistentId"
+            - "lum:swTagId"
+            - "lum:swProductName"
+            - "lum:swLicensor"
+            - "lum:swCategory"
+            - "lum:swCatalogId"
+            - "lum:swCatalogType"
+        operator:
+          description: "lum:in - true when leftOperand value is found in the list of rightOperand"
+          type: string
+          default: "lum:in"
+          enum:
+            - "lum:in"
+
+        rightOperand:
+          description: array of expected values
+          type: array
+          default: []
+          items:
+            type: string
+
+    ODRLTarget:
+      description: filter the application of permission/prohibition
+        by software attributes - refinement on target
+      properties:
+        # source:
+        #   description: selection of the [target software](http://lum/software-licensor/<softwareLicensorId>)
+        #     the source value is ignored by LUM because the source for LUM is all software by softwareLicensorId
+        #   type: string
+        refinement:
+          description: collection of constraints that limit the selection of the software
+          type: array
+          default: []
+          items:
+            $ref: '#/components/schemas/ODRLTargetRefinement'
+      example:
+        refinement:
+          - leftOperand: "lum:swPersistentId"
+            operator: "lum:in"
+            rightOperand:
+              - "c01c4e06-557c-4c21-bc22-2afd757ee7af"
+              - "cbf31f26-4590-4323-8991-000d9f290901"
+          - leftOperand: "lum:swCategory"
+            operator: "lum:in"
+            rightOperand:
+              - "image-processing"
+              - "face-detection"
+          - leftOperand: "lum:swCatalogId"
+            operator: "lum:in"
+            rightOperand:
+              - "XYZ models"
+          - leftOperand: "lum:swCatalogType"
+            operator: "lum:in"
+            rightOperand:
+              - "restricted"
+
+
+    ODRLRule:
+      description: either [permission or prohibition](https://www.w3.org/TR/odrl-model/#rule)
+      required:
+        - uid
+        - action
+      properties:
+        uid:
+          description: unique identifier of type [IRI rfc3987](https://www.w3.org/TR/odrl-vocab/#term-uid).
+            possible format "http://software-licensor/<softwareLicensorId>/permission/<permission-uuid>"
+          type: string
+
+        action:
+          description: 'action on the asset like download, publish, execute, ...
+            in one of the following formats
+            "play"
+            [ "play", "stream" ]
+            {"@type": "Action","@value": "acumos:deploy"}
+            [{"@type": "Action","@value": "acumos:deploy"}, {"@type": "Action","@value": "acumos:download"}]'
+          type: object
+          example: ["acumos:deploy", "acumos:download"]
+
+        assignee:
+          $ref: '#/components/schemas/ODRLAssignee'
+
+        target:
+          $ref: '#/components/schemas/ODRLTarget'
+
+        constraint:
+          description: collection of the usage constraints to a set of assets (e.g. models)
+            all leftOperand count are here and only here
+          type: array
+          default: []
+          items:
+            $ref: '#/components/schemas/ODRLConstraint'
+          example:
+            - leftOperand: "count"
+              operator: "lteq"
+              rightOperand: "25"
+            - leftOperand: "date"
+              operator: "lteq"
+              rightOperand: "2019-12-31"
+
+
+    ODRLAgreement:
+      description: ODRL [agreement](https://www.w3.org/TR/odrl-model/#policy-agreement)
+      required:
+        - uid
+        - assigner
+        - assignee
+        - permission
+
+      properties:
+        uid:
+          description: the same as assetUsageAgreementId -
+            unique identifier of type [IRI rfc3987](https://www.w3.org/TR/odrl-vocab/#term-uid).
+            possible format "http://software-licensor/<softwareLicensorId>/agreement/<agreement-uuid>"
+          type: string
+
+        "@context":
+          description: property to define the processing [context](https://www.w3.org/TR/odrl-vocab/#json-ld).
+            at least the URL "http://www.w3.org/ns/odrl.jsonld"
+            or any other @context (file) including the content
+            of "http://www.w3.org/ns/odrl.jsonld" plus terms defined by a non-ODRL namespace
+          type: object
+
+        "@type":
+          description: Agreement
+          type: string
+          default: Agreement
+          example: Agreement
+
+        profile:
+          description: profile that contains non-ODRL defined values
+          type: string
+
+        assigner:
+          description: the same as softwareLicensorId -
+            identifier of the entity that issued the agreement for right-to-use
+          required:
+            - uid
+          properties:
+            uid:
+              description: the same as softwareLicensorId -
+                identifier of the entity that issued the agreement for right-to-use
+              type: string
+
+        assignee:
+          $ref: '#/components/schemas/ODRLAssignee'
+
+        target:
+          $ref: '#/components/schemas/ODRLTarget'
+
+        permission:
+          description: collection of permissive rules
+          type: array
+          default: []
+          items:
+            $ref: '#/components/schemas/ODRLRule'
+
+        prohibition:
+          description: collection of prohibitive rules
+          type: array
+          default: []
+          items:
+            $ref: '#/components/schemas/ODRLRule'
+

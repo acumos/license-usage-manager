@@ -16,6 +16,7 @@
 
 const utils = require('../utils');
 const healthcheck = require('./healthcheck');
+const {InvalidDataError} = require('../error');
 
 const resHeader = {requestId: "requestId", requested: "requested", status: "status"};
 const httpStatuses = {204: "not found", 224: "revoked", 402: "denied"};
@@ -60,22 +61,37 @@ module.exports = {
         res.json(res.locals.response);
         next();
     },
-    responseError(exception, req, res, next) {
-        utils.logError(res, "responseError - exception on", exception, exception.stack);
-        res.status(500);
-        utils.logInfo(res, `ERROR response ${utils.calcReqTime(res)}`, res.statusCode, exception.stack, 'to', res.locals.requestHttp);
+    responseError(error, req, res, next) {
+        utils.logError(res, "responseError - exception on", error, error.stack);
+        if (error instanceof InvalidDataError) {
+            res.status(460);
+        } else {
+            res.status(500);
+        }
+
+        utils.logInfo(res, `ERROR response ${utils.calcReqTime(res)}`, res.statusCode, error.stack, 'to', res.locals.requestHttp);
         healthcheck.calcUptime();
         res.json({
-            "error":{
-                "code":exception.code,
-                "stack": exception.stack,
-                "pgStep": utils.getPgStepInfo(res)
+            requestId: res.locals.response.requestId,
+            requested: res.locals.response.requested,
+            "error": {
+                severity: error.severity,
+                code:     error.code,
+                message:  error.message,
+                detail:   error.detail,
+                where:    error.where,
+                items:    error.items,
+                stack:    error.stack,
+                hint:     error.hint,
+                schema:   error.schema,
+                table:    error.table,
+                column:   error.column,
+                pgStep:   utils.getPgStepInfo(res)
             },
-            "healthcheck": lumServer.healthcheck
+            healthcheck: lumServer.healthcheck
         });
         next();
     },
-    isOk(res) {return (res.statusCode === 200);},
     setHttpStatus(res, statusCode, recordlName) {
         if (res.statusCode && res.statusCode < statusCode) {
             res.status(statusCode);
