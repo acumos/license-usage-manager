@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "f3168715_52f76880",
+        "filename": "docs/release-notes.rst",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-09-30T14:34:43Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "91845cd3_a58d2a66",
+      "revId": "c18fbecbe07a9dcca08bb03454fd8f89462bb114",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d42c1131_6748797d",
         "filename": "docs/release-notes.rst",
         "patchSetId": 1
@@ -53,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "a7484e67_a7f05fc5",
+        "filename": "lum-server/lum-server-api/lum-server-API.yaml",
+        "patchSetId": 1
+      },
+      "lineNbr": 319,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-09-30T14:34:43Z",
+      "side": 1,
+      "message": "I was thinking about 400, but that does not seem to be the choice for the invalid input data, but rather about the malformed structure of the request.  So, I picked 460 that is not on any list in HTTP.  \n\nhttps://en.wikipedia.org/wiki/List_of_HTTP_status_codes#4xx_Client_errors\n400 Bad Request\nThe server cannot or will not process the request due to an apparent client error (e.g., malformed request syntax, size too large, invalid request message framing, or deceptive request routing).",
+      "parentUuid": "c1c0e075_fcba0f1a",
+      "revId": "c18fbecbe07a9dcca08bb03454fd8f89462bb114",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "67dc3f2b_df270e2d",
         "filename": "lum-server/lum-server-api/lum-server-API.yaml",
         "patchSetId": 1
@@ -64,6 +100,24 @@
       "writtenOn": "2019-09-30T13:54:02Z",
       "side": 1,
       "message": "I would expect something named serverUptime to have an ever changing value.  How is that consistent with using it as an identifier for a delete operation?",
+      "revId": "c18fbecbe07a9dcca08bb03454fd8f89462bb114",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "42003f4e_162a4879",
+        "filename": "lum-server/lum-server-api/lum-server-API.yaml",
+        "patchSetId": 1
+      },
+      "lineNbr": 741,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-09-30T14:34:43Z",
+      "side": 1,
+      "message": "serverUptime is ever changing value in the format \"0 days 00:26:23.190\".  It should not be used for any identification since it is ever changing - not sure whether I understood your question.",
+      "parentUuid": "67dc3f2b_df270e2d",
       "revId": "c18fbecbe07a9dcca08bb03454fd8f89462bb114",
       "serverId": "655300a2-7a56-4504-9153-881edd907bea",
       "unresolved": false
@@ -87,6 +141,47 @@
     },
     {
       "key": {
+        "uuid": "124e3ea1_ee0854bc",
+        "filename": "lum-server/lum-server-api/lum-server-API.yaml",
+        "patchSetId": 1
+      },
+      "lineNbr": 747,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-09-30T14:34:43Z",
+      "side": 1,
+      "message": "Thank you - I see there is an extra quote in the name of the serverUptime\" in example - \nanything else ?",
+      "parentUuid": "eafcdf61_51370826",
+      "revId": "c18fbecbe07a9dcca08bb03454fd8f89462bb114",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a22c1ed_8f3219fd",
+        "filename": "lum-server/lum-server-api/lum-server-API.yaml",
+        "patchSetId": 1
+      },
+      "lineNbr": 755,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-09-30T14:34:43Z",
+      "side": 1,
+      "message": "thank you - going to remove the quote",
+      "range": {
+        "startLine": 755,
+        "startChar": 24,
+        "endLine": 755,
+        "endChar": 25
+      },
+      "revId": "c18fbecbe07a9dcca08bb03454fd8f89462bb114",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "d712e9b2_b28584af",
         "filename": "lum-server/src/api/response.js",
         "patchSetId": 1
@@ -104,6 +199,24 @@
     },
     {
       "key": {
+        "uuid": "2e790d36_afbb7529",
+        "filename": "lum-server/src/api/response.js",
+        "patchSetId": 1
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-09-30T14:34:43Z",
+      "side": 1,
+      "message": "good point - thanks",
+      "parentUuid": "d712e9b2_b28584af",
+      "revId": "c18fbecbe07a9dcca08bb03454fd8f89462bb114",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "6beb5c7a_6a07dbad",
         "filename": "lum-server/src/api/response.js",
         "patchSetId": 1
@@ -118,6 +231,24 @@
       "revId": "c18fbecbe07a9dcca08bb03454fd8f89462bb114",
       "serverId": "655300a2-7a56-4504-9153-881edd907bea",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "59ebcb70_d6f2ae69",
+        "filename": "lum-server/src/api/response.js",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-09-30T14:34:43Z",
+      "side": 1,
+      "message": "thank you - going to delete the stack for 460 error",
+      "parentUuid": "6beb5c7a_6a07dbad",
+      "revId": "c18fbecbe07a9dcca08bb03454fd8f89462bb114",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
     }
   ]
 }
