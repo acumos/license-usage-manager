@@ -15,7 +15,6 @@
 // ============LICENSE_END=========================================================
 
 const utils = require('../utils');
-const response = require('../api/response');
 const pgclient = require('./pgclient');
 const snapshot = require('./snapshot');
 const SqlParams = require('./sql-params');
@@ -61,10 +60,10 @@ module.exports = {
         selectFields.addFields(swidTagHouse);
 
         const sqlCmd = `SELECT ${keys.keyName}, ${selectFields.fields} FROM "swidTag"
-                        WHERE ${keys.keyName} IN (${keys.idxValues}) FOR SHARE`;
+                         WHERE ${keys.keyName} IN (${keys.idxValues}) FOR SHARE`;
         const result = await pgclient.sqlQuery(res, sqlCmd, keys.values);
         for (const swidTag of result.rows) {
-            res.locals.dbdata.swidTags[swidTag.swTagId] = swidTag;
+            res.locals.dbdata.swidTags[swidTag.swTagId].swidTagBody        = swidTag;
             res.locals.dbdata.licenseProfiles[swidTag.licenseProfileId] = null;
         }
         utils.logInfo(res, `out getSwidTag(${JSON.stringify(res.locals.dbdata.swidTags)})`);
@@ -73,22 +72,23 @@ module.exports = {
         utils.logInfo(res, `in revokeSwidTag(${res.locals.params.swTagId})`);
         const keys = new SqlParams();
         keys.addField("swTagId", res.locals.params.swTagId);
-        const putFields = new SqlParams(keys.nextOffsetIdx);
+        const putFields = new SqlParams(keys);
+        putFields.addField("swidTagActive", false);
         putFields.addField("closer", res.locals.params.userId);
         putFields.addField("closureReason", "revoked");
 
         const sqlCmd = `UPDATE "swidTag" SET "swidTagRevision" = "swidTagRevision" + 1,
-            "swidTagActive" = FALSE, "closed" = NOW() ${putFields.updates} WHERE ${keys.where} RETURNING *`;
-        const result = await pgclient.sqlQuery(res, sqlCmd, keys.values.concat(putFields.values));
+            "closed" = NOW() ${putFields.updates} WHERE ${keys.where} RETURNING *`;
+        const result = await pgclient.sqlQuery(res, sqlCmd, keys.getAllValues());
         if (result.rows.length) {
             const snapshotBody = result.rows[0];
-            await snapshot.addSnapshot(res, "swidTag", res.locals.params.swTagId, snapshotBody.swidTagRevision, snapshotBody);
-            await pgclient.sqlQuery(res, `DELETE FROM "swToRtu" WHERE ${keys.where}`, keys.values);
+            await snapshot.storeSnapshot(res, snapshotBody.softwareLicensorId,
+                "swidTag", res.locals.params.swTagId, snapshotBody.swidTagRevision, snapshotBody);
         }
         utils.logInfo(res, `out revokeSwidTag(${res.locals.params.swTagId})`);
     },
     async putSwidTag(res) {
-        if (!response.isOk(res) || !res.locals.params.swTagId) {
+        if (!res.locals.params.swTagId) {
             utils.logInfo(res, `skipped putSwidTag(${res.locals.params.swTagId})`);
             return;
         }
@@ -98,38 +98,38 @@ module.exports = {
 
         const keys = new SqlParams();
         keys.addField("swTagId", res.locals.params.swTagId);
-        const putFields = new SqlParams(keys.nextOffsetIdx);
+        const putFields = new SqlParams(keys);
         putFields.addFieldsFromBody(swidTagReq, swidTag);
         putFields.addFieldJson("swCatalogs", swidTag.swCatalogs);
 
-        const houseFields = new SqlParams(putFields.nextOffsetIdx);
+        const houseFields = new SqlParams(putFields);
         houseFields.addField("swidTagActive", true);
         houseFields.addField("modifier", res.locals.params.userId);
         houseFields.addField("closer", null);
         houseFields.addField("closed", null);
         houseFields.addField("closureReason", null);
 
-        const insFields = new SqlParams(houseFields.nextOffsetIdx);
+        const insFields = new SqlParams(houseFields);
         insFields.addField("creator", res.locals.params.userId);
 
         const sqlCmd = `INSERT INTO "swidTag" AS swt
             (${keys.fields} ${putFields.fields} ${houseFields.fields} ${insFields.fields}, "created", "modified")
             VALUES (${keys.idxValues} ${putFields.idxValues} ${houseFields.idxValues} ${insFields.idxValues}, NOW(), NOW())
-            ON CONFLICT ("swTagId") DO UPDATE
+            ON CONFLICT (${keys.fields}) DO UPDATE
             SET "swidTagRevision" = swt."swidTagRevision" + 1 ${putFields.updates} ${houseFields.updates}, "modified" = NOW()
-            WHERE ${keys.getWhere("swt")} AND (swt."swidTagActive" = FALSE OR ${putFields.getWhereDistinct("swt")})
+            WHERE swt."swidTagActive" = FALSE OR ${putFields.getWhereDistinct("swt")}
             RETURNING *`;
-        const result = await pgclient.sqlQuery(res, sqlCmd,
-            keys.values.concat(putFields.values, houseFields.values, insFields.values));
+        const result = await pgclient.sqlQuery(res, sqlCmd, keys.getAllValues());
 
         if (result.rows.length) {
             const snapshotBody = result.rows[0];
-            await snapshot.addSnapshot(res, "swidTag", res.locals.params.swTagId, snapshotBody.swidTagRevision, snapshotBody);
+            await snapshot.storeSnapshot(res, snapshotBody.softwareLicensorId,
+                "swidTag", res.locals.params.swTagId, snapshotBody.swidTagRevision, snapshotBody);
         }
         utils.logInfo(res, `out putSwidTag(${res.locals.params.swTagId})`);
     },
     async putSwidTagCreators(res) {
-        if (!response.isOk(res) || !res.locals.params.swTagId) {
+        if (!res.locals.params.swTagId) {
             utils.logInfo(res, `skipped putSwidTagCreators(${res.locals.params.swTagId})`);
             return;
         }
@@ -137,9 +137,9 @@ module.exports = {
 
         const keys = new SqlParams();
         keys.addField("swTagId", res.locals.params.swTagId);
-        const putFields = new SqlParams(keys.nextOffsetIdx);
+        const putFields = new SqlParams(keys);
         putFields.addField("swCreators", utils.getFromReqByPath(res, "swCreators"));
-        const houseFields = new SqlParams(putFields.nextOffsetIdx);
+        const houseFields = new SqlParams(putFields);
         houseFields.addField("swidTagActive", true);
         houseFields.addField("modifier", res.locals.params.userId);
         houseFields.addField("closer", null);
@@ -150,10 +150,11 @@ module.exports = {
             SET "swidTagRevision" = swt."swidTagRevision" + 1 ${putFields.updates} ${houseFields.updates}, "modified" = NOW()
             WHERE ${keys.getWhere("swt")} AND (swt."swidTagActive" = FALSE OR ${putFields.getWhereDistinct("swt")})
             RETURNING *`;
-        const result = await pgclient.sqlQuery(res, sqlCmd, keys.values.concat(putFields.values, houseFields.values));
+        const result = await pgclient.sqlQuery(res, sqlCmd, keys.getAllValues());
         if (result.rows.length) {
             const snapshotBody = result.rows[0];
-            await snapshot.addSnapshot(res, "swidTag", res.locals.params.swTagId, snapshotBody.swidTagRevision, snapshotBody);
+            await snapshot.storeSnapshot(res, snapshotBody.softwareLicensorId,
+                "swidTag", res.locals.params.swTagId, snapshotBody.swidTagRevision, snapshotBody);
         }
         utils.logInfo(res, `out putSwidTagCreators(${res.locals.params.swTagId})`);
     }

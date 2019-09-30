@@ -15,6 +15,7 @@
 // ============LICENSE_END=========================================================
 
 const utils = require('../../utils');
+const response = require('../response');
 const pgclient = require('../../db/pgclient');
 const dbAssetUsageAgreement = require('../../db/asset-usage-agreement');
 
@@ -27,18 +28,41 @@ const setAssetUsageAgreementId = (req, res, next, assetUsageAgreementId) => {
 
 const getAssetUsageAgreement = async (req, res, next) => {
     utils.logInfo(res, `api getAssetUsageAgreement(${res.locals.params.assetUsageAgreementId})`);
+    res.locals.dbdata.assetUsageAgreement = null;
     await pgclient.runTx(res, dbAssetUsageAgreement.getAssetUsageAgreement);
+
+    if (!res.locals.dbdata.assetUsageAgreement) {
+        response.setHttpStatus(res, response.lumHttpCodes.notFound, "assetUsageAgreement");
+    } else {
+        if (res.locals.dbdata.assetUsageAgreement.assetUsageAgreementActive === false) {
+            res.locals.response.assetUsageAgreementId = res.locals.params.assetUsageAgreementId;
+            response.setHttpStatus(res, response.lumHttpCodes.revoked, "assetUsageAgreement");
+        } else {
+            res.locals.response = Object.assign(res.locals.response, {"assetUsageAgreement": res.locals.dbdata.assetUsageAgreement});
+        }
+    }
+
+    utils.logInfo(res, "out api getAssetUsageAgreement", res.statusCode, response.getResHeader(res));
     next();
 };
 
 const revokeAssetUsageAgreement = async (req, res, next) => {
-    await pgclient.runTx(res, dbAssetUsageAgreement.revokeAssetUsageAgreement);
+    await pgclient.runTx(res,
+        dbAssetUsageAgreement.revokeAssetUsageAgreement,
+        dbAssetUsageAgreement.revokeObsoleteRightToUse
+    );
     next();
 };
 
 const putAssetUsageAgreement = async (req, res, next) => {
     utils.logInfo(res, `api putAssetUsageAgreement(${res.locals.params.assetUsageAgreementId})`);
-    await pgclient.runTx(res, dbAssetUsageAgreement.putAssetUsageAgreement);
+    await pgclient.runTx(res,
+        dbAssetUsageAgreement.validateAssetUsageAgreement,
+        dbAssetUsageAgreement.putAssetUsageAgreement,
+        dbAssetUsageAgreement.groomAssetUsageAgreement,
+        dbAssetUsageAgreement.putRightToUse,
+        dbAssetUsageAgreement.revokeObsoleteRightToUse
+    );
     next();
 };
 

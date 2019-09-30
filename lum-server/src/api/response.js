@@ -16,11 +16,20 @@
 
 const utils = require('../utils');
 const healthcheck = require('./healthcheck');
+const {InvalidDataError} = require('../error');
 
 const resHeader = {requestId: "requestId", requested: "requested", status: "status"};
-const httpStatuses = {204: "not found", 224: "revoked", 402: "denied"};
+
+const lumHttpCodes = {notFound: 204, revoked: 224, denied: 402, invalidDataError: 400, serverError: 500};
+const httpStatuses = {[lumHttpCodes.notFound]: "not found", [lumHttpCodes.revoked]: "revoked", [lumHttpCodes.denied]: "denied"};
 
 module.exports = {
+    /**
+     * on every new req received by lum-server - set the locals in res
+     * @param  {} req
+     * @param  {} res
+     * @param  {} next
+     */
     newReq(req, res, next) {
         res.locals.started = utils.now();
         res.locals.stepStarted = res.locals.started;
@@ -55,32 +64,73 @@ module.exports = {
         utils.logInfo(res, 'newReq', res.locals.requestHttp, res.locals.reqBody);
         next();
     },
+    /**
+     * send the response back to the client at the end of successful request processing
+     * @param  {} req
+     * @param  {} res
+     * @param  {} next
+     */
     respond(req, res, next) {
         utils.logInfo(res, `response ${utils.calcReqTime(res)}`, res.statusCode, res.locals.response, 'to', res.locals.requestHttp);
         res.json(res.locals.response);
         next();
     },
-    responseError(exception, req, res, next) {
-        utils.logError(res, "responseError - exception on", exception, exception.stack);
-        res.status(500);
-        utils.logInfo(res, `ERROR response ${utils.calcReqTime(res)}`, res.statusCode, exception.stack, 'to', res.locals.requestHttp);
+    /**
+     * send an error back to the client on interrupted request processing
+     * @param  {} error
+     * @param  {} req
+     * @param  {} res
+     * @param  {} next
+     */
+    responseError(error, req, res, next) {
+        utils.logError(res, "responseError - exception on", error, error.stack);
+        if (error instanceof InvalidDataError) {
+            res.status(lumHttpCodes.invalidDataError);
+        } else {
+            res.status(lumHttpCodes.serverError);
+        }
+
+        utils.logInfo(res, `ERROR response ${utils.calcReqTime(res)}`, res.statusCode, error.stack, 'to', res.locals.requestHttp);
         healthcheck.calcUptime();
+        if (res.statusCode < lumHttpCodes.serverError && error.stack) {delete error.stack;}
         res.json({
-            "error":{
-                "code":exception.code,
-                "stack": exception.stack,
-                "pgStep": utils.getPgStepInfo(res)
+            requestId: res.locals.response.requestId,
+            requested: res.locals.response.requested,
+            "error": {
+                severity: error.severity,
+                code:     error.code,
+                message:  error.message,
+                detail:   error.detail,
+                where:    error.where,
+                items:    error.items,
+                stack:    error.stack,
+                hint:     error.hint,
+                position: error.position,
+                schema:   error.schema,
+                table:    error.table,
+                column:   error.column,
+                pgStep:   utils.getPgStepInfo(res)
             },
-            "healthcheck": lumServer.healthcheck
+            healthcheck: lumServer.healthcheck
         });
         next();
     },
-    isOk(res) {return (res.statusCode === 200);},
+    /**
+     * non-200 http status codes returned by lum-server
+     * @enum {number} notFound: 204, revoked: 224, denied: 402, invalidDataError: 400, serverError: 500
+     */
+    lumHttpCodes: lumHttpCodes,
+    /**
+     * set the http status at any time of the request processing
+     * @param  {} res
+     * @param  {} statusCode
+     * @param  {} recordlName
+     */
     setHttpStatus(res, statusCode, recordlName) {
         if (res.statusCode && res.statusCode < statusCode) {
             res.status(statusCode);
             const status = `${recordlName} ${httpStatuses[statusCode] || statusCode}`;
-            if (statusCode !== 402) {
+            if (statusCode !== lumHttpCodes.denied) {
                 res.locals.response.status = status;
             }
             res.set(resHeader.status, status);
@@ -88,6 +138,10 @@ module.exports = {
             utils.logInfo(res, "setHttpStatus", res.statusCode, res.locals.response);
         }
     },
+    /**
+     * convenience for logging the http header and top locals params in response
+     * @param  {} res
+     */
     getResHeader(res) {
         return Object.keys(res.locals.params).reduce((target, key) => {target[key] = res.get(key); return target;},
                Object.values(resHeader).reduce((target, value) => {target[value] = res.get(value); return target;}, {}));

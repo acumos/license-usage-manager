@@ -47,7 +47,7 @@ const getAssetUsage = async (req, res, next) => {
     res.locals.dbdata.assetUsage = null;
     await pgclient.runTx(res, dbAssetUsage.getAssetUsage);
     if (!res.locals.dbdata.assetUsage) {
-        response.setHttpStatus(res, 204, "assetUsage");
+        response.setHttpStatus(res, response.lumHttpCodes.notFound, "assetUsage");
     } else {
         res.locals.response = res.locals.dbdata.assetUsage.response;
         if (res.locals.dbdata.assetUsage.responseHttpCode) {
@@ -78,13 +78,13 @@ const putAssetUsage = async (req, res, next) => {
 
     const assetUsage = dbAssetUsage.convertToAssetUsage(res.locals.reqBody.assetUsageReq);
     res.locals.assetUsages[assetUsage.assetUsageId] = assetUsage;
-    res.locals.dbdata.swidTags[assetUsage.swTagId] = null;
+    utils.addSwidTag(res.locals.dbdata.swidTags, assetUsage.swTagId, assetUsage.isIncludedAsset);
 
     for (const includedAssetUsage of res.locals.reqBody.assetUsageReq.includedAssetUsage || []) {
         res.locals.includedAssetUsageIds.push(includedAssetUsage.includedAssetUsageId);
         const assetUsage = dbAssetUsage.convertToAssetUsage(includedAssetUsage);
         res.locals.assetUsages[assetUsage.assetUsageId] = assetUsage;
-        res.locals.dbdata.swidTags[assetUsage.swTagId] = null;
+        utils.addSwidTag(res.locals.dbdata.swidTags, assetUsage.swTagId, assetUsage.isIncludedAsset);
     }
 
     utils.logInfo(res, `api putAssetUsage(${res.locals.params.assetUsageId}, ${res.locals.params.action})`);
@@ -109,7 +109,7 @@ const setAssetUsageResponse = (res) => {
     utils.logInfo(res, `api setAssetUsageResponse(${res.locals.params.assetUsageId}, ${res.locals.params.action})`);
 
     if (!res.locals.response.usageEntitled) {
-        response.setHttpStatus(res, 402, "assetUsage");
+        response.setHttpStatus(res, response.lumHttpCodes.denied, "assetUsage");
     }
     res.locals.response.assetUsage = dbAssetUsage.convertToAssetUsageResponse(res.locals.assetUsages[res.locals.params.assetUsageId]);
 
@@ -118,6 +118,7 @@ const setAssetUsageResponse = (res) => {
             res.locals.response.assetUsage.includedAssetUsage = [];
         }
         const assetUsage = dbAssetUsage.convertToAssetUsageResponse(res.locals.assetUsages[includedAssetUsage.includedAssetUsageId]);
+        delete assetUsage.isIncludedAsset;
         res.locals.response.assetUsage.includedAssetUsage.push(assetUsage);
     }
     utils.logInfo(res, `out api setAssetUsageResponse(${res.locals.params.assetUsageId}, ${res.locals.params.action})`);

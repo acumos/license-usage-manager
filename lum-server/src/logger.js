@@ -19,10 +19,9 @@ const winston = require("winston")
     , fs = require("fs")
     , utils = require('./utils');
 
-const logFolder = __dirname + '/../../logs';
+const logFolder = __dirname + '/../logs';
 try {if (!fs.existsSync(logFolder)) {fs.mkdirSync(logFolder);}}
-// eslint-disable-next-line no-empty
-catch (e) {}
+catch (e) {console.error(`failed to create log folder ${logFolder}`, e);}
 
 const logFormatText = winston.format.printf(({level, message, timestamp}) => {
   return `${timestamp} ${level.toUpperCase().padStart(10, ' ')}: ${message}`;
