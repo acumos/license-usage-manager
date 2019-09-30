@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "eedd5e33_77dfc214",
+        "filename": "lum-server/src/api/response.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-09-30T16:20:10Z",
+      "side": 1,
+      "message": "the difference between 4xx and 2xx is that 4xx is an error of the client, whereas 2xx is not.  Not found data is not an error of the client - we cannot assume that client knows upfront what data is present or not in the server.  Revoked is also not an error - we have the record, but it is not active\u003d\u003drevoked.",
+      "parentUuid": "fc1b4ca5_1981e719",
+      "revId": "ba27a646a6bafc45e9b19816912830d4470a445a",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "110645b9_4fa7af5d",
         "filename": "lum-server/src/api/v1/asset-usage.js",
         "patchSetId": 2
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "2c4ddf09_4b68494e",
+        "filename": "lum-server/src/api/v1/asset-usage.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-09-30T16:20:10Z",
+      "side": 1,
+      "message": "That field is not just a conventional value - lum concatenates a sentence like this one \n\"swidTag not found\"\n\nBesides, the convention looks ridiculous - having the Camel Back when it is not required and goes against the grammar rules of English and any other language that i know.\n\nSee the difference\n\"swidTag not found\" versus \"swidTag Not Found\"",
+      "parentUuid": "110645b9_4fa7af5d",
+      "revId": "ba27a646a6bafc45e9b19816912830d4470a445a",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "552a5df0_3318cdc8",
         "filename": "lum-server/src/db/pgclient.js",
         "patchSetId": 2
@@ -50,6 +86,24 @@
       "revId": "ba27a646a6bafc45e9b19816912830d4470a445a",
       "serverId": "655300a2-7a56-4504-9153-881edd907bea",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dd0527dd_09b834ad",
+        "filename": "lum-server/src/db/pgclient.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-09-30T16:20:10Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "552a5df0_3318cdc8",
+      "revId": "ba27a646a6bafc45e9b19816912830d4470a445a",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
     }
   ]
 }
