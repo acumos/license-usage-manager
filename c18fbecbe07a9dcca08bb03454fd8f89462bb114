@@ -89,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "e70eb576_37b5429a",
+        "filename": "lum-server/lum-server-api/lum-server-API.yaml",
+        "patchSetId": 1
+      },
+      "lineNbr": 319,
+      "author": {
+        "id": 123
+      },
+      "writtenOn": "2019-09-30T14:38:59Z",
+      "side": 1,
+      "message": "my 2c: 400 is used all the time for a valid looking body but bad data; i agree with Andrew on 400\nalso inventing a code means no client is prepared to generate code to handle it, i would advise against",
+      "parentUuid": "a7484e67_a7f05fc5",
+      "revId": "c18fbecbe07a9dcca08bb03454fd8f89462bb114",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "67dc3f2b_df270e2d",
         "filename": "lum-server/lum-server-api/lum-server-API.yaml",
         "patchSetId": 1
