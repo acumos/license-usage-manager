@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "91845cd3_a58d2a66",
+        "filename": "docs/release-notes.rst",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 288
+      },
+      "writtenOn": "2019-09-30T13:54:02Z",
+      "side": 1,
+      "message": "spelling: entitlement",
+      "revId": "c18fbecbe07a9dcca08bb03454fd8f89462bb114",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d42c1131_6748797d",
+        "filename": "docs/release-notes.rst",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 288
+      },
+      "writtenOn": "2019-09-30T13:54:02Z",
+      "side": 1,
+      "message": "460?  What is that one?  I don\u0027t see it listed at IANA.",
+      "revId": "c18fbecbe07a9dcca08bb03454fd8f89462bb114",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c1c0e075_fcba0f1a",
+        "filename": "lum-server/lum-server-api/lum-server-API.yaml",
+        "patchSetId": 1
+      },
+      "lineNbr": 319,
+      "author": {
+        "id": 288
+      },
+      "writtenOn": "2019-09-30T13:54:02Z",
+      "side": 1,
+      "message": "IANA does not list 460 as a valid code.  Why not use 400 Bad Request?",
+      "revId": "c18fbecbe07a9dcca08bb03454fd8f89462bb114",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "67dc3f2b_df270e2d",
+        "filename": "lum-server/lum-server-api/lum-server-API.yaml",
+        "patchSetId": 1
+      },
+      "lineNbr": 741,
+      "author": {
+        "id": 288
+      },
+      "writtenOn": "2019-09-30T13:54:02Z",
+      "side": 1,
+      "message": "I would expect something named serverUptime to have an ever changing value.  How is that consistent with using it as an identifier for a delete operation?",
+      "revId": "c18fbecbe07a9dcca08bb03454fd8f89462bb114",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eafcdf61_51370826",
+        "filename": "lum-server/lum-server-api/lum-server-API.yaml",
+        "patchSetId": 1
+      },
+      "lineNbr": 747,
+      "author": {
+        "id": 288
+      },
+      "writtenOn": "2019-09-30T13:54:02Z",
+      "side": 1,
+      "message": "It doesn\u0027t look like the example matches the schema.",
+      "revId": "c18fbecbe07a9dcca08bb03454fd8f89462bb114",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d712e9b2_b28584af",
+        "filename": "lum-server/src/api/response.js",
+        "patchSetId": 1
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 288
+      },
+      "writtenOn": "2019-09-30T13:54:02Z",
+      "side": 1,
+      "message": "Can you declare constants for these rather than use the raw numbers?",
+      "revId": "c18fbecbe07a9dcca08bb03454fd8f89462bb114",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6beb5c7a_6a07dbad",
+        "filename": "lum-server/src/api/response.js",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 288
+      },
+      "writtenOn": "2019-09-30T13:54:02Z",
+      "side": 1,
+      "message": "Should you be revealing internal information, like a stack trace, on a failed license check?",
+      "revId": "c18fbecbe07a9dcca08bb03454fd8f89462bb114",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": false
+    }
+  ]
+}
