@@ -160,33 +160,65 @@ module.exports = {
     /**
      * add a single denial to the collection of denials
      * @param  {Object[]} denials
-     * @param  {string} denialType ENUM {usageConstraint, swidTagNotFound, swidTagRevoked,
-     *                             licenseProfileNotFound, licenseProfileRevoked,
-     *                             agreementNotFound, agreementNRevoked,
-     *                             matchingConstraintOnAssignee, matchingConstraintOnRule}
+     * @param  {string} denialType ENUM {swidTagNotFound, swidTagRevoked,
+     *                                   licenseProfileNotFound, licenseProfileRevoked,
+     *                                   agreementNotFound, rightToUseRevoked, usageProhibited,
+     *                                   matchingConstraintOnAssignee, matchingConstraintOnTarget,
+     *                                   timingConstraint, usageConstraint}
      * @param  {string} denialReason human readable explanation why denied the entitlement
      * @param  {string} denialReqItemName name of the item that came from req or datetime or asset-action-count
-     * @param  {string} denialReqItemValue value of the item that came from req or NOW() or +1 for asset-action-count
+     * @param  {} denialReqItemValue value of the item that came from req or NOW() or +1 for asset-action-count
      * @param  {string} [deniedAssetUsageAgreementId] id of Asset-Usage-Agreement that caused the denial
      * @param  {string} [deniedAssetUsageAgreementRevision] 1,2,3,... revision of the assetUsageAgreement
      * @param  {string} [deniedRightToUseId] id of rightToUse that caused the denial
      * @param  {string} [deniedRightToUseRevision] 1,2,3,... revision of the rightToUse
-     * @param  {string} [deniedConstraint] whole record from usageConstraint or matchingConstraint that caused the denial
+     * @param  {} [deniedConstraint] whole record from usageConstraint or assignee refinement that caused the denial
+     * @param  {} [deniedMetrics] current statistical data that caused the denial
      */
     addDenial(denials, denialType, denialReason, denialReqItemName, denialReqItemValue,
         deniedAssetUsageAgreementId, deniedAssetUsageAgreementRevision,
-        deniedRightToUseId, deniedRightToUseRevision, deniedConstraint) {
-            // "assetUsageDenialSeq": (this._denials.length + 1),
+        deniedRightToUseId, deniedRightToUseRevision, deniedConstraint, deniedMetrics) {
         denials.push({
             "denialType": denialType,
             "denialReason": module.exports.makeOneLine(denialReason),
-            "denialReqItemName": denialReqItemName,
-            "denialReqItemValue": denialReqItemValue,
             "deniedAssetUsageAgreementId": deniedAssetUsageAgreementId,
             "deniedAssetUsageAgreementRevision": deniedAssetUsageAgreementRevision,
             "deniedRightToUseId": deniedRightToUseId,
             "deniedRightToUseRevision": deniedRightToUseRevision,
-            "deniedConstraint": deniedConstraint
+            "denialReqItemName": denialReqItemName,
+            "denialReqItemValue": denialReqItemValue,
+            "deniedConstraint": deniedConstraint,
+            "deniedMetrics": deniedMetrics
         });
+    },
+    /**
+     * add a request to find swidTag by swTagId and get the right-to-usage
+     * dbdata.swidTags[swTagId]
+     * @param  {} swidTags
+     * @param  {string} swTagId
+     * @param  {boolean} [isIncludedAsset] optional flag to indicate that
+     *                   the asset of the swidTag is included in composition of another asset
+     */
+    addSwidTag(swidTags, swTagId, isIncludedAsset) {
+        let swidTag = swidTags[swTagId];
+        if (swidTag == null) {
+            swidTags[swTagId] = swidTag = {
+                swTagId: swTagId,
+                swidTagBody: null,
+                isRtuRequired: null,
+                isUsedBySwCreator: null,
+                usageDenials: [],
+                rightToUse: null,
+                usageMetrics: {
+                    usageMetricsId: null,
+                    usageType: null,
+                    assetUsageRuleId: null,
+                    reqUsageCount: 0,
+                    reqIncludedUsageCount: 0
+                }
+            };
+        }
+        ++swidTag.usageMetrics.reqUsageCount;
+        if (isIncludedAsset) {++swidTag.usageMetrics.reqIncludedUsageCount;}
     }
 };

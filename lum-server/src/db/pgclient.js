@@ -21,11 +21,13 @@
 
 const pg = require('pg');
 const utils = require('../utils');
+const {InvalidDataError} = require('../error');
 
 const pgTx = {
     begin: 'BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ',
     commit: 'COMMIT',
     rollback: 'ROLLBACK',
+    release: 'pg.client.release'
 };
 
 var pgPool;
@@ -37,7 +39,11 @@ var pgPool;
  */
 function logRunStepInfo(res, runStep) {
     if (!res.locals.pg) {res.locals.pg = {};}
-    if (runStep) {res.locals.pg.runStep = runStep;}
+    if (runStep) {
+        if ([pgTx.rollback, pgTx.release].includes(runStep)) {
+            res.locals.pg.runStep = `${runStep}: ${res.locals.pg.runStep}`;
+        } else {res.locals.pg.runStep = utils.makeOneLine(runStep);}
+    }
     utils.logInfo(res, utils.getPgStepInfo(res));
 }
 /**
@@ -49,6 +55,11 @@ async function connect(res) {
         logRunStepInfo(res, "pg.pool.connect");
         const client = await pgPool.connect();
         res.locals.pg.client = client;
+        if (res.locals.pg.txid)         {delete res.locals.pg.txid;}
+        if (res.locals.pg.txNow)        {delete res.locals.pg.txNow;}
+        if (res.locals.pg.txNowDate)    {delete res.locals.pg.txNowDate;}
+        if (res.locals.pg.txStep)       {delete res.locals.pg.txStep;}
+        if (res.locals.pg.runStep)      {delete res.locals.pg.runStep;}
     }
 }
 /**
@@ -57,14 +68,9 @@ async function connect(res) {
  */
 function release(res) {
     if (res.locals.pg.client) {
-        logRunStepInfo(res, "pg.client.release");
+        logRunStepInfo(res, pgTx.release);
         res.locals.pg.client.release();
-        res.locals.pg.txRetryCount = 0;
         delete res.locals.pg.client;
-        if (res.locals.pg.txid)     {delete res.locals.pg.txid;}
-        if (res.locals.pg.txNow)    {delete res.locals.pg.txNow;}
-        if (res.locals.pg.txStep)   {delete res.locals.pg.txStep;}
-        if (res.locals.pg.runStep)  {delete res.locals.pg.runStep;}
     }
 }
 /**
@@ -82,6 +88,7 @@ async function begin(res) {
         if (rows.length) {
             res.locals.pg.txid  = ` txid(${rows[0].txid}) pid(${rows[0].pid})`;
             res.locals.pg.txNow = rows[0].tx_now;
+            res.locals.pg.txNowDate = res.locals.pg.txNow.toISOString().substr(0,10);
         }
         logRunStepInfo(res, `NOW(${res.locals.pg.txNow.toISOString()})`);
     }
@@ -135,10 +142,11 @@ module.exports = {
     /**
      * run single query that is part of the bigger transaction
      * @param  {} res
-     * @param  {} sqlCmd
-     * @param  {} sqlVals
+     * @param  {} sqlCmd SQL command with params
+     * @param  {} sqlVals values for arams used in SQL command
      */
     async sqlQuery(res, sqlCmd, sqlVals) {
+        sqlCmd = utils.makeOneLine(sqlCmd);
         logRunStepInfo(res, `sqlQuery (${sqlCmd}) with (${JSON.stringify(sqlVals)})`);
         const rslt = await res.locals.pg.client.query(sqlCmd, sqlVals);
         const result = {command: rslt.command, rowCount: rslt.rowCount, rows: rslt.rows};
@@ -149,10 +157,11 @@ module.exports = {
     /**
      * run a single standalone query in auto-commit mode
      * @param  {} res
-     * @param  {} sqlCmd
-     * @param  {} sqlVals
+     * @param  {} sqlCmd SQL command with params
+     * @param  {} sqlVals values for arams used in SQL command
      */
     async standaloneQuery(res, sqlCmd, sqlVals) {
+        sqlCmd = utils.makeOneLine(sqlCmd);
         logRunStepInfo(res, `standaloneQuery (${sqlCmd}) with (${JSON.stringify(sqlVals)})`);
         const rslt = await pgPool.query(sqlCmd, sqlVals);
         const result = {command: rslt.command, rowCount: rslt.rowCount, rows: rslt.rows};
@@ -171,32 +180,37 @@ module.exports = {
             const responseBackup = Object.assign({}, res.locals.response);
             for (res.locals.pg.txRetryCount = 1; res.locals.pg.txRetryCount <= lumServer.config.maxTxRetryCount; ++res.locals.pg.txRetryCount) {
                 try {
-                    var iStep = 0;
-                    res.locals.pg.txStep = ` [${iStep}] getPgVersion`;
+                    let iStep = 0;
+                    let iStepTxt = iStep.toString().padStart(2,'0');
+                    res.locals.pg.txStep = ` [${iStepTxt}] getPgVersion`;
                     await module.exports.getPgVersion(res);
-                    res.locals.pg.txStep = ` [${iStep}] connect`;
+                    res.locals.pg.txStep = ` [${iStepTxt}] connect`;
                     await connect(res);
-                    res.locals.pg.txStep = ` [${iStep}] begin`;
+                    res.locals.pg.txStep = ` [${iStepTxt}] begin`;
                     await begin(res);
                     for await (const txStep of txSteps) {
+                        iStepTxt = (++iStep).toString().padStart(2,'0')
                         if (typeof txStep === 'function') {
-                            res.locals.pg.txStep = ` [${++iStep}]${txStep.name}`;
-                            logRunStepInfo(res, `runTx step[${iStep}]`);
+                            res.locals.pg.txStep = ` [${iStepTxt}] ${txStep.name}`;
+                            logRunStepInfo(res, `runTx step[${iStepTxt}]`);
                             await txStep(res);
                             delete res.locals.pg.txStep;
                         } else {
-                            logRunStepInfo(res, `skipped non-function(${typeof txStep}) runTx step[${++iStep}]`);
+                            logRunStepInfo(res, `[${iStepTxt}] - runTx step skipped: non-function(${typeof txStep})`);
                         }
                     }
-                    res.locals.pg.txStep = ` [${iStep}] commit`;
+                    res.locals.pg.txStep = ` [${iStepTxt}] commit`;
                     await commit(res);
-                    res.locals.pg.txStep = ` [${iStep}] release`;
+                    res.locals.pg.txStep = ` [${iStepTxt}] release`;
                     release(res);
                     break;
                 } catch (error) {
                     utils.logError(res, utils.getPgStepInfo(res), "ERROR runTx", error.code, error.stack);
                     await rollback(res);
                     release(res);
+                    if (error instanceof InvalidDataError) {
+                        throw error;
+                    }
                     if (error.code === "ECONNREFUSED" && res.locals.pg.txRetryCount < lumServer.config.maxTxRetryCount) {
                         lumServer.healthcheck.pgVersion = null;
                         await utils.sleep(500);

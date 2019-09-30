@@ -22,15 +22,18 @@ module.exports = class SqlParams {
     /**
      * SqlParams - collection of field names+values or key(s) with the offsetIdx
      * to simplify building SQL statement
-     * @param  {number} [offsetIdx] starting index offset when several SqlParams are chained.
-     *
-     *                  That is the nextOffsetIdx of the previous SqlParams object
+     * @param  {SqlParams} [prevSqlParams] previous SqlParams object in chain
      */
-    constructor(offsetIdx) {
-        this.offsetIdx = offsetIdx || 0;
+    constructor(prevSqlParams) {
+        this.offsetIdx = (prevSqlParams && prevSqlParams.nextOffsetIdx) || 0;
         this._names    = [];
         this.values    = [];
         this._keyName  = null;
+
+        this._next     = null;
+        if (prevSqlParams) {
+            prevSqlParams._next = this;
+        }
     }
     /**
      * base method to add any field that has the value defined
@@ -193,5 +196,23 @@ module.exports = class SqlParams {
     getWhereDistinct(prefix) {
         prefix = (prefix && (prefix+'.')) || '';
         return Array.from(this.values.keys(), idx => `${prefix}"${this._names[idx]}" IS DISTINCT FROM ($${idx + 1 + this.offsetIdx})`).join(' OR ');
+    }
+    /**
+     * recurisively collect all values
+     * @param  {} [allValues]
+     * @returns {Object[]} concat of all values in chain of SqlParams
+     */
+    getAllValues(allValues) {
+        if (allValues) {
+            allValues.push(this.values);
+            if (this._next) {
+                this._next.getAllValues(allValues);
+            }
+            return allValues;
+        }
+        if (!this._next) {
+            return this.values;
+        }
+        return this.values.concat(...this._next.getAllValues([]));
     }
 };

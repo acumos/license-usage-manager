@@ -20,10 +20,72 @@
 License Usage Manager Release Notes
 ===================================
 
+Version 0.26.1, 30 September 2019
+---------------------------------
+
+lum-server
+..........
+
+- bringing ODRL (`ACUMOS-3219 <https://jira.acumos.org/browse/ACUMOS-3219>`_)
+  (`ACUMOS-3060 <https://jira.acumos.org/browse/ACUMOS-3060>`_)
+- added openAPI spec for ODRL agreement, permission, prohibition, refinement on target,
+  assignee and constraints
+- added a few examples to openAPI spec
+- support for the ODRL variety of structures on the rightOperand and action
+- the new concept of grooming the agreement and merging the constraints
+  keyed by leftOperand on the load of agreement instead of storing all
+  the constraints and applying all of them at the matching and usage
+  constraint evaluation steps
+- LUM-server now finds the rightToUse under agreement for the swidTag
+  on the asset-usage, returns either the entitlement with keys of the assetUsageDenial
+  with the details of denial (`ACUMOS-3040 <https://jira.acumos.org/browse/ACUMOS-3040>`_)
+  (`ACUMOS-3042 <https://jira.acumos.org/browse/ACUMOS-3042>`_)
+- LUM is using the "use" action that is equivalent to any action
+  as soon as we bring prohibition to agreement.  LUM does not need to know all the
+  possible action values. The count constraint for action: "use" will be the total count
+  for any action value, rather than separate count per each action value.
+  LUM will apply either the constraint on specific action, or the constraint on "use"
+  when the specific action not found.
+- LUM always resolves the conflict between prohibition and permission in favor of prohibition.
+  That is not be controlled by the ODRL conflict clause.  No need for RTU editor to convert
+  the prohibition into permission with count = 0 constraint.
+- new and changed values for denialType: swidTagNotFound, swidTagRevoked,
+     licenseProfileNotFound, licenseProfileRevoked, agreementNotFound,
+     rightToUseRevoked, usageProhibited, matchingConstraintOnAssignee,
+     matchingConstraintOnTarget, timingConstraint, usageConstraint
+- added deniedMetrics to denials to report the current stats that caused the denial
+- minimalistic validation of input data on agreement and permission/prohibition
+  to make sure they have the uid values on them.  Otherwise, LUM-server returns
+  http status 400.  More validation is due later
+- reports show the latest denials based on ODRL agreement (`ACUMOS-3229 <https://jira.acumos.org/browse/ACUMOS-3229>`_)
+- jsdoc - work in progress
+
+lum-database
+............
+
+- including softwareLicensorId as partial PK on assetUsageAgreement, rightToUse,
+  snapshot tables
+- storing groomedAgreement in assetUsageAgreement
+- changed PK on rightToUse to uuid (assetUsageRuleId) - not trusting
+  rightToUseId received from outside LUM to be globally unique
+- rightToUse now contains the groomed targetRefinement, assigneeRefinement,
+  usageConstraints and assigneeMetrics - dicts to easily find the
+  matching right-to-use for the swidTag
+- removed the no longer needed tables swToRtu, matchingConstraint, usageConstraint
+
+    * that was possible due to the new concept of merging the constraints
+    * using SQL to find the matching rightToUse on the fly instead
+    * using JSON functionality of Postgres
+- renamed table rtuUsage to usageMetrics
+- stroting LUM version into database table lumInfo
+
+
+
 Version 0.25.2, 13 September 2019
 ---------------------------------
 
 lum-server
+..........
 
 - added first denials (`ACUMOS-3061 <https://jira.acumos.org/browse/ACUMOS-3061>`_)
 - return http status 402 for denied assetUsage
@@ -45,6 +107,7 @@ Version 0.23.1, 11 September 2019
 ---------------------------------
 
 lum-java-client
+...............
 
 - Fixed allOfWarnings - required changes to swagger
 - bumped version to 0.23.1 for all components
@@ -55,11 +118,13 @@ Version 0.23.0, 09 September 2019
 ---------------------------------
 
 local dev setup fixes
+.....................
 
 - Setup NodeJS server to work without docker for quicker debugging
 - adding .gitignore to not include local folders / files that are only for development
 
 first incarnation of the lum-server with basic functionality of API
+...................................................................
 
 - improved API definition for lum-server (`ACUMOS-3342 <https://jira.acumos.org/browse/ACUMOS-3342>`_)
 - openapi-ui on lum-server (`ACUMOS-3342 <https://jira.acumos.org/browse/ACUMOS-3342>`_)
@@ -67,6 +132,7 @@ first incarnation of the lum-server with basic functionality of API
 - defined DDL for the database (`ACUMOS-3006 <https://jira.acumos.org/browse/ACUMOS-3006>`_)
 
 first iteration of APIs on lum-server
+.....................................
 
 - basic CRUD on swid-tag combined with license-profile (`ACUMOS-3035 <https://jira.acumos.org/browse/ACUMOS-3035>`_)
 - basic CRUD on software-creators (`ACUMOS-3062 <https://jira.acumos.org/browse/ACUMOS-3062>`_)
@@ -80,6 +146,7 @@ first iteration of APIs on lum-server
 - run eslint in docker build
 
 What is not done yet
+....................
 
 - asset-usage-agreement and asset-usage-agreement-restriction are just objects
 - no RTUs, no matching, no usage constraints

@@ -15,7 +15,6 @@
 // ============LICENSE_END=========================================================
 
 const utils = require('../utils');
-const response = require('../api/response');
 const pgclient = require('./pgclient');
 const SqlParams = require('./sql-params');
 
@@ -43,28 +42,536 @@ const assetUsageHistoryFields = {
     "swMgtSystemInstanceId": true,
     "swMgtSystemComponent" : true
 };
-const swidTagHistoryFields = {
+const swidTagAttributes = {
     "softwareLicensorId": true,
     "swidTagRevision"   : true
 };
-const licenseProfileHistoryFields = {
+const licenseProfileAttributes = {
     "licenseProfileId"      : true,
     "licenseProfileRevision": true,
     "isRtuRequired"         : true
 };
 
 
+/**
+ * verify swidTag and licenseProfile are found for the asset-usage
+ * @param  {} res
+ * @param  {} swidTag
+ */
+function verifySwidTag(res, swidTag) {
+    const licenseProfile   = (swidTag.swidTagBody && res.locals.dbdata.licenseProfiles[swidTag.swidTagBody.licenseProfileId]) || null;
+    const licenseProfileId = (swidTag.swidTagBody || {}).licenseProfileId || '';
+
+    swidTag.isRtuRequired     = (licenseProfile || {}).isRtuRequired;
+    swidTag.isUsedBySwCreator = !!(swidTag.swidTagBody && swidTag.swidTagBody.swCreators
+        && swidTag.swidTagBody.swCreators.includes(res.locals.params.userId));
+
+    if (!swidTag.swidTagBody) {
+        utils.addDenial(swidTag.usageDenials, "swidTagNotFound",
+            `swid-tag not found for swTagId(${swidTag.swTagId})`);
+    } else if (!swidTag.swidTagBody.swidTagActive) {
+        utils.addDenial(swidTag.usageDenials, "swidTagRevoked",
+            `swid-tag ${swidTag.swidTagBody.closureReason || 'revoked'} for swTagId(${swidTag.swTagId})`);
+    }
+
+    if (!licenseProfile) {
+        utils.addDenial(swidTag.usageDenials, "licenseProfileNotFound",
+            `license-profile not found
+            for swTagId(${swidTag.swTagId}) with licenseProfileId(${licenseProfileId})`);
+    } else if (!licenseProfile.licenseProfileActive) {
+        utils.addDenial(swidTag.usageDenials, "licenseProfileRevoked",
+            `license-profile ${licenseProfile.closureReason || 'revoked'}
+            for swTagId(${swidTag.swTagId}) with licenseProfileId(${licenseProfileId})`);
+    }
+}
+
+/**
+ * find the RTU-permission or prohibition for the swidTag
+ * @param  {} res
+ * @param  {} swidTag for either assetUsage or includedAssetUsage
+ */
+async function findRtuForSwidTag(res, swidTag) {
+    if (!swidTag.isRtuRequired || !swidTag.swidTagBody || !swidTag.swidTagBody.softwareLicensorId) {
+        utils.logInfo(res, `skipped findRtuForSwidTag(${swidTag.swTagId})`);
+        return;
+    }
+    utils.logInfo(res, `in findRtuForSwidTag(${swidTag.swTagId})`);
+
+    const keys = new SqlParams();
+    keys.addField("swTagId", swidTag.swTagId);
+    keys.addField("softwareLicensorId", swidTag.swidTagBody.softwareLicensorId);
+    const actionField = new SqlParams(keys);
+    actionField.setKeyValues("action", res.locals.params.action === 'use' ? ['use']: [res.locals.params.action, 'use']);
+    const userField = new SqlParams(actionField);
+    userField.addField("userId", res.locals.params.userId);
+    const reqUsageCountField = new SqlParams(userField);
+    reqUsageCountField.addField("reqUsageCount", swidTag.usageMetrics.reqUsageCount);
+
+    const sqlCmd = `SELECT rtu."assetUsageRuleId", rtu."assetUsageAgreementId", agr."assetUsageAgreementRevision",
+            rtu."rightToUseId", rtu."assetUsageRuleType", rtu."rightToUseRevision", rtu."metricsRevision",
+            rtu."licenseKeys", "rtuAction",
+            (rtu."assigneeMetrics"->'users')::JSONB ? ${userField.idxKeyValues} AS "isUserInAssigneeMetrics"
+        FROM (SELECT * FROM "swidTag" WHERE ${keys.where}) AS swt
+             JOIN "rightToUse" AS rtu ON (rtu."softwareLicensorId" = swt."softwareLicensorId")
+             JOIN "assetUsageAgreement" AS agr ON (rtu."softwareLicensorId" = agr."softwareLicensorId"
+                                               AND rtu."assetUsageAgreementId" = agr."assetUsageAgreementId")
+             CROSS JOIN LATERAL jsonb_to_recordset(
+                CASE WHEN swt."swCatalogs" IS NULL OR jsonb_array_length(swt."swCatalogs") = 0 THEN
+                        '[{"swCatalogId":null,"swCatalogType":null}]'::jsonb
+                     ELSE swt."swCatalogs" END) AS ctlg("swCatalogId" TEXT, "swCatalogType" TEXT)
+             CROSS JOIN LATERAL jsonb_array_elements_text(array_to_json(rtu."actions")::jsonb) AS "rtuAction"
+             LEFT OUTER JOIN LATERAL (SELECT ums.* FROM "usageMetrics" AS ums
+                                       WHERE ums."usageMetricsId" = rtu."assetUsageRuleId"
+                                         AND ums."action" = "rtuAction"
+                                         AND ums."usageType" = 'rightToUse') AS usmcs ON TRUE
+        WHERE "rtuAction" IN (${actionField.idxKeyValues})
+          AND swt."swidTagActive" = TRUE AND rtu."rightToUseActive" = TRUE
+          AND (rtu."expireOn" IS NULL OR NOW()::DATE <= rtu."expireOn"::DATE)
+          AND (rtu."enableOn" IS NULL OR NOW()::DATE >= rtu."enableOn"::DATE)
+          AND (rtu."targetRefinement"#>'{lum:swPersistentId}' IS NULL
+            OR COALESCE(rtu."targetRefinement"#>'{lum:swPersistentId,rightOperand}' ? swt."swPersistentId"::TEXT, FALSE))
+          AND (rtu."targetRefinement"#>'{lum:swTagId}' IS NULL
+            OR COALESCE(rtu."targetRefinement"#>'{lum:swTagId,rightOperand}' ? swt."swTagId", FALSE))
+          AND (rtu."targetRefinement"#>'{lum:swProductName}' IS NULL
+            OR COALESCE(rtu."targetRefinement"#>'{lum:swProductName,rightOperand}' ? swt."swProductName", FALSE))
+          AND (rtu."targetRefinement"#>'{lum:swCategory}' IS NULL
+            OR COALESCE(rtu."targetRefinement"#>'{lum:swCategory,rightOperand}' ? swt."swCategory", FALSE))
+          AND (rtu."targetRefinement"#>'{lum:swCatalogId}' IS NULL
+            OR COALESCE(rtu."targetRefinement"#>'{lum:swCatalogId,rightOperand}' ? ctlg."swCatalogId", FALSE))
+          AND (rtu."targetRefinement"#>'{lum:swCatalogType}' IS NULL
+            OR COALESCE(rtu."targetRefinement"#>'{lum:swCatalogType,rightOperand}' ? ctlg."swCatalogType", FALSE))
+          AND (rtu."assigneeRefinement"#>'{lum:countUniqueUsers}' IS NULL
+            OR (rtu."assigneeMetrics"->'users')::JSONB ? ${userField.idxKeyValues}
+            OR COALESCE(JSONB_ARRAY_LENGTH((rtu."assigneeMetrics"->'users')::JSONB)
+                < (rtu."assigneeRefinement"#>'{lum:countUniqueUsers,rightOperand}')::INTEGER, FALSE))
+          AND ((rtu."assigneeRefinement"#>'{lum:users}') IS NULL
+            OR COALESCE((rtu."assigneeRefinement"#>'{lum:users,rightOperand}')::JSONB ? ${userField.idxKeyValues}, FALSE))
+          AND (rtu."usageConstraints"#>'{count}' IS NULL
+            OR COALESCE(COALESCE((usmcs."metrics"#>'{count}')::INTEGER, 0) + ${reqUsageCountField.idxKeyValues}
+                <= (rtu."usageConstraints"#>'{count,rightOperand}')::INTEGER, FALSE))
+        ORDER BY CASE WHEN rtu."assetUsageRuleType" = 'prohibition' THEN '0'
+                      ELSE rtu."assetUsageRuleType" END,
+                 CASE WHEN "rtuAction" = 'use' THEN NULL ELSE "rtuAction" END NULLS LAST,
+                 rtu."created", rtu."assetUsageRuleId"
+        LIMIT 1 FOR UPDATE OF rtu`;
+
+    const result = await pgclient.sqlQuery(res, sqlCmd, keys.getAllValues());
+    if (result.rows.length) {
+        swidTag.rightToUse = result.rows[0];
+        utils.logInfo(res, `RTU found for swTagId(${swidTag.swTagId})`, swidTag.rightToUse);
+    }
+    utils.logInfo(res, `out findRtuForSwidTag(${swidTag.swTagId})`);
+}
+/**
+ * find and check the RTU-permission for the swidTag
+ * @param  {} res
+ * @param  {} swidTag found either in assetUsage or includedAssetUsage
+ */
+async function checkRtuForSwidTag(res, swidTag) {
+    if (swidTag.isUsedBySwCreator) {
+        swidTag.usageMetrics.usageType        = "bySwCreator";
+        swidTag.usageMetrics.usageMetricsId   = swidTag.swTagId;
+        swidTag.usageMetrics.assetUsageRuleId = null;
+        utils.logInfo(res, `RTU not required for software creator checkRtuForSwidTag(${res.locals.params.userId}) -
+            entitled checkRtuForSwidTag(${swidTag.swTagId})`);
+        return;
+    }
+    if (swidTag.isRtuRequired === false) {
+        swidTag.usageMetrics.usageType        = "freeToUse";
+        swidTag.usageMetrics.usageMetricsId   = swidTag.swTagId;
+        swidTag.usageMetrics.assetUsageRuleId = null;
+        utils.logInfo(res, `RTU not required - entitled checkRtuForSwidTag(${swidTag.swTagId})`);
+        return;
+    }
+    if (swidTag.isRtuRequired == null) {
+        utils.logWarn(res, `no license profile -> not looking for RTU - checkRtuForSwidTag(${swidTag.swTagId})`);
+        return;
+    }
+    swidTag.usageMetrics.usageType        = "rightToUse";
+    swidTag.usageMetrics.usageMetricsId   = null;
+    swidTag.usageMetrics.assetUsageRuleId = null;
+
+    await findRtuForSwidTag(res, swidTag);
+
+    if (swidTag.rightToUse == null) {
+        utils.addDenial(swidTag.usageDenials, "agreementNotFound",
+            `asset-usage-agreement not found for swTagId(${swidTag.swTagId})`);
+        await collectDenialsForSwidTag(res, swidTag);
+        return;
+    }
+    if (swidTag.rightToUse.assetUsageRuleType === 'prohibition') {
+        utils.logInfo(res, `usageProhibited checkRtuForSwidTag(${swidTag.swTagId})`);
+        utils.addDenial(swidTag.usageDenials, "usageProhibited",
+            `asset-usage prohibited for swTagId(${swidTag.swTagId})`,
+            "action", res.locals.params.action,
+            swidTag.rightToUse.assetUsageAgreementId,
+            swidTag.rightToUse.assetUsageAgreementRevision,
+            swidTag.rightToUse.rightToUseId,
+            swidTag.rightToUse.rightToUseRevision,
+            {action: swidTag.rightToUse.rtuAction}
+        );
+        return;
+    }
+    swidTag.usageMetrics.usageMetricsId   = swidTag.rightToUse.assetUsageRuleId;
+    swidTag.usageMetrics.assetUsageRuleId = swidTag.rightToUse.assetUsageRuleId;
+    swidTag.entitlement = {
+        rightToUseId: swidTag.rightToUse.rightToUseId,
+        rightToUseRevision: swidTag.rightToUse.rightToUseRevision,
+        assetUsageAgreementId: swidTag.rightToUse.assetUsageAgreementId,
+        assetUsageAgreementRevision: swidTag.rightToUse.assetUsageAgreementRevision,
+        licenseKeys: swidTag.rightToUse.licenseKeys
+    };
+    utils.logInfo(res, `entitled checkRtuForSwidTag(${swidTag.swTagId})`, swidTag.entitlement);
+}
+/**
+ * find the first 100 of RTU-permission or prohibition for the swidTag that are denied
+ * and report them into swidTag.usageDenials.
+ *
+ * SQL query is based on findRtu with denials moved from WHERE into SELECT list
+ * @param  {} res
+ * @param  {} swidTag for either assetUsage or includedAssetUsage
+ */
+async function collectDenialsForSwidTag(res, swidTag) {
+    if (!swidTag.isRtuRequired || !swidTag.swidTagBody || !swidTag.swidTagBody.softwareLicensorId) {
+        utils.logInfo(res, `skipped collectDenialsForSwidTag(${swidTag.swTagId})`);
+        return;
+    }
+    utils.logInfo(res, `in collectDenialsForSwidTag(${swidTag.swTagId})`);
+
+    const keys = new SqlParams();
+    keys.addField("swTagId", swidTag.swTagId);
+    keys.addField("softwareLicensorId", swidTag.swidTagBody.softwareLicensorId);
+    const actionField = new SqlParams(keys);
+    actionField.setKeyValues("action", res.locals.params.action === 'use' ? ['use']: [res.locals.params.action, 'use']);
+    const userField = new SqlParams(actionField);
+    userField.addField("userId", res.locals.params.userId);
+    const reqUsageCountField = new SqlParams(userField);
+    reqUsageCountField.addField("reqUsageCount", swidTag.usageMetrics.reqUsageCount);
+
+    const sqlCmd = `SELECT
+        JSON_BUILD_OBJECT(
+            'denied', NOT rtu."rightToUseActive",
+            'denialType', 'rightToUseRevoked',
+            'denialReason', 'rightToUse ' || COALESCE(rtu."closureReason", 'revoked'),
+            'deniedAssetUsageAgreementId', rtu."assetUsageAgreementId",
+            'deniedAssetUsageAgreementRevision', agr."assetUsageAgreementRevision",
+            'deniedRightToUseId', rtu."rightToUseId",
+            'deniedRightToUseRevision', rtu."rightToUseRevision",
+            'denialReqItemName', 'rightToUseActive',
+            'denialReqItemValue', TRUE
+        ) AS "denied_rightToUseRevoked",
+
+        JSON_BUILD_OBJECT(
+            'denied', NOT (rtu."expireOn" IS NULL OR NOW()::DATE <= rtu."expireOn"::DATE),
+            'denialType', 'timingConstraint',
+            'denialReason', 'rightToUse ' || COALESCE(rtu."closureReason", 'expired'),
+            'deniedAssetUsageAgreementId', rtu."assetUsageAgreementId",
+            'deniedAssetUsageAgreementRevision', agr."assetUsageAgreementRevision",
+            'deniedRightToUseId', rtu."rightToUseId",
+            'deniedRightToUseRevision', rtu."rightToUseRevision",
+            'denialReqItemName', 'date',
+            'denialReqItemValue', NOW()::DATE,
+            'deniedConstraint', JSON_BUILD_OBJECT('expireOn', rtu."expireOn")
+        ) AS "denied_expired",
+
+        JSON_BUILD_OBJECT(
+            'denied', NOT (rtu."enableOn" IS NULL OR NOW()::DATE >= rtu."enableOn"::DATE),
+            'denialType', 'timingConstraint',
+            'denialReason', 'rightToUse ' || COALESCE(rtu."closureReason", 'too soon'),
+            'deniedAssetUsageAgreementId', rtu."assetUsageAgreementId",
+            'deniedAssetUsageAgreementRevision', agr."assetUsageAgreementRevision",
+            'deniedRightToUseId', rtu."rightToUseId",
+            'deniedRightToUseRevision', rtu."rightToUseRevision",
+            'denialReqItemName', 'date',
+            'denialReqItemValue', NOW()::DATE,
+            'deniedConstraint', JSON_BUILD_OBJECT('enableOn', rtu."enableOn")
+        ) AS "denied_tooSoon",
+
+        JSON_BUILD_OBJECT(
+            'denied', NOT (rtu."targetRefinement"#>'{lum:swPersistentId}' IS NULL
+                OR COALESCE(rtu."targetRefinement"#>'{lum:swPersistentId,rightOperand}' ?
+                            swt."swPersistentId"::TEXT, FALSE)),
+            'denialType', 'matchingConstraintOnTarget',
+            'denialReason', 'not targeted by the rightToUse',
+            'deniedAssetUsageAgreementId', rtu."assetUsageAgreementId",
+            'deniedAssetUsageAgreementRevision', agr."assetUsageAgreementRevision",
+            'deniedRightToUseId', rtu."rightToUseId",
+            'deniedRightToUseRevision', rtu."rightToUseRevision",
+            'denialReqItemName', 'swPersistentId',
+            'denialReqItemValue', swt."swPersistentId",
+            'deniedConstraint', rtu."targetRefinement"#>'{lum:swPersistentId}'
+        ) AS "denied_swPersistentId",
+
+        JSON_BUILD_OBJECT(
+            'denied', NOT (rtu."targetRefinement"#>'{lum:swTagId}' IS NULL
+                OR COALESCE(rtu."targetRefinement"#>'{lum:swTagId,rightOperand}' ? swt."swTagId", FALSE)),
+            'denialType', 'matchingConstraintOnTarget',
+            'denialReason', 'not targeted by the rightToUse',
+            'deniedAssetUsageAgreementId', rtu."assetUsageAgreementId",
+            'deniedAssetUsageAgreementRevision', agr."assetUsageAgreementRevision",
+            'deniedRightToUseId', rtu."rightToUseId",
+            'deniedRightToUseRevision', rtu."rightToUseRevision",
+            'denialReqItemName', 'swTagId',
+            'denialReqItemValue', swt."swTagId",
+            'deniedConstraint', rtu."targetRefinement"#>'{lum:swTagId}'
+        ) AS "denied_swTagId",
+
+        JSON_BUILD_OBJECT(
+            'denied', NOT (rtu."targetRefinement"#>'{lum:swProductName}' IS NULL
+                OR COALESCE(rtu."targetRefinement"#>'{lum:swProductName,rightOperand}' ? swt."swProductName", FALSE)),
+            'denialType', 'matchingConstraintOnTarget',
+            'denialReason', 'not targeted by the rightToUse',
+            'deniedAssetUsageAgreementId', rtu."assetUsageAgreementId",
+            'deniedAssetUsageAgreementRevision', agr."assetUsageAgreementRevision",
+            'deniedRightToUseId', rtu."rightToUseId",
+            'deniedRightToUseRevision', rtu."rightToUseRevision",
+            'denialReqItemName', 'swProductName',
+            'denialReqItemValue', swt."swProductName",
+            'deniedConstraint', rtu."targetRefinement"#>'{lum:swProductName}'
+        ) AS "denied_swProductName",
+
+        JSON_BUILD_OBJECT(
+            'denied', NOT (rtu."targetRefinement"#>'{lum:swCategory}' IS NULL
+                OR COALESCE(rtu."targetRefinement"#>'{lum:swCategory,rightOperand}' ? swt."swCategory", FALSE)),
+            'denialType', 'matchingConstraintOnTarget',
+            'denialReason', 'not targeted by the rightToUse',
+            'deniedAssetUsageAgreementId', rtu."assetUsageAgreementId",
+            'deniedAssetUsageAgreementRevision', agr."assetUsageAgreementRevision",
+            'deniedRightToUseId', rtu."rightToUseId",
+            'deniedRightToUseRevision', rtu."rightToUseRevision",
+            'denialReqItemName', 'swCategory',
+            'denialReqItemValue', swt."swCategory",
+            'deniedConstraint', rtu."targetRefinement"#>'{lum:swCategory}'
+        ) AS "denied_swCategory",
+
+        JSON_BUILD_OBJECT(
+            'denied', NOT (rtu."targetRefinement"#>'{lum:swCatalogId}' IS NULL
+                OR COALESCE(rtu."targetRefinement"#>'{lum:swCatalogId,rightOperand}' ? ctlg."swCatalogId", FALSE)),
+            'denialType', 'matchingConstraintOnTarget',
+            'denialReason', 'not targeted by the rightToUse',
+            'deniedAssetUsageAgreementId', rtu."assetUsageAgreementId",
+            'deniedAssetUsageAgreementRevision', agr."assetUsageAgreementRevision",
+            'deniedRightToUseId', rtu."rightToUseId",
+            'deniedRightToUseRevision', rtu."rightToUseRevision",
+            'denialReqItemName', 'swCatalogId',
+            'denialReqItemValue', ctlg."swCatalogId",
+            'deniedConstraint', rtu."targetRefinement"#>'{lum:swCatalogId}'
+        ) AS "denied_swCatalogId",
+
+        JSON_BUILD_OBJECT(
+            'denied', NOT (rtu."targetRefinement"#>'{lum:swCatalogType}' IS NULL
+                OR COALESCE(rtu."targetRefinement"#>'{lum:swCatalogType,rightOperand}' ? ctlg."swCatalogType", FALSE)),
+            'denialType', 'matchingConstraintOnTarget',
+            'denialReason', 'not targeted by the rightToUse',
+            'deniedAssetUsageAgreementId', rtu."assetUsageAgreementId",
+            'deniedAssetUsageAgreementRevision', agr."assetUsageAgreementRevision",
+            'deniedRightToUseId', rtu."rightToUseId",
+            'deniedRightToUseRevision', rtu."rightToUseRevision",
+            'denialReqItemName', 'swCatalogType',
+            'denialReqItemValue', ctlg."swCatalogType",
+            'deniedConstraint', rtu."targetRefinement"#>'{lum:swCatalogType}'
+        ) AS "denied_swCatalogType",
+
+        JSON_BUILD_OBJECT(
+            'denied', NOT (rtu."assigneeRefinement"#>'{lum:countUniqueUsers}' IS NULL
+                OR (rtu."assigneeMetrics"->'users')::JSONB ? ${userField.idxKeyValues}
+                OR COALESCE(JSONB_ARRAY_LENGTH((rtu."assigneeMetrics"->'users')::JSONB)
+                    < (rtu."assigneeRefinement"#>'{lum:countUniqueUsers,rightOperand}')::INTEGER, FALSE)),
+            'denialType', 'matchingConstraintOnAssignee',
+            'denialReason', 'too many users for the rightToUse',
+            'deniedAssetUsageAgreementId', rtu."assetUsageAgreementId",
+            'deniedAssetUsageAgreementRevision', agr."assetUsageAgreementRevision",
+            'deniedRightToUseId', rtu."rightToUseId",
+            'deniedRightToUseRevision', rtu."rightToUseRevision",
+            'denialReqItemName', 'userId',
+            'denialReqItemValue', ${userField.idxKeyValues},
+            'deniedConstraint', rtu."assigneeRefinement"#>'{lum:countUniqueUsers}',
+            'deniedMetrics', rtu."assigneeMetrics"
+        ) AS "denied_countUniqueUsers",
+
+        JSON_BUILD_OBJECT(
+            'denied', NOT ((rtu."assigneeRefinement"#>'{lum:users}') IS NULL
+                OR COALESCE((rtu."assigneeRefinement"#>'{lum:users,rightOperand}')::JSONB ? ${userField.idxKeyValues}, FALSE)),
+            'denialType', 'matchingConstraintOnAssignee',
+            'denialReason', 'user not in assignee list on the rightToUse',
+            'deniedAssetUsageAgreementId', rtu."assetUsageAgreementId",
+            'deniedAssetUsageAgreementRevision', agr."assetUsageAgreementRevision",
+            'deniedRightToUseId', rtu."rightToUseId",
+            'deniedRightToUseRevision', rtu."rightToUseRevision",
+            'denialReqItemName', 'userId',
+            'denialReqItemValue', ${userField.idxKeyValues},
+            'deniedConstraint', rtu."assigneeRefinement"#>'{lum:users}'
+        ) AS "denied_users",
+
+        JSON_BUILD_OBJECT(
+            'denied', NOT (rtu."usageConstraints"#>'{count}' IS NULL
+                OR COALESCE(COALESCE((usmcs."metrics"#>'{count}')::INTEGER, 0) + ${reqUsageCountField.idxKeyValues}
+                    <= (rtu."usageConstraints"#>'{count,rightOperand}')::INTEGER, FALSE)),
+            'denialType', 'usageConstraint',
+            'denialReason', 'exceeding the usage count on the rightToUse',
+            'deniedAssetUsageAgreementId', rtu."assetUsageAgreementId",
+            'deniedAssetUsageAgreementRevision', agr."assetUsageAgreementRevision",
+            'deniedRightToUseId', rtu."rightToUseId",
+            'deniedRightToUseRevision', rtu."rightToUseRevision",
+            'denialReqItemName', 'usageCount',
+            'denialReqItemValue', ${reqUsageCountField.idxKeyValues},
+            'deniedConstraint', rtu."usageConstraints"#>'{count}',
+            'deniedMetrics', COALESCE((usmcs."metrics"#>'{count}')::INTEGER, 0)
+        ) AS "denied_usageCount"
+        FROM (SELECT * FROM "swidTag" WHERE ${keys.where}) AS swt
+             JOIN "rightToUse" AS rtu ON (rtu."softwareLicensorId" = swt."softwareLicensorId")
+             JOIN "assetUsageAgreement" AS agr ON (rtu."softwareLicensorId" = agr."softwareLicensorId"
+                                               AND rtu."assetUsageAgreementId" = agr."assetUsageAgreementId")
+             CROSS JOIN LATERAL jsonb_to_recordset(
+                CASE WHEN swt."swCatalogs" IS NULL OR jsonb_array_length(swt."swCatalogs") = 0 THEN
+                        '[{"swCatalogId":null,"swCatalogType":null}]'::jsonb
+                     ELSE swt."swCatalogs" END) AS ctlg("swCatalogId" TEXT, "swCatalogType" TEXT)
+             CROSS JOIN LATERAL jsonb_array_elements_text(array_to_json(rtu."actions")::jsonb) AS "rtuAction"
+             LEFT OUTER JOIN LATERAL (SELECT ums.* FROM "usageMetrics" AS ums
+                                       WHERE ums."usageMetricsId" = rtu."assetUsageRuleId"
+                                         AND ums."action" = "rtuAction"
+                                         AND ums."usageType" = 'rightToUse') AS usmcs ON TRUE
+        WHERE "rtuAction" IN (${actionField.idxKeyValues})
+        ORDER BY CASE WHEN rtu."rightToUseActive"
+                       AND (rtu."enableOn" IS NULL OR NOW()::DATE >= rtu."enableOn"::DATE)
+                       AND (rtu."expireOn" IS NULL OR NOW()::DATE <= rtu."expireOn"::DATE)
+                      THEN '0' ELSE '1' END,
+                 CASE WHEN rtu."assetUsageRuleType" = 'prohibition' THEN '0'
+                      ELSE rtu."assetUsageRuleType" END,
+                 CASE WHEN "rtuAction" = 'use' THEN NULL ELSE "rtuAction" END NULLS LAST,
+                 rtu."created", rtu."assetUsageRuleId"
+        LIMIT 100`;
+
+    const result = await pgclient.sqlQuery(res, sqlCmd, keys.getAllValues());
+    const visitedDenials = {};
+    for (const deniedRightToUse of result.rows) {
+        for (const denial of Object.values(deniedRightToUse)) {
+            if (!denial.denied) {continue;}
+            delete denial.denied;
+            const visitedDdenial = JSON.stringify(denial);
+            if (visitedDenials[visitedDdenial]) {continue;}
+            visitedDenials[visitedDdenial] = true;
+            swidTag.usageDenials.push(denial);
+        }
+    }
+    utils.logInfo(res, `out collectDenialsForSwidTag(${swidTag.swTagId})`);
+}
+/**
+ * increment counters and record userId into usageMetrics table
+ * @param  {} res
+ * @param  {} swidTag
+ */
+async function incrementUsageMetrics(res, swidTag) {
+    if (!swidTag.usageMetrics || !swidTag.usageMetrics.usageMetricsId) {
+        utils.logInfo(res, `skipped incrementUsageMetrics(${swidTag.swTagId})`);
+        return;
+    }
+    utils.logInfo(res, `in incrementUsageMetrics(${swidTag.swTagId})`);
+
+    const keys = new SqlParams();
+    keys.addField("usageMetricsId", swidTag.usageMetrics.usageMetricsId);
+    keys.addField("usageType", swidTag.usageMetrics.usageType);
+    const actionField = new SqlParams(keys);
+    actionField.addField("action", res.locals.params.action);
+    const userField = new SqlParams(actionField);
+    userField.addField("userId", res.locals.params.userId);
+    const reqUsageCountField = new SqlParams(userField);
+    reqUsageCountField.addField("reqUsageCount", swidTag.usageMetrics.reqUsageCount);
+    const houseFields = new SqlParams(reqUsageCountField);
+    houseFields.addField("modifier", res.locals.params.userId);
+    houseFields.addField("modifierRequestId", res.locals.requestId);
+
+    const insFields = new SqlParams(houseFields);
+    insFields.addField("swTagId", swidTag.swTagId);
+    insFields.addField("assetUsageRuleId", swidTag.usageMetrics.assetUsageRuleId);
+    insFields.addField("metrics", {count: swidTag.usageMetrics.reqUsageCount, users:[res.locals.params.userId]});
+    insFields.addField("usageMetricsRevision", 1);
+    insFields.addField("creator", res.locals.params.userId);
+    insFields.addField("creatorRequestId", res.locals.requestId);
+
+    const sqlCmd = `INSERT INTO "usageMetrics" AS ums
+        (${keys.fields} ${actionField.fields} ${houseFields.fields} ${insFields.fields}, "created", "modified")
+        VALUES (${keys.idxValues} ${actionField.idxValues} ${houseFields.idxValues} ${insFields.idxValues}, NOW(), NOW())
+             ${res.locals.params.action == 'use' ? '':
+             `, (${keys.idxValues}, 'use' ${houseFields.idxValues} ${insFields.idxValues}, NOW(), NOW())`}
+        ON CONFLICT (${keys.fields} ${actionField.fields}) DO UPDATE
+        SET "usageMetricsRevision" = ums."usageMetricsRevision" + 1, "modified" = NOW(),
+            "metrics" = ums.metrics
+                || JSONB_BUILD_OBJECT('count', ((ums.metrics->'count')::INTEGER + ${reqUsageCountField.idxKeyValues}))
+                || CASE WHEN (ums.metrics->'users')::JSONB ? ${userField.idxKeyValues} THEN '{}'::JSONB
+                   ELSE JSONB_BUILD_OBJECT('users', (ums.metrics->'users')::JSONB
+                                                   || ('["' || ${userField.idxKeyValues} || '"]')::JSONB)
+                END
+            ${houseFields.updates}
+        RETURNING *`;
+
+    await pgclient.sqlQuery(res, sqlCmd, keys.getAllValues());
+    utils.logInfo(res, `out incrementUsageMetrics(${swidTag.swTagId}`);
+}
+/**
+ * add userId into assigneeMetrics field in rightToUse table
+ * @param  {} res
+ * @param  {} swidTag
+ */
+async function updateAssigneeMetrics(res, swidTag) {
+    if (!swidTag.rightToUse || swidTag.rightToUse.isUserInAssigneeMetrics || !swidTag.usageMetrics.assetUsageRuleId) {
+        utils.logInfo(res, `skipped updateAssigneeMetrics(${swidTag.swTagId})`, swidTag);
+        return;
+    }
+    utils.logInfo(res, `in updateAssigneeMetrics(${swidTag.swTagId})`);
+
+    const keys = new SqlParams();
+    keys.addField("assetUsageRuleId", swidTag.usageMetrics.assetUsageRuleId);
+    const userField = new SqlParams(keys);
+    userField.addField("userId", res.locals.params.userId);
+    const houseFields = new SqlParams(userField);
+    houseFields.addField("metricsModifierReqId", res.locals.requestId);
+    const requestIdField = new SqlParams(houseFields);
+    requestIdField.addField("requestId", res.locals.requestId);
+
+    const sqlCmd = `UPDATE "rightToUse" SET "metricsModified" = NOW(), "metricsRevision" = "metricsRevision" + 1,
+            "assigneeMetrics" = "assigneeMetrics"
+                || CASE WHEN ("assigneeMetrics"->'users')::JSONB ? ${userField.idxKeyValues} THEN '{}'::JSONB
+                        ELSE JSONB_BUILD_OBJECT('users', ("assigneeMetrics"->'users')::JSONB
+                                              || ('["' || ${userField.idxKeyValues} || '"]')::JSONB) END,
+            "usageStartReqId" = COALESCE("usageStartReqId", ${requestIdField.idxKeyValues}),
+            "usageStarted"    = COALESCE("usageStarted", NOW())
+            ${houseFields.updates} WHERE ${keys.where}`;
+    await pgclient.sqlQuery(res, sqlCmd, keys.getAllValues());
+    utils.logInfo(res, `out updateAssigneeMetrics(${swidTag.swTagId}`);
+}
+
+/**
+ * copy swidTag and licenseProfile usage into the assetUsage
+ * @param  {} res
+ * @param  {} assetUsage either assetUsage or includedAssetUsage
+ */
+function copySwidTagUsageToAssetUsage(res, assetUsage) {
+    const swidTag        = res.locals.dbdata.swidTags[assetUsage.swTagId];
+    const licenseProfile = (swidTag.swidTagBody && res.locals.dbdata.licenseProfiles[swidTag.swidTagBody.licenseProfileId]) || null;
+
+    utils.copyTo(assetUsage, swidTagAttributes, swidTag.swidTagBody);
+    utils.copyTo(assetUsage, licenseProfileAttributes, licenseProfile);
+    assetUsage.isUsedBySwCreator = !!swidTag.isUsedBySwCreator;
+    assetUsage.entitlement       = swidTag.entitlement;
+    Array.prototype.push.apply(assetUsage.assetUsageDenial, swidTag.usageDenials);
+}
+/**
+ * insert/update the assetUsage and assetUsageHistory records for the assetUsage
+ * @param  {} res
+ * @param  {} assetUsage
+ */
 async function storeAssetUsage(res, assetUsage) {
     utils.logInfo(res, `in storeAssetUsage(${assetUsage.assetUsageId})`);
 
     const keys = new SqlParams();
     keys.addField("assetUsageId", assetUsage.assetUsageId);
-    const usageFields = new SqlParams(keys.nextOffsetIdx);
+    const usageFields = new SqlParams(keys);
     usageFields.addField("isIncludedAsset", assetUsage.isIncludedAsset);
     usageFields.addField("modifier", res.locals.params.userId);
-    const insFields = new SqlParams(usageFields.nextOffsetIdx);
+    const insFields = new SqlParams(usageFields);
     insFields.addField("creator", res.locals.params.userId);
-    const historyFields = new SqlParams(insFields.nextOffsetIdx);
+    const historyFields = new SqlParams(insFields);
     historyFields.addFieldsFromBody(assetUsageHistoryFields, res.locals.reqBody);
     historyFields.addField("usageEntitled", assetUsage.usageEntitled);
     historyFields.addField("isUsedBySwCreator", assetUsage.isUsedBySwCreator);
@@ -72,8 +579,8 @@ async function storeAssetUsage(res, assetUsage) {
     historyFields.addField("action", res.locals.params.action);
     historyFields.addField("assetUsageType", res.locals.params.assetUsageType);
     historyFields.addField("swTagId", assetUsage.swTagId);
-    historyFields.addFieldsFromBody(swidTagHistoryFields, assetUsage);
-    historyFields.addFieldsFromBody(licenseProfileHistoryFields, assetUsage);
+    historyFields.addFieldsFromBody(swidTagAttributes, assetUsage);
+    historyFields.addFieldsFromBody(licenseProfileAttributes, assetUsage);
     if (assetUsage.assetUsageDenial.length) {
         historyFields.addFieldJson("assetUsageDenial", assetUsage.assetUsageDenial);
     }
@@ -84,78 +591,21 @@ async function storeAssetUsage(res, assetUsage) {
                 "assetUsageSeqTail", "assetUsageSeqTailEntitlement", "created", "modified")
             VALUES (${keys.idxValues} ${usageFields.idxValues} ${insFields.idxValues},
                 1, 1, NOW(), NOW())
-            ON CONFLICT ("assetUsageId") DO UPDATE
+            ON CONFLICT (${keys.fields}) DO UPDATE
             SET "assetUsageSeqTail" = au."assetUsageSeqTail" + 1,
                 "assetUsageSeqTailEntitlement" = au."assetUsageSeqTail" + 1, "modified" = NOW()
                 ${usageFields.updates}
-            WHERE ${keys.getWhere("au")} RETURNING "assetUsageSeqTail")
+            RETURNING "assetUsageSeqTail")
         INSERT INTO "assetUsageHistory" AS auh
             (${keys.fields} ${historyFields.fields} ${insFields.fields}, "assetUsageSeq", "created")
             SELECT ${keys.idxValues} ${historyFields.idxValues} ${insFields.idxValues}, "assetUsageSeqTail", NOW() FROM asset_usage
         RETURNING auh."assetUsageSeq"`;
-    const result = await pgclient.sqlQuery(res, sqlCmd,
-        keys.values.concat(usageFields.values, insFields.values, historyFields.values));
+    const result = await pgclient.sqlQuery(res, sqlCmd, keys.getAllValues());
 
     if (result.rows.length) {
         assetUsage.assetUsageSeq = result.rows[0].assetUsageSeq;
     }
     utils.logInfo(res, `out storeAssetUsage(${assetUsage.assetUsageId})`);
-}
-
-/**
- * verify swidTag and licenseProfile are found for the asset-usage
- * @param  {} res
- * @param  {} assetUsage either assetUsage or includedAssetUsage
- */
-async function verifyAssetUsageSwidTag(res, assetUsage) {
-    const swidTag        = res.locals.dbdata.swidTags[assetUsage.swTagId];
-    const licenseProfile = (swidTag && res.locals.dbdata.licenseProfiles[swidTag.licenseProfileId]) || null;
-
-    utils.copyTo(assetUsage, swidTagHistoryFields, swidTag);
-    utils.copyTo(assetUsage, licenseProfileHistoryFields, licenseProfile);
-    assetUsage.isUsedBySwCreator = !!(swidTag && swidTag.swCreators && swidTag.swCreators.includes(res.locals.params.userId));
-
-    if (!swidTag) {
-        utils.addDenial(assetUsage.assetUsageDenial, "swidTagNotFound",
-            `swid-tag not found for swTagId(${assetUsage.swTagId})`);
-    } else if (!swidTag.swidTagActive) {
-        utils.addDenial(assetUsage.assetUsageDenial, "swidTagRevoked",
-            `swid-tag ${swidTag.closureReason || 'revoked'} for swTagId(${assetUsage.swTagId})`);
-    }
-
-    if (!licenseProfile) {
-        utils.addDenial(assetUsage.assetUsageDenial, "licenseProfileNotFound",
-            `license-profile not found
-            for swTagId(${assetUsage.swTagId}) with licenseProfileId(${(swidTag || '').licenseProfileId || ''})`);
-    } else if (!licenseProfile.licenseProfileActive) {
-        utils.addDenial(assetUsage.assetUsageDenial, "licenseProfileRevoked",
-            `license-profile ${licenseProfile.closureReason || 'revoked'}
-            for swTagId(${assetUsage.swTagId}) with licenseProfileId(${(swidTag || '').licenseProfileId || ''})`);
-    }
-}
-
-/**
- * find and check the RTU-permission for the assetUsage
- * @param  {} res
- * @param  {} assetUsage either assetUsage or includedAssetUsage
- */
-async function checkRtu(res, assetUsage) {
-    if (assetUsage.isRtuRequired === false) {
-        utils.logInfo(res, `RTU not required - entitled checkRtu(${assetUsage.assetUsageId})`);
-        return;
-    }
-    if (assetUsage.isUsedBySwCreator) {
-        utils.logInfo(res, `RTU not required for software creator(${res.locals.params.userId}) -
-            entitled checkRtu(${assetUsage.assetUsageId})`);
-        return;
-    }
-    utils.logWarn(res, `TODO: RTU is required - implement checkRtu(${assetUsage.assetUsageId})`);
-    utils.addDenial(assetUsage.assetUsageDenial, "agreementNotFound",
-        `asset-usage-agreement not found for swTagId(${assetUsage.swTagId})`);
-}
-
-async function incrementUsageCounter(res, assetUsage) {
-    utils.logWarn(res, `TODO: implement incrementUsageCounter(${assetUsage.assetUsageId})`);
 }
 
 module.exports = {
@@ -166,21 +616,20 @@ module.exports = {
      */
     convertToAssetUsage(assetUsage) {
         return {
-            "swTagId":          (assetUsage.swTagId         || assetUsage.includedSwTagId),
-            "assetUsageId":     (assetUsage.assetUsageId    || assetUsage.includedAssetUsageId),
-            "action":           assetUsage.action,
-            "isIncludedAsset":  (assetUsage.isIncludedAsset || !!assetUsage.includedAssetUsageId),
-            "usageEntitled":            null,
-            "isUsedBySwCreator":        null,
-            "assetUsageSeq":            null,
-            "swidTagRevision":          null,
-            "licenseProfileId":         null,
-            "licenseProfileRevision":   null,
-            "isRtuRequired":            null,
-            "softwareLicensorId":       null,
-            "entitlement":              null,
-            "assetUsageDenial":         [],
-            "matchDenials":             []
+            swTagId:                (assetUsage.swTagId         || assetUsage.includedSwTagId),
+            assetUsageId:           (assetUsage.assetUsageId    || assetUsage.includedAssetUsageId),
+            action:                 assetUsage.action,
+            isIncludedAsset:        (assetUsage.isIncludedAsset || !!assetUsage.includedAssetUsageId),
+            usageEntitled:          null,
+            isUsedBySwCreator:      null,
+            assetUsageSeq:          null,
+            softwareLicensorId:     null,
+            licenseProfileId:       null,
+            licenseProfileRevision: null,
+            isRtuRequired:          null,
+            swidTagRevision:        null,
+            entitlement:            null,
+            assetUsageDenial:       []
         };
     },
     /**
@@ -189,8 +638,6 @@ module.exports = {
      */
     convertToAssetUsageResponse(assetUsage) {
         if (!assetUsage) {return assetUsage;}
-        delete assetUsage.isIncludedAsset;
-        delete assetUsage.matchDenials;
         for (const [key, value] of Object.entries(assetUsage)) {
             if (value == null) {
                 delete assetUsage[key];
@@ -219,7 +666,7 @@ module.exports = {
      * @param  {} res
      */
     async getAssetUsage(res) {
-        if (!response.isOk(res) || !res.locals.params.assetUsageId) {
+        if (!res.locals.params.assetUsageId) {
             utils.logInfo(res, `skipped getAssetUsage(${res.locals.params.assetUsageId})`);
             return;
         }
@@ -246,15 +693,19 @@ module.exports = {
      * @param  {} res
      */
     async determineAssetUsageEntitlement(res) {
-        if (!response.isOk(res) || !res.locals.params.assetUsageId) {
+        if (!res.locals.params.assetUsageId) {
             utils.logInfo(res, `skipped determineAssetUsageEntitlement(${res.locals.params.assetUsageId})`);
             return;
         }
         utils.logInfo(res, `in determineAssetUsageEntitlement(${res.locals.params.assetUsageId})`);
 
+        for await (const swidTag of Object.values(res.locals.dbdata.swidTags)) {
+            verifySwidTag(res, swidTag);
+            await checkRtuForSwidTag(res, swidTag);
+        }
+
         for await (const assetUsage of Object.values(res.locals.assetUsages)) {
-            verifyAssetUsageSwidTag(res, assetUsage);
-            await checkRtu(res, assetUsage);
+            copySwidTagUsageToAssetUsage(res, assetUsage);
             assetUsage.usageEntitled = !assetUsage.assetUsageDenial.length;
 
             if (res.locals.response.usageEntitled == null) {
@@ -265,8 +716,9 @@ module.exports = {
         }
         res.locals.response.usageEntitled = !!res.locals.response.usageEntitled;
         if (res.locals.response.usageEntitled) {
-            for await (const assetUsage of Object.values(res.locals.assetUsages)) {
-                await incrementUsageCounter(res, assetUsage);
+            for await (const swidTag of Object.values(res.locals.dbdata.swidTags)) {
+                await incrementUsageMetrics(res, swidTag);
+                await updateAssigneeMetrics(res, swidTag);
             }
         }
 
@@ -277,7 +729,7 @@ module.exports = {
      * @param  {} res
      */
     async putAssetUsage(res) {
-        if (!response.isOk(res) || !res.locals.params.assetUsageId) {
+        if (!res.locals.params.assetUsageId) {
             utils.logInfo(res, `skipped putAssetUsage(${res.locals.params.assetUsageId})`);
             return;
         }
@@ -302,15 +754,16 @@ module.exports = {
 
         const keys = new SqlParams();
         keys.addField("assetUsageId", res.locals.params.assetUsageId);
-        const includedKey = new SqlParams(keys.nextOffsetIdx);
+        const includedKey = new SqlParams(keys);
         includedKey.setKeyValues("includedAssetUsageId", res.locals.includedAssetUsageIds);
-        const insFields = new SqlParams(includedKey.nextOffsetIdx);
+        const insFields = new SqlParams(includedKey);
         insFields.addField("creator", res.locals.params.userId);
+        insFields.addField("creatorRequestId", res.locals.requestId);
 
         const sqlCmd = `INSERT INTO "includedAssetUsage" (${keys.fields}, ${includedKey.keyName} ${insFields.fields})
                 SELECT ${keys.idxValues}, UNNEST(ARRAY[${includedKey.idxKeyValues}]) ${insFields.idxValues}
                 ON CONFLICT (${keys.fields}, ${includedKey.keyName}) DO NOTHING`;
-        await pgclient.sqlQuery(res, sqlCmd, keys.values.concat(includedKey.values, insFields.values));
+        await pgclient.sqlQuery(res, sqlCmd, keys.getAllValues());
 
         utils.logInfo(res, `out registerIncludedAssetUsage(${res.locals.params.assetUsageId})`);
     },
@@ -319,7 +772,7 @@ module.exports = {
      * @param  {} res
      */
     async getAssetUsageEvent(res) {
-        if (!response.isOk(res) || !res.locals.params.assetUsageId) {
+        if (!res.locals.params.assetUsageId) {
             utils.logInfo(res, `skipped getAssetUsageEvent(${res.locals.params.assetUsageId})`);
             return;
         }
@@ -346,29 +799,29 @@ module.exports = {
      * @param  {} res
      */
     async putAssetUsageEvent(res) {
-        if (!response.isOk(res) || !res.locals.params.assetUsageId) {
+        if (!res.locals.params.assetUsageId) {
             utils.logInfo(res, `skipped putAssetUsageEvent(${res.locals.params.assetUsageId})`);
             return;
         }
         utils.logInfo(res, `in putAssetUsageEvent(${res.locals.params.assetUsageId})`);
 
-        const swidTag = res.locals.dbdata.swidTags[res.locals.params.swTagId] || {};
+        const swidTag = res.locals.dbdata.swidTags[res.locals.params.swTagId].swidTagBody || {};
         const licenseProfile = res.locals.dbdata.licenseProfiles[swidTag.licenseProfileId] || {};
 
         const keys = new SqlParams();
         keys.addField("assetUsageId", res.locals.params.assetUsageId);
-        const houseFields = new SqlParams(keys.nextOffsetIdx);
+        const houseFields = new SqlParams(keys);
         houseFields.addField("modifier", res.locals.params.userId);
-        const insFields = new SqlParams(houseFields.nextOffsetIdx);
+        const insFields = new SqlParams(houseFields);
         insFields.addField("creator", res.locals.params.userId);
-        const historyFields = new SqlParams(insFields.nextOffsetIdx);
+        const historyFields = new SqlParams(insFields);
         historyFields.addFieldsFromBody(assetUsageHistoryFields, res.locals.reqBody);
         historyFields.addField("assetUsageReqId", res.locals.requestId);
         historyFields.addField("action", res.locals.params.action);
         historyFields.addField("assetUsageType", res.locals.params.assetUsageType);
         historyFields.addField("swTagId", res.locals.params.swTagId);
-        historyFields.addFieldsFromBody(swidTagHistoryFields, swidTag);
-        historyFields.addFieldsFromBody(licenseProfileHistoryFields, licenseProfile);
+        historyFields.addFieldsFromBody(swidTagAttributes, swidTag);
+        historyFields.addFieldsFromBody(licenseProfileAttributes, licenseProfile);
 
         const sqlCmd = `WITH asset_usage AS (
                 INSERT INTO "assetUsage" AS au
@@ -376,31 +829,48 @@ module.exports = {
                     "assetUsageSeqTail", "assetUsageSeqTailEvent", "created", "modified")
                 VALUES (${keys.idxValues} ${houseFields.idxValues} ${insFields.idxValues},
                     1, 1, NOW(), NOW())
-                ON CONFLICT ("assetUsageId") DO UPDATE
+                ON CONFLICT (${keys.fields}) DO UPDATE
                 SET "assetUsageSeqTail" = au."assetUsageSeqTail" + 1,
                     "assetUsageSeqTailEvent" = au."assetUsageSeqTail" + 1, "modified" = NOW()
                     ${houseFields.updates}
-                WHERE ${keys.getWhere("au")} RETURNING "assetUsageSeqTail")
+                RETURNING "assetUsageSeqTail")
             INSERT INTO "assetUsageHistory" AS auh
                 (${keys.fields} ${historyFields.fields} ${insFields.fields}, "assetUsageSeq", "created")
                 SELECT ${keys.idxValues} ${historyFields.idxValues} ${insFields.idxValues}, "assetUsageSeqTail", NOW() FROM asset_usage
             RETURNING auh."assetUsageSeq"`;
-        const result = await pgclient.sqlQuery(res, sqlCmd,
-            keys.values.concat(houseFields.values, insFields.values, historyFields.values));
+        const result = await pgclient.sqlQuery(res, sqlCmd, keys.getAllValues());
 
         if (result.rows.length) {
             res.locals.response.assetUsageEvent.assetUsageSeq = result.rows[0].assetUsageSeq;
         }
-        utils.copyTo(res.locals.response.assetUsageEvent, swidTagHistoryFields, swidTag);
-        utils.copyTo(res.locals.response.assetUsageEvent, licenseProfileHistoryFields, licenseProfile);
+        utils.copyTo(res.locals.response.assetUsageEvent, swidTagAttributes, swidTag);
+        utils.copyTo(res.locals.response.assetUsageEvent, licenseProfileAttributes, licenseProfile);
         utils.logInfo(res, `out putAssetUsageEvent(${res.locals.params.assetUsageId})`);
+    },
+    /**
+     * update the usageMetrics record for the event into database
+     * @param  {} res
+     */
+    async putAssetUsageEventMetrics(res) {
+        if (!res.locals.params.assetUsageId) {
+            utils.logInfo(res, `skipped putAssetUsageEventMetrics(${res.locals.params.assetUsageId})`);
+            return;
+        }
+        utils.logInfo(res, `in putAssetUsageEventMetrics(${res.locals.params.assetUsageId})`);
+
+        const swidTag = {
+            swTagId: res.locals.params.swTagId,
+            usageMetrics: {usageMetricsId: res.locals.params.swTagId, usageType: "assetUsageEvent"}
+        };
+        await incrementUsageMetrics(res, swidTag);
+        utils.logInfo(res, `out putAssetUsageEventMetrics(${res.locals.params.assetUsageId})`);
     },
     /**
      * GET assetUsageReq records per softwareLicensorId from the database
      * @param  {} res
      */
     async getAssetUsageTracking(res) {
-        if (!response.isOk(res) || !res.locals.params.softwareLicensorId) {
+        if (!res.locals.params.softwareLicensorId) {
             utils.logInfo(res, `skipped getAssetUsageTracking(${res.locals.params.softwareLicensorId})`);
             return;
         }
