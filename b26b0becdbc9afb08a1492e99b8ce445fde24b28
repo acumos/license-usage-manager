@@ -16,6 +16,24 @@
       "revId": "b26b0becdbc9afb08a1492e99b8ce445fde24b28",
       "serverId": "655300a2-7a56-4504-9153-881edd907bea",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9cc41827_057a0102",
+        "filename": "docker-compose.yaml",
+        "patchSetId": 3
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-09-30T16:20:10Z",
+      "side": 1,
+      "message": "because I am changing the openapi spec that can break the client code that is already in testing by Justin and in my environment as well",
+      "parentUuid": "2b6eff60_7a037a17",
+      "revId": "b26b0becdbc9afb08a1492e99b8ce445fde24b28",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
     }
   ]
 }
