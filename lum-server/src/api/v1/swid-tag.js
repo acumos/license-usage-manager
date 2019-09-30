@@ -30,21 +30,21 @@ const setSwTagId = (req, res, next, swTagId) => {
 const getSwidTag = async (req, res, next) => {
     utils.logInfo(res, `api getSwidTag(${res.locals.params.swTagId})`);
     res.locals.dbdata.swidTags = {};
-    res.locals.dbdata.swidTags[res.locals.params.swTagId] = null;
+    utils.addSwidTag(res.locals.dbdata.swidTags, res.locals.params.swTagId);
     res.locals.dbdata.licenseProfiles = {};
 
     await pgclient.runTx(res, dbSwidTag.getSwidTag, dbLicenseProfile.getLicenseProfile);
 
-    const swidTag = res.locals.dbdata.swidTags[res.locals.params.swTagId];
+    const swidTag = (res.locals.dbdata.swidTags[res.locals.params.swTagId] || {}).swidTagBody;
     if (!swidTag) {
-        response.setHttpStatus(res, 204, "swidTag");
+        response.setHttpStatus(res, response.lumHttpCodes.notFound, "swidTag");
     } else if (swidTag.swidTagActive === false) {
         res.locals.response.swTagId = swidTag.swTagId;
-        response.setHttpStatus(res, 224, "swidTag");
+        response.setHttpStatus(res, response.lumHttpCodes.revoked, "swidTag");
     } else {
         const licenseProfile = res.locals.dbdata.licenseProfiles[swidTag.licenseProfileId];
         if (!licenseProfile) {
-            response.setHttpStatus(res, 204, "licenseProfile");
+            response.setHttpStatus(res, response.lumHttpCodes.notFound, "licenseProfile");
         } else {
             res.locals.response = Object.assign(res.locals.response, {"swidTag": swidTag});
             res.locals.response = Object.assign(res.locals.response, {"licenseProfile": licenseProfile});

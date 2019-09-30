@@ -19,22 +19,34 @@ const pgclient = require('./pgclient');
 const SqlParams = require('./sql-params');
 
 module.exports = {
-    async addSnapshot(res, snapshotType, snapshotKey, snapshotRevision, snapshotBody) {
-        utils.logInfo(res, `in addSnapshot(${snapshotType})`);
+    /**
+     * store the copy of table record into snapshot table
+     * @param  {} res
+     * @param  {string} softwareLicensorId identifier of the supplier or owner of the software
+     * @param  {string} snapshotType ENUM {licenseProfile, swidTag, assetUsageAgreement, rightToUse}
+     * @param  {string} snapshotKey PK to the source table like swTagId
+     * @param  {integer} snapshotRevision revision field on the source table like swidTagRevision
+     * @param  {} snapshotBody full record from source table
+     */
+    async storeSnapshot(res, softwareLicensorId, snapshotType, snapshotKey, snapshotRevision, snapshotBody) {
+        utils.logInfo(res, `in storeSnapshot(${snapshotType})`);
 
         const keys = new SqlParams();
+        keys.addField("softwareLicensorId", softwareLicensorId || "");
         keys.addField("snapshotType", snapshotType);
         keys.addField("snapshotKey", snapshotKey);
         keys.addField("snapshotRevision", snapshotRevision);
-        const putFields = new SqlParams(keys.nextOffsetIdx);
+        const putFields = new SqlParams(keys);
         putFields.addField("snapshotBody", snapshotBody);
         putFields.addField("creator", res.locals.params.userId);
+        putFields.addField("requestId", res.locals.requestId);
+        putFields.addField("txStep", (res.locals.pg.txStep || '').trim());
 
         const sqlCmd = `INSERT INTO "snapshot" (${keys.fields} ${putFields.fields})
                         VALUES (${keys.idxValues} ${putFields.idxValues})
                         ON CONFLICT (${keys.fields}) DO NOTHING`;
-        await pgclient.sqlQuery(res, sqlCmd, keys.values.concat(putFields.values));
+        await pgclient.sqlQuery(res, sqlCmd, keys.getAllValues());
 
-        utils.logInfo(res, `out addSnapshot(${snapshotType})`);
+        utils.logInfo(res, `out storeSnapshot(${snapshotType})`);
     }
  };
