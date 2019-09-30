@@ -160,6 +160,24 @@
     },
     {
       "key": {
+        "uuid": "4f15c2c5_c462dff3",
+        "filename": "lum-server/lum-server-api/lum-server-API.yaml",
+        "patchSetId": 1
+      },
+      "lineNbr": 741,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-09-30T15:10:57Z",
+      "side": 1,
+      "message": "Oh - I get it now.  \n\nYou might want to click on @@ line right before line #731 and below line #335 to show the 395 common lines that were hidden by gerrit.  That way the HTTP DELETE and userId param will not be associated with the healthcheck info that contains the serverUptime field.",
+      "parentUuid": "abe48972_1c2d618d",
+      "revId": "c18fbecbe07a9dcca08bb03454fd8f89462bb114",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "eafcdf61_51370826",
         "filename": "lum-server/lum-server-api/lum-server-API.yaml",
         "patchSetId": 1
