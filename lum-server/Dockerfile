@@ -1,6 +1,6 @@
 # ===================================================================
 # Copyright (c) 2019 AT&T Intellectual Property. All rights reserved.
-# Modifications Copyright (C) 2019 Nordix Foundation. 
+# Modifications Copyright (C) 2019 Nordix Foundation.
 # ===================================================================
 # Unless otherwise specified, all software contained herein is licensed
 # under the Apache License, Version 2.0 (the "License");
@@ -22,8 +22,7 @@ FROM node:10.16.3-alpine
 ENV INSROOT /opt/app
 ENV APPPORT 2080
 ENV APPUSER lum
-ENV USRDIR ${INSROOT}/${APPUSER}
-ENV APPDIR ${USRDIR}/${SRVDIR}
+ENV APPDIR ${INSROOT}/${APPUSER}
 
 COPY ./*.js     ${APPDIR}/
 COPY ./*.json   ${APPDIR}/
@@ -40,8 +39,8 @@ RUN npm install \
  && npm remove -g npm
 
 RUN addgroup ${APPUSER} \
- && adduser -S -h ${USRDIR} -G ${APPUSER} ${APPUSER} \
- && chown -R ${APPUSER}:${APPUSER} ${USRDIR}
+ && adduser -S -h ${APPDIR} -G ${APPUSER} ${APPUSER} \
+ && chown -R ${APPUSER}:${APPUSER} ${APPDIR}
 
 USER ${APPUSER}
 

@@ -15,7 +15,6 @@
 // ============LICENSE_END=========================================================
 
 const utils = require('../utils');
-const response = require('../api/response');
 const pgclient = require('./pgclient');
 const SqlParams = require('./sql-params');
 
@@ -46,37 +45,30 @@ const SqlParams = require('./sql-params');
 
 module.exports = {
     async putAssetUsageReq(res) {
-        if (!response.isOk(res)) {
-            utils.logInfo(res, `skipped putAssetUsageReq(${res.locals.requestId})`);
-            return;
-        }
         utils.logInfo(res, `in putAssetUsageReq(${res.locals.requestId})`);
 
         const keys = new SqlParams();
         keys.addField("assetUsageReqId", res.locals.requestId);
-        const putFields = new SqlParams(keys.nextOffsetIdx);
+        const putFields = new SqlParams(keys);
         putFields.addField("action", res.locals.params.action);
         putFields.addField("assetUsageType", res.locals.params.assetUsageType);
         putFields.addField("requestHttp", res.locals.requestHttp);
         putFields.addField("request", res.locals.reqBody);
+        putFields.addField("userId", res.locals.params.userId);
         putFields.addField("status", "started");
 
         const sqlCmd = `INSERT INTO "assetUsageReq"
             (${keys.fields} ${putFields.fields}, "requestStarted")
             VALUES (${keys.idxValues} ${putFields.idxValues}, NOW())`;
-        await pgclient.sqlQuery(res, sqlCmd, keys.values.concat(putFields.values));
+        await pgclient.sqlQuery(res, sqlCmd, keys.getAllValues());
         utils.logInfo(res, `out putAssetUsageReq(${res.locals.requestId})`);
     },
     async putAssetUsageResponse(res) {
-        if (!response.isOk(res)) {
-            utils.logInfo(res, `skipped putAssetUsageResponse(${res.locals.requestId})`);
-            return;
-        }
         utils.logInfo(res, `in putAssetUsageResponse(${res.locals.requestId})`);
 
         const keys = new SqlParams();
         keys.addField("assetUsageReqId", res.locals.requestId);
-        const putFields = new SqlParams(keys.nextOffsetIdx);
+        const putFields = new SqlParams(keys);
         putFields.addField("responseHttpCode", res.statusCode);
         putFields.addField("response", res.locals.response);
         putFields.addField("usageEntitled", res.locals.response.usageEntitled);
@@ -86,7 +78,7 @@ module.exports = {
             SET "requestDone" = TRUE, "responseSent" = NOW() ${putFields.updates}
             WHERE ${keys.getWhere("aur")}`;
 
-        await pgclient.sqlQuery(res, sqlCmd, keys.values.concat(putFields.values));
+        await pgclient.sqlQuery(res, sqlCmd, keys.getAllValues());
         utils.logInfo(res, `out putAssetUsageResponse(${res.locals.requestId})`);
     }
  };
