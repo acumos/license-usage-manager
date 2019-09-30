@@ -142,6 +142,24 @@
     },
     {
       "key": {
+        "uuid": "abe48972_1c2d618d",
+        "filename": "lum-server/lum-server-api/lum-server-API.yaml",
+        "patchSetId": 1
+      },
+      "lineNbr": 741,
+      "author": {
+        "id": 288
+      },
+      "writtenOn": "2019-09-30T14:52:54Z",
+      "side": 1,
+      "message": "My reading of this is that this is describing an HTTP DELETE request, and that the URL ends with something like ?userId\u003d..., and that that userId field\u0027s value is a JSON object with fields serverRunInstanceId, serverStarted, serverUptime, and pathToOpenapiUi.  These seem like very strange way to specify a userId, but maybe that\u0027s how the LicenseManager works.  Also, the example that is then given (below) doesn\u0027t match that userId schema, since it has additional fields like serverName and serverVersion.",
+      "parentUuid": "42003f4e_162a4879",
+      "revId": "c18fbecbe07a9dcca08bb03454fd8f89462bb114",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "eafcdf61_51370826",
         "filename": "lum-server/lum-server-api/lum-server-API.yaml",
         "patchSetId": 1
