@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fc1b4ca5_1981e719",
+        "filename": "lum-server/src/api/response.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 288
+      },
+      "writtenOn": "2019-09-30T15:56:14Z",
+      "side": 1,
+      "message": "Not Found is usually 404, don\u0027t use 204, clients explicitly look for it to mean the response body on a GET/POST/PUT exists but has zero length.  Perhaps 410 (Gone) rather than non-standard code 224.",
+      "revId": "ba27a646a6bafc45e9b19816912830d4470a445a",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "110645b9_4fa7af5d",
+        "filename": "lum-server/src/api/v1/asset-usage.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 288
+      },
+      "writtenOn": "2019-09-30T15:56:14Z",
+      "side": 1,
+      "message": "Is there a good reason why (here and elsewhere) you aren\u0027t following the usual HTTP convention of having status codes be presented as capitalized and phrases, like, \"Internal Server Error\", \"Not Found\", \"OK\", or \"No Content\"?",
+      "revId": "ba27a646a6bafc45e9b19816912830d4470a445a",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "552a5df0_3318cdc8",
+        "filename": "lum-server/src/db/pgclient.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 288
+      },
+      "writtenOn": "2019-09-30T15:56:14Z",
+      "side": 1,
+      "message": "spelling: params",
+      "revId": "ba27a646a6bafc45e9b19816912830d4470a445a",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": false
+    }
+  ]
+}
