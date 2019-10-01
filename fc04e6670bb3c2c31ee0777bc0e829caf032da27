@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "371cb9df_67c96894",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-10-01T19:02:06Z",
+      "side": 1,
+      "message": "there is no user story for this effort",
+      "range": {
+        "startLine": 18,
+        "startChar": 0,
+        "endLine": 19,
+        "endChar": 52
+      },
+      "revId": "fc04e6670bb3c2c31ee0777bc0e829caf032da27",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8bbb2813_6f72662a",
+        "filename": "lum-server/Dockerfile",
+        "patchSetId": 3
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-10-01T19:02:06Z",
+      "side": 1,
+      "message": "keeping npm in the image is a bad practice because it allows installing packages",
+      "range": {
+        "startLine": 82,
+        "startChar": 0,
+        "endLine": 82,
+        "endChar": 31
+      },
+      "revId": "fc04e6670bb3c2c31ee0777bc0e829caf032da27",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "05e4b7bf_ac612a66",
+        "filename": "lum-server/package-lock.json",
+        "patchSetId": 3
+      },
+      "lineNbr": 630,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-10-01T19:02:06Z",
+      "side": 1,
+      "message": "why eslint in production package ?",
+      "range": {
+        "startLine": 630,
+        "startChar": 4,
+        "endLine": 630,
+        "endChar": 26
+      },
+      "revId": "fc04e6670bb3c2c31ee0777bc0e829caf032da27",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "11c9e29a_189dd357",
+        "filename": "lum-server/src/api/v1/asset-usage-event.js",
+        "patchSetId": 3
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-10-01T19:02:06Z",
+      "side": 1,
+      "message": "should be no change",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 27,
+        "endChar": 54
+      },
+      "revId": "fc04e6670bb3c2c31ee0777bc0e829caf032da27",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    }
+  ]
+}

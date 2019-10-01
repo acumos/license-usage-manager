@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8dca776e_289a2c25",
+        "filename": "lum-server/src/api/response.js",
+        "patchSetId": 3
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-10-01T19:02:06Z",
+      "side": 0,
+      "message": "should be no change",
+      "range": {
+        "startLine": 133,
+        "startChar": 1,
+        "endLine": 135,
+        "endChar": 4
+      },
+      "revId": "7e91f227fadfb00de746f92ffb113f6194c95db1",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    }
+  ]
+}
