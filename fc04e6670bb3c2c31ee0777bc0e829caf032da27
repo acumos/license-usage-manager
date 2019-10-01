@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "fe746c49_d036df97",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 290
+      },
+      "writtenOn": "2019-10-01T19:52:05Z",
+      "side": 1,
+      "message": "Created follow on gerrit for build issues / fixes https://jira.acumos.org/browse/ACUMOS-3504",
+      "parentUuid": "371cb9df_67c96894",
+      "range": {
+        "startLine": 18,
+        "startChar": 0,
+        "endLine": 19,
+        "endChar": 52
+      },
+      "revId": "fc04e6670bb3c2c31ee0777bc0e829caf032da27",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "8bbb2813_6f72662a",
         "filename": "lum-server/Dockerfile",
         "patchSetId": 3
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "b6faeaf4_e6fde0dd",
+        "filename": "lum-server/Dockerfile",
+        "patchSetId": 3
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 290
+      },
+      "writtenOn": "2019-10-01T19:52:05Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "8bbb2813_6f72662a",
+      "range": {
+        "startLine": 82,
+        "startChar": 0,
+        "endLine": 82,
+        "endChar": 31
+      },
+      "revId": "fc04e6670bb3c2c31ee0777bc0e829caf032da27",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "05e4b7bf_ac612a66",
         "filename": "lum-server/package-lock.json",
         "patchSetId": 3
@@ -59,6 +107,30 @@
       "writtenOn": "2019-10-01T19:02:06Z",
       "side": 1,
       "message": "why eslint in production package ?",
+      "range": {
+        "startLine": 630,
+        "startChar": 4,
+        "endLine": 630,
+        "endChar": 26
+      },
+      "revId": "fc04e6670bb3c2c31ee0777bc0e829caf032da27",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "26b4f357_f5baf97f",
+        "filename": "lum-server/package-lock.json",
+        "patchSetId": 3
+      },
+      "lineNbr": 630,
+      "author": {
+        "id": 290
+      },
+      "writtenOn": "2019-10-01T19:52:05Z",
+      "side": 1,
+      "message": "this is the lock file - not in dependencies list.",
+      "parentUuid": "05e4b7bf_ac612a66",
       "range": {
         "startLine": 630,
         "startChar": 4,
@@ -91,6 +163,30 @@
       "revId": "fc04e6670bb3c2c31ee0777bc0e829caf032da27",
       "serverId": "655300a2-7a56-4504-9153-881edd907bea",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2b4de7c9_a5e2ab18",
+        "filename": "lum-server/src/api/v1/asset-usage-event.js",
+        "patchSetId": 3
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 290
+      },
+      "writtenOn": "2019-10-01T19:52:05Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "11c9e29a_189dd357",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 27,
+        "endChar": 54
+      },
+      "revId": "fc04e6670bb3c2c31ee0777bc0e829caf032da27",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": false
     }
   ]
 }
