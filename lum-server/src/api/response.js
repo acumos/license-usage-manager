@@ -20,7 +20,7 @@ const {InvalidDataError} = require('../error');
 
 const resHeader = {requestId: "requestId", requested: "requested", status: "status"};
 
-const lumHttpCodes = {notFound: 204, revoked: 224, denied: 402, invalidDataError: 400, serverError: 500};
+const lumHttpCodes = {notFound: 404, revoked: 224, denied: 402, invalidDataError: 400, serverError: 500};
 const httpStatuses = {[lumHttpCodes.notFound]: "Not Found", [lumHttpCodes.revoked]: "Revoked", [lumHttpCodes.denied]: "Denied"};
 
 module.exports = {
@@ -131,7 +131,6 @@ module.exports = {
             const statusMessage = httpStatuses[statusCode];
             if (statusMessage) {res.statusMessage = statusMessage;}
             res.status(statusCode);
-
             const status = `${recordlName} ${(statusMessage || statusCode).toString().toLowerCase()}`;
             if (statusCode !== lumHttpCodes.denied) {
                 res.locals.response.status = status;

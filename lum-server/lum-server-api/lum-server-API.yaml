@@ -19,8 +19,11 @@
 openapi: '3.0.2'
 
 info:
-  version: "0.26.2"
+  version: "0.26.3"
   title: "License Usage Manager (LUM) API"
+  contact:
+    name: Acumos License Management
+    url: https://wiki.acumos.org/display/LM/
   license:
     name: "Apache 2.0"
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
@@ -82,6 +85,44 @@ paths:
         schema:
           type: string
 
+    put:
+      tags: ["swid-tag"]
+      description: updates swidTag record for swTagId
+      operationId: putSwidTag
+      requestBody:
+        description: request to update swidTag record for swTagId
+        required: true
+        content:
+          'application/json; charset=utf-8':
+            example: 
+              userId: admin
+              swidTag:
+                swTagId: ee48b699-3b16-4391-884c-1bec557f32b9
+                swPersistentId: 0d70ca44-2868-4042-8028-6b9a5e7c8eec
+                swVersion: '1'
+                licenseProfileId: 08731dff-2a30-44b7-b46c-aec1c2d0a4d7
+                softwareLicensorId: Company A
+                swCategory: CL
+                swCatalogs:
+                - swCatalogId: b934935e-caad-11e9-9a2f-2edc1426c78a
+                  swCatalogType: RS
+                swProductName: example-model
+                swCreators:
+                - modelowner1
+              licenseProfile:
+                licenseProfileId: 08731dff-2a30-44b7-b46c-aec1c2d0a4d7
+                isRtuRequired: true
+            schema:
+              $ref: '#/components/schemas/PutSwidTagRequest'
+
+      responses:
+        200:
+          description: success
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: '#/components/schemas/PutSwidTagResponse'
+
     get:
       tags: ["swid-tag"]
       operationId: getSwidTag
@@ -95,7 +136,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/GetSwidTagResponse'
 
-        204:
+        404:
           description: swidTag not found
           headers:
             requestId:
@@ -125,26 +166,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/RevokeSwidTagResponse'
 
-    put:
-      tags: ["swid-tag"]
-      description: updates swidTag record for swTagId
-      operationId: putSwidTag
-      requestBody:
-        description: request to update swidTag record for swTagId
-        required: true
-        content:
-          'application/json':
-            schema:
-              $ref: '#/components/schemas/PutSwidTagRequest'
-
-      responses:
-        200:
-          description: success
-          content:
-            'application/json':
-              schema:
-                $ref: '#/components/schemas/PutSwidTagResponse'
-
     delete:
       tags: ["swid-tag"]
       description: revoke the swidTag for swTagId
@@ -158,7 +179,7 @@ paths:
             type: string
 
       responses:
-        204:
+        404:
           description: swidTag not found
           headers:
             requestId:
@@ -219,7 +240,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/SetSwidTagCreatorsResponse'
 
-        204:
+        404:
           description: swidTag not found
           headers:
             requestId:
@@ -266,7 +287,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/GetAssetUsageAgreementResponse'
 
-        204:
+        404:
           description: assetUsageAgreement not found
           headers:
             requestId:
@@ -304,7 +325,67 @@ paths:
         description: request to update assetUsageAgreement record for assetUsageAgreementId
         required: true
         content:
-          'application/json':
+          'application/json; charset=utf-8':
+            example: 
+              assetUsageAgreement:
+                softwareLicensorId: Company A
+                assetUsageAgreementId: acumos://software-licensor/Company A/agreement/3eb8c43a-bf19-46ab-8392-99c7efdf4106
+                agreement:
+                  "@context":
+                    "@vocab": https://www.w3.org/ns/odrl.jsonld#
+                    vcard: http://www.w3.org/2006/vcard/ns#
+                  "@type": Agreement
+                  uid: acumos://software-licensor/Company%2520A/agreement/3eb8c43a-bf19-46ab-8392-99c7efdf4106
+                  assignee:
+                    "@type":
+                    - Party
+                    - vcard:Organization
+                    vcard:hasUrl: companyb.com
+                    vcard:fn: Company B
+                    vcard:hasEmail: team@companyb.com
+                    refinement:
+                    - rightOperand:
+                        "@value": '10'
+                        "@type": xsd:integer
+                      "@type": Constraint
+                      leftOperand: lum:countUniqueUsers
+                      operator: lteq
+                  assigner:
+                    "@type":
+                    - Party
+                    - vcard:Organization
+                    vcard:hasUrl: companya.com
+                    vcard:fn: Company A
+                    vcard:hasEmail: sales@companya.com
+                  target:
+                    refinement:
+                    - "@type": Constraint
+                      leftOperand: lum:swProductName
+                      operator: lum:in
+                      rightOperand:
+                      - face-detect
+                    "@type": Target
+                  permission:
+                  - uid: acumos://software-licensor/Company%252520A/permission/98378924-84ff-41f5-87ac-02fd2012c727
+                    "@type": Rule
+                    action:
+                    - acumos:deploy
+                    - acumos:download
+                    - modelrunner:predict
+                    - modelrunner:train
+                    constraint:
+                    - rightOperand:
+                        "@value": '100'
+                        "@type": xsd:integer
+                      "@type": Constraint
+                      leftOperand: count
+                      operator: lt
+                  prohibition:
+                  - "@type": Rule
+                    action:
+                    - transfer
+                    - aggregate
+                    uid: acumos://software-licensor/Company%2520A/prohibition/85f6ab36-3ede-461a-ad57-23b941264d10
             schema:
               $ref: '#/components/schemas/PutAssetUsageAgreementRequest'
 
@@ -336,7 +417,7 @@ paths:
             type: string
 
       responses:
-        204:
+        404:
           description: assetUsageAgreement not found
           headers:
             requestId:
@@ -397,7 +478,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PutAssetUsageAgreementResponse'
 
-        204:
+        404:
           description: assetUsageAgreement not found
           headers:
             requestId:
@@ -448,7 +529,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PutAssetUsageAgreementResponse'
 
-        204:
+        404:
           description: assetUsageAgreement not found
           headers:
             requestId:
@@ -535,7 +616,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PutAssetUsageSuccessResponse'
 
-        204:
+        404:
           description: assetUsage not found
           headers:
             requestId:
@@ -612,7 +693,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AssetUsageEventResponse'
 
-        204:
+        404:
           description: assetUsageEvent not found
           headers:
             requestId:
@@ -634,7 +715,6 @@ paths:
               schema:
                 type: string
                 default: "assetUsageEvent not found"
-
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
   /api/v1/asset-usage-tracking/software-licensor/{softwareLicensorId}:
@@ -746,8 +826,8 @@ components:
               type: string
           example:
             serverName: "lum-server"
-            serverVersion: "0.26.2"
-            apiVersion: "0.26.2"
+            serverVersion: "0.26.3"
+            apiVersion: "0.26.3"
             nodeVersion: "10.16.3"
             pgVersion: "PostgreSQL 11.5 on x86_64-pc-linux-musl, compiled by gcc (Alpine 8.3.0) 8.3.0, 64-bit"
             serverRunInstanceId: "faa08408-59fd-44d2-b815-9ceb9b8fdf92"
@@ -1770,14 +1850,7 @@ components:
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
     ODRLConstraint:
-      description: 'ODRL based [constraint](https://www.w3.org/TR/odrl-model/#constraint-class)
-        see [RTU design](https://wiki.acumos.org/pages/viewpage.action?pageId=20547102)
-        examples
-          {"action": "acumos:download", "constraint": [{"leftOperand": "count", "operator": "lteq", "rightOperand": {"@value": "25", "@type": "xsd:integer"}}]}
-          {"action": "acumos:deploy", "constraint": [{"leftOperand": "count", "operator": "lteq", "rightOperand": {"@value": "35", "@type": "xsd:integer"}}]}
-          {"action": ["install", "acumos:run"], "constraint": [{"leftOperand": "count", "operator": "lteq", "rightOperand": {"@value": "45", "@type": "xsd:integer"}}]}
-          {"action": "acumos:train", "constraint": [{"leftOperand": "count", "operator": "lteq", "rightOperand": {"@value": "15", "@type": "xsd:integer"}}]}
-          {"action": "acumos:compose.include", "constraint": [{"leftOperand": "count", "operator": "lteq", "rightOperand": {"@value": "55", "@type": "xsd:integer"}}]}'
+      description: 'ODRL based [constraint](https://www.w3.org/TR/odrl-model/#constraint-class) see [RTU design](https://wiki.acumos.org/pages/viewpage.action?pageId=20547102)'
 
       required:
         - leftOperand
@@ -1804,11 +1877,7 @@ components:
             - gteq
 
         rightOperand:
-          description: 'string or stringified number like
-            "2019-08-01"
-            "5"
-            {"@value": "2019-08-01", "@type": "xsd:date"}
-            {"@value": "5", "@type": "xsd:integer"}'
+          description: 'string or stringified number like "2019-08-01" "5" {"@value": "2019-08-01", "@type": "xsd:date"} {"@value": "5", "@type": "xsd:integer"}'
           type: object
 
     ODRLAssigneeRefinement:
@@ -1831,11 +1900,8 @@ components:
           type: string
           enum:
             - "lteq"
-
         rightOperand:
-          description: 'maximal counter of unique users - string or stringified number like
-            "5"
-            {"@value": "5", "@type": "xsd:integer"}'
+          description: 'maximal counter of unique users - string or stringified number like "5" {"@value": "5", "@type": "xsd:integer"}'
       example:
         leftOperand: "lum:countUniqueUsers"
         operator: "lteq"
@@ -1995,7 +2061,6 @@ components:
           description: Agreement
           type: string
           default: Agreement
-          example: Agreement
 
         profile:
           description: profile that contains non-ODRL defined values

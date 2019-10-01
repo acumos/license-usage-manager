@@ -20,6 +20,19 @@
 License Usage Manager Release Notes
 ===================================
 
+Version 0.26.3, 1 October 2019
+------------------------------
+
+- Added support for nodemon support for faster reloads in docker container
+- using http code 404 with no body for record not found - closer to resource not found
+- adding examples to make dredd apiary happy easier to test 
+- docker build change to use multi stage builds
+- Include open api spec lint to docker build
+- Clean up API for open api lint errors
+- Update eslint
+- Reserved variable name - package changed to pkg
+- Adding .dockerignore to ensure node_modules are installed in docker not locally
+
 Version 0.26.2, 30 September 2019
 ---------------------------------
 
