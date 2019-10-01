@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "b260467c_cb52c789",
+        "filename": "lum-server/src/api/healthcheck.js",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 290
+      },
+      "writtenOn": "2019-10-01T17:32:05Z",
+      "side": 1,
+      "message": "https://ecma-international.org/ecma-262/6.0/#sec-future-reserved-words",
+      "parentUuid": "203f18c5_7dbb69b5",
+      "range": {
+        "startLine": 18,
+        "startChar": 0,
+        "endLine": 25,
+        "endChar": 39
+      },
+      "revId": "2423018e367cf117cd79b30cc769584c40b9b83c",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "ae1236e2_ab270802",
         "filename": "lum-server/src/api/response.js",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "79787f89_a4c03684",
+        "filename": "lum-server/src/api/response.js",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 290
+      },
+      "writtenOn": "2019-10-01T17:32:05Z",
+      "side": 1,
+      "message": "We can change back but 204 there should be no content in response and you are sending data. I found that \n\nwhen I get \n\n/api/v1/asset-usage-event/38935f5c-293b-4e00-91ad-14d5de66eee3 \n\nI get a response 204 with a message body\n\n{\"requestId\":\"70fb6a7f-9147-4490-9e48-a136dbabfe89\",\"requested\":\"2019-10-01T17:27:31.393Z\",\"status\":\"assetUsageEvent not found\"}\n\n\nThe 204 response MUST NOT include a message-body, and thus is always terminated by the first empty line after the header fields.\n\nOur options are 404 you can return message body\n\nor we can use 200 -- since server did successfully check database and acknowledged request but could not find a response.",
+      "parentUuid": "ae1236e2_ab270802",
+      "range": {
+        "startLine": 23,
+        "startChar": 22,
+        "endLine": 23,
+        "endChar": 35
+      },
+      "revId": "2423018e367cf117cd79b30cc769584c40b9b83c",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e05d5946_a67153b6",
         "filename": "lum-server/src/api/v1/asset-usage-event.js",
         "patchSetId": 1
@@ -59,6 +107,30 @@
       "writtenOn": "2019-10-01T17:15:09Z",
       "side": 1,
       "message": "there is no agreement in event",
+      "range": {
+        "startLine": 47,
+        "startChar": 4,
+        "endLine": 50,
+        "endChar": 4
+      },
+      "revId": "2423018e367cf117cd79b30cc769584c40b9b83c",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f974108b_c54b097f",
+        "filename": "lum-server/src/api/v1/asset-usage-event.js",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 290
+      },
+      "writtenOn": "2019-10-01T17:32:05Z",
+      "side": 1,
+      "message": "yes message is not correct will update",
+      "parentUuid": "e05d5946_a67153b6",
       "range": {
         "startLine": 47,
         "startChar": 4,
