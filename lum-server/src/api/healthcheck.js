@@ -15,14 +15,14 @@
 // ============LICENSE_END=========================================================
 
 const utils = require('../utils');
-const package = require("../../package.json");
+const pkg = require("../../package.json");
 const pgclient = require('../db/pgclient');
 
 module.exports = {
     init() {
         lumServer.healthcheck = {
             serverName: lumServer.config.serverName || "lum-server",
-            serverVersion: package.version,
+            serverVersion: pkg.version,
             apiVersion: null,
             nodeVersion: process.env.NODE_VERSION,
             pgVersion: null,

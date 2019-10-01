@@ -17,6 +17,47 @@
 # ============LICENSE_END============================================
 # Dockerfile for lum-server
 
+# The instructions for the first stage
+FROM node:10.16.3-alpine as build-stage
+
+ARG BUILD_DEVELOPMENT
+# if --build-arg BUILD_DEVELOPMENT=1, set NODE_ENV to 'development' or set to null otherwise.
+ENV NODE_ENV=${BUILD_DEVELOPMENT:+development}
+# if NODE_ENV is null, set it to 'production' (or leave as is otherwise).
+ENV NODE_ENV=${NODE_ENV:-production}
+
+WORKDIR /work/
+COPY package*.json ./
+COPY ./lum-server-api/   ./lum-server-api/
+COPY  ./lum-server.js lum-server.js
+COPY ./src src
+COPY ./*.txt    .
+COPY ./etc/     ./etc/
+COPY ./lum-server-api/   ./lum-server-api/
+RUN npm install --quiet
+
+RUN if [ "$BUILD_DEVELOPMENT" == "1" ]; \
+    then echo 'installing nodemon' && npm install nodemon ; \
+    fi 
+
+FROM node:10.16.3-alpine as lint-stage
+
+## ES lint 
+WORKDIR /js-lint-work/
+COPY .eslintrc.js ./.eslintrc.js
+COPY --from=build-stage /work/src src
+RUN npm install eslint@^6.5.0  --no-save
+RUN npm install eslint-config-recommended@^4.0.0  --no-save
+RUN ls -la 
+RUN node_modules/.bin/eslint .
+
+## OAS linting
+WORKDIR /oas-work/
+COPY --from=build-stage /work/ .
+RUN npm install speccy
+RUN npm run lint-spec
+
+# The instructions for last runtime stage
 FROM node:10.16.3-alpine
 
 ENV INSROOT /opt/app
@@ -24,19 +65,12 @@ ENV APPPORT 2080
 ENV APPUSER lum
 ENV APPDIR ${INSROOT}/${APPUSER}
 
-COPY ./*.js     ${APPDIR}/
-COPY ./*.json   ${APPDIR}/
-COPY ./*.txt    ${APPDIR}/
-COPY ./etc/     ${APPDIR}/etc/
-COPY ./src/     ${APPDIR}/src/
-COPY ./lum-server-api/   ${APPDIR}/lum-server-api/
-
 WORKDIR ${APPDIR}
+COPY --from=build-stage /work/ .
 
-RUN npm install \
- && npm run lint \
- && npm prune --production \
- && npm remove -g npm
+RUN if [ "$NODE_ENV" == "production" ]; \
+    then echo 'removing npm' &&  npm remove -g npm; \
+    fi 
 
 RUN addgroup ${APPUSER} \
  && adduser -S -h ${APPDIR} -G ${APPUSER} ${APPUSER} \
