@@ -131,7 +131,6 @@ module.exports = {
             const statusMessage = httpStatuses[statusCode];
             if (statusMessage) {res.statusMessage = statusMessage;}
             res.status(statusCode);
-
             const status = `${recordlName} ${(statusMessage || statusCode).toString().toLowerCase()}`;
             if (statusCode !== lumHttpCodes.denied) {
                 res.locals.response.status = status;

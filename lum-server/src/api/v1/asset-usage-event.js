@@ -23,6 +23,7 @@ const dbAssetUsage = require('../../db/asset-usage');
 const dbSwidTag = require('../../db/swid-tag');
 const dbLicenseProfile = require('../../db/license-profile');
 
+
 const getAssetUsageEvent = async (req, res, next) => {
     utils.logInfo(res, `api getAssetUsageEvent(${res.locals.params.assetUsageId})`);
     res.locals.dbdata.assetUsageEvent = null;

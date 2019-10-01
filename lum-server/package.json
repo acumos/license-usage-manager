@@ -1,8 +1,18 @@
 {
   "name": "lum-server",
   "description": "License Usage Manager (LUM) for Acumos and ONAP",
-  "version": "0.26.2",
+  "version": "0.26.3",
   "main": "lum-server.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/acumos/license-usage-manager.git"
+  },
+  "scripts": {
+    "start:prod": "node lum-server.js",
+    "start:dev": "./node_modules/.bin/nodemon --inspect=0.0.0.0:5858 -w lum-server.js",
+    "lint": "./node_modules/.bin/eslint  .",
+    "lint-spec": "./node_modules/.bin/speccy lint -s openapi-tags-alphabetical -s  path-keys-no-trailing-slash lum-server-api/lum-server-API.yaml"
+  },
   "engines": {
     "node": ">=10.16.3"
   },
@@ -22,34 +32,5 @@
     "asset",
     "right-to-use",
     "entitlement"
-  ],
-  "devDependencies": {
-    "eslint": "^6.3.0"
-  },
-  "eslintConfig": {
-    "env": {
-      "commonjs": true,
-      "es6": true,
-      "node": true
-    },
-    "extends": "eslint:recommended",
-    "globals": {
-      "Atomics": "readonly",
-      "SharedArrayBuffer": "readonly",
-      "lumServer": "writable"
-    },
-    "parserOptions": {
-      "ecmaVersion": 2018
-    },
-    "rules": {
-      "require-atomic-updates": "off",
-      "no-process-exit": "error"
-    }
-  },
-  "scripts": {
-    "start": "node lum-server.js",
-    "lint": "./node_modules/.bin/eslint  .",
-    "openapi": "mkdir -p ./lum-server-api/ && cp ../lum-server-api/lum-server-API.yaml ./lum-server-api/"
-
-  }
+  ]
 }

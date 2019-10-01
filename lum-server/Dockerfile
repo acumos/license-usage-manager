@@ -17,6 +17,43 @@
 # ============LICENSE_END============================================
 # Dockerfile for lum-server
 
+# The instructions for the first stage
+FROM node:10.16.3-alpine as builder
+
+ARG BUILD_DEVELOPMENT
+# if --build-arg BUILD_DEVELOPMENT=1, set NODE_ENV to 'development' or set to null otherwise.
+ENV NODE_ENV=${BUILD_DEVELOPMENT:+development}
+# if NODE_ENV is null, set it to 'production' (or leave as is otherwise).
+ENV NODE_ENV=${NODE_ENV:-production}
+
+RUN mkdir work
+WORKDIR /work/
+COPY package*.json ./
+RUN npm install --quiet
+
+RUN if [ "$BUILD_DEVELOPMENT" == "1" ]; \
+    then echo 'installing nodemon' && npm install nodemon ; \
+    fi 
+
+
+## ES lint 
+WORKDIR /js-lint-work/
+COPY ./.eslintrc.js  ./
+COPY ./lum-server.js ./lum-server.js
+COPY ./src/     src/
+RUN npm install eslint@^6.5.0  --no-save
+RUN npm install eslint-config-recommended@^4.0.0  --no-save
+RUN node_modules/.bin/eslint .
+
+
+## OAS linting
+WORKDIR /oas-work/
+COPY package*.json ./
+COPY ./lum-server-api/   ./lum-server-api/
+RUN npm install speccy
+RUN npm run lint-spec
+
+# The instructions for second stage
 FROM node:10.16.3-alpine
 
 ENV INSROOT /opt/app
@@ -24,19 +61,15 @@ ENV APPPORT 2080
 ENV APPUSER lum
 ENV APPDIR ${INSROOT}/${APPUSER}
 
-COPY ./*.js     ${APPDIR}/
-COPY ./*.json   ${APPDIR}/
-COPY ./*.txt    ${APPDIR}/
-COPY ./etc/     ${APPDIR}/etc/
-COPY ./src/     ${APPDIR}/src/
-COPY ./lum-server-api/   ${APPDIR}/lum-server-api/
-
 WORKDIR ${APPDIR}
+COPY --from=builder /work/package.json package.json
+COPY --from=builder /js-lint-work/lum-server.js lum-server.js
 
-RUN npm install \
- && npm run lint \
- && npm prune --production \
- && npm remove -g npm
+COPY --from=builder /js-lint-work/src src
+COPY --from=builder /work/node_modules node_modules
+COPY ./*.txt    .
+COPY ./etc/     ./etc/
+COPY ./lum-server-api/   ./lum-server-api/
 
 RUN addgroup ${APPUSER} \
  && adduser -S -h ${APPDIR} -G ${APPUSER} ${APPUSER} \
@@ -46,4 +79,4 @@ USER ${APPUSER}
 
 EXPOSE ${APPPORT}
 
-CMD ["/usr/local/bin/node", "lum-server.js"]
+CMD ["npm", "run" "start:prod"]
