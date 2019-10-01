@@ -22,6 +22,8 @@ const dbAssetUsageReq = require('../../db/asset-usage-req');
 const dbAssetUsage = require('../../db/asset-usage');
 const dbSwidTag = require('../../db/swid-tag');
 const dbLicenseProfile = require('../../db/license-profile');
+const {InvalidDataError} = require('../../error');
+
 
 const getAssetUsageEvent = async (req, res, next) => {
     utils.logInfo(res, `api getAssetUsageEvent(${res.locals.params.assetUsageId})`);
@@ -42,6 +44,10 @@ const getAssetUsageEvent = async (req, res, next) => {
 const putAssetUsageEvent = async (req, res, next) => {
     res.locals.params.assetUsageType = "assetUsageEvent";
     const assetUsageEvent = res.locals.reqBody.assetUsageEvent;
+    if(!assetUsageEvent){
+        throw new InvalidDataError('agreement expected');
+    }
+    
     res.locals.response.assetUsageEvent = Object.assign({}, assetUsageEvent);
 
     res.locals.params.action = assetUsageEvent.action;
