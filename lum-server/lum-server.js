@@ -44,7 +44,10 @@ const lumHttpServer = require('http').createServer(app);
 lumHttpServer.listen(lumServer.config.port, () => {
     lumServer.logger.info(`started ${lumServer.config.serverName}:
         config(${JSON.stringify(lumServer.config, utils.hidePass)})
-        healthcheck(${JSON.stringify(lumServer.healthcheck)})
-        env(${JSON.stringify(process.env)})`);
+        healthcheck(${JSON.stringify(lumServer.healthcheck)})`);
+
+    if(process.env.NODE_ENV !== 'production'){
+        lumServer.logger.info(`env(${JSON.stringify(process.env)})`);
+    }
 });
 lumServer.logger.info(`starting ${lumServer.config.serverName}...`);

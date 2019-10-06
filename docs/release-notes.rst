@@ -20,6 +20,25 @@
 License Usage Manager Release Notes
 ===================================
 
+Version 0.26.4, 7 October 2019
+------------------------------
+
+- LUM integration support (`ACUMOS-3534 <https://jira.acumos.org/browse/ACUMOS-3534>`_)
+  - Added new helm chart for lum + postgresql
+  - New environment variable DATABASE_PASSWORD to help seperate config from secret config
+  - Updated docker-compose - to handle debugging and skipping over production build steps
+  - Support integration with AIO / K8 / Helm chart behind nginx proxy
+    - Fixed issue with nginx-proxy decoding url causing issues with encoded url as path params
+      changed   /api/v1/asset-usage-agreement/[encodedIRI] -
+        ->/api/v1/asset-usage-agreement/?assetUsageAgreementId=[encodedIRI]
+    - Added support for handling query param vs path param for assetUsageAgreementId
+    - Added server back into lum-server-API.yaml to help with serving from different 
+      base path after adding nginx proxy
+  - Fixed docker-compose debugging and reloading after adding multi-stage build
+  - Added support for base url to be under /lum/ and support servers dropdown in swagger ui
+  - Bug in swagger lint - disabled rule server-trailing-slash -- caused error for server /
+
+
 Version 0.26.3, 1 October 2019
 ------------------------------
 

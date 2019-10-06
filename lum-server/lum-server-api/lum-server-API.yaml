@@ -19,7 +19,7 @@
 openapi: '3.0.2'
 
 info:
-  version: "0.26.3"
+  version: "0.26.4"
   title: "License Usage Manager (LUM) API"
   contact:
     name: Acumos License Management
@@ -30,8 +30,10 @@ info:
   description: RESTfull-ish API for License Usage Manager - json based
 
 servers:
-  - url: http://localhost:2080
-    description: License Usage Manager (LUM) server
+  - url: /
+    description: Root
+  - url: /lum
+    description: Helm Chart with ingress
 
 tags:
   - name: "swid-tag"
@@ -269,12 +271,12 @@ paths:
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-  /api/v1/asset-usage-agreement/{assetUsageAgreementId}:
+  /api/v1/asset-usage-agreement/:
     parameters:
       - name: assetUsageAgreementId
         example:  acumos://software-licensor/Company A/agreement/3eb8c43a-bf19-46ab-8392-99c7efdf4106
         required: true
-        in: path
+        in: query
         description: urlencoded UID key to assetUsageAgreement in IRI or URI format
         schema:
           type: string
@@ -454,12 +456,12 @@ paths:
                 $ref: '#/components/schemas/RevokeAgreementResponse'
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-  /api/v1/asset-usage-agreement-restriction/{assetUsageAgreementId}:
+  /api/v1/asset-usage-agreement-restriction/:
     parameters:
       - name: assetUsageAgreementId
         required: true
         example:  acumos://software-licensor/Company A/agreement/3eb8c43a-bf19-46ab-8392-99c7efdf4106
-        in: path
+        in: query
         description: urlencoded UID key to assetUsageAgreement in IRI or URI format.
           possible format "http://software-licensor/<softwareLicensorId>/agreement/<agreement-uuid>"
         schema:
@@ -839,8 +841,8 @@ components:
               type: string
           example:
             serverName: "lum-server"
-            serverVersion: "0.26.3"
-            apiVersion: "0.26.3"
+            serverVersion: "0.26.4"
+            apiVersion: "0.26.4"
             nodeVersion: "10.16.3"
             pgVersion: "PostgreSQL 11.5 on x86_64-pc-linux-musl, compiled by gcc (Alpine 8.3.0) 8.3.0, 64-bit"
             serverRunInstanceId: "faa08408-59fd-44d2-b815-9ceb9b8fdf92"
@@ -2111,4 +2113,3 @@ components:
           default: []
           items:
             $ref: '#/components/schemas/ODRLRule'
-

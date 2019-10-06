@@ -122,6 +122,7 @@ module.exports = {
      */
     initDb() {
         const pgOptions = Object.assign({}, lumServer.config.database);
+        pgOptions.password = process.env.DATABASE_PASSWORD || pgOptions.password;
         lumServer.logger.info(`initializing pgclient(${JSON.stringify(pgOptions, utils.hidePass)})...`);
         pgPool = new pg.Pool(pgOptions);
     },

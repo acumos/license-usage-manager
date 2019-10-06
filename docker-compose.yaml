@@ -14,26 +14,27 @@
 # limits under the License.
 # ============LICENSE_END=========================================================
 ---
-version: "3"
+version: "3.4"
 services:
   lum-database:
     build: ./lum-db/
     # replace username/repo:tag with your name and image details
-    image: lum-database:0.26.3-SNAPSHOT
+    image: lum-database:0.26.4-SNAPSHOT
     ports:
       - "5432:5432"
   lum-server:
     build: 
       context: ./lum-server/
+      target: build-stage
       args:
       - BUILD_DEVELOPMENT=1
     command: npm run start:dev
     # replace username/repo:tag with your name and image details
-    image: lum-server:0.26.3-SNAPSHOT
+    image: lum-server:0.26.4-SNAPSHOT
     depends_on:
       - lum-database
     ports:
       - "2080:2080"
       - "5858:5858"
     volumes:
-      - ./lum-server/src:/opt/app/lum/src
+      - ./lum-server/src:/work/src

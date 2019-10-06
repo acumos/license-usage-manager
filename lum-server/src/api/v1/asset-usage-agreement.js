@@ -72,7 +72,7 @@ const router = new Router();
 
 router.param('assetUsageAgreementId', setAssetUsageAgreementId);
 
-router.route('/:assetUsageAgreementId')
+router.route('/')
     .get(getAssetUsageAgreement)
     .delete(revokeAssetUsageAgreement, getAssetUsageAgreement)
     .put(putAssetUsageAgreement, getAssetUsageAgreement);
