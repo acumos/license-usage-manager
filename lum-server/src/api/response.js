@@ -46,12 +46,19 @@ module.exports = {
         res.locals.reqBody = Object.assign({}, req.body || {});
         res.locals.requestId = res.locals.reqBody.requestId || utils.uuid();
 
+        // Moved assetUsageAgreementId to query param due to issues with escaping path param with nginx proxy
+        if (req.query.assetUsageAgreementId && typeof req.query.assetUsageAgreementId === 'string') {
+            res.locals.params.assetUsageAgreementId = req.query.assetUsageAgreementId;
+            res.locals.response.assetUsageAgreementId = res.locals.params.assetUsageAgreementId;
+        }
+
         if (req.query.userId && typeof req.query.userId === 'string') {
             res.locals.params.userId = req.query.userId;
             res.locals.response.userId = res.locals.params.userId;
         } else if (res.locals.reqBody.userId) {
             res.locals.params.userId = res.locals.reqBody.userId;
         }
+
 
         for (const [key, value] of Object.entries(res.locals.reqBody)) {
             if (typeof value === 'string') {

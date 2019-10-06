@@ -1,0 +1,1 @@
+../../../lum-db/initdb/10_insert_data.sql

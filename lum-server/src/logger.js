@@ -65,6 +65,8 @@ module.exports = {
         lumServer.logger.info("-----------------------------------------------------------------------");
 
         lumServer.logger.info("logger started for", app_name, 'to', logFile? 'console': logFile);
-        lumServer.logger.info("process.env", process.env);
+        if(process.env.NODE_ENV !== 'production'){
+            lumServer.logger.info('process.env', process.env);
+        }
     }
 };

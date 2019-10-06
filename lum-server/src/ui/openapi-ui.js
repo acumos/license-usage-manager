@@ -22,9 +22,7 @@ const swaggerUi = require('swagger-ui-express');
 
 try {
     const swaggerSpec = require('yamljs').load('./lum-server-api/lum-server-API.yaml');
-    if (swaggerSpec.servers) {
-        delete swaggerSpec.servers;
-    }
+
     lumServer.healthcheck.apiVersion = swaggerSpec.info.version;
 
     router.use("/", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
