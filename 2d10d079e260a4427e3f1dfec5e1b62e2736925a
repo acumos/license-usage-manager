@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bfd7d9fb_6757db47",
+        "filename": "lum-server/lum-server-api/lum-server-API.yaml",
+        "patchSetId": 1
+      },
+      "lineNbr": 279,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-10-08T17:56:04Z",
+      "side": 1,
+      "message": "we need to discuss it first",
+      "range": {
+        "startLine": 279,
+        "startChar": 12,
+        "endLine": 279,
+        "endChar": 17
+      },
+      "revId": "2d10d079e260a4427e3f1dfec5e1b62e2736925a",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "45c71535_ef145993",
+        "filename": "lum-server/lum-server-api/lum-server-API.yaml",
+        "patchSetId": 1
+      },
+      "lineNbr": 464,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-10-08T17:56:04Z",
+      "side": 1,
+      "message": "we need to discuss it first",
+      "range": {
+        "startLine": 464,
+        "startChar": 12,
+        "endLine": 464,
+        "endChar": 17
+      },
+      "revId": "2d10d079e260a4427e3f1dfec5e1b62e2736925a",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "928752c8_0d31e59c",
+        "filename": "lum-server/lum-server-api/lum-server-API.yaml",
+        "patchSetId": 1
+      },
+      "lineNbr": 2115,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-10-08T17:56:04Z",
+      "side": 1,
+      "message": "gerrit complains on many changed files: No newline at end of revision file.",
+      "range": {
+        "startLine": 2115,
+        "startChar": 12,
+        "endLine": 2115,
+        "endChar": 49
+      },
+      "revId": "2d10d079e260a4427e3f1dfec5e1b62e2736925a",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bed4da6c_36576a08",
+        "filename": "lum-server/src/api/response.js",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-10-08T17:56:04Z",
+      "side": 1,
+      "message": "this is a wrong place and badly structured logic\ncould you send me example of the problem you are trying to solve ?",
+      "range": {
+        "startLine": 49,
+        "startChar": 0,
+        "endLine": 53,
+        "endChar": 9
+      },
+      "revId": "2d10d079e260a4427e3f1dfec5e1b62e2736925a",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4c1f1241_ad3f3556",
+        "filename": "lum-server/src/api/v1/asset-usage-agreement.js",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-10-08T17:56:04Z",
+      "side": 1,
+      "message": "now this is an unused function because you shuffled the code",
+      "range": {
+        "startLine": 22,
+        "startChar": 0,
+        "endLine": 27,
+        "endChar": 2
+      },
+      "revId": "2d10d079e260a4427e3f1dfec5e1b62e2736925a",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6aac3089_aac97707",
+        "filename": "lum-server/src/logger.js",
+        "patchSetId": 1
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-10-08T17:56:04Z",
+      "side": 1,
+      "message": "there is a better way of hiding the password",
+      "range": {
+        "startLine": 68,
+        "startChar": 0,
+        "endLine": 70,
+        "endChar": 9
+      },
+      "revId": "2d10d079e260a4427e3f1dfec5e1b62e2736925a",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    }
+  ]
+}

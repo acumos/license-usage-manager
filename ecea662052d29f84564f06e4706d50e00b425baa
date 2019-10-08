@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7dcda5e3_711ef047",
+        "filename": "lum-server/src/ui/openapi-ui.js",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-10-08T17:56:04Z",
+      "side": 0,
+      "message": "should this be configurable ?",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 27,
+        "endChar": 5
+      },
+      "revId": "ecea662052d29f84564f06e4706d50e00b425baa",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    }
+  ]
+}
