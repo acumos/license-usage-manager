@@ -46,6 +46,30 @@
       "revId": "ecea662052d29f84564f06e4706d50e00b425baa",
       "serverId": "655300a2-7a56-4504-9153-881edd907bea",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a2bf700d_25b6ebea",
+        "filename": "lum-server/src/ui/openapi-ui.js",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 290
+      },
+      "writtenOn": "2019-10-09T17:08:52Z",
+      "side": 0,
+      "message": "I believe there are some improvements coming for this severs dropdown for open api 3 but for now the dropdown will work I added /lum (lum behind k8 nginx ingress server) and / for development. I am using relative paths instead of server names and ports since those could change. \n\n\nAs a future improvement .. It is possible if we have an environment variable to know the server name we could automatically set that value here. -- all improvements could be made to make this easier (auto detected)",
+      "parentUuid": "60a6f975_ca632ba8",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 27,
+        "endChar": 5
+      },
+      "revId": "ecea662052d29f84564f06e4706d50e00b425baa",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": false
     }
   ]
 }
