@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "92fd53cb_df7d7b98",
+        "filename": "lum-server/lum-server-api/lum-server-API.yaml",
+        "patchSetId": 1
+      },
+      "lineNbr": 279,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-10-09T16:19:19Z",
+      "side": 1,
+      "message": "Andrew - good point about UUID.  \n\nThe problem is that LUM is trying to comply with ODRL and in ODRL all ids are uid \u003d\u003d IRI \u003d\u003d URI.  \n\nBesides, all the other keys in LUM API are also uid\u003d\u003dIRI except some uuid type attributes (like swPersistentId and licenseProfileId) that are not part of the URL.  \n\nSo, LUM cannot demand that swTagId and assetUsageAgreementId and assetUsageId and softwareLicensorId would not contain urlencoded chars in one or another URL",
+      "parentUuid": "f927a7c3_89653225",
+      "range": {
+        "startLine": 279,
+        "startChar": 12,
+        "endLine": 279,
+        "endChar": 17
+      },
+      "revId": "2d10d079e260a4427e3f1dfec5e1b62e2736925a",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "45c71535_ef145993",
         "filename": "lum-server/lum-server-api/lum-server-API.yaml",
         "patchSetId": 1
