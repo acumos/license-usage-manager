@@ -20,7 +20,7 @@ replicaCount: 1
 
 image:
   repository: nexus3.acumos.org:10002/acumos/lum-server
-  tag: 0.26.4
+  tag: 0.26.5
   pullPolicy: IfNotPresent
   pullSecrets: 
 
