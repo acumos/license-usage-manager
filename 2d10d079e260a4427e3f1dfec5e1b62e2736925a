@@ -121,6 +121,30 @@
     },
     {
       "key": {
+        "uuid": "7137a773_dc4dda1f",
+        "filename": "lum-server/lum-server-api/lum-server-API.yaml",
+        "patchSetId": 1
+      },
+      "lineNbr": 279,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-10-09T16:39:28Z",
+      "side": 1,
+      "message": "thank you for discussion\n\nJustin - if you agree to conversion of all path-params to query-params in LUM API, I will change all path-params to query-params for all LUM APIs in 0.27.0 - you do not have to do that in LUM 0.26.4.  \n\nHowever, you would need to change all LUM clients to pass params in query rather than path after or together with LUM 0.27.0.",
+      "parentUuid": "8400429a_3b7cf85d",
+      "range": {
+        "startLine": 279,
+        "startChar": 12,
+        "endLine": 279,
+        "endChar": 17
+      },
+      "revId": "2d10d079e260a4427e3f1dfec5e1b62e2736925a",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "45c71535_ef145993",
         "filename": "lum-server/lum-server-api/lum-server-API.yaml",
         "patchSetId": 1
