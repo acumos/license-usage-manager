@@ -22,6 +22,30 @@
       "revId": "ecea662052d29f84564f06e4706d50e00b425baa",
       "serverId": "655300a2-7a56-4504-9153-881edd907bea",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "60a6f975_ca632ba8",
+        "filename": "lum-server/src/ui/openapi-ui.js",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-10-09T15:09:30Z",
+      "side": 0,
+      "message": "I take that back - no need for this logic since we have \"/\" in URL for the server on swagger-spec",
+      "parentUuid": "7dcda5e3_711ef047",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 27,
+        "endChar": 5
+      },
+      "revId": "ecea662052d29f84564f06e4706d50e00b425baa",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": false
     }
   ]
 }

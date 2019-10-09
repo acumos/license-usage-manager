@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "73290ad3_599e865e",
+        "filename": "lum-server/lum-server-api/lum-server-API.yaml",
+        "patchSetId": 1
+      },
+      "lineNbr": 279,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-10-09T15:09:30Z",
+      "side": 1,
+      "message": "All LUM API endpoints need to be consistent to avoid what-when cases that are confusing.\n\nIf we change here from path to query, we would need to change all the other API endpoints from path to query as well.  Let me know and I will change all of them to query in 0.27.0.",
+      "parentUuid": "bfd7d9fb_6757db47",
+      "range": {
+        "startLine": 279,
+        "startChar": 12,
+        "endLine": 279,
+        "endChar": 17
+      },
+      "revId": "2d10d079e260a4427e3f1dfec5e1b62e2736925a",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "45c71535_ef145993",
         "filename": "lum-server/lum-server-api/lum-server-API.yaml",
         "patchSetId": 1
@@ -94,6 +118,30 @@
     },
     {
       "key": {
+        "uuid": "2e113a49_8f25f5f3",
+        "filename": "lum-server/src/api/response.js",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-10-09T15:09:30Z",
+      "side": 1,
+      "message": "if we decide going from path to query for all the params, I will change that on all LUM API endpoints to keep them consistent in 0.27.0",
+      "parentUuid": "bed4da6c_36576a08",
+      "range": {
+        "startLine": 49,
+        "startChar": 0,
+        "endLine": 53,
+        "endChar": 9
+      },
+      "revId": "2d10d079e260a4427e3f1dfec5e1b62e2736925a",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "4c1f1241_ad3f3556",
         "filename": "lum-server/src/api/v1/asset-usage-agreement.js",
         "patchSetId": 1
@@ -137,6 +185,30 @@
       "revId": "2d10d079e260a4427e3f1dfec5e1b62e2736925a",
       "serverId": "655300a2-7a56-4504-9153-881edd907bea",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a776037a_3361bb8f",
+        "filename": "lum-server/src/logger.js",
+        "patchSetId": 1
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-10-09T15:09:30Z",
+      "side": 1,
+      "message": "ignore this comment - I will update the logic for hiding password in env vars in 0.27.0",
+      "parentUuid": "6aac3089_aac97707",
+      "range": {
+        "startLine": 68,
+        "startChar": 0,
+        "endLine": 70,
+        "endChar": 9
+      },
+      "revId": "2d10d079e260a4427e3f1dfec5e1b62e2736925a",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": false
     }
   ]
 }
