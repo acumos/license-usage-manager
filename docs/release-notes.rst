@@ -20,6 +20,20 @@
 License Usage Manager Release Notes
 ===================================
 
+Version 0.26.5, 9 October 2019
+------------------------------
+* Open api changes to support fixes in LUM Java client - fixed typing of AssetUsageResponse and AssetUsageDenialAssetUsageDenial --
+  Java code gen has a problem with the same property referenced by multiple schemas .. treats it as object
+* Object getAssetUsage() -> AssetUsageDenialOrEntitlement getAssetUsage()
+* List<Object> getAssetUsageDenial() ->  List<AssetUsageDenialAssetUsageDenial> getAssetUsageDenial()
+* Removed wrapper schema for assetUsageDenial  #/components/schemas/AssetUsageDenials
+* Removed wrapper schemas for assetUsage property - for AssetUsageResponse schema
+ - $ref: '#/components/schemas/AssetUsageResponseBase'
+ - $ref: '#/components/schemas/AssetUsageMixedResponse'
+ - $ref: '#/components/schemas/IncludedAssetUsageMixedResponse'
+  - Fix caused some overlap between AssetUsageResponseBase and AssetUsageMixedResponse.
+
+
 Version 0.26.4, 7 October 2019
 ------------------------------
 
@@ -32,7 +46,7 @@ Version 0.26.4, 7 October 2019
       changed   /api/v1/asset-usage-agreement/[encodedIRI] -
         ->/api/v1/asset-usage-agreement/?assetUsageAgreementId=[encodedIRI]
     - Added support for handling query param vs path param for assetUsageAgreementId
-    - Added server back into lum-server-API.yaml to help with serving from different 
+    - Added server back into lum-server-API.yaml to help with serving from different
       base path after adding nginx proxy
   - Fixed docker-compose debugging and reloading after adding multi-stage build
   - Added support for base url to be under /lum/ and support servers dropdown in swagger ui
@@ -43,7 +57,7 @@ Version 0.26.3, 1 October 2019
 ------------------------------
 
 - Added support for nodemon support for faster reloads in docker container
-- adding examples to make dredd apiary happy easier to test 
+- adding examples to make dredd apiary happy easier to test
 - docker build change to use multi stage builds
 - Include open api spec lint to docker build
 - Clean up API for open api lint errors

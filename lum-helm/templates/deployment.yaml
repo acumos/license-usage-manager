@@ -65,7 +65,7 @@ spec:
               - 'sh'
               - '-c'
               - >
-                until nc -z -w 2 {{ .Release.Name }}-postgresql {{ .Values.postgresql.servicePort }} && echo mongodb ok;
+                until nc -z -w 2 {{ .Release.Name }}-postgresql {{ .Values.postgresql.servicePort }} && echo postgresql ok;
                   do sleep 2;
                 done
           volumeMounts:

@@ -18,11 +18,11 @@
 
 image:
   repository: acumos/lum-server
-  tag: 0.26.4
+  tag: 0.26.5
   pullPolicy: Never
-  
+
 ingress:
-  ## Enable to setup ingress for lum server 
+  ## Enable to setup ingress for lum server
   ## Need to determine how we will secure this ingress service
   enabled: true
 

@@ -22,7 +22,7 @@ minikube start -p acumos-lum --kubernetes-version=1.13.0
 minikube profile acumos-lum
 helm init
 
-## build in minikube docker instance 
+## build in minikube docker instance
 eval $(minikube -p acumos-lum docker-env)
 cd ../lum-server
-docker build -t acumos/lum-server:0.26.4 .
+docker build -t acumos/lum-server:0.26.5 .
