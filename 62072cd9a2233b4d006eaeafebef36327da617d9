@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1ed458fe_cfde7e4e",
+        "filename": "lum-server/lum-server.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-10-09T17:47:55Z",
+      "side": 1,
+      "message": "will improve that in 0.27.0",
+      "range": {
+        "startLine": 49,
+        "startChar": 4,
+        "endLine": 51,
+        "endChar": 5
+      },
+      "revId": "62072cd9a2233b4d006eaeafebef36327da617d9",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dafa5eff_b71b5338",
+        "filename": "lum-server/src/api/response.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-10-09T17:47:55Z",
+      "side": 1,
+      "message": "I will change that in 0.27.0",
+      "range": {
+        "startLine": 49,
+        "startChar": 8,
+        "endLine": 53,
+        "endChar": 9
+      },
+      "revId": "62072cd9a2233b4d006eaeafebef36327da617d9",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3745ba98_963e1da2",
+        "filename": "lum-server/src/db/pgclient.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-10-09T17:47:55Z",
+      "side": 1,
+      "message": "I will change that in 0.27.0",
+      "range": {
+        "startLine": 125,
+        "startChar": 8,
+        "endLine": 125,
+        "endChar": 81
+      },
+      "revId": "62072cd9a2233b4d006eaeafebef36327da617d9",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c558e58f_01edb475",
+        "filename": "lum-server/src/logger.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-10-09T17:47:55Z",
+      "side": 1,
+      "message": "going to remove this logging here in 0.27.0",
+      "range": {
+        "startLine": 68,
+        "startChar": 8,
+        "endLine": 70,
+        "endChar": 9
+      },
+      "revId": "62072cd9a2233b4d006eaeafebef36327da617d9",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    }
+  ]
+}
