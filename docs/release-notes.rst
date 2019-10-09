@@ -20,6 +20,20 @@
 License Usage Manager Release Notes
 ===================================
 
+Version 0.26.5, 9 October 2019
+------------------------------
+* Open api changes to support fixes in LUM Java client - fixed typing of AssetUsageResponse and AssetUsageDenialAssetUsageDenial -- 
+  Java code gen has a problem with the same property referenced by multiple schemas .. treats it as object
+* Object getAssetUsage() -> AssetUsageDenialOrEntitlement getAssetUsage()
+* List<Object> getAssetUsageDenial() ->  List<AssetUsageDenialAssetUsageDenial> getAssetUsageDenial() 
+* Removed wrapper schema for assetUsageDenial  #/components/schemas/AssetUsageDenials
+* Removed wrapper schemas for assetUsage property - for AssetUsageResponse schema 
+ - $ref: '#/components/schemas/AssetUsageResponseBase'
+ - $ref: '#/components/schemas/AssetUsageMixedResponse'
+ - $ref: '#/components/schemas/IncludedAssetUsageMixedResponse'
+  - Fix caused some overlap between AssetUsageResponseBase and 
+ 
+
 Version 0.26.4, 7 October 2019
 ------------------------------
 

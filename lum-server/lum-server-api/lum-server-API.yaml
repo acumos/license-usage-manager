@@ -19,7 +19,7 @@
 openapi: '3.0.2'
 
 info:
-  version: "0.26.4"
+  version: "0.26.5"
   title: "License Usage Manager (LUM) API"
   contact:
     name: Acumos License Management
@@ -841,8 +841,8 @@ components:
               type: string
           example:
             serverName: "lum-server"
-            serverVersion: "0.26.4"
-            apiVersion: "0.26.4"
+            serverVersion: "0.26.5"
+            apiVersion: "0.26.5"
             nodeVersion: "10.16.3"
             pgVersion: "PostgreSQL 11.5 on x86_64-pc-linux-musl, compiled by gcc (Alpine 8.3.0) 8.3.0, 64-bit"
             serverRunInstanceId: "faa08408-59fd-44d2-b815-9ceb9b8fdf92"
@@ -1479,72 +1479,6 @@ components:
           - $ref: '#/components/schemas/AssetUsageRequestTop'
           - $ref: '#/components/schemas/AssetUsageIncludedRequestTop'
 
-    AssetUsageDenials:
-      description: collection of denial info to assetUsageReq request
-      type: array
-      default: []
-      nullable: true
-      items:
-        description: single denial info
-        type: object
-        required:
-          - denialType
-          - denialReason
-        properties:
-          denialType:
-            description: type of the reason for denial
-            type: string
-            enum:
-              - swidTagNotFound
-              - swidTagRevoked
-              - licenseProfileNotFound
-              - licenseProfileRevoked
-              - agreementNotFound
-              - rightToUseRevoked
-              - usageProhibited
-              - matchingConstraintOnAssignee
-              - matchingConstraintOnTarget
-              - timingConstraint
-              - usageConstraint
-
-          denialReason:
-            description: human readable explanation why denied entitlement
-            type: string
-
-          deniedAssetUsageAgreementId:
-            description: uid of Asset-Usage-AssetUsageAgreement that caused the denial or not match
-            type: string
-
-          deniedAssetUsageAgreementRevision:
-            description: 1,2,3,... revision of the AssetUsageAgreement
-            type: integer
-            format: int64
-
-          deniedRightToUseId:
-            description: id of rightToUse that caused the denial
-            type: string
-
-          deniedRightToUseRevision:
-            description: 1,2,3,... revision of the rightToUse - auto-incremented by LUM
-            type: integer
-            format: int64
-
-          denialReqItemName:
-            description: name of the item that came from req or NOW() or +1 for asset-assignment
-            type: string
-
-          denialReqItemValue:
-            description: value of the item that came from req or NOW() or +1 for asset-assignment.
-              It can be either string or number
-
-          deniedConstraint:
-            description: data from usageConstraint or assignee refinement record that caused the denial
-            type: object
-
-          deniedMetrics:
-            description: current statistical data that caused the denial. It is optional and its structure can very
-            type: object
-
     AssetUsageEventBody:
       description: body of the notification of asset-usage event to be tracked by LUM with no decision on the entitlement of the action
       type: object
@@ -1739,7 +1673,70 @@ components:
       type: object
       properties:
         assetUsageDenial:
-          $ref: '#/components/schemas/AssetUsageDenials'
+          description: collection of denial info to assetUsageReq request
+          type: array
+          default: []
+          nullable: true
+          items:
+            description: single denial info
+            type: object
+            required:
+              - denialType
+              - denialReason
+            properties:
+              denialType:
+                description: type of the reason for denial
+                type: string
+                enum:
+                  - swidTagNotFound
+                  - swidTagRevoked
+                  - licenseProfileNotFound
+                  - licenseProfileRevoked
+                  - agreementNotFound
+                  - rightToUseRevoked
+                  - usageProhibited
+                  - matchingConstraintOnAssignee
+                  - matchingConstraintOnTarget
+                  - timingConstraint
+                  - usageConstraint
+
+              denialReason:
+                description: human readable explanation why denied entitlement
+                type: string
+
+              deniedAssetUsageAgreementId:
+                description: uid of Asset-Usage-AssetUsageAgreement that caused the denial or not match
+                type: string
+
+              deniedAssetUsageAgreementRevision:
+                description: 1,2,3,... revision of the AssetUsageAgreement
+                type: integer
+                format: int64
+
+              deniedRightToUseId:
+                description: id of rightToUse that caused the denial
+                type: string
+
+              deniedRightToUseRevision:
+                description: 1,2,3,... revision of the rightToUse - auto-incremented by LUM
+                type: integer
+                format: int64
+
+              denialReqItemName:
+                description: name of the item that came from req or NOW() or +1 for asset-assignment
+                type: string
+
+              denialReqItemValue:
+                description: value of the item that came from req or NOW() or +1 for asset-assignment.
+                  It can be either string or number
+
+              deniedConstraint:
+                description: data from usageConstraint or assignee refinement record that caused the denial
+                type: object
+
+              deniedMetrics:
+                description: current statistical data that caused the denial. It is optional and its structure can very
+                type: object
 
     AssetUsageDenialOrEntitlement:
       description: either denial or entitlement for denied response to assetUsageReq request.
@@ -1754,32 +1751,6 @@ components:
       # discriminator:
       #   propertyName: usageEntitled
 
-    AssetUsageMixedResponse:
-      description: denied response to assetUsageReq request
-      type: object
-      required: [assetUsage]
-      properties:
-        assetUsage:
-          $ref: '#/components/schemas/AssetUsageDenialOrEntitlement'
-
-    IncludedAssetUsageMixedResponse:
-      description: denied response to assetUsageReq request
-      type: object
-      required: [assetUsage]
-      properties:
-        assetUsage:
-          description: assetUsage info
-          properties:
-            includedAssetUsage:
-              description: list of included swTagId and assetUsageId
-              type: array
-              default: []
-              nullable: true
-              items:
-                allOf:
-                  - $ref: '#/components/schemas/IncludedAssetUsageTop'
-                  - $ref: '#/components/schemas/AssetUsageEntitled'
-                  - $ref: '#/components/schemas/AssetUsageDenialOrEntitlement'
 
     PutAssetUsageRequest:
       description: request for entitlement on assetUsage
@@ -1806,16 +1777,26 @@ components:
         - $ref: '#/components/schemas/RequestTopUser'
         - $ref: '#/components/schemas/RequestTop'
         - $ref: '#/components/schemas/ReqUsageEntitled'
-        - $ref: '#/components/schemas/AssetUsageResponseBase'
-        - $ref: '#/components/schemas/AssetUsageMixedResponse'
-        - $ref: '#/components/schemas/IncludedAssetUsageMixedResponse'
+        - $ref: '#/components/schemas/AssetUsage'
 
-    # GetAssetUsageNotFoundResponse:
-    #   description: not found - response to assetUsage request
-    #   allOf:
-    #     - $ref: '#/components/schemas/BaseRequestTop'
-    #     - $ref: '#/components/schemas/AssetUsageResponseTop'
-    #     - $ref: '#/components/schemas/AssetUsageNotFoundResponse'
+    AssetUsage:
+      required: [assetUsage]
+      properties:
+        assetUsage: 
+          allOf:  
+            - $ref: '#/components/schemas/AssetUsageDenialOrEntitlement'
+            - $ref: '#/components/schemas/AssetUsageEntitledMixin'
+          properties:
+            includedAssetUsage:
+              description: list of included swTagId and assetUsageId
+              type: array
+              default: []
+              nullable: true
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/IncludedAssetUsageTop'
+                  - $ref: '#/components/schemas/AssetUsageEntitled'
+                  - $ref: '#/components/schemas/AssetUsageDenialOrEntitlement'
 
     AssetUsageEventRequest:
       description: notification of asset-usage event to be tracked by LUM with no decision on the entitlement of the action
