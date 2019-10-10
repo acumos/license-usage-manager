@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b6c8b712_a5050b7f",
+        "filename": "docs/release-notes.rst",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-10-10T13:09:24Z",
+      "side": 1,
+      "message": "is this sentence finished ?\n\ngerrit does not like the trailing blanks.  There are 4 of them in this file and more in other files.  \n\ncould you remove the trailing blanks ?",
+      "range": {
+        "startLine": 34,
+        "startChar": 2,
+        "endLine": 34,
+        "endChar": 63
+      },
+      "revId": "4e897abba145cd5399c4cd36b7364f3cde4ee224",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "508b3412_26d939fd",
+        "filename": "lum-server/lum-server-api/lum-server-API.yaml",
+        "patchSetId": 2
+      },
+      "lineNbr": 1771,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-10-10T13:09:24Z",
+      "side": 1,
+      "message": "should we replace the following as well to keep it consistent with the AssetUsageResponse structure ?\n - $ref: \u0027#/components/schemas/AssetUsageResponseBase\u0027\n - $ref: \u0027#/components/schemas/AssetUsageSuccessResponse\u0027",
+      "range": {
+        "startLine": 1770,
+        "startChar": 0,
+        "endLine": 1771,
+        "endChar": 64
+      },
+      "revId": "4e897abba145cd5399c4cd36b7364f3cde4ee224",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "28d7779b_b314ce14",
+        "filename": "lum-server/lum-server-api/lum-server-API.yaml",
+        "patchSetId": 2
+      },
+      "lineNbr": 1786,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-10-10T13:09:24Z",
+      "side": 1,
+      "message": "trailing blanks",
+      "range": {
+        "startLine": 1786,
+        "startChar": 16,
+        "endLine": 1786,
+        "endChar": 18
+      },
+      "revId": "4e897abba145cd5399c4cd36b7364f3cde4ee224",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    }
+  ]
+}
