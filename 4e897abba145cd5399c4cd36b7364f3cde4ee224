@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "34e778ab_49792366",
+        "filename": "docs/release-notes.rst",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 290
+      },
+      "writtenOn": "2019-10-10T15:52:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b6c8b712_a5050b7f",
+      "range": {
+        "startLine": 34,
+        "startChar": 2,
+        "endLine": 34,
+        "endChar": 63
+      },
+      "revId": "4e897abba145cd5399c4cd36b7364f3cde4ee224",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "508b3412_26d939fd",
         "filename": "lum-server/lum-server-api/lum-server-API.yaml",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2019-10-10T13:09:24Z",
       "side": 1,
       "message": "should we replace the following as well to keep it consistent with the AssetUsageResponse structure ?\n - $ref: \u0027#/components/schemas/AssetUsageResponseBase\u0027\n - $ref: \u0027#/components/schemas/AssetUsageSuccessResponse\u0027",
+      "range": {
+        "startLine": 1770,
+        "startChar": 0,
+        "endLine": 1771,
+        "endChar": 64
+      },
+      "revId": "4e897abba145cd5399c4cd36b7364f3cde4ee224",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "93ccd7cd_33a30eee",
+        "filename": "lum-server/lum-server-api/lum-server-API.yaml",
+        "patchSetId": 2
+      },
+      "lineNbr": 1771,
+      "author": {
+        "id": 290
+      },
+      "writtenOn": "2019-10-10T15:52:17Z",
+      "side": 1,
+      "message": "I was just focused on denials in this patch.  Will take a look at this post 0.27.",
+      "parentUuid": "508b3412_26d939fd",
       "range": {
         "startLine": 1770,
         "startChar": 0,
