@@ -24,7 +24,7 @@ const {performance} = require('perf_hooks');
 module.exports = {
     /**
      * measuring time for performance
-     * @returns {} performance.now()
+     * @returns {number} performance.now()
      */
     now() {return performance.now();},
     /**
@@ -34,15 +34,15 @@ module.exports = {
     uuid() {return uuid();},
     /**
      * await sleep(milliSecs) to wake up after milliSecs
-     * @param  {} milliSecs
+     * @param  {number} milliSecs
      */
     sleep(milliSecs) {return new Promise(resolve => setTimeout(resolve, milliSecs));},
     /**
-     * hide pass* in JSON.stringify
-     * @param  {} key
+     * hide pass* and *password fields in JSON.stringify
+     * @param  {string} key
      * @param  {} value
      */
-    hidePass(key, value) {return (key && key.startsWith("pass") && "*") || value;},
+    hidePass(key, value) {return (key && key.toLowerCase().includes("passw") && "*") || value;},
     /**
      * remove new line symbols from the text
      * @param  {} text
@@ -56,16 +56,18 @@ module.exports = {
     },
     /**
      * convert milliSecs to human readable format in days and time
-     * @param  {} milliSecs
-     * @returns {string}
+     * @example "2 days 00:03:15.091157"
+     * @param   {number} milliSecs
+     * @returns {string} human readable format in days and time
      */
     milliSecsToString(milliSecs) {
-        var seconds = Math.floor(milliSecs / 1000);     milliSecs  -= seconds * 1000;
-        var minutes = Math.floor(seconds   / 60);       seconds    -= minutes * 60;
-        var hours   = Math.floor(minutes   / 60);       minutes    -= hours * 60;
-        const days  = Math.floor(hours     / 24);       hours      -= days * 24;
-
-        return `${days} days ${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}.${milliSecs}`;
+        let mkSecs  = Math.round(milliSecs * 1000);
+        let seconds = Math.floor(mkSecs  / 1000000);  mkSecs  -= seconds * 1000000;  mkSecs  = mkSecs.toString().padStart(6,'0');
+        let minutes = Math.floor(seconds / 60);       seconds -= minutes * 60;       seconds = seconds.toString().padStart(2,'0');
+        let hours   = Math.floor(minutes / 60);       minutes -= hours * 60;         minutes = minutes.toString().padStart(2,'0');
+        let days    = Math.floor(hours   / 24);       hours   -= days * 24;          hours   = hours.toString().padStart(2,'0');
+        days = (days ? `${days} day${days==1?'':'s'} `: '');
+        return `${days}${hours}:${minutes}:${seconds}.${mkSecs}`;
     },
     /**
      * postgres step info for logging
@@ -73,6 +75,7 @@ module.exports = {
      * @returns {string} postgres step info
      */
     getPgStepInfo(res) {
+        if (!res) {return;}
         const pg = res.locals.pg;
         if (!pg) {return;}
         return `tx[try(${pg.txRetryCount || ''})${pg.txid || ''}${pg.txStep || ''}]: ${pg.runStep || ''}`;
@@ -98,15 +101,19 @@ module.exports = {
     /**
      * log the info per request
      * @param  {} res
-     * @param  {} ...args
+     * @param  {...} args
      */
     logInfo(res, ...args) {
-        lumServer.logger.info(`${res.locals.requestId} ${module.exports.trackStepTime(res)}`, ...args);
+        if (res) {
+            lumServer.logger.info(`${res.locals.requestId} ${module.exports.trackStepTime(res)}`, ...args);
+        } else {
+            lumServer.logger.info(...args);
+        }
     },
     /**
      * log the warning per request
      * @param  {} res
-     * @param  {} ...args
+     * @param  {...} args
      */
     logWarn(res, ...args) {
         lumServer.logger.warn(`${res.locals.requestId} ${module.exports.trackStepTime(res)}`, ...args);
@@ -114,15 +121,19 @@ module.exports = {
     /**
      * log the error per request
      * @param  {} res
-     * @param  {} ...args
+     * @param  {...} args
      */
     logError(res, ...args) {
-        lumServer.logger.error(`${res.locals.requestId} ${module.exports.trackStepTime(res)}`, ...args);
+        if (res) {
+            lumServer.logger.error(`${res.locals.requestId} ${module.exports.trackStepTime(res)}`, ...args);
+        } else {
+            lumServer.logger.error(...args);
+        }
     },
     /**
      * safely retrieve a field from any object - body
      * @param  {} body
-     * @param  {} ...pathInReq
+     * @param  {...string} pathInReq
      * @returns {} field value
      */
     getFieldByPath(body, ...pathInReq) {
@@ -136,11 +147,24 @@ module.exports = {
     /**
      * safely retrieve a field from req.body stored in res.locals.reqBody
      * @param  {} res
-     * @param  {} ...pathInReq
+     * @param  {...string} pathInReq
      * @returns {} field value
      */
     getFromReqByPath(res, ...pathInReq) {
         return this.getFieldByPath(res.locals.reqBody, ...pathInReq);
+    },
+    /**
+     * deep copy items from source to items in target
+     * @param  {} target
+     * @param  {} source
+     * @returns target
+     */
+    deepCopyTo(target, source) {
+        if (!target || !source || typeof source !== 'object') {return target;}
+        for (const [key, value] of Object.entries(source)) {
+            target[key] = JSON.parse(JSON.stringify(value));
+        }
+        return target;
     },
     /**
      * copy fields with names listed in params from resultBody into target object
@@ -153,7 +177,7 @@ module.exports = {
         for (const paramName in params) {
             const value = sourceBody[paramName];
             if (typeof value !== 'undefined') {
-                target[paramName] = value;
+                target[paramName] = JSON.parse(JSON.stringify(value));
             }
         }
     },
@@ -166,6 +190,8 @@ module.exports = {
      *                                   matchingConstraintOnAssignee, matchingConstraintOnTarget,
      *                                   timingConstraint, usageConstraint}
      * @param  {string} denialReason human readable explanation why denied the entitlement
+     * @param  {string} deniedAction either requested action on the asset like download, publish, execute, etc.
+     *                  or special value of use
      * @param  {string} denialReqItemName name of the item that came from req or datetime or asset-action-count
      * @param  {} denialReqItemValue value of the item that came from req or NOW() or +1 for asset-action-count
      * @param  {string} [deniedAssetUsageAgreementId] id of Asset-Usage-Agreement that caused the denial
@@ -175,12 +201,13 @@ module.exports = {
      * @param  {} [deniedConstraint] whole record from usageConstraint or assignee refinement that caused the denial
      * @param  {} [deniedMetrics] current statistical data that caused the denial
      */
-    addDenial(denials, denialType, denialReason, denialReqItemName, denialReqItemValue,
+    addDenial(denials, denialType, denialReason, deniedAction, denialReqItemName, denialReqItemValue,
         deniedAssetUsageAgreementId, deniedAssetUsageAgreementRevision,
         deniedRightToUseId, deniedRightToUseRevision, deniedConstraint, deniedMetrics) {
         denials.push({
             "denialType": denialType,
             "denialReason": module.exports.makeOneLine(denialReason),
+            "deniedAction": deniedAction,
             "deniedAssetUsageAgreementId": deniedAssetUsageAgreementId,
             "deniedAssetUsageAgreementRevision": deniedAssetUsageAgreementRevision,
             "deniedRightToUseId": deniedRightToUseId,

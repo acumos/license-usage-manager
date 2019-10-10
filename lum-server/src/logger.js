@@ -14,19 +14,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // ============LICENSE_END=========================================================
+/* eslint-disable no-console */
 
 const winston = require("winston")
+    , path = require('path')
     , fs = require("fs")
     , utils = require('./utils');
 
-const logFolder = __dirname + '/../logs';
+const logFolder = path.join(__dirname, '../logs');
 try {if (!fs.existsSync(logFolder)) {fs.mkdirSync(logFolder);}}
 catch (e) {console.error(`failed to create log folder ${logFolder}`, e);}
-
+/**
+ * setup the log line format
+ */
 const logFormatText = winston.format.printf(({level, message, timestamp}) => {
   return `${timestamp} ${level.toUpperCase().padStart(10, ' ')}: ${message}`;
 });
-
+/**
+ * convert args to the logger into one line string
+ * @param  {function} original
+ */
 const logWrapper = (original) => {
     return (...args) => original(args.map(arg => {
             if (typeof arg === 'object') {return JSON.stringify(arg);}
@@ -36,13 +43,17 @@ const logWrapper = (original) => {
 };
 
 module.exports = {
-    initLogger(app_name) {
+    /**
+     * setup logger
+     * @param  {string} serverName name of the server
+     */
+    initLogger(serverName) {
         const transports = [
             new (winston.transports.Console)()
         ];
         let logFile;
         if (process.env.LOGDIR) {
-            logFile = logFolder + "/" + (app_name || '') + '_' + new Date().toISOString().substr(0, 19).replace(/:/g, "") + ".log";
+            logFile = path.join(logFolder, (serverName || '') + '_' + new Date().toISOString().substr(0, 19).replace(/:/g, "") + ".log");
             transports.push(new (winston.transports.File)({ json: false, filename: logFile, maxsize: (100 * 1024 * 1024) }));
         }
         const logger = winston.createLogger({
@@ -63,10 +74,6 @@ module.exports = {
 
         lumServer.logger = logger;
         lumServer.logger.info("-----------------------------------------------------------------------");
-
-        lumServer.logger.info("logger started for", app_name, 'to', logFile? 'console': logFile);
-        if(process.env.NODE_ENV !== 'production'){
-            lumServer.logger.info('process.env', process.env);
-        }
+        lumServer.logger.info("logger started for", serverName, 'to console', ((logFile && ('and ' + logFile)) || ''));
     }
 };

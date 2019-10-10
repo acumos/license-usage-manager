@@ -306,7 +306,7 @@ CREATE TABLE "usageMetrics" (
     "action"                TEXT NOT NULL,
     "usageType"             TEXT NOT NULL,
     "swTagId"               TEXT NULL,
-    "assetUsageRuleId"          TEXT NULL,
+    "assetUsageRuleId"      TEXT NULL,
     --usage metrics--
     "metrics"               JSONB NOT NULL,
     --housekeeping--
@@ -384,21 +384,24 @@ CREATE TABLE "assetUsageHistory" (
     "assetUsageSeq"                 INTEGER NOT NULL DEFAULT 1,
     "assetUsageType"                TEXT NOT NULL DEFAULT 'assetUsage',
     "assetUsageReqId"               UUID NOT NULL REFERENCES "assetUsageReq" ("assetUsageReqId"),
+    "action"                        TEXT NOT NULL,
     "softwareLicensorId"            TEXT NULL,
+    "swMgtSystemId"                 TEXT NULL,
+    "swMgtSystemInstanceId"         TEXT NULL,
+    "swMgtSystemComponent"          TEXT NULL,
     "swTagId"                       TEXT NULL,
     "swidTagRevision"               INTEGER NULL,
     "licenseProfileId"              UUID NULL,
     "licenseProfileRevision"        INTEGER NULL,
     "isRtuRequired"                 BOOLEAN NULL,
-    "usageMetricsId"                TEXT NULL,
-    "action"                        TEXT NOT NULL,
-    "assetUsageRuleId"                  TEXT NULL,
+    "assetUsageRuleId"              TEXT NULL,
     "rightToUseRevision"            INTEGER NULL,
     "assetUsageAgreementId"         TEXT NULL,
     "assetUsageAgreementRevision"   INTEGER NULL,
-    "swMgtSystemId"                 TEXT NULL,
-    "swMgtSystemInstanceId"         TEXT NULL,
-    "swMgtSystemComponent"          TEXT NULL,
+    "usageMetricsId"                TEXT NULL,
+    "metrics"                       JSONB NULL,
+    "assigneeMetrics"               JSONB NULL,
+
     --results--
     "usageEntitled"                 BOOLEAN NULL,
     "isUsedBySwCreator"             BOOLEAN NULL,
@@ -416,21 +419,23 @@ COMMENT ON COLUMN "assetUsageHistory"."assetUsageId" IS 'identifier of the asset
 COMMENT ON COLUMN "assetUsageHistory"."assetUsageSeq" IS 'sequential number 1,2,3,... - auto-incremented by LUM';
 COMMENT ON COLUMN "assetUsageHistory"."assetUsageType" IS 'ENUM {assetUsage, assetUsageEvent}';
 COMMENT ON COLUMN "assetUsageHistory"."assetUsageReqId" IS 'identifier of the assetUsageReq - identifier of request that inserted the assetUsageHistory';
+COMMENT ON COLUMN "assetUsageHistory"."action" IS 'download, publish, execute, monitor, ...';
 COMMENT ON COLUMN "assetUsageHistory"."softwareLicensorId" IS 'identifier of the supplier or owner of the software who provides the license profile and the right-to-use';
+COMMENT ON COLUMN "assetUsageHistory"."swMgtSystemId" IS 'like Acumos';
+COMMENT ON COLUMN "assetUsageHistory"."swMgtSystemInstanceId" IS 'system instance id that manages the software pieces and sent the request - like "Acumos#22"';
+COMMENT ON COLUMN "assetUsageHistory"."swMgtSystemComponent" IS 'component inside the system that sent the request like "model-runner"';
 COMMENT ON COLUMN "assetUsageHistory"."swTagId" IS 'GUID+version -- identifier of the software up to specific version';
 COMMENT ON COLUMN "assetUsageHistory"."swidTagRevision" IS '1,2,3,... revision of the swidTag - updates are allowed - auto-incremented by LUM';
 COMMENT ON COLUMN "assetUsageHistory"."licenseProfileId" IS 'identifier of the license profile attached to the software';
 COMMENT ON COLUMN "assetUsageHistory"."licenseProfileRevision" IS '1,2,3,... revision of the license - updates are allowed - auto-incremented by LUM';
 COMMENT ON COLUMN "assetUsageHistory"."isRtuRequired" IS 'whether requires the right-to-use for usage';
-COMMENT ON COLUMN "assetUsageHistory"."usageMetricsId" IS 'identifier of the usageMetrics';
-COMMENT ON COLUMN "assetUsageHistory"."action" IS 'download, publish, execute, monitor, ...';
 COMMENT ON COLUMN "assetUsageHistory"."assetUsageRuleId" IS 'identifier of the rightToUse for usageType=rightToUse';
 COMMENT ON COLUMN "assetUsageHistory"."rightToUseRevision" IS '1,2,3,... revision of rightToUse';
 COMMENT ON COLUMN "assetUsageHistory"."assetUsageAgreementId" IS 'FK to assetUsageAgreement';
 COMMENT ON COLUMN "assetUsageHistory"."assetUsageAgreementRevision" IS '1,2,3,... revision of assetUsageAgreement';
-COMMENT ON COLUMN "assetUsageHistory"."swMgtSystemId" IS 'like Acumos';
-COMMENT ON COLUMN "assetUsageHistory"."swMgtSystemInstanceId" IS 'system instance id that manages the software pieces and sent the request - like "Acumos#22"';
-COMMENT ON COLUMN "assetUsageHistory"."swMgtSystemComponent" IS 'component inside the system that sent the request like "model-runner"';
+COMMENT ON COLUMN "assetUsageHistory"."usageMetricsId" IS 'identifier of the usageMetrics';
+COMMENT ON COLUMN "assetUsageHistory"."metrics" IS 'usage metrics used for entitlement';
+COMMENT ON COLUMN "assetUsageHistory"."assigneeMetrics" IS 'assignee metrics used for entitlement';
 COMMENT ON COLUMN "assetUsageHistory"."usageEntitled" IS 'whether the asset-usage entitled (true) or not (false)';
 COMMENT ON COLUMN "assetUsageHistory"."isUsedBySwCreator" IS 'whether the userId listed in swCreators of the software';
 COMMENT ON COLUMN "assetUsageHistory"."licenseKeys" IS '[licenseKey] - copied from usageMetrics - list of license-keys provided by supplier are consumed by the software to unlock the functionality';

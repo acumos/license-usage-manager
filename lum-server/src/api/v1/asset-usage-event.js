@@ -22,7 +22,12 @@ const dbAssetUsageReq = require('../../db/asset-usage-req');
 const dbAssetUsage = require('../../db/asset-usage');
 const dbSwidTag = require('../../db/swid-tag');
 const dbLicenseProfile = require('../../db/license-profile');
-
+/**
+ * api to get asset-usage-event from database
+ * @param  {} req
+ * @param  {} res
+ * @param  {} next
+ */
 const getAssetUsageEvent = async (req, res, next) => {
     utils.logInfo(res, `api getAssetUsageEvent(${res.locals.params.assetUsageId})`);
     res.locals.dbdata.assetUsageEvent = null;
@@ -38,11 +43,16 @@ const getAssetUsageEvent = async (req, res, next) => {
     utils.logInfo(res, `out api getAssetUsageEvent(${res.locals.params.assetUsageId})`);
     next();
 };
-
+/**
+ * api to put asset-usage-event into database
+ * @param  {} req
+ * @param  {} res
+ * @param  {} next
+ */
 const putAssetUsageEvent = async (req, res, next) => {
     res.locals.params.assetUsageType = "assetUsageEvent";
     const assetUsageEvent = res.locals.reqBody.assetUsageEvent;
-    res.locals.response.assetUsageEvent = Object.assign({}, assetUsageEvent);
+    res.locals.response.assetUsageEvent = utils.deepCopyTo({}, assetUsageEvent);
 
     res.locals.params.action = assetUsageEvent.action;
     res.locals.params.swTagId = assetUsageEvent.swTagId;
@@ -62,13 +72,11 @@ const putAssetUsageEvent = async (req, res, next) => {
     next();
 };
 
-// router
 const Router = require('express-promise-router');
 const router = new Router();
 
-router.param('assetUsageId', assetUsage.setAssetUsageId);
-
-router.route('/:assetUsageId')
+router.use(assetUsage.validateParams);
+router.route('/')
     .get(getAssetUsageEvent)
     .put(putAssetUsageEvent);
 

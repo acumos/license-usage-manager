@@ -14,16 +14,21 @@
 // limitations under the License.
 // ============LICENSE_END=========================================================
 
-global.lumServer = {};
-
-require('./src/logger.js').initLogger('lum-server');
-require('./src/config.js').loadConfig();
-require('./src/api/healthcheck').init();
-require('./src/db/pgclient.js').initDb();
+/**
+ * @global  lumServer - place where all global data is stored on lum-server
+ */
+global.lumServer = {started: new Date()};
 
 const utils = require('./src/utils');
-const lumApi = require('./src/api');
 
+require('./src/config.js').loadConfig();
+require('./src/logger.js').initLogger(lumServer.config.serverName);
+require('./src/db/pgclient.js').initDb();
+
+const healthcheck = require('./src/api/healthcheck');
+healthcheck.init();
+
+const lumApi = require('./src/api');
 
 const express = require('express');
 const app = express();
@@ -44,10 +49,8 @@ const lumHttpServer = require('http').createServer(app);
 lumHttpServer.listen(lumServer.config.port, () => {
     lumServer.logger.info(`started ${lumServer.config.serverName}:
         config(${JSON.stringify(lumServer.config, utils.hidePass)})
-        healthcheck(${JSON.stringify(lumServer.healthcheck)})`);
+        env(${JSON.stringify(process.env, utils.hidePass)})`);
 
-    if(process.env.NODE_ENV !== 'production'){
-        lumServer.logger.info(`env(${JSON.stringify(process.env)})`);
-    }
+    healthcheck.logHealthcheck();
 });
 lumServer.logger.info(`starting ${lumServer.config.serverName}...`);

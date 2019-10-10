@@ -35,11 +35,24 @@ module.exports = {
                 } else {
                     this.message = "multiple InvalidDataErrors";
                 }
-                this.items = error.map(item => {
-                    if (typeof item === 'object') {return Object.assign({}, item);}
-                    return item;
-                });
+                this.items = error;
             }
         }
+    },
+    /**
+     * append the error to the collection of errors
+     * @param  {Object[]} errors collection of errors
+     * @param  {string} errorMessage error message
+     * @param  {string} [erroredObjectName] name of the erroredObject
+     * @param  {} [erroredObject] optional object the error is reported about
+     * @returns {Object[]} errors collection of errors with the new error appended
+     */
+    addError(errors, errorMessage, erroredObjectName, erroredObject) {
+        if (erroredObjectName == null) {
+            errors.push({error: errorMessage});
+        } else {
+            errors.push({error: errorMessage, [erroredObjectName]: erroredObject});
+        }
+        return errors;
     }
 };

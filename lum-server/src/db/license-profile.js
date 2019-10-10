@@ -40,7 +40,11 @@ const licenseProfileHouse = {
 };
 
 module.exports = {
-    async getLicenseProfile (res) {
+    /**
+     * get license-profile from database
+     * @param  {} res
+     */
+    async getLicenseProfile(res) {
         if (Object.keys(res.locals.dbdata.licenseProfiles).every(lp => !lp)) {
             utils.logInfo(res, `skipped getLicenseProfile(${JSON.stringify(res.locals.dbdata.licenseProfiles)})`);
             return;
@@ -62,7 +66,7 @@ module.exports = {
         utils.logInfo(res, `out getLicenseProfile(${JSON.stringify(res.locals.dbdata.licenseProfiles)})`);
     },
     /**
-     * insert/update licenseProfile in database
+     * insert/update licenseProfile into database
      * @param  {} res
      */
     async putLicenseProfile(res) {
@@ -111,7 +115,11 @@ module.exports = {
         }
         utils.logInfo(res, `out putLicenseProfile(${res.locals.params.licenseProfileId})`);
     },
-    async activateLicenseProfile (res) {
+    /**
+     * mark the license-profile as active in the database
+     * @param  {} res
+     */
+    async activateLicenseProfile(res) {
         if (!res.locals.params.swTagId) {
             utils.logInfo(res, `skipped activateLicenseProfile(${res.locals.params.swTagId})`);
             return;
