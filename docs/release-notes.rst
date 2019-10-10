@@ -36,7 +36,6 @@ Version 0.26.5, 9 October 2019
 
 Version 0.26.4, 7 October 2019
 ------------------------------
-
 - LUM integration support (`ACUMOS-3534 <https://jira.acumos.org/browse/ACUMOS-3534>`_)
   - Added new helm chart for lum + postgresql
   - New environment variable DATABASE_PASSWORD to help seperate config from secret config
