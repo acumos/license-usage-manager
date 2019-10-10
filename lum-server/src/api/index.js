@@ -24,7 +24,7 @@ router.use(response.newReq);
 
 router.use('/v1', require('./v1'));
 
-router.get(['/healthcheck', '/'], healthcheck.checkPg, healthcheck.getHealthcheck);
+router.get(['/healthcheck', '/'], healthcheck.getHealthcheck);
 
 router.use(response.respond);
 router.use(response.responseError);

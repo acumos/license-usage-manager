@@ -18,16 +18,24 @@ const utils = require('../../utils');
 const response = require('../response');
 const pgclient = require('../../db/pgclient');
 const dbAssetUsageAgreement = require('../../db/asset-usage-agreement');
-
-const setAssetUsageAgreementId = (req, res, next, assetUsageAgreementId) => {
-    res.locals.params.assetUsageAgreementId = assetUsageAgreementId;
-    res.set(res.locals.params);
-    utils.logInfo(res, `:assetUsageAgreementId(${res.locals.params.assetUsageAgreementId})`);
+/**
+ * validate params received in query
+ * @param  {} req
+ * @param  {} res
+ * @param  {} next
+ */
+const validateParams = (req, res, next) => {
+    response.validateParamInQuery(res, 'softwareLicensorId', 'assetUsageAgreementId');
     if (next) {next();}
 };
-
+/**
+ * api to get asset-usage-agreement
+ * @param  {} req
+ * @param  {} res
+ * @param  {} next
+ */
 const getAssetUsageAgreement = async (req, res, next) => {
-    utils.logInfo(res, `api getAssetUsageAgreement(${res.locals.params.assetUsageAgreementId})`);
+    utils.logInfo(res, `api getAssetUsageAgreement(${res.locals.paramKeys})`);
     res.locals.dbdata.assetUsageAgreement = null;
     await pgclient.runTx(res, dbAssetUsageAgreement.getAssetUsageAgreement);
 
@@ -35,17 +43,23 @@ const getAssetUsageAgreement = async (req, res, next) => {
         response.setHttpStatus(res, response.lumHttpCodes.notFound, "assetUsageAgreement");
     } else {
         if (res.locals.dbdata.assetUsageAgreement.assetUsageAgreementActive === false) {
+            res.locals.response.softwareLicensorId    = res.locals.params.softwareLicensorId;
             res.locals.response.assetUsageAgreementId = res.locals.params.assetUsageAgreementId;
             response.setHttpStatus(res, response.lumHttpCodes.revoked, "assetUsageAgreement");
         } else {
-            res.locals.response = Object.assign(res.locals.response, {"assetUsageAgreement": res.locals.dbdata.assetUsageAgreement});
+            res.locals.response.assetUsageAgreement = utils.deepCopyTo({}, res.locals.dbdata.assetUsageAgreement);
         }
     }
 
     utils.logInfo(res, "out api getAssetUsageAgreement", res.statusCode, response.getResHeader(res));
     next();
 };
-
+/**
+ * api to revoke asset-usage-agreement
+ * @param  {} req
+ * @param  {} res
+ * @param  {} next
+ */
 const revokeAssetUsageAgreement = async (req, res, next) => {
     await pgclient.runTx(res,
         dbAssetUsageAgreement.revokeAssetUsageAgreement,
@@ -53,9 +67,14 @@ const revokeAssetUsageAgreement = async (req, res, next) => {
     );
     next();
 };
-
+/**
+ * api to put asset-usage-agreement
+ * @param  {} req
+ * @param  {} res
+ * @param  {} next
+ */
 const putAssetUsageAgreement = async (req, res, next) => {
-    utils.logInfo(res, `api putAssetUsageAgreement(${res.locals.params.assetUsageAgreementId})`);
+    utils.logInfo(res, `api putAssetUsageAgreement(${res.locals.paramKeys})`);
     await pgclient.runTx(res,
         dbAssetUsageAgreement.validateAssetUsageAgreement,
         dbAssetUsageAgreement.putAssetUsageAgreement,
@@ -70,7 +89,7 @@ const putAssetUsageAgreement = async (req, res, next) => {
 const Router = require('express-promise-router');
 const router = new Router();
 
-router.param('assetUsageAgreementId', setAssetUsageAgreementId);
+router.use(validateParams);
 
 router.route('/')
     .get(getAssetUsageAgreement)
@@ -79,6 +98,6 @@ router.route('/')
 
 module.exports = {
      router: router,
-     setAssetUsageAgreementId: setAssetUsageAgreementId,
+     validateParams: validateParams,
      getAssetUsageAgreement: getAssetUsageAgreement
 };

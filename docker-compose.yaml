@@ -19,7 +19,7 @@ services:
   lum-database:
     build: ./lum-db/
     # replace username/repo:tag with your name and image details
-    image: lum-database:0.26.5-SNAPSHOT
+    image: lum-database:0.27.0-SNAPSHOT
     ports:
       - "5432:5432"
   lum-server:
@@ -30,7 +30,7 @@ services:
       - BUILD_DEVELOPMENT=1
     command: npm run start:dev
     # replace username/repo:tag with your name and image details
-    image: lum-server:0.26.5-SNAPSHOT
+    image: lum-server:0.27.0-SNAPSHOT
     depends_on:
       - lum-database
     ports:

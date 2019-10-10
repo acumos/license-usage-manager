@@ -19,18 +19,21 @@ const pgclient = require('../../db/pgclient');
 const swidTag = require('./swid-tag');
 const dbSwidTag = require('../../db/swid-tag');
 const dbLicenseProfile = require('../../db/license-profile');
-
+/**
+ * api to put swid-tag-creators on swidTag in database
+ * @param  {} req
+ * @param  {} res
+ * @param  {} next
+ */
 const putSwidTagCreators = async (req, res, next) => {
     utils.logInfo(res, `api putSwidTagCreators(${res.locals.params.swTagId})`);
     await pgclient.runTx(res, dbLicenseProfile.activateLicenseProfile, dbSwidTag.putSwidTagCreators);
     next();
 };
 
-// router
 const Router = require('express-promise-router');
 const router = new Router();
 
-router.param('swTagId', swidTag.setSwTagId);
-router.put('/:swTagId', putSwidTagCreators, swidTag.getSwidTag);
+router.put('/', swidTag.validateParams, putSwidTagCreators, swidTag.getSwidTag);
 
 module.exports = router;

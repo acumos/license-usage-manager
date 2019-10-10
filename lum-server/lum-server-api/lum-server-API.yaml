@@ -19,7 +19,7 @@
 openapi: '3.0.2'
 
 info:
-  version: "0.26.5"
+  version: "0.27.0"
   title: "License Usage Manager (LUM) API"
   contact:
     name: Acumos License Management
@@ -78,12 +78,12 @@ paths:
                 $ref: '#/components/schemas/HealthcheckResponse'
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-  /api/v1/swid-tag/{swTagId}:
+  /api/v1/swid-tag:
     parameters:
       - name: swTagId
         example: ee48b699-3b16-4391-884c-1bec557f32b9
         required: true
-        in: path
+        in: query
         description: GUID+version PK to swidTag
         schema:
           type: string
@@ -215,12 +215,12 @@ paths:
                 $ref: '#/components/schemas/RevokeSwidTagResponse'
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-  /api/v1/swid-tag-creators/{swTagId}:
+  /api/v1/swid-tag-creators:
     parameters:
       - name: swTagId
         required: true
         example: ee48b699-3b16-4391-884c-1bec557f32b9
-        in: path
+        in: query
         description: GUID+version PK to swidTag
         schema:
           type: string
@@ -271,8 +271,16 @@ paths:
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-  /api/v1/asset-usage-agreement/:
+  /api/v1/asset-usage-agreement:
     parameters:
+      - name: softwareLicensorId
+        required: true
+        example: Company A
+        in: query
+        description: identifier of the entity that issued the licenseProfile
+        schema:
+          type: string
+
       - name: assetUsageAgreementId
         example:  acumos://software-licensor/Company A/agreement/3eb8c43a-bf19-46ab-8392-99c7efdf4106
         required: true
@@ -307,6 +315,9 @@ paths:
               schema:
                 type: string
                 format: date-time
+            softwareLicensorId:
+              description: identifier of the entity that issued the licenseProfile
+              type: string
             assetUsageAgreementId:
               description: echo back UID key to assetUsageAgreement in IRI or URI format
               schema:
@@ -438,6 +449,9 @@ paths:
               schema:
                 type: string
                 format: date-time
+            softwareLicensorId:
+              description: identifier of the entity that issued the licenseProfile
+              type: string
             assetUsageAgreementId:
               description: echo back UID key to assetUsageAgreement in IRI or URI format
               schema:
@@ -456,8 +470,16 @@ paths:
                 $ref: '#/components/schemas/RevokeAgreementResponse'
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-  /api/v1/asset-usage-agreement-restriction/:
+  /api/v1/asset-usage-agreement-restriction:
     parameters:
+      - name: softwareLicensorId
+        required: true
+        example: Company A
+        in: query
+        description: identifier of the entity that issued the licenseProfile
+        schema:
+          type: string
+
       - name: assetUsageAgreementId
         required: true
         example:  acumos://software-licensor/Company A/agreement/3eb8c43a-bf19-46ab-8392-99c7efdf4106
@@ -500,6 +522,9 @@ paths:
               schema:
                 type: string
                 format: date-time
+            softwareLicensorId:
+              description: identifier of the entity that issued the licenseProfile
+              type: string
             assetUsageAgreementId:
               description: echo back UID key to assetUsageAgreement in IRI or URI format
               example:  acumos://software-licensor/Company A/agreement/3eb8c43a-bf19-46ab-8392-99c7efdf4106
@@ -553,6 +578,9 @@ paths:
               schema:
                 type: string
                 format: date-time
+            softwareLicensorId:
+              description: identifier of the entity that issued the licenseProfile
+              type: string
             assetUsageAgreementId:
               description: echo back UID key to assetUsageAgreement in IRI or URI format
               example:  acumos://software-licensor/Company A/agreement/3eb8c43a-bf19-46ab-8392-99c7efdf4106
@@ -572,12 +600,12 @@ paths:
                 $ref: '#/components/schemas/RevokeAgreementResponse'
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-  /api/v1/asset-usage/{assetUsageId}:
+  /api/v1/asset-usage:
     parameters:
       - name: assetUsageId
         required: true
         example: 38935f5c-293b-4e00-91ad-14d5de66eee3
-        in: path
+        in: query
         description: urlencoded UID key to assetUsage in IRI or URI format
         schema:
           type: string
@@ -665,12 +693,12 @@ paths:
                 $ref: '#/components/schemas/AssetUsageResponse'
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-  /api/v1/asset-usage-event/{assetUsageId}:
+  /api/v1/asset-usage-event:
     parameters:
       - name: assetUsageId
         required: true
         example: 38935f5c-293b-4e00-91ad-14d5de66eee3
-        in: path
+        in: query
         description: urlencoded UID key to assetUsage in IRI or URI format
         schema:
           type: string
@@ -731,12 +759,12 @@ paths:
                 default: "assetUsageEvent not found"
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-  /api/v1/asset-usage-tracking/software-licensor/{softwareLicensorId}:
+  /api/v1/asset-usage-tracking/software-licensor:
     parameters:
       - name: softwareLicensorId
         required: true
         example: Company A
-        in: path
+        in: query
         description: identifier of the entity that issued the licenseProfile
         schema:
           type: string
@@ -822,9 +850,26 @@ components:
             nodeVersion:
               description: version of node.js this server runs under
               type: string
-            pgVersion:
-              description: version of postgres database this server runs with
-              type: string
+            databaseInfo:
+              description: info of postgres database this server runs with
+              properties:
+                pgVersion:
+                  description: version of postgres database this server runs with
+                  type: string
+                databaseVersion:
+                  description: version of LUM database this server runs with - expected to match to serverVersion
+                  type: string
+                databaseStarted:
+                  description: date-time when LUM database server started
+                  type: string
+                  format: date-time
+                databaseUptime:
+                  description: uptime of the LUM database server
+                  type: string
+                checked:
+                  description: date-time when got database info
+                  type: string
+                  format: date-time
             serverRunInstanceId:
               description: identifier of the running instance of the server
               type: string
@@ -841,13 +886,18 @@ components:
               type: string
           example:
             serverName: "lum-server"
-            serverVersion: "0.26.5"
-            apiVersion: "0.26.5"
+            serverVersion: "0.27.0"
+            apiVersion: "0.27.0"
             nodeVersion: "10.16.3"
-            pgVersion: "PostgreSQL 11.5 on x86_64-pc-linux-musl, compiled by gcc (Alpine 8.3.0) 8.3.0, 64-bit"
+            databaseInfo:
+              pgVersion: "PostgreSQL 11.5 on x86_64-pc-linux-musl, compiled by gcc (Alpine 8.3.0) 8.3.0, 64-bit"
+              databaseVersion: "0.27.0"
+              databaseStarted: "2019-10-07T14:07:26.376Z"
+              databaseUptime: "2 days 00:19:37.460527"
+              checked: "2019-10-09T14:27:03.837Z"
             serverRunInstanceId: "faa08408-59fd-44d2-b815-9ceb9b8fdf92"
-            serverStarted: "2019-09-26T19:10:01.721Z"
-            serverUptime: "20 days 21:05:03.450"
+            serverStarted: "2019-10-09T13:51:59.965Z"
+            serverUptime: "00:35:04.073208"
             pathToOpenapiUi: "/ui/openapi"
 
     HealthcheckResponse:
@@ -1263,6 +1313,22 @@ components:
               description: ODRL based agreement data - https://www.w3.org/TR/odrl-model/#policy-agreement
               $ref: '#/components/schemas/ODRLAgreement'
 
+    GroomedAgreement:
+      description: LUM returns the result of grooming the ODRL agreement+agreementRestriction
+      required:
+        - assetUsageAgreement
+      properties:
+        assetUsageAgreement:
+          description: assetUsageAgreement body
+          required:
+            - groomedAgreement
+          properties:
+            groomedAgreement:
+              description: groomed full body of ODRL agreement with restriction already applied.
+                The groomedAgreement is not in ODRL format, but organized for LUM logic.
+                The only purpose of this field in API is debugging - do not put any logic based on groomedAgreement
+
+
     AssetUsageAgreementHousekeeping:
       description: properties populated by LUM server
       required:
@@ -1334,6 +1400,7 @@ components:
         - $ref: '#/components/schemas/AssetUsageAgreementTop'
         - $ref: '#/components/schemas/AssetUsageAgreement'
         - $ref: '#/components/schemas/AssetUsageAgreementRestriction'
+        - $ref: '#/components/schemas/GroomedAgreement'
         - $ref: '#/components/schemas/AssetUsageAgreementHousekeeping'
 
     PutAssetUsageAgreementRequest:
@@ -1352,6 +1419,7 @@ components:
         - $ref: '#/components/schemas/AssetUsageAgreementTop'
         - $ref: '#/components/schemas/AssetUsageAgreement'
         - $ref: '#/components/schemas/AssetUsageAgreementRestriction'
+        - $ref: '#/components/schemas/GroomedAgreement'
         - $ref: '#/components/schemas/AssetUsageAgreementHousekeeping'
 
     RevokeAgreementResponse:
@@ -1704,6 +1772,11 @@ components:
                 description: human readable explanation why denied entitlement
                 type: string
 
+              deniedAction:
+                description: either requested action on the asset
+                  like download, publish, execute, etc. or special value of use
+                type: string
+
               deniedAssetUsageAgreementId:
                 description: uid of Asset-Usage-AssetUsageAgreement that caused the denial or not match
                 type: string
@@ -1746,8 +1819,8 @@ components:
         - If usageEntitled = true, entitlement is provided for that assetUsage
       # oneOf:
       allOf:
-          - $ref: '#/components/schemas/AssetUsageDenial'
           - $ref: '#/components/schemas/AssetUsageEntitlement'
+          - $ref: '#/components/schemas/AssetUsageDenial'
       # discriminator:
       #   propertyName: usageEntitled
 
@@ -1784,8 +1857,8 @@ components:
       properties:
         assetUsage:
           allOf:
-            - $ref: '#/components/schemas/AssetUsageDenialOrEntitlement'
             - $ref: '#/components/schemas/AssetUsageEntitledMixin'
+            - $ref: '#/components/schemas/AssetUsageDenialOrEntitlement'
           properties:
             includedAssetUsage:
               description: list of included swTagId and assetUsageId
