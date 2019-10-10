@@ -44,6 +44,10 @@ const SqlParams = require('./sql-params');
 // };
 
 module.exports = {
+    /**
+     * insert asset-usage-req record into database
+     * @param  {} res
+     */
     async putAssetUsageReq(res) {
         utils.logInfo(res, `in putAssetUsageReq(${res.locals.requestId})`);
 
@@ -63,6 +67,10 @@ module.exports = {
         await pgclient.sqlQuery(res, sqlCmd, keys.getAllValues());
         utils.logInfo(res, `out putAssetUsageReq(${res.locals.requestId})`);
     },
+    /**
+     * update asset-usage-req record in database with response to be sent back to the client
+     * @param  {} res
+     */
     async putAssetUsageResponse(res) {
         utils.logInfo(res, `in putAssetUsageResponse(${res.locals.requestId})`);
 

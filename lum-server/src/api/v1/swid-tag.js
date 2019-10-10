@@ -19,14 +19,22 @@ const response = require('../response');
 const pgclient = require('../../db/pgclient');
 const dbSwidTag = require('../../db/swid-tag');
 const dbLicenseProfile = require('../../db/license-profile');
-
-const setSwTagId = (req, res, next, swTagId) => {
-    res.locals.params.swTagId = swTagId;
-    res.set(res.locals.params);
-    utils.logInfo(res, `:swTagId(${res.locals.params.swTagId})`);
+/**
+ * validate params received in query
+ * @param  {} req
+ * @param  {} res
+ * @param  {} next
+ */
+const validateParams = (req, res, next) => {
+    response.validateParamInQuery(res, 'swTagId');
     next();
 };
-
+/**
+ * api to get swid-tag from database
+ * @param  {} req
+ * @param  {} res
+ * @param  {} next
+ */
 const getSwidTag = async (req, res, next) => {
     utils.logInfo(res, `api getSwidTag(${res.locals.params.swTagId})`);
     res.locals.dbdata.swidTags = {};
@@ -46,39 +54,47 @@ const getSwidTag = async (req, res, next) => {
         if (!licenseProfile) {
             response.setHttpStatus(res, response.lumHttpCodes.notFound, "licenseProfile");
         } else {
-            res.locals.response = Object.assign(res.locals.response, {"swidTag": swidTag});
-            res.locals.response = Object.assign(res.locals.response, {"licenseProfile": licenseProfile});
+            res.locals.response.swidTag        = utils.deepCopyTo({}, swidTag);
+            res.locals.response.licenseProfile = utils.deepCopyTo({}, licenseProfile);
         }
     }
 
     utils.logInfo(res, "out api getSwidTag", res.statusCode, response.getResHeader(res));
     next();
 };
-
+/**
+ * api to revoke swid-tag
+ * @param  {} req
+ * @param  {} res
+ * @param  {} next
+ */
 const revokeSwidTag = async (req, res, next) => {
     await pgclient.runTx(res, dbSwidTag.revokeSwidTag);
     next();
 };
-
+/**
+ * api to put swid-tag into database
+ * @param  {} req
+ * @param  {} res
+ * @param  {} next
+ */
 const putSwidTag = async (req, res, next) => {
     utils.logInfo(res, `api putSwidTag(${res.locals.params.swTagId})`);
     await pgclient.runTx(res, dbLicenseProfile.putLicenseProfile, dbSwidTag.putSwidTag);
     next();
 };
 
-// router
 const Router = require('express-promise-router');
 const router = new Router();
 
-router.param('swTagId', setSwTagId);
-
-router.route('/:swTagId')
+router.use(validateParams);
+router.route('/')
     .get(getSwidTag)
     .delete(revokeSwidTag, getSwidTag)
     .put(putSwidTag, getSwidTag);
 
 module.exports = {
      router: router,
-     setSwTagId: setSwTagId,
+     validateParams: validateParams,
      getSwidTag: getSwidTag
 };

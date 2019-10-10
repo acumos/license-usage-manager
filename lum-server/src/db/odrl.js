@@ -13,6 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // ============LICENSE_END=========================================================
+
 /**
  * @fileoverview ODRL based objects
  *
@@ -94,19 +95,24 @@
 "use strict";
 
 const utils = require('../utils');
-const {InvalidDataError} = require('../error');
+const lumErrors = require('../error');
 
 
+const RULE_TYPES = {permission:'permission', prohibition:'prohibition'};
 const OPERATORS = {lt:'lt', lteq:'lteq', eq:'eq', gt:'gt', gteq:'gteq', lumIn:'lum:in'};
 const CONSUMED_CONSTRAINTS = {
-    merged:'merged', overridden:'overridden', conflicted:'conflicted', errored:'errored', ignored:'ignored', consumed:'consumed'};
+    merged:'merged', overridden:'overridden', conflicted:'conflicted',
+    errored:'errored', ignored:'ignored', consumed:'consumed', expanded:'expanded', unexpected:'unexpected',
+    same:'same'
+};
 
 const FIELDS = {value:'@value', type: '@type'};
 const TYPES = {"integer": "integer", "string": "string"};
 const LEFT_OPERANDS = {
-    "count": {dataType: "integer", usageConstraint: true},
+    "count": {dataType: "integer", usageConstraintOn: [RULE_TYPES.permission]},
     "date":  {dataType: "date"},
-    "lum:countUniqueUsers": {dataType: "integer"}
+    "lum:countUniqueUsers": {dataType: "integer", assigneeConstraintOn: [RULE_TYPES.permission]},
+    "lum:users": {assigneeConstraintOn: [RULE_TYPES.permission, RULE_TYPES.prohibition]}
 };
 
 /**
@@ -174,11 +180,11 @@ function groomAction(action) {
  * push each constraint into consumedConstraints with ```[status]:true```
  * @param  {Object[]} consumedConstraints
  * @param  {string} status
- * @param  {Object} constraints
+ * @param  {...Object} constraints
  */
 function consumeConstraint(consumedConstraints, status, ...constraints) {
     for (const constraint of constraints) {
-        consumedConstraints.push(Object.assign({[status]:true}, constraint));
+        consumedConstraints.push(utils.deepCopyTo({consumeStatus:status}, constraint));
     }
 }
 /**
@@ -204,7 +210,7 @@ function consumeConstraint(consumedConstraints, status, ...constraints) {
  * @returns {} groomed copy of constraint
  */
 function groomConstraint(res, constraint) {
-    constraint = Object.assign({}, constraint);
+    constraint = utils.deepCopyTo({}, constraint);
     utils.logInfo(res, 'groomConstraint to groom constraint', constraint);
     constraint.dataType = (LEFT_OPERANDS[constraint.leftOperand] || {}).dataType || TYPES.string;
 
@@ -226,7 +232,7 @@ function groomConstraint(res, constraint) {
         if (ropValue == null) {return;}
         if (typeof ropValue !== 'string') {return JSON.stringify(ropValue);}
         return ropValue;
-    }).filter(nonEmptyItem => nonEmptyItem != null);
+    }).filter(nonEmptyItem => nonEmptyItem != null).sort();
 
     if (constraint.operator === OPERATORS.lumIn) {return constraint;}
 
@@ -264,17 +270,21 @@ function mergeTwoConstraints(res, constraint, addon, consumedConstraints) {
     utils.logInfo(res, 'mergeTwoConstraints constraint', constraint, '<- addon', addon);
 
     if ([constraint.operator, addon.operator].includes(OPERATORS.lumIn)) {
-        consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.merged, constraint, addon);
         if (constraint.operator === addon.operator) {
+            if (JSON.stringify(constraint.rightOperand) === JSON.stringify(addon.rightOperand)) {
+                consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.same, addon);
+                return true;
+            }
+            consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.merged, constraint, addon);
             constraint.rightOperand = constraint.rightOperand.filter(x => addon.rightOperand.includes(x));
         } else if (constraint.operator === OPERATORS.lumIn) {
-            constraint.rightOperand = constraint.rightOperand.filter(x =>
-                compareTwoValues(addon.operator, x, addon.rightOperand));
+            consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.merged, constraint, addon);
+            constraint.rightOperand = constraint.rightOperand.filter(x => compareTwoValues(addon.operator, x, addon.rightOperand));
         } else {
+            consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.merged, constraint, addon);
             constraint.operator = OPERATORS.lumIn;
             constraint.dataType = addon.dataType;
-            constraint.rightOperand = addon.rightOperand.filter(x =>
-                compareTwoValues(constraint.operator, x, constraint.rightOperand));
+            constraint.rightOperand = addon.rightOperand.filter(x => compareTwoValues(constraint.operator, x, constraint.rightOperand));
         }
         utils.logInfo(res, 'merged mergeTwoConstraints constraint', constraint);
         return true;
@@ -293,8 +303,7 @@ function mergeTwoConstraints(res, constraint, addon, consumedConstraints) {
         }
         if (compareTwoValues(constraint.operator, addon.rightOperand, constraint.rightOperand)) {
             consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.overridden, constraint);
-            constraint.rightOperand = addon.rightOperand;
-            constraint.dataType     = addon.dataType;
+            utils.deepCopyTo(constraint, addon);
         } else {
             consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.ignored, addon);
         }
@@ -316,9 +325,7 @@ function mergeTwoConstraints(res, constraint, addon, consumedConstraints) {
     if (addon.operator === OPERATORS.eq) {
         if (compareTwoValues(constraint.operator, addon.rightOperand, constraint.rightOperand)) {
             consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.overridden, constraint);
-            constraint.operator     = addon.operator;
-            constraint.rightOperand = addon.rightOperand;
-            constraint.dataType     = addon.dataType;
+            utils.deepCopyTo(constraint, addon);
         } else {
             consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.conflicted, constraint, addon);
             constraint.rightOperand = null;
@@ -336,12 +343,100 @@ function mergeTwoConstraints(res, constraint, addon, consumedConstraints) {
         constraint.operator = strongOperator;
     } else if (compareTwoValues(strongOperator, addon.rightOperand, constraint.rightOperand)) {
         consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.overridden, constraint);
-        constraint.operator     = addon.operator;
-        constraint.rightOperand = addon.rightOperand;
-        constraint.dataType     = addon.dataType;
+        utils.deepCopyTo(constraint, addon);
     }
     utils.logInfo(res, 'merged mergeTwoConstraints constraint', constraint);
     return true;
+}
+/**
+ * merge restriction to the prohibition constraint
+ *
+ * @param  {} res
+ * @param  {} constraint initial constraint
+ * @param  {} expansion constraint to add to initial constraint
+ * @param  {} consumedConstraints collection of merged and conflicted constraints
+ *                                that got consumed by grooming
+ */
+function expandProhibitionConstraint(res, constraint, expansion, consumedConstraints) {
+    if (!constraint || !expansion) {return;}
+    utils.logInfo(res, 'expandProhibitionConstraint', constraint, '<- expansion', expansion);
+
+    if ([constraint.operator, expansion.operator].includes(OPERATORS.lumIn)) {
+        if (constraint.operator === expansion.operator) {
+            const toAdd = expansion.rightOperand.filter(x => !constraint.rightOperand.includes(x));
+            if (toAdd.length) {
+                consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.expanded, constraint, expansion);
+                Array.prototype.push.apply(constraint.rightOperand, toAdd).sort();
+                constraint.expanded = true;
+                utils.logInfo(res, 'expanded constraint', constraint);
+            } else {
+                consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.ignored, expansion);
+                utils.logInfo(res, 'ignored expansion for constraint', constraint);
+            }
+        } else {
+            consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.ignored, expansion);
+            utils.logInfo(res, 'ignored expansion for constraint', constraint);
+        }
+        return;
+    }
+
+    if (constraint.operator === expansion.operator) {
+        if (constraint.operator === OPERATORS.eq) {
+            consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.ignored, expansion);
+            utils.logInfo(res, 'ignored expansion for constraint', constraint);
+            return;
+        }
+        if (compareTwoValues(constraint.operator, constraint.rightOperand, expansion.rightOperand)) {
+            consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.expanded, constraint);
+            utils.deepCopyTo(constraint, expansion);
+            constraint.expanded = true;
+            utils.logInfo(res, 'expanded constraint', constraint);
+        } else {
+            consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.ignored, expansion);
+            utils.logInfo(res, 'ignored expansion for constraint', constraint);
+        }
+        return;
+    }
+
+    // ... here when different operators...
+    if (constraint.operator === OPERATORS.eq) {
+        consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.ignored, expansion);
+        utils.logInfo(res, 'ignored expansion for constraint', constraint);
+        return;
+    }
+    if (expansion.operator === OPERATORS.eq) {
+        consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.ignored, expansion);
+        utils.logInfo(res, 'ignored expansion for constraint', constraint);
+        return;
+    }
+
+    const similarOperators = getSimilarOperators(constraint.operator);
+    if (!similarOperators.includes(expansion.operator) || similarOperators.length === 1) {
+        consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.ignored, expansion);
+        utils.logInfo(res, 'ignored expansion for constraint', constraint);
+        return;
+    }
+    const weakOperator = similarOperators[similarOperators.length - 1];
+
+    if (constraint.rightOperand == expansion.rightOperand) {
+        if (constraint.operator !== weakOperator) {
+            consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.expanded, constraint, expansion);
+            constraint.operator = weakOperator;
+            constraint.expanded = true;
+            utils.logInfo(res, 'expanded constraint', constraint);
+        } else {
+            consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.ignored, expansion);
+            utils.logInfo(res, 'ignored expansion for constraint', constraint);
+        }
+        return;
+    }
+
+    if (compareTwoValues(weakOperator, constraint.rightOperand, expansion.rightOperand)) {
+        consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.expanded, constraint);
+        utils.deepCopyTo(constraint, expansion);
+        constraint.expanded = true;
+        utils.logInfo(res, 'expanded constraint', constraint);
+    }
 }
 
 /**
@@ -404,16 +499,21 @@ function groomRefinement(res, target, baseTarget, consumedConstraints) {
  * @param  {} res
  * @param  {Object[]} rules
  * @param  {string} assetUsageRuleType 'permission' or 'prohibition'
- * @param  {Object} agreement parent agreement contains keys and default target and assignee
+ * @param  {} agreement parent agreement contains keys and default target and assignee
+ * @returns dict of rules keyed by uid of the rule
+ * @throws {InvalidDataError} when non-unique uid is found on two or more rules
  */
 function groomRules(res, rules, assetUsageRuleType, agreement) {
     if (rules == null) {return;}
     if (!Array.isArray(rules)) {rules = [rules];}
 
+    const errors = [];
+
     const groomedRules = rules.map(rule => {
         const groomedRule = {
             uid:                 rule.uid,
             assetUsageRuleType:  assetUsageRuleType,
+            actionProvided:      !!rule.action,
             actions:             groomAction(rule.action),
             isPerpetual:         true,
             enableOn:            null,
@@ -428,9 +528,11 @@ function groomRules(res, rules, assetUsageRuleType, agreement) {
             usageConstraints:    {},
             consumedConstraints: {onTarget:[], onAssignee:[], onRule:[]}
         };
+        const ruleInfo = `groom ${groomedRule.assetUsageRuleType}(${groomedRule.uid})`;
         const targetRefinement = groomRefinement(res, rule.target, agreement.target,
                                                  groomedRule.consumedConstraints.onTarget);
         if (targetRefinement) {
+            utils.logInfo(res, `${ruleInfo} targetRefinement`, targetRefinement);
             targetRefinement.forEach(trfn => {
                 const prevConstraint = groomedRule.targetRefinement[trfn.leftOperand];
                 if (prevConstraint) {
@@ -445,7 +547,13 @@ function groomRules(res, rules, assetUsageRuleType, agreement) {
         const assigneeRefinement = groomRefinement(res, rule.assignee, agreement.assignee,
                                                    groomedRule.consumedConstraints.onAssignee);
         if (assigneeRefinement) {
+            utils.logInfo(res, `${ruleInfo} assigneeRefinement`, assigneeRefinement);
             assigneeRefinement.forEach(arfn => {
+                if (!((LEFT_OPERANDS[arfn.leftOperand] || {}).assigneeConstraintOn || []).includes(assetUsageRuleType)) {
+                    utils.logInfo(res, `groomRules unexpected assignee constraint`, arfn, 'on', assetUsageRuleType);
+                    consumeConstraint(groomedRule.consumedConstraints.onAssignee, CONSUMED_CONSTRAINTS.unexpected, arfn);
+                    return;
+                }
                 const prevConstraint = groomedRule.assigneeRefinement[arfn.leftOperand];
                 if (prevConstraint) {
                     consumeConstraint(groomedRule.consumedConstraints.onAssignee, CONSUMED_CONSTRAINTS.conflicted,
@@ -458,8 +566,9 @@ function groomRules(res, rules, assetUsageRuleType, agreement) {
         }
         const constraints = groomConstraints(res, rule.constraint, null, groomedRule.consumedConstraints.onRule);
         if (constraints) {
+            utils.logInfo(res, `${ruleInfo} constraints`, constraints);
             constraints.forEach(constraint => {
-                if ((LEFT_OPERANDS[constraint.leftOperand] || {}).usageConstraint) {
+                if (((LEFT_OPERANDS[constraint.leftOperand] || {}).usageConstraintOn || []).includes(assetUsageRuleType)) {
                     const prevConstraint = groomedRule.usageConstraints[constraint.leftOperand];
                     if (prevConstraint) {
                         consumeConstraint(groomedRule.consumedConstraints.onRule, CONSUMED_CONSTRAINTS.conflicted,
@@ -494,86 +603,323 @@ function groomRules(res, rules, assetUsageRuleType, agreement) {
                             consumeConstraint(groomedRule.consumedConstraints.onRule, CONSUMED_CONSTRAINTS.errored, constraint);
                         }
                     }
-                    if (groomedRule.expireOn && groomedRule.enableOn && groomedRule.enableOn > groomedRule.expireOn) {
-                        groomedRule.enableOn = groomedRule.expireOn;
-                    }
-                    if (groomedRule.enableOn && res.locals.pg.txNowDate < groomedRule.enableOn) {
-                        groomedRule.rightToUseActive = false;
-                        groomedRule.closer = res.locals.params.userId;
-                        groomedRule.closed = res.locals.pg.txNow;
-                        groomedRule.closureReason = 'too soon';
-                    }
-                    if (groomedRule.expireOn && res.locals.pg.txNowDate > groomedRule.expireOn) {
-                        groomedRule.rightToUseActive = false;
-                        groomedRule.closer = res.locals.params.userId;
-                        groomedRule.closed = res.locals.pg.txNow;
-                        groomedRule.closureReason = 'expired';
-                    }
-                    groomedRule.isPerpetual = !groomedRule.expireOn;
+                    setTimingFieldsOnRule(res, groomedRule);
                 } else {
-                    consumeConstraint(groomedRule.consumedConstraints.onRule, CONSUMED_CONSTRAINTS.ignored, constraint);
+                    utils.logInfo(res, `groomRules unexpected constraint`, constraint, 'on', assetUsageRuleType);
+                    consumeConstraint(groomedRule.consumedConstraints.onRule, CONSUMED_CONSTRAINTS.unexpected, constraint);
                 }
             });
         }
         return groomedRule;
-    });
+    }).reduce((target, grRule) => {
+        if (grRule.uid in target) {
+            lumErrors.addError(errors, `non-unique uid(${grRule.uid}) on ${assetUsageRuleType}`, assetUsageRuleType, grRule);
+        }
+        target[grRule.uid] = grRule;
+        return target;
+    }, {});
+    if (errors.length) {
+        throw new lumErrors.InvalidDataError(errors);
+    }
     return groomedRules;
+}
+/**
+ * set timing related fields on the rule
+ * @param  {} res
+ * @param  {} groomedRule
+ */
+function setTimingFieldsOnRule(res, groomedRule) {
+    if (groomedRule.expireOn && groomedRule.enableOn && groomedRule.enableOn > groomedRule.expireOn) {
+        groomedRule.enableOn = groomedRule.expireOn;
+    }
+    if (groomedRule.enableOn && res.locals.pg.txNowDate < groomedRule.enableOn) {
+        groomedRule.rightToUseActive = false;
+        groomedRule.closer = res.locals.params.userId;
+        groomedRule.closed = res.locals.pg.txNow;
+        groomedRule.closureReason = 'too soon';
+    } else if (groomedRule.expireOn && res.locals.pg.txNowDate > groomedRule.expireOn) {
+        groomedRule.rightToUseActive = false;
+        groomedRule.closer = res.locals.params.userId;
+        groomedRule.closed = res.locals.pg.txNow;
+        groomedRule.closureReason = 'expired';
+    } else {
+        groomedRule.rightToUseActive = true;
+        groomedRule.closer = null;
+        groomedRule.closed = null;
+        groomedRule.closureReason = null;
+    }
+    groomedRule.isPerpetual = !groomedRule.expireOn;
+}
+
+/**
+ * apply single permission-restriction over the permission on the groomed agreement.
+ *
+ * agreement-restriction makes permission less permissive
+ * @param  {} res
+ * @param  {} groomedAgreement
+ * @param  {} restriction
+ */
+function restrictPermission(res, groomedAgreement, restriction) {
+    const permission = (groomedAgreement.permission || {})[restriction.uid];
+    if (!permission) {
+        groomedAgreement.ignoredPermissionRestrictions[restriction.uid] = restriction;
+        return;
+    }
+
+    if (restriction.actionProvided) {
+        permission.actions = permission.actions.filter(x => restriction.actions.includes(x));
+    }
+
+    restrictTiming(res, permission, restriction);
+
+    if (restriction.targetRefinement) {
+        if (!permission.targetRefinement) {permission.targetRefinement = {};}
+        for (const targetRestr of Object.values(restriction.targetRefinement)) {
+            targetRestr.origin = 'fromRestriction';
+            const targetRfn = permission.targetRefinement[targetRestr.leftOperand];
+            if (!targetRfn) {
+                permission.targetRefinement[targetRestr.leftOperand] = targetRestr;
+                continue;
+            }
+            if (!mergeTwoConstraints(res, targetRfn, targetRestr, permission.consumedConstraints.onTarget)) {
+                consumeConstraint(permission.consumedConstraints.onTarget, CONSUMED_CONSTRAINTS.ignored, targetRestr);
+            }
+        }
+    }
+
+    if (restriction.assigneeRefinement) {
+        if (!permission.assigneeRefinement) {permission.assigneeRefinement = {};}
+        for (const assigneeRestr of Object.values(restriction.assigneeRefinement)) {
+            assigneeRestr.origin = 'fromRestriction';
+            const assigneeRfn = permission.assigneeRefinement[assigneeRestr.leftOperand];
+            if (!assigneeRfn) {
+                permission.assigneeRefinement[assigneeRestr.leftOperand] = assigneeRestr;
+                continue;
+            }
+            if (!mergeTwoConstraints(res, assigneeRfn, assigneeRestr, permission.consumedConstraints.onAssignee)) {
+                consumeConstraint(permission.consumedConstraints.onAssignee, CONSUMED_CONSTRAINTS.ignored, assigneeRestr);
+            }
+        }
+    }
+
+    if (restriction.usageConstraints) {
+        if (!permission.usageConstraints) {permission.usageConstraints = {};}
+        for (const usageRestr of Object.values(restriction.usageConstraints)) {
+            usageRestr.origin = 'fromRestriction';
+            const usageConstr = permission.usageConstraints[usageRestr.leftOperand];
+            if (!usageConstr) {
+                permission.usageConstraints[usageRestr.leftOperand] = usageRestr;
+                continue;
+            }
+            if (!mergeTwoConstraints(res, usageConstr, usageRestr, permission.consumedConstraints.onRule)) {
+                consumeConstraint(permission.consumedConstraints.onRule, CONSUMED_CONSTRAINTS.ignored, usageRestr);
+            }
+        }
+    }
+}
+/**
+ * make permission to have narrower timing
+ * @param  {} res
+ * @param  {} permission
+ * @param  {} restriction
+ */
+function restrictTiming(res, permission, restriction) {
+    if (restriction.expireOn && (permission.expireOn == null || restriction.expireOn < permission.expireOn)) {
+        permission.expireOn = restriction.expireOn;
+    }
+    if (restriction.enableOn && (permission.enableOn == null || restriction.enableOn > permission.enableOn)) {
+        permission.enableOn = restriction.enableOn;
+    }
+    setTimingFieldsOnRule(res, permission);
+}
+/**
+ * make prohibition to have wider timing
+ * @param  {} res
+ * @param  {} prohibition
+ * @param  {} expansion
+ */
+function expandTiming(res, prohibition, expansion) {
+    if (expansion.expireOn == null || (prohibition.expireOn && expansion.expireOn > prohibition.expireOn)) {
+        prohibition.expireOn = expansion.expireOn;
+    }
+    if (expansion.enableOn == null || (prohibition.enableOn && expansion.enableOn < prohibition.enableOn)) {
+        prohibition.enableOn = expansion.enableOn;
+    }
+    setTimingFieldsOnRule(res, prohibition);
+}
+
+/**
+ * init groomedAgreement.ignoredProhibitionnRestrictions
+ * @param  {} groomedAgreement
+ * @param  {} uid of prohibition
+ */
+function lazyInitIgnoredProhibitionRestrictions(groomedAgreement, uid) {
+    if (uid in groomedAgreement.ignoredProhibitionRestrictions) {return;}
+
+    groomedAgreement.ignoredProhibitionRestrictions[uid] = {
+        uid: uid, targetRefinement:{}, assigneeRefinement:{}, usageConstraints:{}
+    };
+}
+/**
+ * apply single prohibition-restriction over the prohibition on the groomed agreement.
+ *
+ * agreement-restriction makes prohibition more prohibitive
+ * @param  {} res
+ * @param  {} groomedAgreement
+ * @param  {} expansion
+ */
+function expandProhibition(res, groomedAgreement, expansion) {
+    const prohibition = (groomedAgreement.prohibition || {})[expansion.uid];
+    if (!prohibition) {
+        if (!groomedAgreement.prohibition) {groomedAgreement.prohibition = {};}
+        groomedAgreement.prohibition[expansion.uid] = expansion;
+        return;
+    }
+    Array.prototype.push.apply(prohibition.actions, expansion.actions.filter(x => !prohibition.actions.includes(x)))
+
+    expandTiming(res, prohibition, expansion);
+
+    if (expansion.targetRefinement) {
+        if (!prohibition.targetRefinement) {
+            lazyInitIgnoredProhibitionRestrictions(groomedAgreement, expansion.uid);
+            groomedAgreement.ignoredProhibitionRestrictions[expansion.uid].targetRefinement = expansion.targetRefinement;
+        } else {
+            for (const targetExpansion of Object.values(expansion.targetRefinement)) {
+                targetExpansion.origin = 'fromExpansion';
+                const targetRfn = prohibition.targetRefinement[targetExpansion.leftOperand];
+                if (!targetRfn) {
+                    lazyInitIgnoredProhibitionRestrictions(groomedAgreement, expansion.uid);
+                    groomedAgreement.ignoredProhibitionRestrictions[expansion.uid].targetRefinement[targetExpansion.leftOperand] = targetExpansion;
+                    continue;
+                }
+                expandProhibitionConstraint(res, targetRfn, targetExpansion, prohibition.consumedConstraints.onTarget);
+            }
+        }
+    }
+
+    if (expansion.assigneeRefinement) {
+        if (!prohibition.assigneeRefinement) {
+            lazyInitIgnoredProhibitionRestrictions(groomedAgreement, expansion.uid);
+            groomedAgreement.ignoredProhibitionRestrictions[expansion.uid].assigneeRefinement = expansion.assigneeRefinement;
+        } else {
+            for (const assigneeExpansion of Object.values(expansion.assigneeRefinement)) {
+                assigneeExpansion.origin = 'fromExpansion';
+                const assigneeRfn = prohibition.assigneeRefinement[assigneeExpansion.leftOperand];
+                if (!assigneeRfn) {
+                    lazyInitIgnoredProhibitionRestrictions(groomedAgreement, expansion.uid);
+                    groomedAgreement.ignoredProhibitionRestrictions[expansion.uid].assigneeRefinement[assigneeExpansion.leftOperand] = assigneeExpansion;
+                    continue;
+                }
+                expandProhibitionConstraint(res, assigneeRfn, assigneeExpansion, prohibition.consumedConstraints.onAssignee);
+            }
+        }
+    }
+
+    if (expansion.usageConstraints) {
+        if (!prohibition.usageConstraints) {
+            lazyInitIgnoredProhibitionRestrictions(groomedAgreement, expansion.uid);
+            groomedAgreement.ignoredProhibitionRestrictions[expansion.uid].usageConstraints = expansion.usageConstraints;
+        } else {
+            for (const usageExpansion of Object.values(expansion.usageConstraints)) {
+                usageExpansion.origin = 'fromExpansion';
+                const usageConstr = prohibition.usageConstraints[usageExpansion.leftOperand];
+                if (!usageConstr) {
+                    lazyInitIgnoredProhibitionRestrictions(groomedAgreement, expansion.uid);
+                    groomedAgreement.ignoredProhibitionRestrictions[expansion.uid].usageConstraints[usageExpansion.leftOperand] = usageExpansion;
+                    continue;
+                }
+                expandProhibitionConstraint(res, usageConstr, usageExpansion, prohibition.consumedConstraints.onRule);
+            }
+        }
+    }
 }
 
 module.exports = {
+    RULE_TYPES: RULE_TYPES,
+    OPERATORS: OPERATORS,
     /**
      * validate the ODRL agreement to make sure the required fields are present
-     * @param   {} agreement
-     * @throws {InvalidDataError} when invalid data
+     * @param  {Object[]} errors collection of errors
+     * @param  {} agreement
+     * @param  {string} agreementObjectName either agreement or agreementRestriction
      */
-    validateAgreement(agreement) {
-        if (agreement == null) {
-            throw new InvalidDataError('agreement expected');
-        }
+    validateAgreement(errors, agreement, agreementObjectName) {
         if ((agreement.permission == null && agreement.prohibition == null)) {
-            throw new InvalidDataError({error: 'permission or prohibition expected in agreement', agreement: agreement});
+            return lumErrors.addError(errors, `permission or prohibition expected in ${agreementObjectName}`, `${agreementObjectName}`, agreement);
         }
-        const errors = [];
         if (agreement.permission) {
-            if (!Array.isArray(agreement.permission))
-            {
-                errors.push({error: 'expected permission as array', permission: agreement.permission});
+            if (!Array.isArray(agreement.permission)) {
+                lumErrors.addError(errors, 'expected permission as array', 'permission', agreement.permission);
             } else {
-                for (const rule of agreement.permission) {
+                agreement.permission.reduce((target, rule) => {
                     if (!rule.uid) {
-                        errors.push({error: 'uid expected in permission', permission: rule});
+                        lumErrors.addError(errors, 'uid expected in permission', 'permission', rule);
+                        return target;
                     }
-                }
+                    if (rule.uid in target) {
+                        lumErrors.addError(errors, `non-unique uid(${rule.uid}) on permission`, 'permission', rule);
+                    }
+                    target[rule.uid] = rule;
+                    return target;
+                }, {});
             }
         }
         if (agreement.prohibition) {
             if (!Array.isArray(agreement.prohibition)) {
-                errors.push({error: 'expected prohibition as array', prohibition: agreement.prohibition});
+                lumErrors.addError(errors, 'expected prohibition as array', 'prohibition', agreement.prohibition);
             } else {
-                for (const rule of agreement.prohibition) {
+                agreement.prohibition.reduce((target, rule) => {
                     if (!rule.uid) {
-                        errors.push({error: 'uid expected in prohibition', prohibition: rule});
+                        lumErrors.addError(errors, 'uid expected in prohibition', 'prohibition', rule);
+                        return target;
                     }
-                }
+                    if (rule.uid in target) {
+                        lumErrors.addError(errors, `non-unique uid(${rule.uid}) on prohibition`, 'prohibition', rule);
+                    }
+                    target[rule.uid] = rule;
+                    return target;
+                }, {});
             }
-        }
-        if (errors.length) {
-            throw new InvalidDataError(errors);
         }
     },
     /**
-     * groom the ODRL agreement to make all elements recognizable by LUM
-     * @param  {} res
+     * groom the ODRL agreement to make all elements recognizable by LUM and
+     * apply agreement-restriction over the agreement.
+     * @param   {} res
      * @param   {} agreement
+     * @param   {} [agreementRestriction]
      * @returns {} groomed copy of agreement
+     * @throws {InvalidDataError} by groomRules when non-unique uid is found on two or more rules
      */
-    groomAgreement(res, agreement) {
-        const groomedAgreement = {uid: agreement.uid};
+    groomAgreement(res, agreement, agreementRestriction) {
+        const groomedAgreement = {
+            uid: agreement.uid,
+            initialAgreement: utils.deepCopyTo({}, agreement),
+            permission: groomRules(res, agreement.permission,   RULE_TYPES.permission,  agreement),
+            prohibition: groomRules(res, agreement.prohibition, RULE_TYPES.prohibition, agreement),
+            restriction: null,
+            ignoredPermissionRestrictions: {},
+            ignoredProhibitionRestrictions: {}
+        };
 
-        groomedAgreement.permission  = groomRules(res, agreement.permission,  'permission',  agreement);
-        groomedAgreement.prohibition = groomRules(res, agreement.prohibition, 'prohibition', agreement);
+        if (agreementRestriction) {
+            groomedAgreement.restriction = {
+                uid: agreementRestriction.uid,
+                permission:  groomRules(res, agreementRestriction.permission,  RULE_TYPES.permission,  agreementRestriction),
+                prohibition: groomRules(res, agreementRestriction.prohibition, RULE_TYPES.prohibition, agreementRestriction)
+            };
 
-        utils.logInfo(res, `groomedAgreement(${res.locals.params.assetUsageAgreementId}):`, groomedAgreement);
+            for (const restriction of Object.values(groomedAgreement.restriction.permission || {})) {
+                restrictPermission(res, groomedAgreement, restriction);
+            }
+
+            for (const expansion of Object.values(groomedAgreement.restriction.prohibition || {})) {
+                expandProhibition(res, groomedAgreement, expansion);
+            }
+        }
+
+        utils.logInfo(res, `groomedAgreement(${res.locals.paramKeys}):`, groomedAgreement);
         return groomedAgreement;
     }
 };
+

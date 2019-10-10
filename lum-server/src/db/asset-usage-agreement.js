@@ -19,18 +19,17 @@ const pgclient = require('./pgclient');
 const snapshot = require('./snapshot');
 const SqlParams = require('./sql-params');
 const odrl = require('./odrl');
+const lumErrors = require('../error');
 
 // const agreementKey = {"assetUsageAgreementId": true};
 // {required: true, type: "array", ref: "swCategory"};
-const assetUsageAgreementReq = {
-    "softwareLicensorId" : true,
-    "agreement": true
-};
-const agreementRestrictionReq = {
-    "agreementRestriction" : true
+const assetUsageAgreementRecord = {
+    "agreement": true,
+    "agreementRestriction": true,
+    "groomedAgreement": true
 };
 
-const agreementHouse = {
+const assetUsageAgreementHouse = {
     "assetUsageAgreementRevision" : false,
     "assetUsageAgreementActive"   : false,
     "creator"           : false,
@@ -69,6 +68,25 @@ const rightToUseFields = {
 // };
 
 /**
+ * if the row is returned, store it into res.locals.dbdata.assetUsageAgreement
+ * and record the snapshot
+ * @param  {} res
+ * @param  {} result data returned by insert-update action on assetUsageAgreement
+ */
+async function setDbdataAssetUsageAgreement(res, result) {
+    if (result.rows.length) {
+        res.locals.dbdata.assetUsageAgreement = result.rows[0];
+        await snapshot.storeSnapshot(res,
+            res.locals.params.softwareLicensorId,
+            "assetUsageAgreement",
+            res.locals.params.assetUsageAgreementId,
+            res.locals.dbdata.assetUsageAgreement.assetUsageAgreementRevision,
+            res.locals.dbdata.assetUsageAgreement
+        );
+    }
+}
+
+/**
  * store rightToUse to the table in database
  * @param  {} res
  * @param  {} rightToUse single permission or prohibition
@@ -81,7 +99,7 @@ async function storeRightToUse(res, rightToUse) {
     utils.logInfo(res, `in putRightToUse(${rightToUse.uid})`);
 
     const keys = new SqlParams();
-    keys.addField("softwareLicensorId", res.locals.dbdata.assetUsageAgreement.softwareLicensorId);
+    keys.addField("softwareLicensorId", res.locals.params.softwareLicensorId);
     keys.addField("assetUsageAgreementId", res.locals.params.assetUsageAgreementId);
     keys.addField("rightToUseId", rightToUse.uid);
     const putFields = new SqlParams(keys);
@@ -113,26 +131,36 @@ async function storeRightToUse(res, rightToUse) {
 }
 
 module.exports = {
+    /**
+     * retrieve assetUsageAgreement from database
+     * @param  {} res
+     */
     async getAssetUsageAgreement(res) {
-        utils.logInfo(res, `in getAssetUsageAgreement(${res.locals.params.assetUsageAgreementId})`);
+        utils.logInfo(res, `in getAssetUsageAgreement(${res.locals.paramKeys})`);
 
         const keys = new SqlParams();
+        keys.addField("softwareLicensorId", res.locals.params.softwareLicensorId);
         keys.addField("assetUsageAgreementId", res.locals.params.assetUsageAgreementId);
         const selectFields = new SqlParams();
-        selectFields.addFields(assetUsageAgreementReq);
-        selectFields.addFields(agreementRestrictionReq);
-        selectFields.addFields(agreementHouse);
+        selectFields.addFields(assetUsageAgreementRecord);
+        selectFields.addFields(assetUsageAgreementHouse);
 
-        const sqlCmd = `SELECT ${keys.fields}, ${selectFields.fields} FROM "assetUsageAgreement" WHERE ${keys.where} FOR SHARE`;
+        const sqlCmd = `SELECT ${keys.fields}, ${selectFields.fields}
+                          FROM "assetUsageAgreement" WHERE ${keys.where} FOR SHARE`;
         const result = await pgclient.sqlQuery(res, sqlCmd, keys.values);
         if (result.rows.length) {
             res.locals.dbdata.assetUsageAgreement = result.rows[0];
         }
         utils.logInfo(res, "out getAssetUsageAgreement");
     },
+    /**
+     * revoke assetUsageAgreement
+     * @param  {} res
+     */
     async revokeAssetUsageAgreement(res) {
-        utils.logInfo(res, `in revokeAssetUsageAgreement(${res.locals.params.assetUsageAgreementId})`);
+        utils.logInfo(res, `in revokeAssetUsageAgreement(${res.locals.paramKeys})`);
         const keys = new SqlParams();
+        keys.addField("softwareLicensorId", res.locals.params.softwareLicensorId);
         keys.addField("assetUsageAgreementId", res.locals.params.assetUsageAgreementId);
         const putFields = new SqlParams(keys);
         putFields.addField("assetUsageAgreementActive", false);
@@ -143,16 +171,8 @@ module.exports = {
             SET "assetUsageAgreementRevision" = "assetUsageAgreementRevision" + 1, "closed" = NOW()
             ${putFields.updates} WHERE ${keys.where} RETURNING *`;
         const result = await pgclient.sqlQuery(res, sqlCmd, keys.getAllValues());
-        if (result.rows.length) {
-            res.locals.dbdata.assetUsageAgreement = result.rows[0];
-            await snapshot.storeSnapshot(res, res.locals.dbdata.assetUsageAgreement.softwareLicensorId,
-                "assetUsageAgreement",
-                res.locals.params.assetUsageAgreementId,
-                res.locals.dbdata.assetUsageAgreement.assetUsageAgreementRevision,
-                res.locals.dbdata.assetUsageAgreement
-            );
-            }
-        utils.logInfo(res, `out revokeAssetUsageAgreement(${res.locals.params.assetUsageAgreementId})`);
+        await setDbdataAssetUsageAgreement(res, result);
+        utils.logInfo(res, `out revokeAssetUsageAgreement(${res.locals.paramKeys})`);
     },
     /**
      * verify that all required properties are provided in request to PUT asset-usage-agreement
@@ -160,16 +180,31 @@ module.exports = {
      * @throws {InvalidDataError} when invalid data
      */
     validateAssetUsageAgreement(res) {
-        utils.logInfo(res, `validateAssetUsageAgreement(${res.locals.params.assetUsageAgreementId})`);
+        utils.logInfo(res, `validateAssetUsageAgreement(${res.locals.paramKeys})`);
         res.locals.assetUsageAgreement = utils.getFromReqByPath(res, "assetUsageAgreement") || {};
-        odrl.validateAgreement(res.locals.assetUsageAgreement.agreement);
+
+        const errors = [];
+        if (res.locals.assetUsageAgreement.agreement == null) {
+            lumErrors.addError(errors, `agreement expected`);
+        } else {
+            odrl.validateAgreement(errors, res.locals.assetUsageAgreement.agreement, 'agreement');
+        }
+
+        if (errors.length) {
+            throw new lumErrors.InvalidDataError(errors);
+        }
+
     },
+    /**
+     * insert-update assetUsageAgreement in database
+     * @param  {} res
+     */
     async putAssetUsageAgreement(res) {
         if (!res.locals.params.assetUsageAgreementId) {
-            utils.logInfo(res, `skipped putAssetUsageAgreement(${res.locals.params.assetUsageAgreementId})`);
+            utils.logInfo(res, `skipped putAssetUsageAgreement(${res.locals.paramKeys})`);
             return;
         }
-        utils.logInfo(res, `in putAssetUsageAgreement(${res.locals.params.assetUsageAgreementId})`);
+        utils.logInfo(res, `in putAssetUsageAgreement(${res.locals.paramKeys})`);
 
         const keys = new SqlParams();
         keys.addField("softwareLicensorId", res.locals.assetUsageAgreement.softwareLicensorId);
@@ -194,54 +229,41 @@ module.exports = {
             WHERE aua."assetUsageAgreementActive" = FALSE OR ${putFields.getWhereDistinct("aua")}
             RETURNING *`;
         const result = await pgclient.sqlQuery(res, sqlCmd, keys.getAllValues());
-        if (result.rows.length) {
-            res.locals.dbdata.assetUsageAgreement = result.rows[0];
-            await snapshot.storeSnapshot(res, res.locals.dbdata.assetUsageAgreement.softwareLicensorId,
-                "assetUsageAgreement",
-                res.locals.params.assetUsageAgreementId,
-                res.locals.dbdata.assetUsageAgreement.assetUsageAgreementRevision,
-                res.locals.dbdata.assetUsageAgreement
-            );
-        }
-        utils.logInfo(res, `out putAssetUsageAgreement(${res.locals.params.assetUsageAgreementId})`);
+        await setDbdataAssetUsageAgreement(res, result);
+        utils.logInfo(res, `out putAssetUsageAgreement(${res.locals.paramKeys})`);
     },
+    /**
+     * groom assetUsageAgreement and its restriction into format used by LUM for entitlement evaluation
+     * @param  {} res
+     */
     async groomAssetUsageAgreement(res) {
         if (!res.locals.dbdata.assetUsageAgreement) {
-            utils.logInfo(res, `skipped groomAssetUsageAgreement(${res.locals.params.assetUsageAgreementId})`);
+            utils.logInfo(res, `skipped groomAssetUsageAgreement(${res.locals.paramKeys})`);
             return;
         }
-        utils.logInfo(res, `in groomAssetUsageAgreement(${res.locals.params.assetUsageAgreementId})`);
-        res.locals.groomedAgreement = odrl.groomAgreement(res, res.locals.dbdata.assetUsageAgreement.agreement);
+        utils.logInfo(res, `in groomAssetUsageAgreement(${res.locals.paramKeys})`);
+        res.locals.groomedAgreement = odrl.groomAgreement(res,
+            res.locals.dbdata.assetUsageAgreement.agreement,
+            res.locals.dbdata.assetUsageAgreement.agreementRestriction
+        );
 
         const keys = new SqlParams();
-        keys.addField("softwareLicensorId", res.locals.dbdata.assetUsageAgreement.softwareLicensorId);
+        keys.addField("softwareLicensorId", res.locals.params.softwareLicensorId);
         keys.addField("assetUsageAgreementId", res.locals.params.assetUsageAgreementId);
         const putFields = new SqlParams(keys);
         putFields.addField("groomedAgreement", res.locals.groomedAgreement);
         const houseFields = new SqlParams(putFields);
         houseFields.addField("modifier", res.locals.params.userId);
 
-        // houseFields.addField("closer", null);
-        // houseFields.addField("closed", null);
-        // houseFields.addField("closureReason", null);
-
         const sqlCmd = `UPDATE "assetUsageAgreement" AS aua
             SET "assetUsageAgreementRevision" = aua."assetUsageAgreementRevision" + 1 ${putFields.updates} ${houseFields.updates}, "modified" = NOW()
             WHERE ${keys.getWhere("aua")} AND ${putFields.getWhereDistinct("aua")} RETURNING *`;
         const result = await pgclient.sqlQuery(res, sqlCmd, keys.getAllValues());
-        if (result.rows.length) {
-            res.locals.dbdata.assetUsageAgreement = result.rows[0];
-            await snapshot.storeSnapshot(res, res.locals.dbdata.assetUsageAgreement.softwareLicensorId,
-                "assetUsageAgreement",
-                res.locals.params.assetUsageAgreementId,
-                res.locals.dbdata.assetUsageAgreement.assetUsageAgreementRevision,
-                res.locals.dbdata.assetUsageAgreement
-            );
-        }
-        utils.logInfo(res, `out groomAssetUsageAgreement(${res.locals.params.assetUsageAgreementId})`);
+        await setDbdataAssetUsageAgreement(res, result);
+        utils.logInfo(res, `out groomAssetUsageAgreement(${res.locals.paramKeys})`);
     },
     /**
-     * INSERT rightToUse records into database per agreement
+     * insert-update rightToUse records into database per agreement
      * @param  {} res
      */
     async putRightToUse(res) {
@@ -250,19 +272,19 @@ module.exports = {
         || !res.locals.dbdata.assetUsageAgreement.assetUsageAgreementRevision
         || !res.locals.groomedAgreement
         || (!res.locals.groomedAgreement.permission && !res.locals.groomedAgreement.prohibition)) {
-            utils.logInfo(res, `skipped putRightToUse(${res.locals.params.assetUsageAgreementId})`);
+            utils.logInfo(res, `skipped putRightToUse(${res.locals.paramKeys})`);
             return;
         }
-        utils.logInfo(res, `in putRightToUse(${res.locals.params.assetUsageAgreementId})`);
+        utils.logInfo(res, `in putRightToUse(${res.locals.paramKeys})`);
 
-        for await (const rightToUse of res.locals.groomedAgreement.permission || []) {
+        for await (const rightToUse of Object.values(res.locals.groomedAgreement.permission || {})) {
             await storeRightToUse(res, rightToUse);
         }
-        for await (const rightToUse of res.locals.groomedAgreement.prohibition || []) {
+        for await (const rightToUse of Object.values(res.locals.groomedAgreement.prohibition || {})) {
             await storeRightToUse(res, rightToUse);
         }
 
-        utils.logInfo(res, `out putRightToUse(${res.locals.params.assetUsageAgreementId})`);
+        utils.logInfo(res, `out putRightToUse(${res.locals.paramKeys})`);
     },
     /**
      * mark rightToUse records as non-active if not in agreement
@@ -272,13 +294,13 @@ module.exports = {
         if (!res.locals.params.assetUsageAgreementId
             || !res.locals.dbdata.assetUsageAgreement
             || !res.locals.dbdata.assetUsageAgreement.assetUsageAgreementRevision) {
-                utils.logInfo(res, `skipped revokeObsoleteRightToUse(${res.locals.params.assetUsageAgreementId})`);
+                utils.logInfo(res, `skipped revokeObsoleteRightToUse(${res.locals.paramKeys})`);
                 return;
             }
-            utils.logInfo(res, `in revokeObsoleteRightToUse(${res.locals.params.assetUsageAgreementId})`);
+            utils.logInfo(res, `in revokeObsoleteRightToUse(${res.locals.paramKeys})`);
 
             const keys = new SqlParams();
-            keys.addField("softwareLicensorId", res.locals.dbdata.assetUsageAgreement.softwareLicensorId);
+            keys.addField("softwareLicensorId", res.locals.params.softwareLicensorId);
             keys.addField("assetUsageAgreementId", res.locals.params.assetUsageAgreementId);
             keys.addField("rightToUseActive", true);
             const mismatchKeys = new SqlParams(keys);
@@ -299,19 +321,42 @@ module.exports = {
                         "rightToUse", rightToUse.assetUsageRuleId, rightToUse.rightToUseRevision, rightToUse);
                 }
             }
-            utils.logInfo(res, `out revokeObsoleteRightToUse(${res.locals.params.assetUsageAgreementId})`);
+            utils.logInfo(res, `out revokeObsoleteRightToUse(${res.locals.paramKeys})`);
     },
+    /**
+     * verify that all required properties are provided in request to PUT asset-usage-agreement-restriction
+     * @param  {} res
+     * @throws {InvalidDataError} when invalid data
+     */
+    validateAssetUsageAgreementRestriction(res) {
+        utils.logInfo(res, `validateAssetUsageAgreementRestriction(${res.locals.paramKeys})`);
+        res.locals.assetUsageAgreement = utils.getFromReqByPath(res, "assetUsageAgreement") || {};
+
+        const errors = [];
+        if (res.locals.assetUsageAgreement.agreementRestriction != null) {
+            odrl.validateAgreement(errors, res.locals.assetUsageAgreement.agreementRestriction, 'agreementRestriction');
+        }
+
+        if (errors.length) {
+            throw new lumErrors.InvalidDataError(errors);
+        }
+    },
+    /**
+     * update assetUsageAgreementRestriction in database
+     * @param  {} res
+     */
     async putAssetUsageAgreementRestriction(res) {
         if (!res.locals.params.assetUsageAgreementId) {
-            utils.logInfo(res, `skipped putAssetUsageAgreementRestriction(${res.locals.params.assetUsageAgreementId})`);
+            utils.logInfo(res, `skipped putAssetUsageAgreementRestriction(${res.locals.paramKeys})`);
             return;
         }
-        utils.logInfo(res, `in putAssetUsageAgreementRestriction(${res.locals.params.assetUsageAgreementId})`);
+        utils.logInfo(res, `in putAssetUsageAgreementRestriction(${res.locals.paramKeys})`);
 
         const keys = new SqlParams();
+        keys.addField("softwareLicensorId", res.locals.params.softwareLicensorId);
         keys.addField("assetUsageAgreementId", res.locals.params.assetUsageAgreementId);
         const putFields = new SqlParams(keys);
-        putFields.addField("agreementRestriction", utils.getFromReqByPath(res, "assetUsageAgreement", "agreementRestriction"));
+        putFields.addField("agreementRestriction", res.locals.assetUsageAgreement.agreementRestriction || null);
         const houseFields = new SqlParams(putFields);
         houseFields.addField("modifier", res.locals.params.userId);
 
@@ -319,22 +364,22 @@ module.exports = {
             SET "assetUsageAgreementRevision" = aua."assetUsageAgreementRevision" + 1 ${putFields.updates} ${houseFields.updates}, "modified" = NOW()
             WHERE ${keys.getWhere("aua")} AND ${putFields.getWhereDistinct("aua")} RETURNING *`;
         const result = await pgclient.sqlQuery(res, sqlCmd, keys.getAllValues());
-        if (result.rows.length) {
-            const snapshotBody = result.rows[0];
-            await snapshot.storeSnapshot(res, snapshotBody.softwareLicensorId,
-                "assetUsageAgreement", res.locals.params.assetUsageAgreementId,
-                snapshotBody.assetUsageAgreementRevision, snapshotBody);
-        }
-        utils.logInfo(res, `out putAssetUsageAgreementRestriction(${res.locals.params.assetUsageAgreementId})`);
+        await setDbdataAssetUsageAgreement(res, result);
+        utils.logInfo(res, `out putAssetUsageAgreementRestriction(${res.locals.paramKeys})`);
     },
+    /**
+     * remove assetUsageAgreementRestriction from assetUsageAgreement in database
+     * @param  {} res
+     */
     async revokeAssetUsageAgreementRestriction(res) {
         if (!res.locals.params.assetUsageAgreementId) {
-            utils.logInfo(res, `skipped revokeAssetUsageAgreementRestriction(${res.locals.params.assetUsageAgreementId})`);
+            utils.logInfo(res, `skipped revokeAssetUsageAgreementRestriction(${res.locals.paramKeys})`);
             return;
         }
-        utils.logInfo(res, `in revokeAssetUsageAgreementRestriction(${res.locals.params.assetUsageAgreementId})`);
+        utils.logInfo(res, `in revokeAssetUsageAgreementRestriction(${res.locals.paramKeys})`);
 
         const keys = new SqlParams();
+        keys.addField("softwareLicensorId", res.locals.params.softwareLicensorId);
         keys.addField("assetUsageAgreementId", res.locals.params.assetUsageAgreementId);
         const putFields = new SqlParams(keys);
         putFields.addField("agreementRestriction", null);
@@ -346,12 +391,8 @@ module.exports = {
             WHERE ${keys.getWhere("aua")} AND ${putFields.getWhereDistinct("aua")}
             RETURNING *`;
         const result = await pgclient.sqlQuery(res, sqlCmd, keys.getAllValues());
-        if (result.rows.length) {
-            const snapshotBody = result.rows[0];
-            await snapshot.storeSnapshot(res, snapshotBody.softwareLicensorId,
-                "assetUsageAgreement", res.locals.params.assetUsageAgreementId,
-                snapshotBody.assetUsageAgreementRevision, snapshotBody);
-        }
-        utils.logInfo(res, `out revokeAssetUsageAgreementRestriction(${res.locals.params.assetUsageAgreementId})`);
+        await setDbdataAssetUsageAgreement(res, result);
+        utils.logInfo(res, `out revokeAssetUsageAgreementRestriction(${res.locals.paramKeys})`);
     }
- };
+};
+

@@ -75,7 +75,8 @@ WORKDIR ${APPDIR}
 COPY --from=build-stage /work/ .
 
 RUN if [ "$NODE_ENV" == "production" ]; \
-    then echo 'removing npm' &&  npm remove -g npm; \
+    then echo 'prune packages' && npm prune --production \
+      && echo 'removing npm'   && npm remove -g npm; \
     fi 
 
 RUN addgroup ${APPUSER} \

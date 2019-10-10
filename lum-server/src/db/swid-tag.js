@@ -49,6 +49,10 @@ const swidTagHouse = {
 
 
 module.exports = {
+    /**
+     * get swid-tag from database
+     * @param  {} res
+     */
     async getSwidTag(res) {
         utils.logInfo(res, `in getSwidTag(${JSON.stringify(res.locals.dbdata.swidTags)})`);
 
@@ -68,6 +72,10 @@ module.exports = {
         }
         utils.logInfo(res, `out getSwidTag(${JSON.stringify(res.locals.dbdata.swidTags)})`);
     },
+    /**
+     * revoke swid-tag in the database
+     * @param  {} res
+     */
     async revokeSwidTag(res) {
         utils.logInfo(res, `in revokeSwidTag(${res.locals.params.swTagId})`);
         const keys = new SqlParams();
@@ -87,6 +95,10 @@ module.exports = {
         }
         utils.logInfo(res, `out revokeSwidTag(${res.locals.params.swTagId})`);
     },
+    /**
+     * put swid-tag into database
+     * @param  {} res
+     */
     async putSwidTag(res) {
         if (!res.locals.params.swTagId) {
             utils.logInfo(res, `skipped putSwidTag(${res.locals.params.swTagId})`);
@@ -128,6 +140,10 @@ module.exports = {
         }
         utils.logInfo(res, `out putSwidTag(${res.locals.params.swTagId})`);
     },
+    /**
+     * put swid-tag creators on swid-tag in the database
+     * @param  {} res
+     */
     async putSwidTagCreators(res) {
         if (!res.locals.params.swTagId) {
             utils.logInfo(res, `skipped putSwidTagCreators(${res.locals.params.swTagId})`);
