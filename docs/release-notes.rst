@@ -20,18 +20,45 @@
 License Usage Manager Release Notes
 ===================================
 
+Version 0.27.0, 11 October 2019
+---------------------------------
+
+lum-server
+..........
+
+- API change - params are now passed in query instead of through path -- per discussion in 0.26.4
+- added ``softwareLicensorId`` as param in query on ``/api/v1/asset-usage-agreement``
+  and ``/api/v1/asset-usage-agreement-restriction``
+- applying ODRL agreement-restriction provided by the subscriber company
+  over ODRL agreement from supplier-licensor company (`ACUMOS-3222 <https://jira.acumos.org/browse/ACUMOS-3222>`_)
+- agreement APIs now return groomedAgreement for debugging
+- ``healthcheck``: added ``databaseInfo`` with databaseVersion (to compare versus LUM server version)
+  and databaseStarted+databaseUptime.  Moved pgVersion under databaseInfo.
+- fixed false positive reporting of denials on swCatalogId/Type mismatch even when
+  there is an intersection between swidTag and rightToUse target (`ACUMOS-3506 <https://jira.acumos.org/browse/ACUMOS-3506>`_)
+- fixed-added populating the rightToUse and metrics data on assetUsageHistory table
+- using ``operator`` from constrain to evaluate the constraint instead of deducting the ``operator`` from ``leftOperand``.
+  Not fully flexible, but covers all use cases for Clio (`ACUMOS-3507 <https://jira.acumos.org/browse/ACUMOS-3507>`_)
+- jsdoc
+- logging healthcheck requests into a separate log file when LOGDIR is provided to uncongest the main log file
+
+
 Version 0.26.5, 9 October 2019
 ------------------------------
-* Open api changes to support fixes in LUM Java client - fixed typing of AssetUsageResponse and AssetUsageDenialAssetUsageDenial --
+* Open api changes to support fixes in LUM Java client - fixed typing of ``AssetUsageResponse`` and ``AssetUsageDenialAssetUsageDenial`` --
   Java code gen has a problem with the same property referenced by multiple schemas .. treats it as object
-* Object getAssetUsage() -> AssetUsageDenialOrEntitlement getAssetUsage()
-* List<Object> getAssetUsageDenial() ->  List<AssetUsageDenialAssetUsageDenial> getAssetUsageDenial()
-* Removed wrapper schema for assetUsageDenial  #/components/schemas/AssetUsageDenials
+* ``Object getAssetUsage() -> AssetUsageDenialOrEntitlement getAssetUsage()``
+* ``List<Object> getAssetUsageDenial() ->  List<AssetUsageDenialAssetUsageDenial> getAssetUsageDenial()``
+* Removed wrapper schema for assetUsageDenial  ``#/components/schemas/AssetUsageDenials``
 * Removed wrapper schemas for assetUsage property - for AssetUsageResponse schema
- - $ref: '#/components/schemas/AssetUsageResponseBase'
- - $ref: '#/components/schemas/AssetUsageMixedResponse'
- - $ref: '#/components/schemas/IncludedAssetUsageMixedResponse'
-  - Fix caused some overlap between AssetUsageResponseBase and AssetUsageMixedResponse.
+
+  ``- $ref: '#/components/schemas/AssetUsageResponseBase'``
+
+  ``- $ref: '#/components/schemas/AssetUsageMixedResponse'``
+
+  ``- $ref: '#/components/schemas/IncludedAssetUsageMixedResponse'``
+
+  Fix caused some overlap between AssetUsageResponseBase and AssetUsageMixedResponse.
 
 
 Version 0.26.4, 7 October 2019
@@ -64,6 +91,7 @@ Version 0.26.3, 1 October 2019
 - Update eslint
 - Reserved variable name - package changed to pkg
 - Adding .dockerignore to ensure node_modules are installed in docker not locally
+
 
 Version 0.26.2, 30 September 2019
 ---------------------------------

@@ -15,33 +15,63 @@
 // ============LICENSE_END=========================================================
 
 const utils = require('../utils');
-const pkg = require("../../package.json");
 const pgclient = require('../db/pgclient');
 
 module.exports = {
+    /**
+     * initialize the healthcheck structure that is sent back to client on healthcheck requests
+     */
     init() {
         lumServer.healthcheck = {
-            serverName: lumServer.config.serverName || "lum-server",
-            serverVersion: pkg.version,
+            serverName: lumServer.config.serverName,
+            serverVersion: require("../../package.json").version,
             apiVersion: null,
             nodeVersion: process.env.NODE_VERSION,
-            pgVersion: null,
+            databaseInfo: null,
             serverRunInstanceId: utils.uuid(),
-            serverStarted: new Date(),
+            serverStarted: lumServer.started,
             serverUptime: "0",
             pathToOpenapiUi: "/ui/openapi"
         };
     },
+    /**
+     * calculate the uptime of the lum-server and store it into lumServer.healthcheck.serverUptime
+     */
     calcUptime() {
-        lumServer.healthcheck.serverUptime = utils.milliSecsToString(new Date() - lumServer.healthcheck.serverStarted);
+        lumServer.healthcheck.serverUptime = utils.milliSecsToString(utils.now());
     },
-    getHealthcheck(req, res, next) {
+    /**
+     * put healthcheck into response
+     * @param  {} req
+     * @param  {} res
+     * @param  {} next
+     */
+    async getHealthcheck(req, res, next) {
+        await module.exports.checkPg(res);
         module.exports.calcUptime();
-        res.locals.response.healthcheck = lumServer.healthcheck;
+        res.locals.response.healthcheck = utils.deepCopyTo({}, lumServer.healthcheck);
         next();
     },
-    async checkPg(req, res, next) {
-        await pgclient.getPgVersion(res);
-        next();
+    /**
+     * check connection to postgres by getting the postgres version
+     * @param  {} res
+     */
+    async checkPg(res) {
+        try {
+            await pgclient.getLumDbInfo(res, true);
+        } catch (error) {
+            utils.logError(res, "ERROR checkPg", error.code, error.stack);
+            lumServer.healthcheck.databaseInfo = null;
+        }
+    },
+    /**
+     * run healthcheck on its own in async mode from sync environment
+     */
+    logHealthcheck() {
+        (async () => {
+            await module.exports.checkPg();
+            module.exports.calcUptime();
+            lumServer.logger.info('healthcheck', lumServer.healthcheck);
+        })();
     }
 };

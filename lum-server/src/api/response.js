@@ -16,7 +16,7 @@
 
 const utils = require('../utils');
 const healthcheck = require('./healthcheck');
-const {InvalidDataError} = require('../error');
+const lumErrors = require('../error');
 
 const resHeader = {requestId: "requestId", requested: "requested", status: "status"};
 
@@ -34,23 +34,17 @@ module.exports = {
         res.locals.started = utils.now();
         res.locals.stepStarted = res.locals.started;
         res.locals.requestHttp = {
-            method : req.method,
-            requestUrl : `${req.protocol}://${req.get('Host')}${req.originalUrl}`,
-            'Content-Type' : req.get('Content-Type'),
-            remoteAddress : req.connection.remoteAddress, ip : req.ip, ips : req.ips
+            method: req.method, requestUrl: `${req.protocol}://${req.get('Host')}${req.originalUrl}`,
+            query: req.query, 'Content-Type': req.get('Content-Type'),
+            remoteAddress: req.connection.remoteAddress, ip: req.ip, ips: req.ips
         };
+        res.locals.isHealthcheck = req.path.includes('/healthcheck');
         res.locals.params = {};
         res.locals.response = {};
         res.locals.dbdata = {};
 
-        res.locals.reqBody = Object.assign({}, req.body || {});
+        res.locals.reqBody = utils.deepCopyTo({}, req.body || {});
         res.locals.requestId = res.locals.reqBody.requestId || utils.uuid();
-
-        // Moved assetUsageAgreementId to query param due to issues with escaping path param with nginx proxy
-        if (req.query.assetUsageAgreementId && typeof req.query.assetUsageAgreementId === 'string') {
-            res.locals.params.assetUsageAgreementId = req.query.assetUsageAgreementId;
-            res.locals.response.assetUsageAgreementId = res.locals.params.assetUsageAgreementId;
-        }
 
         if (req.query.userId && typeof req.query.userId === 'string') {
             res.locals.params.userId = req.query.userId;
@@ -59,17 +53,56 @@ module.exports = {
             res.locals.params.userId = res.locals.reqBody.userId;
         }
 
+        for (const [paramKey, paramValue] of Object.entries(req.query)) {
+            if (paramValue && typeof paramValue === 'string') {
+                res.locals.params[paramKey] = paramValue;
+            }
+        }
+        res.locals.paramKeys = JSON.stringify(res.locals.params);
 
         for (const [key, value] of Object.entries(res.locals.reqBody)) {
-            if (typeof value === 'string') {
+            if (value && typeof value === 'string') {
                 res.locals.response[key] = value;
             }
         }
         res.locals.response.requestId = res.locals.requestId;
         res.locals.response.requested = res.locals.reqBody.requested || (new Date()).toISOString();
         res.set(res.locals.response);
+        res.set(res.locals.params);
         utils.logInfo(res, 'newReq', res.locals.requestHttp, res.locals.reqBody);
         next();
+    },
+    /**
+     * validate param in query by name paramName
+     * @param  {} res
+     * @param  {...string} paramNames
+     * @throws {InvalidDataError} when paramName of type string not received in query
+     */
+    validateParamInQuery(res, ...paramNames) {
+        const params = [];
+        const errors = [];
+        for (const paramName of paramNames) {
+            let paramValue = res.locals.params[paramName];
+            if (paramValue) {
+                params.push(`${paramName}(${paramValue})`);
+                continue;
+            }
+
+            paramValue = res.locals.requestHttp.query[paramName];
+            if (!paramValue) {
+                lumErrors.addError(errors,
+                    `expected ?${paramName}=<string> in ${res.locals.requestHttp.method} ${res.locals.requestHttp.requestUrl}`
+                );
+            }
+            lumErrors.addError(errors,
+                `expected string value for ?${paramName}=<string> in ${res.locals.requestHttp.method} ${res.locals.requestHttp.requestUrl}`,
+                paramName, paramValue
+            );
+        }
+        if (errors.length) {
+            throw new lumErrors.InvalidDataError(errors);
+        }
+        utils.logInfo(res, `params: ${params.join()}`);
     },
     /**
      * send the response back to the client at the end of successful request processing
@@ -91,7 +124,7 @@ module.exports = {
      */
     responseError(error, req, res, next) {
         utils.logError(res, "responseError - exception on", error, error.stack);
-        if (error instanceof InvalidDataError) {
+        if (error instanceof lumErrors.InvalidDataError) {
             res.status(lumHttpCodes.invalidDataError);
         } else {
             res.status(lumHttpCodes.serverError);

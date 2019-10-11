@@ -19,23 +19,44 @@ const pgclient = require('../../db/pgclient');
 const assetUsageAgreement = require('./asset-usage-agreement');
 const dbAssetUsageAgreement = require('../../db/asset-usage-agreement');
 
+/**
+ * api for put asset-usage-agreement-restriction
+ * @param  {} req
+ * @param  {} res
+ * @param  {} next
+ */
 const putAssetUsageAgreementRestriction = async (req, res, next) => {
-    utils.logInfo(res, `api putAssetUsageAgreementRestriction(${res.locals.params.assetUsageAgreementId})`);
-    await pgclient.runTx(res, dbAssetUsageAgreement.putAssetUsageAgreementRestriction);
+    utils.logInfo(res, `api putAssetUsageAgreementRestriction(${res.locals.paramKeys})`);
+    await pgclient.runTx(res,
+        dbAssetUsageAgreement.validateAssetUsageAgreementRestriction,
+        dbAssetUsageAgreement.putAssetUsageAgreementRestriction,
+        dbAssetUsageAgreement.groomAssetUsageAgreement,
+        dbAssetUsageAgreement.putRightToUse,
+        dbAssetUsageAgreement.revokeObsoleteRightToUse
+    );
     next();
 };
-
+/**
+ * api for revoke asset-usage-agreement-restriction
+ * @param  {} req
+ * @param  {} res
+ * @param  {} next
+ */
 const revokeAssetUsageAgreementRestriction = async (req, res, next) => {
-    utils.logInfo(res, `api revokeAssetUsageAgreementRestriction(${res.locals.params.assetUsageAgreementId})`);
-    await pgclient.runTx(res, dbAssetUsageAgreement.revokeAssetUsageAgreementRestriction);
+    utils.logInfo(res, `api revokeAssetUsageAgreementRestriction(${res.locals.paramKeys})`);
+    await pgclient.runTx(res,
+        dbAssetUsageAgreement.revokeAssetUsageAgreementRestriction,
+        dbAssetUsageAgreement.groomAssetUsageAgreement,
+        dbAssetUsageAgreement.putRightToUse,
+        dbAssetUsageAgreement.revokeObsoleteRightToUse
+    );
     next();
 };
 
-// router
 const Router = require('express-promise-router');
 const router = new Router();
 
-router.param('assetUsageAgreementId', assetUsageAgreement.setAssetUsageAgreementId);
+router.use(assetUsageAgreement.validateParams);
 
 router.route('/')
     .delete(revokeAssetUsageAgreementRestriction, assetUsageAgreement.getAssetUsageAgreement)

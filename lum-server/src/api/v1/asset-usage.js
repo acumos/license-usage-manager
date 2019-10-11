@@ -23,16 +23,13 @@ const dbSwidTag = require('../../db/swid-tag');
 const dbLicenseProfile = require('../../db/license-profile');
 
 /**
- * get assetUsageId from path and store in params
+ * validate params received in query
  * @param  {} req
  * @param  {} res
  * @param  {} next
- * @param  {string} assetUsageId
  */
-const setAssetUsageId = (req, res, next, assetUsageId) => {
-    res.locals.params.assetUsageId = assetUsageId;
-    res.set(res.locals.params);
-    utils.logInfo(res, `:assetUsageId(${res.locals.params.assetUsageId})`);
+const validateParams = (req, res, next) => {
+    response.validateParamInQuery(res, 'assetUsageId');
     next();
 };
 
@@ -128,13 +125,13 @@ const setAssetUsageResponse = (res) => {
 const Router = require('express-promise-router');
 const router = new Router();
 
-router.param('assetUsageId', setAssetUsageId);
+router.use(validateParams);
 
-router.route('/:assetUsageId')
+router.route('/')
     .get(getAssetUsage)
     .put(putAssetUsage);
 
 module.exports = {
      router: router,
-     setAssetUsageId: setAssetUsageId
+     validateParams: validateParams
 };
