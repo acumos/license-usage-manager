@@ -15,16 +15,25 @@
 // ============LICENSE_END=========================================================
 
 const utils = require('../../utils');
+const response = require('../response');
 const pgclient = require('../../db/pgclient');
 const dbAssetUsage = require('../../db/asset-usage');
-
-const setSoftwareLicensorId = (req, res, next, softwareLicensorId) => {
-    res.locals.params.softwareLicensorId = softwareLicensorId;
-    res.set(res.locals.params);
-    utils.logInfo(res, `:softwareLicensorId(${res.locals.params.softwareLicensorId})`);
+/**
+ * validate params received in query
+ * @param  {} req
+ * @param  {} res
+ * @param  {} next
+ */
+const validateParams = (req, res, next) => {
+    response.validateParamInQuery(res, 'softwareLicensorId');
     next();
 };
-
+/**
+ * api to get asset-usage-tracking report from database
+ * @param  {} req
+ * @param  {} res
+ * @param  {} next
+ */
 const getAssetUsageTracking = async (req, res, next) => {
     utils.logInfo(res, `api getAssetUsageTracking(${res.locals.params.softwareLicensorId})`);
     res.locals.response.title = `asset-usage-tracking for software-licensor ${res.locals.params.softwareLicensorId}`;
@@ -40,12 +49,9 @@ const getAssetUsageTracking = async (req, res, next) => {
     next();
 };
 
-// router
 const Router = require('express-promise-router');
 const router = new Router();
 
-router.param('softwareLicensorId', setSoftwareLicensorId);
-
-router.get('/software-licensor/:softwareLicensorId', getAssetUsageTracking);
+router.get('/software-licensor', validateParams, getAssetUsageTracking);
 
 module.exports = router;

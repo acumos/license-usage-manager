@@ -59,7 +59,6 @@ async function connect(res) {
         if (res.locals.pg.txNow)        {delete res.locals.pg.txNow;}
         if (res.locals.pg.txNowDate)    {delete res.locals.pg.txNowDate;}
         if (res.locals.pg.txStep)       {delete res.locals.pg.txStep;}
-        if (res.locals.pg.runStep)      {delete res.locals.pg.runStep;}
     }
 }
 /**
@@ -121,22 +120,25 @@ module.exports = {
      * create the pool of connections to the database
      */
     initDb() {
-        const pgOptions = Object.assign({}, lumServer.config.database);
-        pgOptions.password = process.env.DATABASE_PASSWORD || pgOptions.password;
+        const pgOptions = utils.deepCopyTo({}, lumServer.config.database);
         lumServer.logger.info(`initializing pgclient(${JSON.stringify(pgOptions, utils.hidePass)})...`);
         pgPool = new pg.Pool(pgOptions);
     },
     /**
      * retrieve the version info from the database
      * @param  {} res
+     * @param  {boolean} always when true - get fresh data
      */
-    async getPgVersion(res) {
-        if (!lumServer.healthcheck.pgVersion) {
-            logRunStepInfo(res, "getPgVersion");
-            const {rows} = await pgPool.query("SELECT version() AS pg_version");
+    async getLumDbInfo(res, always=false) {
+        if (always || !lumServer.healthcheck.databaseInfo) {
+            utils.logInfo(res, "in getLumDbInfo", lumServer.healthcheck.databaseInfo || '');
+            const {rows} = await pgPool.query(`SELECT VERSION() AS "pgVersion", "lumVersion" AS "databaseVersion",
+                    PG_POSTMASTER_START_TIME() AS "databaseStarted",
+                    (NOW() - PG_POSTMASTER_START_TIME())::TEXT AS "databaseUptime", NOW() AS "checked"
+                    FROM "lumInfo" WHERE "lumSystem" = 'LUM'`);
             if (rows.length) {
-                lumServer.healthcheck.pgVersion = rows[0].pg_version;
-                logRunStepInfo(res, `pgVersion=${lumServer.healthcheck.pgVersion}`);
+                lumServer.healthcheck.databaseInfo = rows[0];
+                utils.logInfo(res, "out getLumDbInfo", lumServer.healthcheck.databaseInfo);
             }
         }
     },
@@ -151,6 +153,7 @@ module.exports = {
         logRunStepInfo(res, `sqlQuery (${sqlCmd}) with (${JSON.stringify(sqlVals)})`);
         const rslt = await res.locals.pg.client.query(sqlCmd, sqlVals);
         const result = {command: rslt.command, rowCount: rslt.rowCount, rows: rslt.rows};
+        if (sqlCmd.length > 100) {sqlCmd = `${sqlCmd.substr(0,100)}...`;}
         logRunStepInfo(res, `sqlQuery result: (${JSON.stringify(result)}) for (${sqlCmd}) with (${JSON.stringify(sqlVals)})`);
         delete res.locals.pg.runStep;
         return result;
@@ -173,18 +176,18 @@ module.exports = {
     /**
      * run transaction of multiple steps-queries with retries
      * @param  {} res
-     * @param  {} ...txSteps
+     * @param  {...function} txSteps
      */
     async runTx(res, ...txSteps) {
         logRunStepInfo(res, `runTx txSteps[${txSteps.length}]`);
         if (txSteps.length) {
-            const responseBackup = Object.assign({}, res.locals.response);
+            const responseBackup = JSON.stringify(res.locals.response);
             for (res.locals.pg.txRetryCount = 1; res.locals.pg.txRetryCount <= lumServer.config.maxTxRetryCount; ++res.locals.pg.txRetryCount) {
                 try {
                     let iStep = 0;
                     let iStepTxt = iStep.toString().padStart(2,'0');
-                    res.locals.pg.txStep = ` [${iStepTxt}] getPgVersion`;
-                    await module.exports.getPgVersion(res);
+                    res.locals.pg.txStep = ` [${iStepTxt}] getLumDbInfo`;
+                    await module.exports.getLumDbInfo(res);
                     res.locals.pg.txStep = ` [${iStepTxt}] connect`;
                     await connect(res);
                     res.locals.pg.txStep = ` [${iStepTxt}] begin`;
@@ -213,7 +216,7 @@ module.exports = {
                         throw error;
                     }
                     if (error.code === "ECONNREFUSED" && res.locals.pg.txRetryCount < lumServer.config.maxTxRetryCount) {
-                        lumServer.healthcheck.pgVersion = null;
+                        lumServer.healthcheck.databaseInfo = null;
                         await utils.sleep(500);
                     } else if (!['40P01', '40001'].includes(error.code)) {
                         throw error;
@@ -225,7 +228,7 @@ module.exports = {
                         logRunStepInfo(res, `runTx txSteps[${txSteps.length}] - gave up trying(<=${lumServer.config.maxTxRetryCount})`);
                         throw error;
                     }
-                    res.locals.response = Object.assign({}, responseBackup);
+                    res.locals.response = JSON.parse(responseBackup);
                     logRunStepInfo(res, `runTx txSteps[${txSteps.length}] - going to retry(<=${lumServer.config.maxTxRetryCount})`);
                 }
             }

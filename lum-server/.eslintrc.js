@@ -5,8 +5,7 @@ module.exports = {
         "es6": true
     },
     "extends": [
-        "node", 
-        // "node/style-guide"
+        "node"
     ],
     "parserOptions": {
         "ecmaVersion": 2018
