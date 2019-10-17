@@ -19,6 +19,6 @@
 -- \conninfo;
 SELECT version();
 
-INSERT INTO "lumInfo" ("lumSystem", "lumVersion") VALUES ('LUM', '0.27.0');
+INSERT INTO "lumInfo" ("lumSystem", "lumVersion") VALUES ('LUM', '0.27.1');
 
 INSERT INTO "swMgtSystem" ("swMgtSystemId") VALUES ('Acumos');

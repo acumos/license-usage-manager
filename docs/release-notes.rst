@@ -20,6 +20,16 @@
 License Usage Manager Release Notes
 ===================================
 
+Version 0.27.1, 17 October 2019
+---------------------------------
+
+lum-server
+..........
+
+- LUM open API spec change (for LUM Java Client) to correctly generate 
+  types for AssetUsage (`ACUMOS-3082 <https://jira.acumos.org/browse/ACUMOS-3082>`_)
+
+
 Version 0.27.0, 11 October 2019
 ---------------------------------
 
