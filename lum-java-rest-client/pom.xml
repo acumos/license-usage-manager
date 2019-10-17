@@ -24,10 +24,10 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.acumos.license-usage-manager</groupId>
 	<artifactId>lum-java-rest-client</artifactId>
-	<version>0.27.1-SNAPSHOT</version>
+	<version>0.27.1</version>
 	<name>LUM Java Rest Client</name>
 	<properties>
-		<old.version>0.23.1-SNAPSHOT</old.version>
+		<old.version>0.23.1</old.version>
 		<default.package>org.acumos.lum</default.package>
 		<openapi-generator-version>4.0.3</openapi-generator-version>
 		<gson-fire-version>1.8.3</gson-fire-version>
