@@ -158,8 +158,8 @@ async function findRtuForSwidTag(res, swidTag) {
                                        WHERE ums."usageMetricsId" = rtu."assetUsageRuleId"
                                          AND ums."action" = "rtuAction"
                                          AND ums."usageType" = 'rightToUse') AS usmcs ON TRUE
-            LEFT OUTER JOIN LATERAL (SELECT swtctlg."swCatalogIds", swtctlg."swCatalogTypes" FROM swtctlg
-                                      WHERE swtctlg."swTagId" = swt."swTagId") AS ctlgs ON TRUE
+             LEFT OUTER JOIN LATERAL (SELECT swtctlg."swCatalogIds", swtctlg."swCatalogTypes" FROM swtctlg
+                                       WHERE swtctlg."swTagId" = swt."swTagId") AS ctlgs ON TRUE
         WHERE "rtuAction" IN (${actionField.idxKeyValues})
           AND swt."swidTagActive" = TRUE AND rtu."rightToUseActive" = TRUE
           AND (rtu."expireOn" IS NULL OR NOW()::DATE <= rtu."expireOn"::DATE)
@@ -236,9 +236,11 @@ async function checkRtuForSwidTag(res, swidTag) {
     await findRtuForSwidTag(res, swidTag);
 
     if (swidTag.rightToUse == null) {
-        utils.addDenial(swidTag.usageDenials, "agreementNotFound",
-            `asset-usage-agreement not found for swTagId(${swidTag.swTagId})`, res.locals.params.action);
-        await collectDenialsForSwidTag(res, swidTag);
+        const denialsCount = await collectDenialsForSwidTag(res, swidTag);
+        if (!denialsCount) {
+            utils.addDenial(swidTag.usageDenials, "agreementNotFound",
+                `asset-usage-agreement not found for swTagId(${swidTag.swTagId})`, res.locals.params.action);
+        }
         return;
     }
     if (swidTag.rightToUse.assetUsageRuleType === odrl.RULE_TYPES.prohibition) {
@@ -495,8 +497,8 @@ async function collectDenialsForSwidTag(res, swidTag) {
                                        WHERE ums."usageMetricsId" = rtu."assetUsageRuleId"
                                          AND ums."action" = "rtuAction"
                                          AND ums."usageType" = 'rightToUse') AS usmcs ON TRUE
-            LEFT OUTER JOIN LATERAL (SELECT swtctlg."swCatalogIds", swtctlg."swCatalogTypes" FROM swtctlg
-                                      WHERE swtctlg."swTagId" = swt."swTagId") AS ctlgs ON TRUE
+             LEFT OUTER JOIN LATERAL (SELECT swtctlg."swCatalogIds", swtctlg."swCatalogTypes" FROM swtctlg
+                                       WHERE swtctlg."swTagId" = swt."swTagId") AS ctlgs ON TRUE
           WHERE "rtuAction" IN (${actionField.idxKeyValues})
         ORDER BY CASE WHEN rtu."rightToUseActive"
                        AND (rtu."enableOn" IS NULL OR NOW()::DATE >= rtu."enableOn"::DATE)
@@ -513,13 +515,14 @@ async function collectDenialsForSwidTag(res, swidTag) {
         for (const denial of Object.values(deniedRightToUse)) {
             if (!denial.denied) {continue;}
             delete denial.denied;
-            const visitedDdenial = JSON.stringify(denial);
-            if (visitedDenials[visitedDdenial]) {continue;}
-            visitedDenials[visitedDdenial] = true;
+            const visitedDenial = JSON.stringify(denial);
+            if (visitedDenials[visitedDenial]) {continue;}
+            visitedDenials[visitedDenial] = true;
             swidTag.usageDenials.push(denial);
         }
     }
     utils.logInfo(res, `out collectDenialsForSwidTag(${swidTag.swTagId})`);
+    return Object.keys(visitedDenials).length;
 }
 /**
  * increment counters and record userId into usageMetrics table

@@ -20,13 +20,24 @@
 License Usage Manager Release Notes
 ===================================
 
+Version 0.27.2, 21 October 2019
+---------------------------------
+
+lum-server
+..........
+
+- LUM not to return denialType of the agreementNotFound when have other denials
+  as an indication of there are agreements, but not matching
+  (`ACUMOS-3598 <https://jira.acumos.org/browse/ACUMOS-3598>`_)
+
+
 Version 0.27.1, 17 October 2019
 ---------------------------------
 
 lum-server
 ..........
 
-- LUM open API spec change (for LUM Java Client) to correctly generate 
+- LUM open API spec change (for LUM Java Client) to correctly generate
   types for AssetUsage (`ACUMOS-3082 <https://jira.acumos.org/browse/ACUMOS-3082>`_)
 
 

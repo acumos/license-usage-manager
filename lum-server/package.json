@@ -1,7 +1,7 @@
 {
   "name": "lum-server",
   "description": "License Usage Manager (LUM) for Acumos and ONAP",
-  "version": "0.27.1",
+  "version": "0.27.2",
   "main": "lum-server.js",
   "repository": {
     "type": "git",
