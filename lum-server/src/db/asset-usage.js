@@ -158,12 +158,12 @@ async function findRtuForSwidTag(res, swidTag) {
                                        WHERE ums."usageMetricsId" = rtu."assetUsageRuleId"
                                          AND ums."action" = "rtuAction"
                                          AND ums."usageType" = 'rightToUse') AS usmcs ON TRUE
-            LEFT OUTER JOIN LATERAL (SELECT swtctlg."swCatalogIds", swtctlg."swCatalogTypes" FROM swtctlg
-                                      WHERE swtctlg."swTagId" = swt."swTagId") AS ctlgs ON TRUE
+             LEFT OUTER JOIN LATERAL (SELECT swtctlg."swCatalogIds", swtctlg."swCatalogTypes" FROM swtctlg
+                                       WHERE swtctlg."swTagId" = swt."swTagId") AS ctlgs ON TRUE
         WHERE "rtuAction" IN (${actionField.idxKeyValues})
           AND swt."swidTagActive" = TRUE AND rtu."rightToUseActive" = TRUE
-          AND (rtu."expireOn" IS NULL OR NOW()::DATE <= rtu."expireOn"::DATE)
-          AND (rtu."enableOn" IS NULL OR NOW()::DATE >= rtu."enableOn"::DATE)
+          AND (rtu."expireOn" IS NULL OR NOW()::DATE <= rtu."expireOn")
+          AND (rtu."enableOn" IS NULL OR NOW()::DATE >= rtu."enableOn")
           AND (rtu."targetRefinement"#>'{lum:swPersistentId}' IS NULL
             OR ${genCasesByOperator(`rtu."targetRefinement"#>>'{lum:swPersistentId,operator}'`,
                     `swt."swPersistentId"`, `rtu."targetRefinement"#>'{lum:swPersistentId,rightOperand}'`, 'TEXT')})
@@ -236,9 +236,11 @@ async function checkRtuForSwidTag(res, swidTag) {
     await findRtuForSwidTag(res, swidTag);
 
     if (swidTag.rightToUse == null) {
-        utils.addDenial(swidTag.usageDenials, "agreementNotFound",
-            `asset-usage-agreement not found for swTagId(${swidTag.swTagId})`, res.locals.params.action);
-        await collectDenialsForSwidTag(res, swidTag);
+        const denialsCount = await collectDenialsForSwidTag(res, swidTag);
+        if (!denialsCount) {
+            utils.addDenial(swidTag.usageDenials, "agreementNotFound",
+                `asset-usage-agreement not found for swTagId(${swidTag.swTagId})`, res.locals.params.action);
+        }
         return;
     }
     if (swidTag.rightToUse.assetUsageRuleType === odrl.RULE_TYPES.prohibition) {
@@ -302,7 +304,7 @@ async function collectDenialsForSwidTag(res, swidTag) {
         JSON_BUILD_OBJECT(
             'denied', NOT rtu."rightToUseActive",
             'denialType', 'rightToUseRevoked',
-            'denialReason', 'rightToUse ' || COALESCE(rtu."closureReason", 'revoked'),
+            'denialReason', rtu."assetUsageRuleType" || ' ' || COALESCE(rtu."closureReason", 'revoked'),
             'deniedAction', "rtuAction",
             'deniedAssetUsageAgreementId', rtu."assetUsageAgreementId",
             'deniedAssetUsageAgreementRevision', agr."assetUsageAgreementRevision",
@@ -313,9 +315,9 @@ async function collectDenialsForSwidTag(res, swidTag) {
         ) AS "denied_rightToUseRevoked",
 
         JSON_BUILD_OBJECT(
-            'denied', NOT (rtu."expireOn" IS NULL OR NOW()::DATE <= rtu."expireOn"::DATE),
+            'denied', NOT (rtu."expireOn" IS NULL OR NOW()::DATE <= rtu."expireOn"),
             'denialType', 'timingConstraint',
-            'denialReason', 'rightToUse ' || COALESCE(rtu."closureReason", 'expired'),
+            'denialReason', rtu."assetUsageRuleType" || ' ' || COALESCE(rtu."closureReason", 'expired'),
             'deniedAction', "rtuAction",
             'deniedAssetUsageAgreementId', rtu."assetUsageAgreementId",
             'deniedAssetUsageAgreementRevision', agr."assetUsageAgreementRevision",
@@ -327,9 +329,9 @@ async function collectDenialsForSwidTag(res, swidTag) {
         ) AS "denied_expired",
 
         JSON_BUILD_OBJECT(
-            'denied', NOT (rtu."enableOn" IS NULL OR NOW()::DATE >= rtu."enableOn"::DATE),
+            'denied', NOT (rtu."enableOn" IS NULL OR NOW()::DATE >= rtu."enableOn"),
             'denialType', 'timingConstraint',
-            'denialReason', 'rightToUse ' || COALESCE(rtu."closureReason", 'too soon'),
+            'denialReason', rtu."assetUsageRuleType" || ' ' || COALESCE(rtu."closureReason", 'too soon'),
             'deniedAction', "rtuAction",
             'deniedAssetUsageAgreementId', rtu."assetUsageAgreementId",
             'deniedAssetUsageAgreementRevision', agr."assetUsageAgreementRevision",
@@ -345,7 +347,7 @@ async function collectDenialsForSwidTag(res, swidTag) {
                 OR ${genCasesByOperator(`rtu."targetRefinement"#>>'{lum:swPersistentId,operator}'`,
                     `swt."swPersistentId"`, `rtu."targetRefinement"#>'{lum:swPersistentId,rightOperand}'`, 'TEXT')}),
             'denialType', 'matchingConstraintOnTarget',
-            'denialReason', 'not targeted by the rightToUse',
+            'denialReason', 'not targeted by the ' || rtu."assetUsageRuleType",
             'deniedAction', "rtuAction",
             'deniedAssetUsageAgreementId', rtu."assetUsageAgreementId",
             'deniedAssetUsageAgreementRevision', agr."assetUsageAgreementRevision",
@@ -361,7 +363,7 @@ async function collectDenialsForSwidTag(res, swidTag) {
                 OR ${genCasesByOperator(`rtu."targetRefinement"#>>'{lum:swTagId,operator}'`,
                     `swt."swTagId"`, `rtu."targetRefinement"#>'{lum:swTagId,rightOperand}'`, 'TEXT')}),
             'denialType', 'matchingConstraintOnTarget',
-            'denialReason', 'not targeted by the rightToUse',
+            'denialReason', 'not targeted by the ' || rtu."assetUsageRuleType",
             'deniedAction', "rtuAction",
             'deniedAssetUsageAgreementId', rtu."assetUsageAgreementId",
             'deniedAssetUsageAgreementRevision', agr."assetUsageAgreementRevision",
@@ -377,7 +379,7 @@ async function collectDenialsForSwidTag(res, swidTag) {
                 OR ${genCasesByOperator(`rtu."targetRefinement"#>>'{lum:swProductName,operator}'`,
                     `swt."swProductName"`, `rtu."targetRefinement"#>'{lum:swProductName,rightOperand}'`, 'TEXT')}),
             'denialType', 'matchingConstraintOnTarget',
-            'denialReason', 'not targeted by the rightToUse',
+            'denialReason', 'not targeted by the ' || rtu."assetUsageRuleType",
             'deniedAction', "rtuAction",
             'deniedAssetUsageAgreementId', rtu."assetUsageAgreementId",
             'deniedAssetUsageAgreementRevision', agr."assetUsageAgreementRevision",
@@ -393,7 +395,7 @@ async function collectDenialsForSwidTag(res, swidTag) {
                 OR ${genCasesByOperator(`rtu."targetRefinement"#>>'{lum:swCategory,operator}'`,
                     `swt."swCategory"`, `rtu."targetRefinement"#>'{lum:swCategory,rightOperand}'`, 'TEXT')}),
             'denialType', 'matchingConstraintOnTarget',
-            'denialReason', 'not targeted by the rightToUse',
+            'denialReason', 'not targeted by the ' || rtu."assetUsageRuleType",
             'deniedAction', "rtuAction",
             'deniedAssetUsageAgreementId', rtu."assetUsageAgreementId",
             'deniedAssetUsageAgreementRevision', agr."assetUsageAgreementRevision",
@@ -408,7 +410,7 @@ async function collectDenialsForSwidTag(res, swidTag) {
             'denied', NOT (rtu."targetRefinement"#>'{lum:swCatalogId}' IS NULL
                   OR COALESCE(rtu."targetRefinement"#>'{lum:swCatalogId,rightOperand}' ?| ctlgs."swCatalogIds", FALSE)),
             'denialType', 'matchingConstraintOnTarget',
-            'denialReason', 'not targeted by the rightToUse',
+            'denialReason', 'not targeted by the ' || rtu."assetUsageRuleType",
             'deniedAction', "rtuAction",
             'deniedAssetUsageAgreementId', rtu."assetUsageAgreementId",
             'deniedAssetUsageAgreementRevision', agr."assetUsageAgreementRevision",
@@ -423,7 +425,7 @@ async function collectDenialsForSwidTag(res, swidTag) {
             'denied', NOT (rtu."targetRefinement"#>'{lum:swCatalogType}' IS NULL
                   OR COALESCE(rtu."targetRefinement"#>'{lum:swCatalogType,rightOperand}' ?| ctlgs."swCatalogTypes", FALSE)),
             'denialType', 'matchingConstraintOnTarget',
-            'denialReason', 'not targeted by the rightToUse',
+            'denialReason', 'not targeted by the ' || rtu."assetUsageRuleType",
             'deniedAction', "rtuAction",
             'deniedAssetUsageAgreementId', rtu."assetUsageAgreementId",
             'deniedAssetUsageAgreementRevision', agr."assetUsageAgreementRevision",
@@ -441,7 +443,7 @@ async function collectDenialsForSwidTag(res, swidTag) {
                     `COALESCE(JSONB_ARRAY_LENGTH((rtu."assigneeMetrics"->'users')::JSONB), 0) + 1`,
                     `rtu."assigneeRefinement"#>'{lum:countUniqueUsers,rightOperand}'`, 'INTEGER')}),
             'denialType', 'matchingConstraintOnAssignee',
-            'denialReason', 'too many users for the rightToUse',
+            'denialReason', 'too many users for the ' || rtu."assetUsageRuleType",
             'deniedAction', "rtuAction",
             'deniedAssetUsageAgreementId', rtu."assetUsageAgreementId",
             'deniedAssetUsageAgreementRevision', agr."assetUsageAgreementRevision",
@@ -458,7 +460,7 @@ async function collectDenialsForSwidTag(res, swidTag) {
                 OR ${genCasesByOperator(`rtu."assigneeRefinement"#>>'{lum:users,operator}'`,
                     `${userField.idxKeyValues}`, `rtu."assigneeRefinement"#>'{lum:users,rightOperand}'`, 'TEXT')}),
             'denialType', 'matchingConstraintOnAssignee',
-            'denialReason', 'user not in assignee list on the rightToUse',
+            'denialReason', 'user not in assignee list on the ' || rtu."assetUsageRuleType",
             'deniedAction', "rtuAction",
             'deniedAssetUsageAgreementId', rtu."assetUsageAgreementId",
             'deniedAssetUsageAgreementRevision', agr."assetUsageAgreementRevision",
@@ -475,7 +477,7 @@ async function collectDenialsForSwidTag(res, swidTag) {
                     `COALESCE((usmcs."metrics"#>'{count}')::INTEGER, 0) + ${reqUsageCountField.idxKeyValues}`,
                     `rtu."usageConstraints"#>'{count,rightOperand}'`, 'INTEGER')}),
             'denialType', 'usageConstraint',
-            'denialReason', 'exceeding the usage count on the rightToUse',
+            'denialReason', 'exceeding the usage count on the ' || rtu."assetUsageRuleType",
             'deniedAction', "rtuAction",
             'deniedAssetUsageAgreementId', rtu."assetUsageAgreementId",
             'deniedAssetUsageAgreementRevision', agr."assetUsageAgreementRevision",
@@ -495,12 +497,12 @@ async function collectDenialsForSwidTag(res, swidTag) {
                                        WHERE ums."usageMetricsId" = rtu."assetUsageRuleId"
                                          AND ums."action" = "rtuAction"
                                          AND ums."usageType" = 'rightToUse') AS usmcs ON TRUE
-            LEFT OUTER JOIN LATERAL (SELECT swtctlg."swCatalogIds", swtctlg."swCatalogTypes" FROM swtctlg
-                                      WHERE swtctlg."swTagId" = swt."swTagId") AS ctlgs ON TRUE
-          WHERE "rtuAction" IN (${actionField.idxKeyValues})
+             LEFT OUTER JOIN LATERAL (SELECT swtctlg."swCatalogIds", swtctlg."swCatalogTypes" FROM swtctlg
+                                       WHERE swtctlg."swTagId" = swt."swTagId") AS ctlgs ON TRUE
+        WHERE "rtuAction" IN (${actionField.idxKeyValues})
         ORDER BY CASE WHEN rtu."rightToUseActive"
-                       AND (rtu."enableOn" IS NULL OR NOW()::DATE >= rtu."enableOn"::DATE)
-                       AND (rtu."expireOn" IS NULL OR NOW()::DATE <= rtu."expireOn"::DATE)
+                       AND (rtu."enableOn" IS NULL OR NOW()::DATE >= rtu."enableOn")
+                       AND (rtu."expireOn" IS NULL OR NOW()::DATE <= rtu."expireOn")
                       THEN '0' ELSE '1' END,
                  NULLIF(rtu."assetUsageRuleType", 'prohibition') NULLS FIRST,
                  NULLIF("rtuAction", 'use') NULLS LAST,
@@ -513,13 +515,14 @@ async function collectDenialsForSwidTag(res, swidTag) {
         for (const denial of Object.values(deniedRightToUse)) {
             if (!denial.denied) {continue;}
             delete denial.denied;
-            const visitedDdenial = JSON.stringify(denial);
-            if (visitedDenials[visitedDdenial]) {continue;}
-            visitedDenials[visitedDdenial] = true;
+            const visitedDenial = JSON.stringify(denial);
+            if (visitedDenials[visitedDenial]) {continue;}
+            visitedDenials[visitedDenial] = true;
             swidTag.usageDenials.push(denial);
         }
     }
     utils.logInfo(res, `out collectDenialsForSwidTag(${swidTag.swTagId})`);
+    return Object.keys(visitedDenials).length;
 }
 /**
  * increment counters and record userId into usageMetrics table
