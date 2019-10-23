@@ -19,7 +19,7 @@
 openapi: '3.0.2'
 
 info:
-  version: "0.27.2"
+  version: "0.28.0"
   title: "License Usage Manager (LUM) API"
   contact:
     name: Acumos License Management
@@ -890,12 +890,12 @@ components:
               type: string
           example:
             serverName: "lum-server"
-            serverVersion: "0.27.2"
-            apiVersion: "0.27.2"
+            serverVersion: "0.28.0"
+            apiVersion: "0.28.0"
             nodeVersion: "10.16.3"
             databaseInfo:
               pgVersion: "PostgreSQL 11.5 on x86_64-pc-linux-musl, compiled by gcc (Alpine 8.3.0) 8.3.0, 64-bit"
-              databaseVersion: "0.27.2"
+              databaseVersion: "0.28.0"
               databaseStarted: "2019-10-07T14:07:26.376Z"
               databaseUptime: "2 days 00:19:37.460527"
               checked: "2019-10-09T14:27:03.837Z"
@@ -1744,6 +1744,10 @@ components:
       description: denials for the response to assetUsageReq request
       type: object
       properties:
+        assetUsageDenialSummary:
+          description: human readable summary for denial of the asset-usage
+          type: string
+
         assetUsageDenial:
           description: collection of denial info to assetUsageReq request
           type: array

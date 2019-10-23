@@ -20,6 +20,22 @@
 License Usage Manager Release Notes
 ===================================
 
+Version 0.28.0, 23 October 2019
+---------------------------------
+
+lum-server
+..........
+
+- changed API and asset-usage-denial data that LUM returns (`ACUMOS-3601 <https://jira.acumos.org/browse/ACUMOS-3601>`_)
+
+  * ``assetUsageDenialSummary`` that is human readable summary for denial of the asset-usage
+    to be shown on UI
+
+  * unique ``denialReason`` values that contain all the keys and the constraint condition
+    from the denial in human readable format
+
+  * added ``assetUsageDenialSummary`` field to ``assetUsageHistory`` table in database
+
 Version 0.27.2, 21 October 2019
 ---------------------------------
 

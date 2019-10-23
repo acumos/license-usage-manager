@@ -406,6 +406,7 @@ CREATE TABLE "assetUsageHistory" (
     "usageEntitled"                 BOOLEAN NULL,
     "isUsedBySwCreator"             BOOLEAN NULL,
     "licenseKeys"                   TEXT[] NULL,
+    "assetUsageDenialSummary"       TEXT NULL,
     "assetUsageDenial"              JSON NULL,
     --housekeeping--
     "creator"                       TEXT NOT NULL DEFAULT USER,
@@ -439,6 +440,7 @@ COMMENT ON COLUMN "assetUsageHistory"."assigneeMetrics" IS 'assignee metrics use
 COMMENT ON COLUMN "assetUsageHistory"."usageEntitled" IS 'whether the asset-usage entitled (true) or not (false)';
 COMMENT ON COLUMN "assetUsageHistory"."isUsedBySwCreator" IS 'whether the userId listed in swCreators of the software';
 COMMENT ON COLUMN "assetUsageHistory"."licenseKeys" IS '[licenseKey] - copied from usageMetrics - list of license-keys provided by supplier are consumed by the software to unlock the functionality';
+COMMENT ON COLUMN "assetUsageHistory"."assetUsageDenialSummary" IS 'human readable summary for denial of the asset-usage';
 COMMENT ON COLUMN "assetUsageHistory"."assetUsageDenial" IS 'denials of the usage of the software asset - see API';
 COMMENT ON COLUMN "assetUsageHistory"."creator" IS 'userId of the record creator';
 COMMENT ON COLUMN "assetUsageHistory"."created" IS 'when action happened - record created';
