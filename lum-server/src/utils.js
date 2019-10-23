@@ -181,7 +181,7 @@ module.exports = {
     },
     /**
      * add a single denial to the collection of denials
-     * @param  {Object[]} denials
+     * @param  {Object} swidTag contains usageDenials
      * @param  {string} denialType ENUM {swidTagNotFound, swidTagRevoked,
      *                                   licenseProfileNotFound, licenseProfileRevoked,
      *                                   agreementNotFound, rightToUseRevoked, usageProhibited,
@@ -199,12 +199,18 @@ module.exports = {
      * @param  {} [deniedConstraint] whole record from usageConstraint or assignee refinement that caused the denial
      * @param  {} [deniedMetrics] current statistical data that caused the denial
      */
-    addDenial(denials, denialType, denialReason, deniedAction, denialReqItemName, denialReqItemValue,
+    addDenial(swidTag, denialType, denialReason, deniedAction, denialReqItemName, denialReqItemValue,
         deniedAssetUsageAgreementId, deniedAssetUsageAgreementRevision,
         deniedRightToUseId, deniedRightToUseRevision, deniedConstraint, deniedMetrics) {
-        denials.push({
+
+        denialReason = module.exports.makeOneLine(denialReason);
+        if (!swidTag.usageDenialSummary) {
+            swidTag.usageDenialSummary = denialReason;
+        }
+
+        swidTag.usageDenials.push({
             "denialType": denialType,
-            "denialReason": module.exports.makeOneLine(denialReason),
+            "denialReason": denialReason,
             "deniedAction": deniedAction,
             "deniedAssetUsageAgreementId": deniedAssetUsageAgreementId,
             "deniedAssetUsageAgreementRevision": deniedAssetUsageAgreementRevision,
@@ -232,6 +238,7 @@ module.exports = {
                 swidTagBody: null,
                 isRtuRequired: null,
                 isUsedBySwCreator: null,
+                usageDenialSummary: null,
                 usageDenials: [],
                 rightToUse: null,
                 usageMetrics: {
