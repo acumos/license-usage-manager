@@ -29,7 +29,8 @@ module.exports = {
      * @param  {} snapshotBody full record from source table
      */
     async storeSnapshot(res, softwareLicensorId, snapshotType, snapshotKey, snapshotRevision, snapshotBody) {
-        utils.logInfo(res, `in storeSnapshot(${snapshotType})`);
+        const logSnapshot = `storeSnapshot[${softwareLicensorId},${snapshotType},${snapshotKey},${snapshotRevision}]`;
+        utils.logInfo(res, `in ${logSnapshot}`);
 
         const keys = new SqlParams();
         keys.addField("softwareLicensorId", softwareLicensorId || "");
@@ -47,6 +48,6 @@ module.exports = {
                         ON CONFLICT (${keys.fields}) DO NOTHING`;
         await pgclient.sqlQuery(res, sqlCmd, keys.getAllValues());
 
-        utils.logInfo(res, `out storeSnapshot(${snapshotType})`);
+        utils.logInfo(res, `out ${logSnapshot}`);
     }
  };
