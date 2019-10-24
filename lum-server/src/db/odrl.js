@@ -518,10 +518,6 @@ function groomRules(res, rules, assetUsageRuleType, agreement) {
             isPerpetual:         true,
             enableOn:            null,
             expireOn:            null,
-            rightToUseActive:    true,
-            closer:              null,
-            closed:              null,
-            closureReason:       null,
             targetRefinement:    {},
             assigneeRefinement:  {},
             assigneeMetrics:     {users: []},
@@ -631,22 +627,6 @@ function groomRules(res, rules, assetUsageRuleType, agreement) {
 function setTimingFieldsOnRule(res, groomedRule) {
     if (groomedRule.expireOn && groomedRule.enableOn && groomedRule.enableOn > groomedRule.expireOn) {
         groomedRule.enableOn = groomedRule.expireOn;
-    }
-    if (groomedRule.enableOn && res.locals.pg.txNowDate < groomedRule.enableOn) {
-        groomedRule.rightToUseActive = false;
-        groomedRule.closer = res.locals.params.userId;
-        groomedRule.closed = res.locals.pg.txNow;
-        groomedRule.closureReason = 'too soon';
-    } else if (groomedRule.expireOn && res.locals.pg.txNowDate > groomedRule.expireOn) {
-        groomedRule.rightToUseActive = false;
-        groomedRule.closer = res.locals.params.userId;
-        groomedRule.closed = res.locals.pg.txNow;
-        groomedRule.closureReason = 'expired';
-    } else {
-        groomedRule.rightToUseActive = true;
-        groomedRule.closer = null;
-        groomedRule.closed = null;
-        groomedRule.closureReason = null;
     }
     groomedRule.isPerpetual = !groomedRule.expireOn;
 }

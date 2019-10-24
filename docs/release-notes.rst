@@ -20,6 +20,19 @@
 License Usage Manager Release Notes
 ===================================
 
+Version 0.28.1, 24 October 2019
+---------------------------------
+
+lum-server
+..........
+
+- LUM-server now returns a single denial reason for the expiration when the right-to-use expired instead
+  of two denials - one for non-active RTU (removed) and another one for expired (stays)
+  (`ACUMOS-3636 <https://jira.acumos.org/browse/ACUMOS-3636>`_)
+- writing a single snapshot per asset-usage-agreement and/or asset-usage-agreement-restriction change
+  instead of two
+
+
 Version 0.28.0, 23 October 2019
 ---------------------------------
 
@@ -106,12 +119,14 @@ Version 0.26.4, 7 October 2019
   - New environment variable DATABASE_PASSWORD to help seperate config from secret config
   - Updated docker-compose - to handle debugging and skipping over production build steps
   - Support integration with AIO / K8 / Helm chart behind nginx proxy
+
     - Fixed issue with nginx-proxy decoding url causing issues with encoded url as path params
-      changed   /api/v1/asset-usage-agreement/[encodedIRI] -
-        ->/api/v1/asset-usage-agreement/?assetUsageAgreementId=[encodedIRI]
+      changed ``/api/v1/asset-usage-agreement/[encodedIRI]``
+      to ``/api/v1/asset-usage-agreement/?assetUsageAgreementId=[encodedIRI]``
     - Added support for handling query param vs path param for assetUsageAgreementId
     - Added server back into lum-server-API.yaml to help with serving from different
       base path after adding nginx proxy
+
   - Fixed docker-compose debugging and reloading after adding multi-stage build
   - Added support for base url to be under /lum/ and support servers dropdown in swagger ui
   - Bug in swagger lint - disabled rule server-trailing-slash -- caused error for server /
@@ -236,8 +251,11 @@ local dev setup fixes
 first incarnation of the lum-server with basic functionality of API
 ...................................................................
 
-- improved API definition for lum-server (`ACUMOS-3342 <https://jira.acumos.org/browse/ACUMOS-3342>`_)
-- openapi-ui on lum-server (`ACUMOS-3342 <https://jira.acumos.org/browse/ACUMOS-3342>`_)
+- API for lum-server (`ACUMOS-3342 <https://jira.acumos.org/browse/ACUMOS-3342>`_)
+
+  * improved API definition
+  * openapi-ui on lum-server
+
 - Posgres database initdb and setup (`ACUMOS-3006 <https://jira.acumos.org/browse/ACUMOS-3006>`_)
 - defined DDL for the database (`ACUMOS-3006 <https://jira.acumos.org/browse/ACUMOS-3006>`_)
 
@@ -267,7 +285,7 @@ What is not done yet
 Version 0.20.0, 29 August 2019
 ------------------------------
 
-defining LUM API in lum_server-API.yaml (`ACUMOS-3342 <https://jira.acumos.org/browse/ACUMOS-3342/>`_)
+defining LUM API in lum_server-API.yaml (`ACUMOS-3342. <https://jira.acumos.org/browse/ACUMOS-3342/>`_)
 
 - fix for tracking
 - not using oneOf that breaks the java code gen
