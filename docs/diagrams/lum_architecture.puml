@@ -1,0 +1,411 @@
+' ===============LICENSE_START=======================================================
+' Acumos CC-BY-4.0
+' ===================================================================================
+' Copyright (C) 2019 AT&T Intellectual Property. All rights reserved.
+' ===================================================================================
+' This Acumos documentation file is distributed by AT&T
+' under the Creative Commons Attribution 4.0 International License (the "License");
+' you may not use this file except in compliance with the License.
+' You may obtain a copy of the License at
+'
+'      http://creativecommons.org/licenses/by/4.0
+'
+' This file is distributed on an "AS IS" BASIS,
+' WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+' See the License for the specific language governing permissions and
+' limitations under the License.
+' ===============LICENSE_END=========================================================
+@startuml lum_architecture
+allowmixing
+scale 4096*4096
+
+hide empty description
+hide class circle
+hide methods
+
+skinparam title {
+    FontSize 24
+    FontColor Blue
+    FontStyle Bold
+    BorderRoundCorner 15
+    BorderThickness 2
+}
+
+skinparam roundcorner 20
+
+skinparam class {
+    FontColor Blue
+    FontStyle Bold
+    HeaderBackgroundColor Wheat
+}
+skinparam component {
+    BackgroundColor Snow
+}
+skinparam usecase {
+    FontColor Navy
+    BackgroundColor Snow
+}
+
+skinparam note {
+    FontColor Black
+    BackgroundColor azure
+}
+
+title = data model for license usage management based on ODRL
+
+package "<&people> Supplier -- totally schematic - only the concepts" as supplierMgt #ff9999 {
+    class "<&person> supplier == softwareLicensor" as supplier {
+        softwareLicensorId TEXT <&key> PK
+    }
+    class "<&shield> supplierPublicLicense" as supplierPublicLicense {
+        supplierPublicLicenseId TEXT <&key> PK
+    }
+    class "<&credit-card> purchaseOrder" as purchaseOrder {
+        purchaseOrderId TEXT <&key> PK
+        softwareLicensorId TEXT <&link-intact> FK
+        ..
+        purchaseOrderBuyer TEXT
+        <&list> subscribers = [<b>subscriber</b>] TEXT[] - multiple subscribers
+        assetUsageAgreement JSON
+    }
+}
+
+package "<&dollar> BSS -- totally schematic - only the concepts" as BSS #99ff99 {
+    package "<&dollar> AM (Asset Manager) purchases RTU from supplier" as assetManager {
+        class "<&dollar> entPurchaseOrder" as entPurchaseOrder {
+            purchaseOrder=assetUsageAgreement for multiple rights to use of the software
+            generate the asset-tags per RTU rules
+            select-specify the users per RTU
+            ==
+            <b>assetUsageAgreementId</b> GUID <&key> PK -- assetUsageAgreement id
+            ==alternative PKs==
+            <b>purchaseOrderId</b> TEXT <&link-intact> FK to purchaseOrder -- PON
+            --agreements details--
+            agreementDetails JSON <&info> -- assetUsageAgreement->[<rule>]
+        }
+    }
+}
+
+package "<&laptop> Acumos (softwareManagementSystem)" as SMS {
+    component "<&shield> <b>lumProxy</b> (generic and stateless)" as lumProxy
+}
+
+package "<&shield> LUM (License Usage Manager)" as LUM #eeffee {
+    actor "<&cog> dev" as devAdmin
+
+    component "<&aperture> <&shield> <b>lumServer</b>........................................................................................................................................................................................................................" as lumServer
+
+    package "<&cog> software-management-system" as swmgt #eeeeee {
+        class "<&cog> <&signpost> swMgtSystem" as swMgtSystem {
+            contains all settings per softwareManagementSystem like Acumos
+            ==
+            <b>swMgtSystemId</b> TEXT <&key> PK -- like "Acumos"
+            ==
+            --housekeeping--
+            creator TEXT, modifier TEXT -- creator, modifier userId
+            <&clock> created DATETIME, <&clock> modified DATETIME
+        }
+    }
+
+    package "<&shield> LI (License Inventory)" as LI #eeeeee {
+        class "<&info> swidTag" as swidTag {
+            ISO/IEC 19770-2: software identification tag
+            ==
+            <b>swTagId</b> GUID+version <&key> PK -- identifier of the software up to specific version - revisionId in Acumos
+            ..
+            possible format: <swPersistentId>_<swVersion>
+            example:
+            "c0de3e70-e815-461f-9734-a239c450bf777.5.3.123-t1"
+            --alternative <&key> PK--
+            <b>swPersistentId</b> GUID -- versionless product-id - solutionId in Acumos
+            example: "c0de3e70-e815-461f-9734-a239c450bf77"
+            <b>swVersion</b> TEXT -- semver like "7.5.3.123-t1"
+            <b>swVersionComparable</b> TEXT -- semver in comparable format "00000007.00000005.00000003.00000123-t00000001"
+            --
+            <b>licenseProfileId</b> GUID <&link-intact> FK to licenseProfile -- assigned license
+            <b>softwareLicensorId</b> TEXT IDX -- supplier or owner of the software
+            --matching software to target on permission/right-to-use--
+            swCategory TEXT -- image processing, software, image, video, data, ...
+            swCatalogs JSONB -- array of catalog info the software is stored in Acumos
+            > [{"swCatalogId": "", -- uid for the catalog identifier
+            > "swCatalogType": ""  -- restricted, company-wide, public, etc.
+            }]
+            swCreators TEXT[] -- collection of userId values of the creators for swidTag = superusers of the software
+            ..SWID details..
+            swProductName TEXT -- product name like Windows
+            swidTagDetails JSONB:
+            >   edition TEXT -- like Pro, Dev, Enterprise, Ultimate
+            >   revision TEXT -- build or revision number
+            >   marketVersion TEXT -- might differ from swVersion
+            >   patch BOOL -- indication that this is a patch
+            >   productUrl TEXT -- url to find more info at the licensor site
+            --housekeeping--
+            <&tag> <b>swidTagRevision</b> INTEGER -- 1,2,3,... revision of the swidTag - updates are allowed - auto-incremented by LUM
+            swidTagActive BOOL -- whether swidTag is not revoked-closed
+            creator TEXT, modifier TEXT, closer TEXT -- creator, modifier, closer userId
+            <&clock> created DATETIME, <&clock> modified DATETIME, <&ban> <&clock> closed DATETIME
+            closureReason TEXT -- reason for the closure - revoked, expired, etc.
+        }
+
+        class "<&shield> licenseProfile" as licenseProfile {
+            terms and conditions define the rights for managing the usage of the software asset
+            ==
+            <b>licenseProfileId</b> GUID <&key> PK - identifier of the license - can be shared between multiple swTagId
+            --
+            <b>softwareLicensorId</b> TEXT IDX -- supplier or owner of the software
+            --body--
+            licenseProfile JSONB -- full body of the license profile
+            --cornerstone--
+            <&lock-locked> <b>isRtuRequired</b> BOOL -- whether requires the right-to-use for usage, when false goes directly to usageMetrics
+            --lawyer readable--
+            <&signpost> licenseTxt TEXT -- license.txt - humanly readable terms and conditions for the licenseProfile
+            --human readable--
+            licenseName TEXT -- name of the license in free text
+            licenseDescription TEXT -- desciption of the license in free text
+            licenseNotes TEXT -- any textual notes
+            --housekeeping--
+            <&tag> <b>licenseProfileRevision</b> INTEGER -- 1,2,3,... revision of the license - updates are allowed - auto-incremented by LUM
+            licenseProfileActive BOOL -- whether the license profile is currently active - not closed and not expired and not revoked
+            creator TEXT, modifier TEXT, closer TEXT -- creator, modifier, closer userId
+            <&clock> created DATETIME, <&clock> modified DATETIME, <&ban> <&clock> closed DATETIME
+            closureReason TEXT -- reason for the closure - revoked, expired, etc.
+        }
+    }
+
+    package "<&dollar> AUA (asset-usage-agreement/entitlement = list of permissions/Rights To Use)" as AUA #eeeeee {
+        class "<&dollar> assetUsageAgreement" as assetUsageAgreement {
+            ODRL - Agreement https://www.w3.org/TR/odrl-model/#policy-agreement
+            related to ISO/IEC 19770-3: software entitlement (ENT) - collection of purchased rights-to-use
+            ==
+            <b>softwareLicensorId</b> TEXT <&key> PK1 -- supplier or owner of the software
+            <b>assetUsageAgreementId</b> GUID <&key> PK2 -- UID key to assetUsageAgreement in IRI or URI format
+            possible format: "http://software-licensor/<softwareLicensorId>/agreement/<agreement-uuid>"
+            --assetUsageAgreement details--
+            <b>agreement</b> JSONB <&info> -- full body of ODRL agreement received from supplier
+            <b>agreementRestriction</b> JSONB <&info> -- full body of ODRL agreement restriction from the subscriber company
+            <b>groomedAgreement</b> JSONB <&info> -- groomed full body of ODRL agreement with restriction already applied
+            --housekeeping--
+            <&tag> <b>assetUsageAgreementRevision</b> INTEGER -- 1,2,3,... revision - updates are allowed
+            assetUsageAgreementActive BOOL -- whether agreement is enabled, but not revoked-closed or expired
+            creator TEXT, modifier TEXT, closer TEXT -- creator, modifier, closer userId
+            <&clock> created DATETIME, <&clock> modified DATETIME, <&ban> <&clock> closed DATETIME
+            closureReason TEXT -- reason for the closure - revoked, expired, etc.
+        }
+        class "<&dollar> rightToUse" as rightToUse {
+            in ODRL this is a permission rule for matching and usage rights for specific software assets
+            ==
+            <b>assetUsageRuleId</b> GUID <&key> PK -- uuid of the rule
+            ..alternative PKs..
+            <b>softwareLicensorId</b> TEXT UIDX1-1 -- supplier or owner of the software
+            <b>assetUsageAgreementId</b> GUID <&key> UIDX1-2 <&link-intact> FK to assetUsageAgreement
+            <b>rightToUseId</b> TEXT <&key> UIDX1-3 -- uid of the rule (uri/iri)
+            possible format: "http://software-licensor/<softwareLicensorId>/permission/<permission-uuid>"
+            --rightToUse details--
+            <b>assetUsageRuleType</b> ENUM {permission, prohibition}
+            <b>actions</b> TEXT[] -- list of action values for the rule (permission.action)
+            <&crop> <b>targetRefinement</b> JSONB -- groomed target refinement with restriction already applied
+            <&crop> <b>assigneeRefinement</b> JSONB -- groomed assignee refinement with restriction already applied
+            <&crop> <b>usageConstraints</b> JSONB -- groomed usageConstraints with restriction already applied
+            <&crop> consumedConstraints JSONB -- constraints that were consumed by grooming - for debugging
+            ==entitlement keys from supplier and are consumed by the software to unlock the functionality==
+            <&shield> <&list> <b>licenseKeys</b> = [<b>licenseKey</b>] TEXT[]
+            --timeframe limits extracted from constraints--
+            <&clock> isPerpetual BOOL -- never expires if true
+            <&clock> enableOn DATE, <&clock> expireOn DATE GMT
+            <&clock> goodFor INTERVAL -- timeperiod in seconds for entitled usage. Example: 30 days == 2592000 secs
+            ..timeframe and usage metrics..
+            <b>assigneeMetrics</b> JSONB {users: ['alex', 'justin']} -- metrics for assignee - list of unique users
+            usageStartReqId GUID -- identifier of request that started the usage of the rightToUse
+            <&clock> usageStarted DATETIME -- populated on first start of the usage
+            <&clock> usageEnds DATETIME -- usageStarted + goodFor
+            --housekeeping--
+            <&tag> <b>rightToUseRevision</b> INTEGER -- 1,2,3,... revision of the rightToUse - updates are allowed
+            <&tag> <b>metricsRevision</b> INTEGER -- 1,2,3,... auto-incremented by LUM - revision of changing the value of the metrics
+            rightToUseActive BOOL -- whether rightToUse is enabled and not revoked-closed or expired
+            creator TEXT, modifier TEXT, closer TEXT -- creator, modifier, closer userId
+            <&clock> created DATETIME, <&clock> modified DATETIME, <&ban> <&clock> closed DATETIME
+            closureReason TEXT -- reason for the closure - revoked, expired, etc.
+            metricsModifierReqId GUID -- identifier of request that modified the metrics
+            <&clock> metricsModified DATETIME -- when the metrics was updated
+        }
+    }
+
+    package "<&shield> AUM (Asset Usage Manager)" as AUM #eeeeee {
+        class "<&task> assetUsageReq" as assetUsageReq {
+            request for granting the entitlement for the asset usage or record the event
+            can be more than one asset when other assets are included
+            ==
+            <b>assetUsageReqId</b> GUID PK -- identifier of request that inserted the assetUsageHistory
+            ==<&data-transfer-download> request received by LUM==
+            action TEXT -- download, deploy, execute, ...
+            assetUsageType ENUM {assetUsage, assetUsageEvent}
+            requestHttp JSON: -- http method+urlPath part of the request
+            {> method TEXT -- put, delete, post
+            > path TEXT -- path in url like "/asset-usage/{assetUsageId}"
+            > ips TEXT[] -- ip-addresses of the http client, ...}
+            ..full copy of request message..
+            <b>request</b> JSON -- see API for more details
+            --usage entitlement result full copy of response message--
+            <b>responseHttpCode</b> INTEGER -- 200 for success, 224 for revoked, 402 for denial
+            <b>response</b> JSON -- see API for more details
+            <&check> usageEntitled BOOL -- whether the action on the request has been entitled (true) or not (false) by LUM
+            ==housekeeping==
+            userId TEXT -- userId on the request
+            <&check> status ENUM {entitled, denied, eventRecorded, ...}
+            <&clock> requestStarted DATETIME
+            <&check> requestDone BOOL -- true on sending the response
+            <&clock> responseSent DATETIME -- when the response was sent
+        }
+
+        class "<&shield> usageMetrics" as usageMetrics {
+            usage per single RTU+action on each asset separately.
+            contains constraints with status-metrics onRule and onRuleStandalone.
+            for usageType == rightToUse -> usageMetricsId == rightToUse.assetUsageRuleId <&link-intact> FK to rightToUse
+            for usageType == bySwCreator -> usageMetricsId == swidTag.swTagId <&link-intact> FK to swidTag
+            for usageType == freeToUse -> usageMetricsId == swidTag.swTagId <&link-intact> FK to swidTag
+            ==
+            <b>usageMetricsId</b> GUID <&key> PK1
+            <b>action</b> TEXT <&key> PK2 -- download, deploy, execute, ...
+            usageType ENUM {rightToUse, bySwCreator, freeToUse, assetUsageEvent} <&key> PK3 -- how the usageMetrics is created
+            ==
+            <b>swTagId</b> GUID+version <&key> PK -- identifier of the software up to specific version - revisionId in Acumos
+            <b>assetUsageRuleId</b> GUID <&link-intact> FK to rightToUse -- identifier of the rightToUse for usageType=rightToUse
+            --usage metrics--
+            <&spreadsheet> metrics JSONB -- metrics - count of action calls etc. {count:3, users:['alex', 'justin']}
+            --housekeeping--
+            <&tag> <b>usageMetricsRevision</b> INTEGER -- 1,2,3,... revision of the metrics
+            creator TEXT, modifier TEXT -- creator, modifier userId
+            <&clock> created DATETIME, <&clock> modified DATETIME
+            creatorRequestId GUID -- identifier of request that created the metrics
+            modifierRequestId GUID -- identifier of request that modified the metrics
+        }
+
+        package "<&shield> AUT (Asset Usage Tracking)" as AUT #eeffee {
+            class "<&task> assetUsage" as assetUsage {
+                usage of the software asset by users
+                ==
+                <b>assetUsageId</b> GUID <&key> PK <&link-intact> FK1 to assetUsageHistory
+                ..master or included asset..
+                <b>isIncludedAsset</b> BOOL -- included asset (true), master asset (false)
+                --tails of history--
+                <b>assetUsageSeqTail</b> INTEGER -- sequential number 1,2,3,... <&link-intact> FK2 to tail record on assetUsageHistory
+                <b>assetUsageSeqTailEntitled</b> INTEGER <&link-intact> FK2 to assetUsageHistory for last successful entitlement in assetUsageHistory
+                <b>assetUsageSeqTailEntitlement</b> INTEGER <&link-intact> FK2 to assetUsageHistory for last entitlement
+                <b>assetUsageSeqTailEvent</b> INTEGER <&link-intact> FK2 to assetUsageHistory for last event
+                --housekeeping--
+                creator TEXT, modifier TEXT -- creator, modifier userId
+                <&clock> created DATETIME, <&clock> modified DATETIME
+            }
+            class "<&shield> includedAssetUsage" as includedAssetUsage {
+                when software piece is either copied-included or composed of other software pieces
+                ==
+                <b>assetUsageId</b> GUID <&key> PK <&link-intact> FK to assetUsage
+                <b>includedAssetUsageId</b> GUID <&key> PK2 <&link-intact> FK to assetUsage
+                --housekeeping--
+                creator TEXT -- creator userId
+                <&clock> created DATETIME
+                creatorRequestId GUID -- identifier of request that created the record
+            }
+
+            class "<&layers> snapshot" as snapshot {
+                historical snapshots of any data
+                ==
+                softwareLicensorId TEXT <&key> PK1 -- supplier or owner of the software
+                snapshotType ENUM {licenseProfile, swidTag, assetUsageAgreement, rightToUse} <&key> PK2
+                snapshotKey TEXT <&key> PK3 -- PK to the source table like swTagId
+                snapshotRevision INTEGER <&key> PK4 -- revision field on the source table like swidTagRevision
+                --snapshot itself--
+                snapshotBody JSON -- copy of the full record from source table
+                --housekeeping--
+                creator TEXT -- creator userId
+                <&clock> created DATETIME
+                <&clock> requestId GUID -- uuid of the request that recorded the snapshot
+                <&clock> txStep TEXT -- transaction step that recorded the snapshot
+            }
+            class "<&task> assetUsageHistory" as assetUsageHistory {
+                history of the usage of the software asset - can only insert - never update or delete to this table
+                ==
+                <b>assetUsageId</b> GUID <&key> PK1 <&link-intact> FK to assetUsage
+                <b>assetUsageSeq</b> INTEGER <&key> PK2 -- sequential number 1,2,3,...
+                --type--
+                assetUsageType ENUM {assetUsage, assetUsageEvent}
+                ==notnullable FKs==
+                <b>assetUsageReqId</b> GUID <&link-intact> FK to assetUsageReq
+                <b>action</b> TEXT <&link-intact> FK2 to usageMetrics -- download, deploy, execute, ...
+                <b>softwareLicensorId</b> TEXT IDX -- supplier or owner of the software
+                ..asset residence - searchable keys..
+                <&tag> <b>swMgtSystemId</b> TEXT -- like "Acumos"
+                <&tag> <b>swMgtSystemInstanceId</b> TEXT -- system instance id that manages the software pieces and sent the request - like "Acumos#22"
+                <&tag> <b>swMgtSystemComponent</b> TEXT -- component inside the system that sent the request like "model-runner"
+                ..nullable FKs..
+                <b>swTagId</b> GUID+version <&link-intact> FK to swidTag
+                <&tag> <b>swidTagRevision</b> INTEGER -- 1,2,3,... revision of the swidTag - updates are allowed - auto-incremented by LUM
+                <b>licenseProfileId</b> GUID <&link-intact> FK to licenseProfile
+                <&tag> <b>licenseProfileRevision</b> INTEGER -- 1,2,3,... revision of the license - updates are allowed - auto-incremented by LUM
+                <&lock-locked> <b>isRtuRequired</b> BOOL -- whether requires the right-to-use for usage
+                <b>assetUsageRuleId</b> GUID <&link-intact> FK to rightToUse -- identifier of the rightToUse for usageType=rightToUse
+                <&tag> <b>rightToUseRevision</b> INTEGER -- 1,2,3,... rightToUse revision
+                <b>assetUsageAgreementId</b> GUID <&link-intact> FK to assetUsageAgreement
+                <&tag> <b>assetUsageAgreementRevision</b> INTEGER -- 1,2,3,... assetUsageAgreement revision
+                <b>usageMetricsId</b> GUID <&link-intact> FK1 to usageMetrics
+                <b>metrics</b> JSONB -- usage metrics used for entitlement
+                ==usage entitlement result==
+                <&check> usageEntitled BOOL
+                <&check> isUsedBySwCreator BOOL -- whether the userId listed in swCreators of the software
+                <&list> <b>licenseKeys</b> = [<b>licenseKey</b>] TEXT[]
+                assetUsageDenialSummary TEXT -- human readable summary for denial of the asset-usage
+                <&list> assetUsageDenial JSON[] -- denials of the usage of the software asset - see API
+                --housekeeping--
+                creator TEXT -- creator userId
+                <&clock> created DATETIME
+            }
+        }
+        component "<&print> asset-usage report" as AUMReport
+    }
+}
+
+supplier "1" *--{ "many" purchaseOrder : sign with buyer (for Acumos) >
+supplier "1" *-{ "many" supplierPublicLicense : >
+purchaseOrder .> entPurchaseOrder : get/add/update/revoke\n purchaseOrder with RTUs
+
+
+supplierPublicLicense .right.> SMS : <&shield> add/update/revoke license
+lumProxy .down.> lumServer : <&shield> get/add/update/revoke \n license
+
+lumProxy .down.> lumServer : request for entitlement
+lumServer .up.> lumProxy : entitlement response
+
+entPurchaseOrder .down.> lumServer : <&dollar> get/add/update/revoke \n assetUsageAgreement
+
+lumServer ..> licenseProfile : <&shield> get/add/update/revoke license
+
+licenseProfile "1" *--{ "many" swidTag
+
+devAdmin ..> swMgtSystem : setup asset assignment rules
+
+lumServer ..> assetUsageAgreement : <&dollar> get/add/update/revoke assetUsageAgreement
+
+assetUsageAgreement "1" *--{ "many" rightToUse : permissions and prohibitions >
+
+swidTag ..> usageMetrics : <&lock-unlocked> <b>isRtuRequired == false</b> \n goes directly to usageMetrics \n with freeToUse >
+
+rightToUse ..> usageMetrics : usage by RTU >
+
+assetUsage .up.> usageMetrics : is usage entitled ? >
+
+includedAssetUsage "0-many" }-* "1" assetUsage : includes <
+assetUsage "1" *-{ "many" assetUsageHistory : entitlement per single asset >
+assetUsageHistory "many" }-o "0-1" snapshot  : snapshots in history >
+
+
+lumServer ..> assetUsageReq : usage and events
+assetUsageReq ..> assetUsage : usage on each asset >
+assetUsageReq "1" *--{ "many" assetUsageHistory : per single asset >
+
+assetUsageReq .> AUMReport
+
+left footer
+    Copyright (C) 2019 AT&T Intellectual Property. All rights reserved.
+endfooter
+
+@enduml
