@@ -1,5 +1,5 @@
 .. ===============LICENSE_START=======================================================
-.. Acumos
+.. Acumos CC-BY-4.0
 .. ===================================================================================
 .. Copyright (C) 2019 AT&T Intellectual Property. All rights reserved.
 .. ===================================================================================
@@ -16,12 +16,12 @@
 .. limitations under the License.
 .. ===============LICENSE_END=========================================================
 
-===================================
-License Usage Manager Release Notes
-===================================
+=====================================
+License Usage Manager - Release Notes
+=====================================
 
 Version 0.28.1, 24 October 2019
----------------------------------
+===============================
 
 lum-server
 ..........
@@ -34,7 +34,7 @@ lum-server
 
 
 Version 0.28.0, 23 October 2019
----------------------------------
+===============================
 
 lum-server
 ..........
@@ -50,7 +50,7 @@ lum-server
   * added ``assetUsageDenialSummary`` field to ``assetUsageHistory`` table in database
 
 Version 0.27.2, 21 October 2019
----------------------------------
+===============================
 
 lum-server
 ..........
@@ -62,7 +62,7 @@ lum-server
 
 
 Version 0.27.1, 17 October 2019
----------------------------------
+===============================
 
 lum-server
 ..........
@@ -72,7 +72,7 @@ lum-server
 
 
 Version 0.27.0, 11 October 2019
----------------------------------
+===============================
 
 lum-server
 ..........
@@ -95,7 +95,7 @@ lum-server
 
 
 Version 0.26.5, 9 October 2019
-------------------------------
+==============================
 * Open api changes to support fixes in LUM Java client - fixed typing of ``AssetUsageResponse`` and ``AssetUsageDenialAssetUsageDenial`` --
   Java code gen has a problem with the same property referenced by multiple schemas .. treats it as object
 * ``Object getAssetUsage() -> AssetUsageDenialOrEntitlement getAssetUsage()``
@@ -113,7 +113,7 @@ Version 0.26.5, 9 October 2019
 
 
 Version 0.26.4, 7 October 2019
-------------------------------
+==============================
 - LUM integration support (`ACUMOS-3534 <https://jira.acumos.org/browse/ACUMOS-3534>`_)
   - Added new helm chart for lum + postgresql
   - New environment variable DATABASE_PASSWORD to help seperate config from secret config
@@ -133,7 +133,7 @@ Version 0.26.4, 7 October 2019
 
 
 Version 0.26.3, 1 October 2019
-------------------------------
+==============================
 
 - Added support for nodemon support for faster reloads in docker container
 - adding examples to make dredd apiary happy easier to test
@@ -146,7 +146,7 @@ Version 0.26.3, 1 October 2019
 
 
 Version 0.26.2, 30 September 2019
----------------------------------
+=================================
 
 lum-server
 ..........
@@ -207,7 +207,7 @@ lum-database
 
 
 Version 0.25.2, 13 September 2019
----------------------------------
+=================================
 
 lum-server
 ..........
@@ -229,7 +229,7 @@ lum-server
 - jsdoc - work in progress
 
 Version 0.23.1, 11 September 2019
----------------------------------
+=================================
 
 lum-java-client
 ...............
@@ -240,7 +240,7 @@ lum-java-client
 - Add support for development without docker
 
 Version 0.23.0, 09 September 2019
----------------------------------
+=================================
 
 local dev setup fixes
 .....................
@@ -283,7 +283,7 @@ What is not done yet
 
 
 Version 0.20.0, 29 August 2019
-------------------------------
+==============================
 
 defining LUM API in lum_server-API.yaml (`ACUMOS-3342. <https://jira.acumos.org/browse/ACUMOS-3342/>`_)
 
