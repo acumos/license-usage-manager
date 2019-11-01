@@ -2,6 +2,57 @@
   "comments": [
     {
       "key": {
+        "uuid": "81c862c2_27a3bd42",
+        "filename": "docs/api-docs.rst",
+        "patchSetId": 6
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 291
+      },
+      "writtenOn": "2019-11-01T19:56:11Z",
+      "side": 1,
+      "message": "kindly append _ at the end to render the \u0027lum-server-API.yaml\u0027 as hyperlink",
+      "revId": "2ce7cd825f6941ec21e7fce0463af164ec3e8aaf",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b8901a05_fa7e28e8",
+        "filename": "docs/api-docs.rst",
+        "patchSetId": 6
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 291
+      },
+      "writtenOn": "2019-11-01T19:56:11Z",
+      "side": 1,
+      "message": "kindly append _ at the end to render the \u0027lum-server-API.yaml\u0027 as hyperlink",
+      "revId": "2ce7cd825f6941ec21e7fce0463af164ec3e8aaf",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6f029ea5_aab73bd9",
+        "filename": "docs/developer-guide.rst",
+        "patchSetId": 6
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 291
+      },
+      "writtenOn": "2019-11-01T19:56:11Z",
+      "side": 1,
+      "message": "kindly remove extra \u0027the\u0027",
+      "revId": "2ce7cd825f6941ec21e7fce0463af164ec3e8aaf",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f94b89f9_dbda27d8",
         "filename": "docs/developer-guide.rst",
         "patchSetId": 6
