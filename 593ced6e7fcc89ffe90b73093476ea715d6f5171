@@ -174,6 +174,24 @@
       "revId": "593ced6e7fcc89ffe90b73093476ea715d6f5171",
       "serverId": "655300a2-7a56-4504-9153-881edd907bea",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "00e07242_fe2e2c1d",
+        "filename": "docs/developer-guide.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2019-11-01T19:41:20Z",
+      "side": 1,
+      "message": "hmmm - ref not working.\n\ntried \n:ref:`Acumos Right to Use Actions \u003c../../license-manager/docs/user-guide-license-rtu-editor.html#acumos-right-to-use-actions\u003e`\n\n:ref:`Acumos Right to Use Actions \u003c../../../license-manager/docs/user-guide-license-rtu-editor.html#acumos-right-to-use-actions\u003e`",
+      "parentUuid": "6fbcc045_0987204b",
+      "revId": "593ced6e7fcc89ffe90b73093476ea715d6f5171",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": false
     }
   ]
 }
