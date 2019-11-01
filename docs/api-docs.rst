@@ -16,16 +16,16 @@
 .. limitations under the License.
 .. ===============LICENSE_END=========================================================
 
-===========================
-License Usage Manager (LUM)
-===========================
+=========================================================
+License Usage Manager - Application Programming Interface
+=========================================================
 
-.. toctree::
-    :maxdepth: 2
+License Usage Manager provides http based API under
+specification of `openapi 3.0.2 <https://swagger.io/specification/>`_.
 
-    api-docs.rst
-    developer-guide.rst
-    release-notes.rst
+    #. download :download:`lum-server-API.yaml <https://gerrit.acumos.org/r/gitweb?p=license-usage-manager.git;a=blob_plain;f=lum-server/lum-server-api/lum-server-API.yaml;hb=HEAD>`
+    #. use https://editor.swagger.io/ on the downloaded
+       :download:`lum-server-API.yaml <https://gerrit.acumos.org/r/gitweb?p=license-usage-manager.git;a=blob_plain;f=lum-server/lum-server-api/lum-server-API.yaml;hb=HEAD>`
+       to see the API
 
-
-* :ref:`search`
+:doc:`back to LUM index <index>`
