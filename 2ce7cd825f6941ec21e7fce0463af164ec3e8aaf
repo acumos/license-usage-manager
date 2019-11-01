@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f94b89f9_dbda27d8",
+        "filename": "docs/developer-guide.rst",
+        "patchSetId": 6
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 290
+      },
+      "writtenOn": "2019-11-01T19:42:18Z",
+      "side": 1,
+      "message": "This didn\u0027t convert to link as expected -https://logs.acumos.org/production/vex-yul-acumos-jenkins-1/documentation-rtd-verify-master/4765/html/submodules/license-usage-manager/docs/developer-guide.html",
+      "revId": "2ce7cd825f6941ec21e7fce0463af164ec3e8aaf",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    }
+  ]
+}
