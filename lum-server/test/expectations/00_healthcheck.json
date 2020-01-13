@@ -1,0 +1,46 @@
+{
+    "db": [{
+        "sqlCmd": "SELECT VERSION() AS \"pgVersion\", \"lumVersion\" AS \"databaseVersion\", \"created\" AS \"schemaCreated\", \"modified\" AS \"schemaModified\", PG_POSTMASTER_START_TIME() AS \"databaseStarted\", (NOW() - PG_POSTMASTER_START_TIME())::TEXT AS \"databaseUptime\", NOW() AS \"checked\" FROM \"lumInfo\" WHERE \"lumSystem\" = 'LUM'",
+        "result": {"command": "SELECT", "rowCount": 1,
+            "rows":[{
+                "pgVersion": "mock-PostgreSQL",
+                "databaseVersion": "0.28.2",
+                "schemaCreated": "2020-01-09T17:12:31.791Z",
+                "schemaModified": "2020-01-09T17:12:31.791Z",
+                "databaseStarted": "2020-01-09T17:12:32.361Z",
+                "databaseUptime": "00:22:38.660894",
+                "checked": "2020-01-09T17:35:11.022Z"
+            }]
+        }
+    }],
+    "req": {
+        "method": "GET",
+        "path": "/api/healthcheck"
+    },
+    "res": {
+        "statusCode": 200,
+        "body": {
+            "requestId": "__type__uuid__",
+            "requested": "__type__dateTime__",
+            "healthcheck": {
+                "serverName":"lum-server",
+                "serverVersion":"0.28.2",
+                "apiVersion":"0.28.2",
+                "nodeVersion":"__env__NODE_VERSION",
+                "databaseInfo": {
+                    "pgVersion": "mock-PostgreSQL",
+                    "databaseVersion": "0.28.2",
+                    "schemaCreated": "2020-01-09T17:12:31.791Z",
+                    "schemaModified": "2020-01-09T17:12:31.791Z",
+                    "databaseStarted": "2020-01-09T17:12:32.361Z",
+                    "databaseUptime": "00:22:38.660894",
+                    "checked": "2020-01-09T17:35:11.022Z"
+                },
+                "serverRunInstanceId": "__type__uuid__",
+                "serverStarted": "__type__dateTime__",
+                "serverUptime": "__type__ignore__",
+                "pathToOpenapiUi":"/ui/openapi"
+            }
+        }
+    }
+}

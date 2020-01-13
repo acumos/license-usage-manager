@@ -1,5 +1,5 @@
 // ================================================================================
-// Copyright (c) 2019 AT&T Intellectual Property. All rights reserved.
+// Copyright (c) 2019-2020 AT&T Intellectual Property. All rights reserved.
 // ================================================================================
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -110,6 +110,15 @@ module.exports = {
         } else {
             lumServer.logger.info(logPrefix, ...args);
         }
+    },
+    /**
+     * log the debug per request
+     * @param  {} res
+     * @param  {...} args
+     */
+    logDebug(res, ...args) {
+        const logPrefix = (res && `${res.locals.requestId} ${module.exports.trackStepTime(res)}`) || '';
+        lumServer.logger.debug(logPrefix, ...args);
     },
     /**
      * log the warning per request

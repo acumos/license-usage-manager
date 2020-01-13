@@ -1,5 +1,5 @@
 // ================================================================================
-// Copyright (c) 2019 AT&T Intellectual Property. All rights reserved.
+// Copyright (c) 2019-2020 AT&T Intellectual Property. All rights reserved.
 // ================================================================================
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -324,8 +324,7 @@ async function collectDenialsForSwidTag(res, swidTag) {
             'denied', NOT (rtu."expireOn" IS NULL OR NOW()::DATE <= rtu."expireOn"),
             'denialType', 'timingConstraint',
             'denialReason', FORMAT(
-                'rightToUse %s: (today(%s) > expireOn(%s)) on %s(%s) under agreement(%s) for action(%s)',
-                COALESCE(rtu."closureReason", 'expired'),
+                'rightToUse expired: (today(%s) > expireOn(%s)) on %s(%s) under agreement(%s) for action(%s)',
                 NOW()::DATE::TEXT, rtu."expireOn"::TEXT,
                 rtu."assetUsageRuleType", rtu."rightToUseId", rtu."assetUsageAgreementId", "rtuAction"),
             'deniedAction', "rtuAction",
@@ -342,8 +341,7 @@ async function collectDenialsForSwidTag(res, swidTag) {
             'denied', NOT (rtu."enableOn" IS NULL OR NOW()::DATE >= rtu."enableOn"),
             'denialType', 'timingConstraint',
             'denialReason', FORMAT(
-                'rightToUse %s: (today(%s) < enableOn(%s)) on %s(%s) under agreement(%s) for action(%s)',
-                COALESCE(rtu."closureReason", 'too soon'),
+                'rightToUse not enabled yet: (today(%s) < enableOn(%s)) on %s(%s) under agreement(%s) for action(%s)',
                 NOW()::DATE::TEXT, rtu."enableOn"::TEXT,
                 rtu."assetUsageRuleType", rtu."rightToUseId", rtu."assetUsageAgreementId", "rtuAction"),
             'deniedAction', "rtuAction",
@@ -1021,7 +1019,11 @@ module.exports = {
 
         const swidTag = {
             swTagId: res.locals.params.swTagId,
-            usageMetrics: {usageMetricsId: res.locals.params.swTagId, usageType: "assetUsageEvent"}
+            usageMetrics: {
+                usageMetricsId: res.locals.params.swTagId,
+                usageType: "assetUsageEvent",
+                reqUsageCount: 1
+            }
         };
         await incrementUsageMetrics(res, swidTag);
         utils.logInfo(res, `out putAssetUsageEventMetrics(${res.locals.params.assetUsageId})`);
