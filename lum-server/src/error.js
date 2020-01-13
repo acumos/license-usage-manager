@@ -1,5 +1,5 @@
 // ================================================================================
-// Copyright (c) 2019 AT&T Intellectual Property. All rights reserved.
+// Copyright (c) 2019-2020 AT&T Intellectual Property. All rights reserved.
 // ================================================================================
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -45,7 +45,6 @@ module.exports = {
      * @param  {string} errorMessage error message
      * @param  {string} [erroredObjectName] name of the erroredObject
      * @param  {} [erroredObject] optional object the error is reported about
-     * @returns {Object[]} errors collection of errors with the new error appended
      */
     addError(errors, errorMessage, erroredObjectName, erroredObject) {
         if (erroredObjectName == null) {
@@ -53,6 +52,5 @@ module.exports = {
         } else {
             errors.push({error: errorMessage, [erroredObjectName]: erroredObject});
         }
-        return errors;
     }
 };

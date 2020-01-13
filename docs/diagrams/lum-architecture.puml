@@ -1,7 +1,7 @@
 ' ===============LICENSE_START=======================================================
 ' Acumos CC-BY-4.0
 ' ===================================================================================
-' Copyright (C) 2019 AT&T Intellectual Property. All rights reserved.
+' Copyright (C) 2019-2020 AT&T Intellectual Property. All rights reserved.
 ' ===================================================================================
 ' This Acumos documentation file is distributed by AT&T
 ' under the Creative Commons Attribution 4.0 International License (the "License");
@@ -17,7 +17,7 @@
 ' ===============LICENSE_END=========================================================
 @startuml lum-architecture
 allowmixing
-scale 4096*4096
+' scale 4096*4096
 
 hide empty description
 hide class circle
@@ -115,7 +115,7 @@ package "<&shield> LUM (License Usage Manager)" as LUM #eeffee {
             ..
             possible format: <swPersistentId>_<swVersion>
             example:
-            "c0de3e70-e815-461f-9734-a239c450bf777.5.3.123-t1"
+            "c0de3e70-e815-461f-9734-a239c450bf77_7.5.3.123-t1"
             --alternative <&key> PK--
             <b>swPersistentId</b> GUID -- versionless product-id - solutionId in Acumos
             example: "c0de3e70-e815-461f-9734-a239c450bf77"
