@@ -1,5 +1,5 @@
 // ================================================================================
-// Copyright (c) 2019 AT&T Intellectual Property. All rights reserved.
+// Copyright (c) 2019-2020 AT&T Intellectual Property. All rights reserved.
 // ================================================================================
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,20 +31,20 @@ healthcheck.init();
 const lumApi = require('./src/api');
 
 const express = require('express');
-const app = express();
+lumServer.app = express();
 
-app.use('/ui/openapi', require('./src/ui/openapi-ui'));
+lumServer.app.use('/ui/openapi', require('./src/ui/openapi-ui'));
 
-app.set('x-powered-by', false);
-app.set('etag', false);
-app.set('json spaces', 0);
-app.use(express.json({strict: true, limit: '150mb'}));
+lumServer.app.set('x-powered-by', false);
+lumServer.app.set('etag', false);
+lumServer.app.set('json spaces', 0);
+lumServer.app.use(express.json({strict: true, limit: '150mb'}));
 
-app.use('/api', lumApi);
+lumServer.app.use('/api', lumApi);
 
-app.get('/', lumApi);
+lumServer.app.get('/', lumApi);
 
-const lumHttpServer = require('http').createServer(app);
+const lumHttpServer = require('http').createServer(lumServer.app);
 
 lumHttpServer.listen(lumServer.config.port, () => {
     lumServer.logger.info(`started ${lumServer.config.serverName}:

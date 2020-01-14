@@ -1,6 +1,6 @@
--- ===================================================================
--- Copyright (c) 2019 AT&T Intellectual Property. All rights reserved.
--- ===================================================================
+-- ========================================================================
+-- Copyright (c) 2019-2020 AT&T Intellectual Property. All rights reserved.
+-- ========================================================================
 -- Unless otherwise specified, all software contained herein is licensed
 -- under the Apache License, Version 2.0 (the "License");
 -- you may not use this software except in compliance with the License.
@@ -13,7 +13,7 @@
 -- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
--- ============LICENSE_END============================================
+-- ============LICENSE_END=================================================
 
 \connect lumdb lumdb;
 -- \conninfo;
@@ -137,7 +137,7 @@ CREATE INDEX "idxSwidTagLicenseProfile" ON "swidTag" ("licenseProfileId");
 CREATE INDEX "idxSwidTagsoftwareLicensor" ON "swidTag" ("softwareLicensorId");
 
 COMMENT ON TABLE "swidTag" IS 'software identification tag that is inspired by ISO/IEC 19770-2';
-COMMENT ON COLUMN "swidTag"."swTagId" IS 'GUID+version -- identifier of the software up to specific version - revisionId in Acumos\n possible format: <swPersistentId>_<swVersion>. Example: "c0de3e70-e815-461f-9734-a239c450bf777.5.3.123-t1"';
+COMMENT ON COLUMN "swidTag"."swTagId" IS 'GUID+version -- identifier of the software up to specific version - revisionId in Acumos\n possible format: <swPersistentId>_<swVersion>. Example: "c0de3e70-e815-461f-9734-a239c450bf77_7.5.3.123-t1"';
 COMMENT ON COLUMN "swidTag"."swPersistentId" IS 'versionless product-id that persiste between the version of the software. Example: "c0de3e70-e815-461f-9734-a239c450bf77"';
 COMMENT ON COLUMN "swidTag"."swVersion" IS 'version of the software semver like "7.5.3.123-t1"';
 COMMENT ON COLUMN "swidTag"."swVersionComparable" IS 'comparable value for the version of the software. Example for semver in comparable format: "00000007.00000005.00000003.00000123-t00000001"';
