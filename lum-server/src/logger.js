@@ -1,5 +1,5 @@
 // ================================================================================
-// Copyright (c) 2019 AT&T Intellectual Property. All rights reserved.
+// Copyright (c) 2019-2020 AT&T Intellectual Property. All rights reserved.
 // Modifications Copyright (C) 2019 Nordix Foundation.
 // ================================================================================
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -52,13 +52,21 @@ module.exports = {
     initLogger(serverName) {
         const logFileName = (serverName || '') + '_' + new Date().toISOString().substr(0, 19).replace(/:/g, "") + ".log";
 
-        const logTo      = ['console'];
-        const transports = [new (winston.transports.Console)()];
+        const logTo      = [];
+        const transports = [];
+
+        transports.push(new (winston.transports.Console)({
+            level: (process.env.COUT_LEVEL || lumServer.config.loggerLevel)}));
+        logTo.push('console');
+
         if (process.env.LOGDIR) {
             const logFile = path.join(logFolder, logFileName);
-            transports.push(new (winston.transports.File)({json: false, filename: logFile, maxsize: fileRotateSize}));
+            transports.push(new (winston.transports.File)({
+                filename: logFile, level: lumServer.config.loggerLevel,
+                tailable: true, maxsize: fileRotateSize, maxFiles: 20, zippedArchive: true}));
             logTo.push(logFile);
         }
+
         const logger = winston.createLogger({
             format: winston.format.combine(winston.format.timestamp(), winston.format.errors({stack: true}),
                                            logFormatText),

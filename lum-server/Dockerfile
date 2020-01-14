@@ -1,7 +1,7 @@
-# ===================================================================
-# Copyright (c) 2019 AT&T Intellectual Property. All rights reserved.
+# ========================================================================
+# Copyright (c) 2019-2020 AT&T Intellectual Property. All rights reserved.
 # Modifications Copyright (C) 2019 Nordix Foundation.
-# ===================================================================
+# ========================================================================
 # Unless otherwise specified, all software contained herein is licensed
 # under the Apache License, Version 2.0 (the "License");
 # you may not use this software except in compliance with the License.
@@ -14,7 +14,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# ============LICENSE_END============================================
+# ============LICENSE_END=================================================
 # Dockerfile for lum-server
 
 # The instructions for the first stage
@@ -27,35 +27,50 @@ ENV NODE_ENV=${BUILD_DEVELOPMENT:+development}
 ENV NODE_ENV=${NODE_ENV:-production}
 
 WORKDIR /work/
-COPY package*.json ./
+COPY package*.json       ./
 COPY ./lum-server-api/   ./lum-server-api/
-COPY  ./lum-server.js lum-server.js
-COPY ./src src
-COPY ./*.txt    .
-COPY ./etc/     ./etc/
+COPY ./lum-server.js     ./lum-server.js
+COPY ./src/              ./src/
+COPY ./*.txt             .
+COPY ./etc/              ./etc/
 COPY ./lum-server-api/   ./lum-server-api/
-RUN npm install --quiet
+RUN ls -la && npm install --production --quiet \
+ && ls -la && npm ls --depth 0 && echo "$(ls -l node_modules | grep -c ^d) folders in node_modules"
 
 RUN if [ "$BUILD_DEVELOPMENT" == "1" ]; \
     then echo 'installing nodemon' && npm install nodemon ; \
-    fi 
+    fi
 
 FROM node:10.16.3-alpine as lint-stage
 
-## ES lint 
+## ES lint
 WORKDIR /js-lint-work/
 COPY .eslintrc.js ./.eslintrc.js
-COPY --from=build-stage /work/src src
-RUN npm install eslint@^6.5.0  --no-save
-RUN npm install eslint-config-recommended@^4.0.0  --no-save
-RUN ls -la 
-RUN node_modules/.bin/eslint .
+COPY --from=build-stage /work .
+RUN ls -la && npm ls --depth 0 && echo "$(ls -l node_modules | grep -c ^d) folders in node_modules" \
+ && npm install eslint@^6.5.0 --no-save --production \
+ && npm install eslint-config-recommended@^4.0.0 --no-save --production \
+ && ls -la && npm ls --depth 0 && echo "$(ls -l node_modules | grep -c ^d) folders in node_modules" \
+ && node_modules/.bin/eslint .
 
-## OAS linting
+## OpenAPI spec linting https://speccy.io/
 WORKDIR /oas-work/
-COPY --from=build-stage /work/ .
-RUN npm install speccy
-RUN npm run lint-spec
+COPY --from=build-stage /work .
+RUN npm install speccy@0.11.0 --no-save --production \
+ && npm ls --depth 0 && echo "$(ls -l node_modules | grep -c ^d) folders in node_modules" \
+ && npm run lint-spec
+
+# unit testing with coverage
+FROM node:10.16.3-alpine as unit-test-stage
+
+WORKDIR /unit-test-stage/
+COPY --from=build-stage /work .
+COPY ./test/ ./test/
+COPY ./.nycrc.yaml .
+RUN ls -la && npm ls --depth 0 && echo "$(ls -l node_modules | grep -c ^d) folders in node_modules" \
+ && npm install --only=dev && ls -la \
+ && ls -la && npm ls --depth 0 && echo "$(ls -l node_modules | grep -c ^d) folders in node_modules" \
+ && npm run coverage
 
 # The instructions for last runtime stage
 FROM node:10.16.3-alpine
@@ -76,8 +91,9 @@ COPY --from=build-stage /work/ .
 
 RUN if [ "$NODE_ENV" == "production" ]; \
     then echo 'prune packages' && npm prune --production \
+      && ls -la && npm ls --depth 0 && echo "$(ls -l node_modules | grep -c ^d) folders in node_modules" \
       && echo 'removing npm'   && npm remove -g npm; \
-    fi 
+    fi
 
 RUN addgroup ${APPUSER} \
  && adduser -S -h ${APPDIR} -G ${APPUSER} ${APPUSER} \

@@ -1,7 +1,7 @@
 .. ===============LICENSE_START=======================================================
 .. Acumos CC-BY-4.0
 .. ===================================================================================
-.. Copyright (C) 2019 AT&T Intellectual Property. All rights reserved.
+.. Copyright (C) 2019-2020 AT&T Intellectual Property. All rights reserved.
 .. ===================================================================================
 .. This Acumos documentation file is distributed by AT&T
 .. under the Creative Commons Attribution 4.0 International License (the "License");
@@ -19,6 +19,32 @@
 =====================================
 License Usage Manager - Release Notes
 =====================================
+
+Version 0.28.2, 13 January 2020
+================================
+
+lum-server
+..........
+
+- LUM-server unit-tests with code coverage of 80% (`ACUMOS-3509 <https://jira.acumos.org/browse/ACUMOS-3509>`_)
+
+  * all api endpoints are covered in sunny day scenarios
+  * unit tests are a part of ``Docker`` build process as a preliminary stage ``unit-test-stage``
+
+- fixed the broken call to ``PUT /api/v1/asset-usage-event`` that was not providing usage count per request
+- fixed the sort of the merged arrays in expansion of prohibition constraint in ODRL grooming
+- ``healthcheck``: added ``schemaCreated`` and ``schemaModified`` timestamps into databaseInfo
+- changed ``lum-architecture.svg`` image from png to svg in ``developer-guide.rst``
+- for unit-test runs - option to reduce logging to console to error level ``$COUT_LEVEL=error``
+- added debug level and the logger level to exclude debug
+- minor code cleanup
+- froze the versions in package.json
+- code coverage stats
+  Stmts  81.02 %
+  Branch 58.38 %
+  Funcs  92.31 %
+  Lines  82.5  %
+
 
 Version 0.28.1, 24 October 2019
 ===============================
@@ -48,6 +74,7 @@ lum-server
     from the denial in human readable format
 
   * added ``assetUsageDenialSummary`` field to ``assetUsageHistory`` table in database
+
 
 Version 0.27.2, 21 October 2019
 ===============================

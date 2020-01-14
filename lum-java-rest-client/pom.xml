@@ -1,10 +1,11 @@
 <?xml version="1.0"?>
 <!--<![CDATA[
-	===============LICENSE_START=======================================================
+	===============LICENSE_START==========================================================
 	Acumos
-	===================================================================================
-	Copyright (C) Nordix Foundation
-	===================================================================================
+	======================================================================================
+	Copyright (C) 2019 Nordix Foundation
+	Modifications Copyright (c) 2019-2020 AT&T Intellectual Property. All rights reserved.
+	======================================================================================
 	This Acumos software file is distributed by Nordix Foundation
 	under the Apache License, Version 2.0 (the "License");
 	you may not use this file except in compliance with the License.
@@ -16,7 +17,7 @@
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	See the License for the specific language governing permissions and
 	limitations under the License.
-	===============LICENSE_END=========================================================
+	===============LICENSE_END============================================================
 	]]>-->
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
 	xmlns="http://maven.apache.org/POM/4.0.0"
@@ -24,10 +25,10 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.acumos.license-usage-manager</groupId>
 	<artifactId>lum-java-rest-client</artifactId>
-	<version>0.28.1-SNAPSHOT</version>
+	<version>0.28.2-SNAPSHOT</version>
 	<name>LUM Java Rest Client</name>
 	<properties>
-		<old.version>0.28.0-SNAPSHOT</old.version>
+		<old.version>0.28.1-SNAPSHOT</old.version>
 		<default.package>org.acumos.lum</default.package>
 		<openapi-generator-version>4.0.3</openapi-generator-version>
 		<gson-fire-version>1.8.3</gson-fire-version>

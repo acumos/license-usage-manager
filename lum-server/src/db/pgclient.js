@@ -1,5 +1,5 @@
 // ================================================================================
-// Copyright (c) 2019 AT&T Intellectual Property. All rights reserved.
+// Copyright (c) 2019-2020 AT&T Intellectual Property. All rights reserved.
 // ================================================================================
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ function logRunStepInfo(res, runStep) {
     if (!res.locals.pg) {res.locals.pg = {};}
     if (runStep) {
         if ([pgTx.rollback, pgTx.release].includes(runStep)) {
-            res.locals.pg.runStep = `${runStep}: ${res.locals.pg.runStep}`;
+            res.locals.pg.runStep = `${runStep} <- ${res.locals.pg.runStep}`;
         } else {res.locals.pg.runStep = utils.makeOneLine(runStep);}
     }
     utils.logInfo(res, utils.getPgStepInfo(res));
@@ -83,7 +83,7 @@ async function begin(res) {
         res.locals.pg.inTx = true;
 
         const {rows} = await res.locals.pg.client.query(
-            "SELECT txid_current() AS txid, pg_backend_pid() AS pid, NOW() AS tx_now");
+            "SELECT TXID_CURRENT() AS txid, PG_BACKEND_PID() AS pid, NOW() AS tx_now");
         if (rows.length) {
             res.locals.pg.txid  = ` txid(${rows[0].txid}) pid(${rows[0].pid})`;
             res.locals.pg.txNow = rows[0].tx_now;
@@ -132,10 +132,12 @@ module.exports = {
     async getLumDbInfo(res, always=false) {
         if (always || !lumServer.healthcheck.databaseInfo) {
             utils.logInfo(res, "in getLumDbInfo", lumServer.healthcheck.databaseInfo || '');
-            const {rows} = await pgPool.query(`SELECT VERSION() AS "pgVersion", "lumVersion" AS "databaseVersion",
+            const {rows} = await pgPool.query(utils.makeOneLine(
+                `SELECT VERSION() AS "pgVersion", "lumVersion" AS "databaseVersion",
+                    "created" AS "schemaCreated", "modified" AS "schemaModified",
                     PG_POSTMASTER_START_TIME() AS "databaseStarted",
                     (NOW() - PG_POSTMASTER_START_TIME())::TEXT AS "databaseUptime", NOW() AS "checked"
-                    FROM "lumInfo" WHERE "lumSystem" = 'LUM'`);
+                   FROM "lumInfo" WHERE "lumSystem" = 'LUM'`));
             if (rows.length) {
                 lumServer.healthcheck.databaseInfo = rows[0];
                 utils.logInfo(res, "out getLumDbInfo", lumServer.healthcheck.databaseInfo);
@@ -193,7 +195,7 @@ module.exports = {
                     res.locals.pg.txStep = ` [${iStepTxt}] begin`;
                     await begin(res);
                     for await (const txStep of txSteps) {
-                        iStepTxt = (++iStep).toString().padStart(2,'0')
+                        iStepTxt = (++iStep).toString().padStart(2,'0');
                         if (typeof txStep === 'function') {
                             res.locals.pg.txStep = ` [${iStepTxt}] ${txStep.name}`;
                             logRunStepInfo(res, `runTx step[${iStepTxt}]`);
@@ -203,6 +205,7 @@ module.exports = {
                             logRunStepInfo(res, `[${iStepTxt}] - runTx step skipped: non-function(${typeof txStep})`);
                         }
                     }
+                    iStepTxt = (++iStep).toString().padStart(2,'0');
                     res.locals.pg.txStep = ` [${iStepTxt}] commit`;
                     await commit(res);
                     res.locals.pg.txStep = ` [${iStepTxt}] release`;
