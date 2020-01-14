@@ -1,5 +1,5 @@
 // ================================================================================
-// Copyright (c) 2019 AT&T Intellectual Property. All rights reserved.
+// Copyright (c) 2019-2020 AT&T Intellectual Property. All rights reserved.
 // ================================================================================
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -111,7 +111,8 @@ module.exports = {
      * @param  {} next
      */
     respond(req, res, next) {
-        utils.logInfo(res, `response ${utils.calcReqTime(res)}`, res.statusCode, res.locals.response, 'to', res.locals.requestHttp);
+        utils.logInfo(res, `response ${utils.calcReqTime(res)}`, res.statusCode, res.locals.response,
+            'to', res.locals.requestHttp, 'headers:', module.exports.getResHeader(res));
         res.json(res.locals.response);
         next();
     },
@@ -130,13 +131,15 @@ module.exports = {
             res.status(lumHttpCodes.serverError);
         }
 
-        utils.logInfo(res, `ERROR response ${utils.calcReqTime(res)}`, res.statusCode, error.stack, 'to', res.locals.requestHttp);
+        utils.logInfo(res, `ERROR response ${utils.calcReqTime(res)}`, res.statusCode, error.stack,
+            'to', res.locals.requestHttp, 'headers:', module.exports.getResHeader(res));
         healthcheck.calcUptime();
         if (res.statusCode < lumHttpCodes.serverError && error.stack) {delete error.stack;}
         res.json({
             requestId: res.locals.response.requestId,
             requested: res.locals.response.requested,
             "error": {
+                name:     error.name,
                 severity: error.severity,
                 code:     error.code,
                 message:  error.message,

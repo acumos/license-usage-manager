@@ -1,5 +1,5 @@
 # ================================================================================
-# Copyright (c) 2019 AT&T Intellectual Property. All rights reserved.
+# Copyright (c) 2019-2020 AT&T Intellectual Property. All rights reserved.
 # Modifications Copyright (C) 2019 Nordix Foundation.
 # ================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +19,7 @@
 openapi: '3.0.2'
 
 info:
-  version: "0.28.1"
+  version: "0.28.2"
   title: "License Usage Manager (LUM) API"
   contact:
     name: Acumos License Management
@@ -84,7 +84,7 @@ paths:
         example: ee48b699-3b16-4391-884c-1bec557f32b9
         required: true
         in: query
-        description: GUID+version PK to swidTag
+        description: globally unique identifier of the software tag up to its version
         schema:
           type: string
 
@@ -221,7 +221,7 @@ paths:
         required: true
         example: ee48b699-3b16-4391-884c-1bec557f32b9
         in: query
-        description: GUID+version PK to swidTag
+        description: globally unique identifier of the software tag up to its version
         schema:
           type: string
 
@@ -863,6 +863,14 @@ components:
                 databaseVersion:
                   description: version of LUM database this server runs with - expected to match to serverVersion
                   type: string
+                schemaCreated:
+                  description: date-time when LUM schema was created - inited
+                  type: string
+                  format: date-time
+                schemaModified:
+                  description: date-time when LUM schema was modified
+                  type: string
+                  format: date-time
                 databaseStarted:
                   description: date-time when LUM database server started
                   type: string
@@ -890,18 +898,20 @@ components:
               type: string
           example:
             serverName: "lum-server"
-            serverVersion: "0.28.1"
-            apiVersion: "0.28.1"
+            serverVersion: "0.28.2"
+            apiVersion: "0.28.2"
             nodeVersion: "10.16.3"
             databaseInfo:
               pgVersion: "PostgreSQL 11.5 on x86_64-pc-linux-musl, compiled by gcc (Alpine 8.3.0) 8.3.0, 64-bit"
-              databaseVersion: "0.28.1"
-              databaseStarted: "2019-10-07T14:07:26.376Z"
-              databaseUptime: "2 days 00:19:37.460527"
-              checked: "2019-10-09T14:27:03.837Z"
+              databaseVersion: "0.28.2"
+              schemaCreated: "2020-01-09T17:12:31.791Z"
+              schemaModified: "2020-01-09T17:12:31.791Z"
+              databaseStarted: "2020-01-09T17:12:32.361Z"
+              databaseUptime: "00:22:38.660894"
+              checked: "2020-01-09T17:35:11.022Z"
             serverRunInstanceId: "faa08408-59fd-44d2-b815-9ceb9b8fdf92"
-            serverStarted: "2019-10-09T13:51:59.965Z"
-            serverUptime: "00:35:04.073208"
+            serverStarted": "2020-01-09T17:33:35.001Z"
+            serverUptime: "00:01:36.095038"
             pathToOpenapiUi: "/ui/openapi"
 
     HealthcheckResponse:
@@ -936,9 +946,9 @@ components:
         - swTagId
       properties:
         swTagId:
-          description: globally unique identifier of the software piece
-            format <swPersistentId>_<swVersion>
-            example "c0de3e70-e815-461f-9734-a239c450bf777.5.3.123-t1"
+          description: globally unique identifier of the software tag up to its version
+            possible format <swPersistentId>_<swVersion>
+            example "c0de3e70-e815-461f-9734-a239c450bf77_7.5.3.123-t1"
           type: string
 
     SWIDCreators:
@@ -981,9 +991,9 @@ components:
 
       properties:
         swTagId:
-          description: globally unique identifier of the software piece
+          description: globally unique identifier of the software tag up to its version
             format <swPersistentId>_<swVersion>
-            example "c0de3e70-e815-461f-9734-a239c450bf777.5.3.123-t1"
+            example "c0de3e70-e815-461f-9734-a239c450bf77_7.5.3.123-t1"
           type: string
 
         swPersistentId:
@@ -1141,7 +1151,7 @@ components:
         - swidTag
       properties:
         swTagId:
-          description: GUID+version PK to swidTag
+          description: globally unique identifier of the software tag up to its version
           type: string
         status:
           description: status of swidTag revoking
@@ -1477,7 +1487,7 @@ components:
       properties:
         includedSwTagId:
           description: |
-            unique identifier of the software piece
+            globally unique identifier of the software tag up to its version
             that is included by or composed into the current software piece.
             it is FK to swidTag
           type: string
@@ -1500,7 +1510,7 @@ components:
 
       properties:
         swTagId:
-          description: unique identifier of the swidTag record
+          description: globally unique identifier of the software tag up to its version
           type: string
 
         assetUsageId:
