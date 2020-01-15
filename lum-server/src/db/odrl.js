@@ -1,5 +1,5 @@
 // ================================================================================
-// Copyright (c) 2019 AT&T Intellectual Property. All rights reserved.
+// Copyright (c) 2019-2020 AT&T Intellectual Property. All rights reserved.
 // ================================================================================
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -211,7 +211,7 @@ function consumeConstraint(consumedConstraints, status, ...constraints) {
  */
 function groomConstraint(res, constraint) {
     constraint = utils.deepCopyTo({}, constraint);
-    utils.logInfo(res, 'groomConstraint to groom constraint', constraint);
+    utils.logDebug(res, 'groomConstraint to groom constraint', constraint);
     constraint.dataType = (LEFT_OPERANDS[constraint.leftOperand] || {}).dataType || TYPES.string;
 
     if (constraint.rightOperand == null) {
@@ -267,7 +267,7 @@ function groomConstraint(res, constraint) {
 function mergeTwoConstraints(res, constraint, addon, consumedConstraints) {
     if (!constraint || !addon) {return;}
     if (constraint.leftOperand !== addon.leftOperand) {return;}
-    utils.logInfo(res, 'mergeTwoConstraints constraint', constraint, '<- addon', addon);
+    utils.logDebug(res, 'mergeTwoConstraints constraint', constraint, '<- addon', addon);
 
     if ([constraint.operator, addon.operator].includes(OPERATORS.lumIn)) {
         if (constraint.operator === addon.operator) {
@@ -286,7 +286,7 @@ function mergeTwoConstraints(res, constraint, addon, consumedConstraints) {
             constraint.dataType = addon.dataType;
             constraint.rightOperand = addon.rightOperand.filter(x => compareTwoValues(constraint.operator, x, constraint.rightOperand));
         }
-        utils.logInfo(res, 'merged mergeTwoConstraints constraint', constraint);
+        utils.logDebug(res, 'merged mergeTwoConstraints constraint', constraint);
         return true;
     }
 
@@ -298,7 +298,7 @@ function mergeTwoConstraints(res, constraint, addon, consumedConstraints) {
             } else {
                 consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.ignored, addon);
             }
-            utils.logInfo(res, 'merged mergeTwoConstraints constraint', constraint);
+            utils.logDebug(res, 'merged mergeTwoConstraints constraint', constraint);
             return true;
         }
         if (compareTwoValues(constraint.operator, addon.rightOperand, constraint.rightOperand)) {
@@ -307,7 +307,7 @@ function mergeTwoConstraints(res, constraint, addon, consumedConstraints) {
         } else {
             consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.ignored, addon);
         }
-        utils.logInfo(res, 'merged mergeTwoConstraints constraint', constraint);
+        utils.logDebug(res, 'merged mergeTwoConstraints constraint', constraint);
         return true;
     }
 
@@ -319,7 +319,7 @@ function mergeTwoConstraints(res, constraint, addon, consumedConstraints) {
         } else {
             consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.ignored, addon);
         }
-        utils.logInfo(res, 'merged mergeTwoConstraints constraint', constraint);
+        utils.logDebug(res, 'merged mergeTwoConstraints constraint', constraint);
         return true;
     }
     if (addon.operator === OPERATORS.eq) {
@@ -330,7 +330,7 @@ function mergeTwoConstraints(res, constraint, addon, consumedConstraints) {
             consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.conflicted, constraint, addon);
             constraint.rightOperand = null;
         }
-        utils.logInfo(res, 'merged mergeTwoConstraints constraint', constraint);
+        utils.logDebug(res, 'merged mergeTwoConstraints constraint', constraint);
         return true;
     }
 
@@ -345,7 +345,7 @@ function mergeTwoConstraints(res, constraint, addon, consumedConstraints) {
         consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.overridden, constraint);
         utils.deepCopyTo(constraint, addon);
     }
-    utils.logInfo(res, 'merged mergeTwoConstraints constraint', constraint);
+    utils.logDebug(res, 'merged mergeTwoConstraints constraint', constraint);
     return true;
 }
 /**
@@ -359,23 +359,24 @@ function mergeTwoConstraints(res, constraint, addon, consumedConstraints) {
  */
 function expandProhibitionConstraint(res, constraint, expansion, consumedConstraints) {
     if (!constraint || !expansion) {return;}
-    utils.logInfo(res, 'expandProhibitionConstraint', constraint, '<- expansion', expansion);
+    utils.logDebug(res, 'expandProhibitionConstraint', constraint, '<- expansion', expansion);
 
     if ([constraint.operator, expansion.operator].includes(OPERATORS.lumIn)) {
         if (constraint.operator === expansion.operator) {
             const toAdd = expansion.rightOperand.filter(x => !constraint.rightOperand.includes(x));
             if (toAdd.length) {
                 consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.expanded, constraint, expansion);
-                Array.prototype.push.apply(constraint.rightOperand, toAdd).sort();
+                Array.prototype.push.apply(constraint.rightOperand, toAdd);
+                constraint.rightOperand.sort();
                 constraint.expanded = true;
-                utils.logInfo(res, 'expanded constraint', constraint);
+                utils.logDebug(res, 'expanded constraint', constraint);
             } else {
                 consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.ignored, expansion);
-                utils.logInfo(res, 'ignored expansion for constraint', constraint);
+                utils.logDebug(res, 'ignored expansion for constraint', constraint);
             }
         } else {
             consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.ignored, expansion);
-            utils.logInfo(res, 'ignored expansion for constraint', constraint);
+            utils.logDebug(res, 'ignored expansion for constraint', constraint);
         }
         return;
     }
@@ -383,17 +384,17 @@ function expandProhibitionConstraint(res, constraint, expansion, consumedConstra
     if (constraint.operator === expansion.operator) {
         if (constraint.operator === OPERATORS.eq) {
             consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.ignored, expansion);
-            utils.logInfo(res, 'ignored expansion for constraint', constraint);
+            utils.logDebug(res, 'ignored expansion for constraint', constraint);
             return;
         }
         if (compareTwoValues(constraint.operator, constraint.rightOperand, expansion.rightOperand)) {
             consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.expanded, constraint);
             utils.deepCopyTo(constraint, expansion);
             constraint.expanded = true;
-            utils.logInfo(res, 'expanded constraint', constraint);
+            utils.logDebug(res, 'expanded constraint', constraint);
         } else {
             consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.ignored, expansion);
-            utils.logInfo(res, 'ignored expansion for constraint', constraint);
+            utils.logDebug(res, 'ignored expansion for constraint', constraint);
         }
         return;
     }
@@ -401,19 +402,19 @@ function expandProhibitionConstraint(res, constraint, expansion, consumedConstra
     // ... here when different operators...
     if (constraint.operator === OPERATORS.eq) {
         consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.ignored, expansion);
-        utils.logInfo(res, 'ignored expansion for constraint', constraint);
+        utils.logDebug(res, 'ignored expansion for constraint', constraint);
         return;
     }
     if (expansion.operator === OPERATORS.eq) {
         consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.ignored, expansion);
-        utils.logInfo(res, 'ignored expansion for constraint', constraint);
+        utils.logDebug(res, 'ignored expansion for constraint', constraint);
         return;
     }
 
     const similarOperators = getSimilarOperators(constraint.operator);
     if (!similarOperators.includes(expansion.operator) || similarOperators.length === 1) {
         consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.ignored, expansion);
-        utils.logInfo(res, 'ignored expansion for constraint', constraint);
+        utils.logDebug(res, 'ignored expansion for constraint', constraint);
         return;
     }
     const weakOperator = similarOperators[similarOperators.length - 1];
@@ -423,10 +424,10 @@ function expandProhibitionConstraint(res, constraint, expansion, consumedConstra
             consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.expanded, constraint, expansion);
             constraint.operator = weakOperator;
             constraint.expanded = true;
-            utils.logInfo(res, 'expanded constraint', constraint);
+            utils.logDebug(res, 'expanded constraint', constraint);
         } else {
             consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.ignored, expansion);
-            utils.logInfo(res, 'ignored expansion for constraint', constraint);
+            utils.logDebug(res, 'ignored expansion for constraint', constraint);
         }
         return;
     }
@@ -435,7 +436,7 @@ function expandProhibitionConstraint(res, constraint, expansion, consumedConstra
         consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.expanded, constraint);
         utils.deepCopyTo(constraint, expansion);
         constraint.expanded = true;
-        utils.logInfo(res, 'expanded constraint', constraint);
+        utils.logDebug(res, 'expanded constraint', constraint);
     }
 }
 
@@ -459,18 +460,18 @@ function groomConstraints(res, constraints, baseConstraints, consumedConstraints
     const mergedConstraints = [];
     for (let addon of baseConstraints.concat(constraints)) {
         addon = groomConstraint(res, addon);
-        utils.logInfo(res, 'groomConstraints groomed addon', addon);
+        utils.logDebug(res, 'groomConstraints groomed addon', addon);
 
         let merged = false;
         for (const constraint of mergedConstraints) {
             merged = mergeTwoConstraints(res, constraint, addon, consumedConstraints);
             if (merged) {
-                utils.logInfo(res, 'groomConstraints merged constraint', constraint);
+                utils.logDebug(res, 'groomConstraints merged constraint', constraint);
                 break;
             }
         }
         if (!merged) {
-            utils.logInfo(res, 'groomConstraints added addon', addon);
+            utils.logDebug(res, 'groomConstraints added addon', addon);
             mergedConstraints.push(addon);
         }
     }
