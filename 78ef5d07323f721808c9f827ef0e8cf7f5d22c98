@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f2895caa_0d73029b",
+        "filename": "docs/diagrams/lum-architecture.puml",
+        "patchSetId": 5
+      },
+      "lineNbr": 408,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2020-01-16T19:27:13Z",
+      "side": 1,
+      "message": "lost 2020 year of copyright change",
+      "range": {
+        "startLine": 408,
+        "startChar": 22,
+        "endLine": 408,
+        "endChar": 27
+      },
+      "revId": "78ef5d07323f721808c9f827ef0e8cf7f5d22c98",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    }
+  ]
+}
