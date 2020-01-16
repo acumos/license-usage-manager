@@ -1,7 +1,7 @@
 .. ===============LICENSE_START=======================================================
 .. Acumos CC-BY-4.0
 .. ===================================================================================
-.. Copyright (C) 2019 AT&T Intellectual Property. All rights reserved.
+.. Copyright (C) 2019-2020 AT&T Intellectual Property. All rights reserved.
 .. ===================================================================================
 .. This Acumos documentation file is distributed by AT&T
 .. under the Creative Commons Attribution 4.0 International License (the "License");
@@ -72,7 +72,8 @@ the software licensor (supplier) and the software licensee
 Data model and High-Level Flow
 ==============================
 
-    .. image:: images/lum-architecture.png
+  .. image:: images/lum-architecture.svg
+     :width: 100%
 
 Selecting the right-to-use for the action on the asset of swidTag
 -----------------------------------------------------------------

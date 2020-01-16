@@ -1,6 +1,7 @@
-# ================================================================================
+# ======================================================================================
 # Copyright (C) 2019 Nordix Foundation.
-# ================================================================================
+# Modifications Copyright (c) 2019-2020 AT&T Intellectual Property. All rights reserved.
+# ======================================================================================
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,14 +13,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limits under the License.
-# ============LICENSE_END=========================================================
+# ============LICENSE_END===============================================================
 ---
 version: "3.4"
 services:
   lum-database:
     build: ./lum-db/
     # replace username/repo:tag with your name and image details
-    image: lum-database:0.28.1-SNAPSHOT
+    image: lum-database:0.28.2-SNAPSHOT
     ports:
       - "5432:5432"
   lum-server:
@@ -30,7 +31,7 @@ services:
       - BUILD_DEVELOPMENT=1
     command: npm run start:dev
     # replace username/repo:tag with your name and image details
-    image: lum-server:0.28.1-SNAPSHOT
+    image: lum-server:0.28.2-SNAPSHOT
     depends_on:
       - lum-database
     ports:

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" 
+<project xmlns="http://maven.apache.org/POM/4.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <!--<![CDATA[
 	===============LICENSE_START=======================================================
@@ -20,7 +20,7 @@
 	limitations under the License.
 	===============LICENSE_END=========================================================
 	]]>-->
-  <!--This parent pom is required to ensure javadoc:aggregate works 
+  <!--This parent pom is required to ensure javadoc:aggregate works
     with jenkins maven javadoc job.
   -->
   <modelVersion>4.0.0</modelVersion>
@@ -67,7 +67,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.1.1</version>
+        <version>3.0.1</version>
         <configuration>
           <doclint>none</doclint>
           <tags>

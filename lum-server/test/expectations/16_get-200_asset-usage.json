@@ -1,0 +1,110 @@
+{
+    "db": [
+        {
+            "sqlCmd": "BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ",
+            "result": {"command": "BEGIN", "rowCount": 1, "rows": []}
+        },
+        {
+            "sqlCmd": "SELECT TXID_CURRENT() AS txid, PG_BACKEND_PID() AS pid, NOW() AS tx_now",
+            "result": {"command": "SELECT", "rowCount": 1,
+                "rows": [{"txid": 123, "pid": 456, "tx_now": "__to_date__|2019-12-19T11:43:20.952Z"}]
+            }
+        },
+        {
+            "sqlCmd": "SELECT aur.\"responseHttpCode\", aur.\"response\" FROM \"assetUsageReq\" AS aur, \"assetUsage\" AS au, \"assetUsageHistory\" AS auh WHERE au.\"assetUsageId\" = ($1) AND auh.\"assetUsageId\" = ($1) AND au.\"assetUsageSeqTailEntitlement\" = auh.\"assetUsageSeq\" AND auh.\"assetUsageReqId\" = aur.\"assetUsageReqId\" FOR SHARE",
+            "sqlVals": ["alex-usage-1"],
+            "result": {"command": "SELECT", "rowCount": 1,
+                "rows": [
+                    {
+                        "responseHttpCode": 200,
+                        "response": {
+                            "userId": "alex-sw-creator-unit-test",
+                            "requestId": "25434cb2-bae1-46a6-948e-7cefbfc9bc56",
+                            "requested": "2019-12-26T11:28:10.828Z",
+                            "swMgtSystemId": "alex-sys",
+                            "swMgtSystemInstanceId": "123",
+                            "swMgtSystemComponent": "dev",
+                            "usageEntitled": true,
+                            "assetUsage": {
+                                "swTagId": "alex-1",
+                                "assetUsageId": "alex-usage-1",
+                                "action": "acumos:deploy",
+                                "isIncludedAsset": false,
+                                "usageEntitled": true,
+                                "isUsedBySwCreator": true,
+                                "assetUsageSeq": 26,
+                                "softwareLicensorId": "swlic",
+                                "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                                "licenseProfileRevision": 1,
+                                "isRtuRequired": true,
+                                "swidTagRevision": 4,
+                                "includedAssetUsage": [
+                                    {
+                                        "includedSwTagId": "alex-1",
+                                        "includedAssetUsageId": "alex-usage-2",
+                                        "usageEntitled": true,
+                                        "isUsedBySwCreator": true,
+                                        "assetUsageSeq": 26,
+                                        "softwareLicensorId": "swlic",
+                                        "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                                        "licenseProfileRevision": 1,
+                                        "isRtuRequired": true,
+                                        "swidTagRevision": 4
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "sqlCmd": "COMMIT",
+            "result": {"command": "COMMIT", "rowCount": 1, "rows": []}
+        }
+    ],
+    "req": {
+        "method": "GET",
+        "path": "/api/v1/asset-usage?assetUsageId=alex-usage-1"
+    },
+    "res": {
+        "statusCode": 200,
+        "body": {
+            "userId": "alex-sw-creator-unit-test",
+            "requestId": "25434cb2-bae1-46a6-948e-7cefbfc9bc56",
+            "requested": "2019-12-26T11:28:10.828Z",
+            "swMgtSystemId": "alex-sys",
+            "swMgtSystemInstanceId": "123",
+            "swMgtSystemComponent": "dev",
+            "usageEntitled": true,
+            "assetUsage": {
+                "swTagId": "alex-1",
+                "assetUsageId": "alex-usage-1",
+                "action": "acumos:deploy",
+                "isIncludedAsset": false,
+                "usageEntitled": true,
+                "isUsedBySwCreator": true,
+                "assetUsageSeq": 26,
+                "softwareLicensorId": "swlic",
+                "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                "licenseProfileRevision": 1,
+                "isRtuRequired": true,
+                "swidTagRevision": 4,
+                "includedAssetUsage": [
+                    {
+                        "includedSwTagId": "alex-1",
+                        "includedAssetUsageId": "alex-usage-2",
+                        "usageEntitled": true,
+                        "isUsedBySwCreator": true,
+                        "assetUsageSeq": 26,
+                        "softwareLicensorId": "swlic",
+                        "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                        "licenseProfileRevision": 1,
+                        "isRtuRequired": true,
+                        "swidTagRevision": 4
+                    }
+                ]
+            }
+        }
+    }
+}

@@ -1,0 +1,1191 @@
+{
+    "db": [
+        {
+            "sqlCmd": "BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ",
+            "result": {"command": "BEGIN", "rowCount": 1, "rows": []}
+        },
+        {
+            "sqlCmd": "SELECT TXID_CURRENT() AS txid, PG_BACKEND_PID() AS pid, NOW() AS tx_now",
+            "result": {"command": "SELECT", "rowCount": 1,
+                "rows": [{"txid": 123, "pid": 456, "tx_now": "__to_date__|2019-12-19T11:43:20.952Z"}]
+            }
+        },
+        {
+            "sqlCmd": "WITH req_ids AS (SELECT DISTINCT auh.\"assetUsageReqId\" FROM \"assetUsageHistory\" AS auh WHERE auh.\"softwareLicensorId\" = ($1)) SELECT aur.\"assetUsageType\", aur.\"response\" FROM \"assetUsageReq\" AS aur, req_ids WHERE aur.\"assetUsageReqId\" = req_ids.\"assetUsageReqId\" ORDER BY aur.\"requestStarted\", aur.\"assetUsageReqId\"",
+            "sqlVals": ["swlic"],
+            "result": {"command": "SELECT", "rowCount": 9,
+                "rows": [
+                    {
+                        "assetUsageType": "assetUsage",
+                        "response": {
+                            "userId": "alex-usage",
+                            "swMgtSystemId": "alex-sys",
+                            "swMgtSystemInstanceId": "123",
+                            "swMgtSystemComponent": "dev",
+                            "requestId": "84be07ed-399d-467b-acf0-81820e932fc6",
+                            "requested": "2019-12-26T13:19:59.828Z",
+                            "usageEntitled": false,
+                            "assetUsage": {
+                                "swTagId": "alex-1",
+                                "assetUsageId": "alex-usage-1",
+                                "action": "acumos:deploy",
+                                "isIncludedAsset": false,
+                                "usageEntitled": false,
+                                "isUsedBySwCreator": false,
+                                "assetUsageSeq": 19,
+                                "softwareLicensorId": "swlic",
+                                "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                                "licenseProfileRevision": 1,
+                                "isRtuRequired": true,
+                                "swidTagRevision": 4,
+                                "assetUsageDenialSummary": "swid-tag(alex-1) has been found but asset-usage is prohibited by prohibition(proh-2) under asset-usage-agreement(alex-agr) for action(acumos:deploy)",
+                                "assetUsageDenial": [
+                                    {
+                                        "denialType": "usageProhibited",
+                                        "denialReason": "swid-tag(alex-1) has been found but asset-usage is prohibited by prohibition(proh-2) under asset-usage-agreement(alex-agr) for action(acumos:deploy)",
+                                        "deniedAction": "acumos:deploy",
+                                        "deniedAssetUsageAgreementId": "alex-agr",
+                                        "deniedAssetUsageAgreementRevision": 33,
+                                        "deniedRightToUseId": "proh-2",
+                                        "deniedRightToUseRevision": 33,
+                                        "denialReqItemName": "action",
+                                        "denialReqItemValue": "acumos:deploy",
+                                        "deniedConstraint": {
+                                            "action": "acumos:deploy"
+                                        }
+                                    }
+                                ],
+                                "includedAssetUsage": [
+                                    {
+                                        "includedSwTagId": "alex-1",
+                                        "includedAssetUsageId": "alex-usage-2",
+                                        "usageEntitled": false,
+                                        "isUsedBySwCreator": false,
+                                        "assetUsageSeq": 19,
+                                        "softwareLicensorId": "swlic",
+                                        "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                                        "licenseProfileRevision": 1,
+                                        "isRtuRequired": true,
+                                        "swidTagRevision": 4,
+                                        "assetUsageDenialSummary": "swid-tag(alex-1) has been found but asset-usage is prohibited by prohibition(proh-2) under asset-usage-agreement(alex-agr) for action(acumos:deploy)",
+                                        "assetUsageDenial": [
+                                            {
+                                                "denialType": "usageProhibited",
+                                                "denialReason": "swid-tag(alex-1) has been found but asset-usage is prohibited by prohibition(proh-2) under asset-usage-agreement(alex-agr) for action(acumos:deploy)",
+                                                "deniedAction": "acumos:deploy",
+                                                "deniedAssetUsageAgreementId": "alex-agr",
+                                                "deniedAssetUsageAgreementRevision": 33,
+                                                "deniedRightToUseId": "proh-2",
+                                                "deniedRightToUseRevision": 33,
+                                                "denialReqItemName": "action",
+                                                "denialReqItemValue": "acumos:deploy",
+                                                "deniedConstraint": {
+                                                    "action": "acumos:deploy"
+                                                }
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "assetUsageType": "assetUsage",
+                        "response": {
+                            "userId": "alex-usage",
+                            "requestId": "c181ca14-0786-4ee5-9503-8c2b201819b4",
+                            "requested": "2019-12-26T13:19:59.828Z",
+                            "swMgtSystemId": "alex-sys",
+                            "swMgtSystemInstanceId": "123",
+                            "swMgtSystemComponent": "dev",
+                            "usageEntitled": false,
+                            "assetUsage": {
+                                "swTagId": "alex-1",
+                                "assetUsageId": "alex-usage-1",
+                                "action": "acumos:deploy",
+                                "isIncludedAsset": false,
+                                "usageEntitled": false,
+                                "isUsedBySwCreator": false,
+                                "assetUsageSeq": 20,
+                                "softwareLicensorId": "swlic",
+                                "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                                "licenseProfileRevision": 1,
+                                "isRtuRequired": true,
+                                "swidTagRevision": 4,
+                                "assetUsageDenialSummary": "swid-tag(alex-1) has been found but asset-usage is prohibited by prohibition(proh-2) under asset-usage-agreement(alex-agr) for action(acumos:deploy)",
+                                "assetUsageDenial": [
+                                    {
+                                        "denialType": "usageProhibited",
+                                        "denialReason": "swid-tag(alex-1) has been found but asset-usage is prohibited by prohibition(proh-2) under asset-usage-agreement(alex-agr) for action(acumos:deploy)",
+                                        "deniedAction": "acumos:deploy",
+                                        "deniedAssetUsageAgreementId": "alex-agr",
+                                        "deniedAssetUsageAgreementRevision": 33,
+                                        "deniedRightToUseId": "proh-2",
+                                        "deniedRightToUseRevision": 33,
+                                        "denialReqItemName": "action",
+                                        "denialReqItemValue": "acumos:deploy",
+                                        "deniedConstraint": {
+                                            "action": "acumos:deploy"
+                                        }
+                                    }
+                                ],
+                                "includedAssetUsage": [
+                                    {
+                                        "includedSwTagId": "alex-1",
+                                        "includedAssetUsageId": "alex-usage-2",
+                                        "usageEntitled": false,
+                                        "isUsedBySwCreator": false,
+                                        "assetUsageSeq": 20,
+                                        "softwareLicensorId": "swlic",
+                                        "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                                        "licenseProfileRevision": 1,
+                                        "isRtuRequired": true,
+                                        "swidTagRevision": 4,
+                                        "assetUsageDenialSummary": "swid-tag(alex-1) has been found but asset-usage is prohibited by prohibition(proh-2) under asset-usage-agreement(alex-agr) for action(acumos:deploy)",
+                                        "assetUsageDenial": [
+                                            {
+                                                "denialType": "usageProhibited",
+                                                "denialReason": "swid-tag(alex-1) has been found but asset-usage is prohibited by prohibition(proh-2) under asset-usage-agreement(alex-agr) for action(acumos:deploy)",
+                                                "deniedAction": "acumos:deploy",
+                                                "deniedAssetUsageAgreementId": "alex-agr",
+                                                "deniedAssetUsageAgreementRevision": 33,
+                                                "deniedRightToUseId": "proh-2",
+                                                "deniedRightToUseRevision": 33,
+                                                "denialReqItemName": "action",
+                                                "denialReqItemValue": "acumos:deploy",
+                                                "deniedConstraint": {
+                                                    "action": "acumos:deploy"
+                                                }
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "assetUsageType": "assetUsage",
+                        "response": {
+                            "userId": "alex-usage",
+                            "requestId": "f931d9b9-7dc9-4670-955b-05bd02ff0363",
+                            "requested": "2019-12-26T09:06:03.828Z",
+                            "swMgtSystemId": "alex-sys",
+                            "swMgtSystemInstanceId": "123",
+                            "swMgtSystemComponent": "dev",
+                            "usageEntitled": false,
+                            "assetUsage": {
+                                "swTagId": "alex-1",
+                                "assetUsageId": "alex-usage-1",
+                                "action": "acumos:deploy",
+                                "isIncludedAsset": false,
+                                "usageEntitled": false,
+                                "isUsedBySwCreator": false,
+                                "assetUsageSeq": 21,
+                                "softwareLicensorId": "swlic",
+                                "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                                "licenseProfileRevision": 1,
+                                "isRtuRequired": true,
+                                "swidTagRevision": 4,
+                                "assetUsageDenialSummary": "swid-tag(alex-1) has been found and an asset-usage-agreement from swlic has been found but 2 constraints on the agreement(alex-agr) deny the usage of this asset",
+                                "assetUsageDenial": [
+                                    {
+                                        "denialType": "timingConstraint",
+                                        "denialReason": "rightToUse expired: (today(2019-12-26) > expireOn(2019-11-30)) on permission(perm-1) under agreement(alex-agr) for action(acumos:deploy)",
+                                        "deniedAction": "acumos:deploy",
+                                        "deniedAssetUsageAgreementId": "alex-agr",
+                                        "deniedAssetUsageAgreementRevision": 34,
+                                        "deniedRightToUseId": "perm-1",
+                                        "deniedRightToUseRevision": 34,
+                                        "denialReqItemName": "date",
+                                        "denialReqItemValue": "2019-12-26",
+                                        "deniedConstraint": {
+                                            "expireOn": "2019-11-30"
+                                        }
+                                    },
+                                    {
+                                        "denialType": "matchingConstraintOnAssignee",
+                                        "denialReason": "user not in assignee lum:users: (alex-usage not lum:in [\"alex\", \"ist-tester\", \"justin\", \"michelle\", \"unit-tester\"]) on permission(perm-1) under agreement(alex-agr) for action(acumos:deploy)",
+                                        "deniedAction": "acumos:deploy",
+                                        "deniedAssetUsageAgreementId": "alex-agr",
+                                        "deniedAssetUsageAgreementRevision": 34,
+                                        "deniedRightToUseId": "perm-1",
+                                        "deniedRightToUseRevision": 34,
+                                        "denialReqItemName": "userId",
+                                        "denialReqItemValue": "alex-usage",
+                                        "deniedConstraint": {
+                                            "origin": "fromRestriction",
+                                            "dataType": "string",
+                                            "operator": "lum:in",
+                                            "leftOperand": "lum:users",
+                                            "rightOperand": [
+                                                "alex",
+                                                "ist-tester",
+                                                "justin",
+                                                "michelle",
+                                                "unit-tester"
+                                            ]
+                                        }
+                                    }
+                                ],
+                                "includedAssetUsage": [
+                                    {
+                                        "includedSwTagId": "alex-1",
+                                        "includedAssetUsageId": "alex-usage-2",
+                                        "usageEntitled": false,
+                                        "isUsedBySwCreator": false,
+                                        "assetUsageSeq": 21,
+                                        "softwareLicensorId": "swlic",
+                                        "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                                        "licenseProfileRevision": 1,
+                                        "isRtuRequired": true,
+                                        "swidTagRevision": 4,
+                                        "assetUsageDenialSummary": "swid-tag(alex-1) has been found and an asset-usage-agreement from swlic has been found but 2 constraints on the agreement(alex-agr) deny the usage of this asset",
+                                        "assetUsageDenial": [
+                                            {
+                                                "denialType": "timingConstraint",
+                                                "denialReason": "rightToUse expired: (today(2019-12-26) > expireOn(2019-11-30)) on permission(perm-1) under agreement(alex-agr) for action(acumos:deploy)",
+                                                "deniedAction": "acumos:deploy",
+                                                "deniedAssetUsageAgreementId": "alex-agr",
+                                                "deniedAssetUsageAgreementRevision": 34,
+                                                "deniedRightToUseId": "perm-1",
+                                                "deniedRightToUseRevision": 34,
+                                                "denialReqItemName": "date",
+                                                "denialReqItemValue": "2019-12-26",
+                                                "deniedConstraint": {
+                                                    "expireOn": "2019-11-30"
+                                                }
+                                            },
+                                            {
+                                                "denialType": "matchingConstraintOnAssignee",
+                                                "denialReason": "user not in assignee lum:users: (alex-usage not lum:in [\"alex\", \"ist-tester\", \"justin\", \"michelle\", \"unit-tester\"]) on permission(perm-1) under agreement(alex-agr) for action(acumos:deploy)",
+                                                "deniedAction": "acumos:deploy",
+                                                "deniedAssetUsageAgreementId": "alex-agr",
+                                                "deniedAssetUsageAgreementRevision": 34,
+                                                "deniedRightToUseId": "perm-1",
+                                                "deniedRightToUseRevision": 34,
+                                                "denialReqItemName": "userId",
+                                                "denialReqItemValue": "alex-usage",
+                                                "deniedConstraint": {
+                                                    "origin": "fromRestriction",
+                                                    "dataType": "string",
+                                                    "operator": "lum:in",
+                                                    "leftOperand": "lum:users",
+                                                    "rightOperand": [
+                                                        "alex",
+                                                        "ist-tester",
+                                                        "justin",
+                                                        "michelle",
+                                                        "unit-tester"
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "assetUsageType": "assetUsage",
+                        "response": {
+                            "userId": "alex-usage",
+                            "requestId": "c73e8996-0abf-40b7-b6c6-1713bec545f4",
+                            "requested": "2019-12-26T09:31:25.828Z",
+                            "swMgtSystemId": "alex-sys",
+                            "swMgtSystemInstanceId": "123",
+                            "swMgtSystemComponent": "dev",
+                            "usageEntitled": true,
+                            "assetUsage": {
+                                "swTagId": "alex-1",
+                                "assetUsageId": "alex-usage-1",
+                                "action": "acumos:deploy",
+                                "isIncludedAsset": false,
+                                "usageEntitled": true,
+                                "isUsedBySwCreator": false,
+                                "assetUsageSeq": 22,
+                                "softwareLicensorId": "swlic",
+                                "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                                "licenseProfileRevision": 1,
+                                "isRtuRequired": true,
+                                "swidTagRevision": 4,
+                                "entitlement": {
+                                    "rightToUseId": "perm-1",
+                                    "rightToUseRevision": 35,
+                                    "assetUsageAgreementId": "alex-agr",
+                                    "assetUsageAgreementRevision": 35,
+                                    "licenseKeys": null
+                                },
+                                "includedAssetUsage": [
+                                    {
+                                        "includedSwTagId": "alex-1",
+                                        "includedAssetUsageId": "alex-usage-2",
+                                        "usageEntitled": true,
+                                        "isUsedBySwCreator": false,
+                                        "assetUsageSeq": 22,
+                                        "softwareLicensorId": "swlic",
+                                        "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                                        "licenseProfileRevision": 1,
+                                        "isRtuRequired": true,
+                                        "swidTagRevision": 4,
+                                        "entitlement": {
+                                            "rightToUseId": "perm-1",
+                                            "rightToUseRevision": 35,
+                                            "assetUsageAgreementId": "alex-agr",
+                                            "assetUsageAgreementRevision": 35,
+                                            "licenseKeys": null
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "assetUsageType": "assetUsage",
+                        "response": {
+                            "userId": "alex",
+                            "requestId": "71480054-763d-4d2f-940a-f8384a32a7dc",
+                            "requested": "2019-12-26T11:12:41.828Z",
+                            "swMgtSystemId": "alex-sys",
+                            "swMgtSystemInstanceId": "123",
+                            "swMgtSystemComponent": "dev",
+                            "usageEntitled": true,
+                            "assetUsage": {
+                                "swTagId": "alex-1",
+                                "assetUsageId": "alex-usage-1",
+                                "action": "acumos:deploy",
+                                "isIncludedAsset": false,
+                                "usageEntitled": true,
+                                "isUsedBySwCreator": false,
+                                "assetUsageSeq": 23,
+                                "softwareLicensorId": "swlic",
+                                "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                                "licenseProfileRevision": 1,
+                                "isRtuRequired": true,
+                                "swidTagRevision": 4,
+                                "entitlement": {
+                                    "rightToUseId": "perm-1",
+                                    "rightToUseRevision": 36,
+                                    "assetUsageAgreementId": "alex-agr",
+                                    "assetUsageAgreementRevision": 36,
+                                    "licenseKeys": null
+                                },
+                                "includedAssetUsage": [
+                                    {
+                                        "includedSwTagId": "alex-1",
+                                        "includedAssetUsageId": "alex-usage-2",
+                                        "usageEntitled": true,
+                                        "isUsedBySwCreator": false,
+                                        "assetUsageSeq": 23,
+                                        "softwareLicensorId": "swlic",
+                                        "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                                        "licenseProfileRevision": 1,
+                                        "isRtuRequired": true,
+                                        "swidTagRevision": 4,
+                                        "entitlement": {
+                                            "rightToUseId": "perm-1",
+                                            "rightToUseRevision": 36,
+                                            "assetUsageAgreementId": "alex-agr",
+                                            "assetUsageAgreementRevision": 36,
+                                            "licenseKeys": null
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "assetUsageType": "assetUsage",
+                        "response": {
+                            "userId": "alex-not-allowed",
+                            "requestId": "71480054-763d-4d2f-940a-f8384a32a7dd",
+                            "requested": "2019-12-26T11:12:41.828Z",
+                            "swMgtSystemId": "alex-sys",
+                            "swMgtSystemInstanceId": "123",
+                            "swMgtSystemComponent": "dev",
+                            "usageEntitled": false,
+                            "assetUsage": {
+                                "swTagId": "alex-1",
+                                "assetUsageId": "alex-usage-1",
+                                "action": "acumos:deploy",
+                                "isIncludedAsset": false,
+                                "usageEntitled": false,
+                                "isUsedBySwCreator": false,
+                                "assetUsageSeq": 24,
+                                "softwareLicensorId": "swlic",
+                                "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                                "licenseProfileRevision": 1,
+                                "isRtuRequired": true,
+                                "swidTagRevision": 4,
+                                "assetUsageDenialSummary": "swid-tag(alex-1) has been found and an asset-usage-agreement from swlic has been found but 1 constraint on the agreement(alex-agr) denies the usage of this asset",
+                                "assetUsageDenial": [
+                                    {
+                                        "denialType": "matchingConstraintOnAssignee",
+                                        "denialReason": "user not in assignee lum:users: (alex-not-allowed not lum:in [\"alex\", \"justin\", \"michelle\"]) on permission(perm-1) under agreement(alex-agr) for action(acumos:deploy)",
+                                        "deniedAction": "acumos:deploy",
+                                        "deniedAssetUsageAgreementId": "alex-agr",
+                                        "deniedAssetUsageAgreementRevision": 36,
+                                        "deniedRightToUseId": "perm-1",
+                                        "deniedRightToUseRevision": 36,
+                                        "denialReqItemName": "userId",
+                                        "denialReqItemValue": "alex-not-allowed",
+                                        "deniedConstraint": {
+                                            "origin": "fromRestriction",
+                                            "dataType": "string",
+                                            "operator": "lum:in",
+                                            "leftOperand": "lum:users",
+                                            "rightOperand": [
+                                                "alex",
+                                                "justin",
+                                                "michelle"
+                                            ]
+                                        }
+                                    }
+                                ],
+                                "includedAssetUsage": [
+                                    {
+                                        "includedSwTagId": "alex-1",
+                                        "includedAssetUsageId": "alex-usage-2",
+                                        "usageEntitled": false,
+                                        "isUsedBySwCreator": false,
+                                        "assetUsageSeq": 24,
+                                        "softwareLicensorId": "swlic",
+                                        "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                                        "licenseProfileRevision": 1,
+                                        "isRtuRequired": true,
+                                        "swidTagRevision": 4,
+                                        "assetUsageDenialSummary": "swid-tag(alex-1) has been found and an asset-usage-agreement from swlic has been found but 1 constraint on the agreement(alex-agr) denies the usage of this asset",
+                                        "assetUsageDenial": [
+                                            {
+                                                "denialType": "matchingConstraintOnAssignee",
+                                                "denialReason": "user not in assignee lum:users: (alex-not-allowed not lum:in [\"alex\", \"justin\", \"michelle\"]) on permission(perm-1) under agreement(alex-agr) for action(acumos:deploy)",
+                                                "deniedAction": "acumos:deploy",
+                                                "deniedAssetUsageAgreementId": "alex-agr",
+                                                "deniedAssetUsageAgreementRevision": 36,
+                                                "deniedRightToUseId": "perm-1",
+                                                "deniedRightToUseRevision": 36,
+                                                "denialReqItemName": "userId",
+                                                "denialReqItemValue": "alex-not-allowed",
+                                                "deniedConstraint": {
+                                                    "origin": "fromRestriction",
+                                                    "dataType": "string",
+                                                    "operator": "lum:in",
+                                                    "leftOperand": "lum:users",
+                                                    "rightOperand": [
+                                                        "alex",
+                                                        "justin",
+                                                        "michelle"
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "assetUsageType": "assetUsage",
+                        "response": {
+                            "userId": "alex",
+                            "requestId": "16797ebb-2357-4791-9459-853beba7e192",
+                            "requested": "2019-12-26T11:12:41.828Z",
+                            "swMgtSystemId": "alex-sys",
+                            "swMgtSystemInstanceId": "123",
+                            "swMgtSystemComponent": "dev",
+                            "usageEntitled": true,
+                            "assetUsage": {
+                                "swTagId": "alex-1",
+                                "assetUsageId": "alex-usage-1",
+                                "action": "acumos:deploy",
+                                "isIncludedAsset": false,
+                                "usageEntitled": true,
+                                "isUsedBySwCreator": false,
+                                "assetUsageSeq": 25,
+                                "softwareLicensorId": "swlic",
+                                "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                                "licenseProfileRevision": 1,
+                                "isRtuRequired": true,
+                                "swidTagRevision": 4,
+                                "entitlement": {
+                                    "rightToUseId": "perm-1",
+                                    "rightToUseRevision": 36,
+                                    "assetUsageAgreementId": "alex-agr",
+                                    "assetUsageAgreementRevision": 36,
+                                    "licenseKeys": null
+                                },
+                                "includedAssetUsage": [
+                                    {
+                                        "includedSwTagId": "alex-1",
+                                        "includedAssetUsageId": "alex-usage-2",
+                                        "usageEntitled": true,
+                                        "isUsedBySwCreator": false,
+                                        "assetUsageSeq": 25,
+                                        "softwareLicensorId": "swlic",
+                                        "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                                        "licenseProfileRevision": 1,
+                                        "isRtuRequired": true,
+                                        "swidTagRevision": 4,
+                                        "entitlement": {
+                                            "rightToUseId": "perm-1",
+                                            "rightToUseRevision": 36,
+                                            "assetUsageAgreementId": "alex-agr",
+                                            "assetUsageAgreementRevision": 36,
+                                            "licenseKeys": null
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "assetUsageType": "assetUsage",
+                        "response": {
+                            "userId": "alex-sw-creator-unit-test",
+                            "requestId": "25434cb2-bae1-46a6-948e-7cefbfc9bc56",
+                            "requested": "2019-12-26T11:28:10.828Z",
+                            "swMgtSystemId": "alex-sys",
+                            "swMgtSystemInstanceId": "123",
+                            "swMgtSystemComponent": "dev",
+                            "usageEntitled": true,
+                            "assetUsage": {
+                                "swTagId": "alex-1",
+                                "assetUsageId": "alex-usage-1",
+                                "action": "acumos:deploy",
+                                "isIncludedAsset": false,
+                                "usageEntitled": true,
+                                "isUsedBySwCreator": true,
+                                "assetUsageSeq": 26,
+                                "softwareLicensorId": "swlic",
+                                "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                                "licenseProfileRevision": 1,
+                                "isRtuRequired": true,
+                                "swidTagRevision": 4,
+                                "includedAssetUsage": [
+                                    {
+                                        "includedSwTagId": "alex-1",
+                                        "includedAssetUsageId": "alex-usage-2",
+                                        "usageEntitled": true,
+                                        "isUsedBySwCreator": true,
+                                        "assetUsageSeq": 26,
+                                        "softwareLicensorId": "swlic",
+                                        "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                                        "licenseProfileRevision": 1,
+                                        "isRtuRequired": true,
+                                        "swidTagRevision": 4
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "assetUsageType": "assetUsageEvent",
+                        "response": {
+                            "userId": "alex-event",
+                            "requestId": "06550414-d590-4fb3-8bbd-1ac3f99b906a",
+                            "requested": "2019-12-26T12:18:44.828Z",
+                            "swMgtSystemId": "alex-sys",
+                            "swMgtSystemInstanceId": "123",
+                            "swMgtSystemComponent": "dev",
+                            "assetUsageEvent": {
+                                "swTagId": "alex-1",
+                                "assetUsageId": "alex-usage-1",
+                                "action": "add-event",
+                                "event": {
+                                    "event-test": "got it"
+                                },
+                                "assetUsageSeq": 27,
+                                "softwareLicensorId": "swlic",
+                                "swidTagRevision": 4,
+                                "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                                "licenseProfileRevision": 1,
+                                "isRtuRequired": true
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "sqlCmd": "COMMIT",
+            "result": {"command": "COMMIT", "rowCount": 1, "rows": []}
+        }
+    ],
+    "req": {
+        "method": "GET",
+        "path": "/api/v1/asset-usage-tracking/software-licensor?softwareLicensorId=swlic"
+    },
+    "res": {
+        "statusCode": 200,
+        "body": {
+            "requestId": "__type__uuid__",
+            "requested": "__type__dateTime__",
+            "title": "asset-usage-tracking for software-licensor swlic",
+            "asOf": "__type__dateTime__",
+            "softwareLicensorId": "swlic",
+            "assetUsages": [
+                {
+                    "userId": "alex-usage",
+                    "swMgtSystemId": "alex-sys",
+                    "swMgtSystemInstanceId": "123",
+                    "swMgtSystemComponent": "dev",
+                    "requestId": "84be07ed-399d-467b-acf0-81820e932fc6",
+                    "requested": "2019-12-26T13:19:59.828Z",
+                    "usageEntitled": false,
+                    "assetUsage": {
+                        "swTagId": "alex-1",
+                        "assetUsageId": "alex-usage-1",
+                        "action": "acumos:deploy",
+                        "isIncludedAsset": false,
+                        "usageEntitled": false,
+                        "isUsedBySwCreator": false,
+                        "assetUsageSeq": 19,
+                        "softwareLicensorId": "swlic",
+                        "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                        "licenseProfileRevision": 1,
+                        "isRtuRequired": true,
+                        "swidTagRevision": 4,
+                        "assetUsageDenialSummary": "swid-tag(alex-1) has been found but asset-usage is prohibited by prohibition(proh-2) under asset-usage-agreement(alex-agr) for action(acumos:deploy)",
+                        "assetUsageDenial": [
+                            {
+                                "denialType": "usageProhibited",
+                                "denialReason": "swid-tag(alex-1) has been found but asset-usage is prohibited by prohibition(proh-2) under asset-usage-agreement(alex-agr) for action(acumos:deploy)",
+                                "deniedAction": "acumos:deploy",
+                                "deniedAssetUsageAgreementId": "alex-agr",
+                                "deniedAssetUsageAgreementRevision": 33,
+                                "deniedRightToUseId": "proh-2",
+                                "deniedRightToUseRevision": 33,
+                                "denialReqItemName": "action",
+                                "denialReqItemValue": "acumos:deploy",
+                                "deniedConstraint": {
+                                    "action": "acumos:deploy"
+                                }
+                            }
+                        ],
+                        "includedAssetUsage": [
+                            {
+                                "includedSwTagId": "alex-1",
+                                "includedAssetUsageId": "alex-usage-2",
+                                "usageEntitled": false,
+                                "isUsedBySwCreator": false,
+                                "assetUsageSeq": 19,
+                                "softwareLicensorId": "swlic",
+                                "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                                "licenseProfileRevision": 1,
+                                "isRtuRequired": true,
+                                "swidTagRevision": 4,
+                                "assetUsageDenialSummary": "swid-tag(alex-1) has been found but asset-usage is prohibited by prohibition(proh-2) under asset-usage-agreement(alex-agr) for action(acumos:deploy)",
+                                "assetUsageDenial": [
+                                    {
+                                        "denialType": "usageProhibited",
+                                        "denialReason": "swid-tag(alex-1) has been found but asset-usage is prohibited by prohibition(proh-2) under asset-usage-agreement(alex-agr) for action(acumos:deploy)",
+                                        "deniedAction": "acumos:deploy",
+                                        "deniedAssetUsageAgreementId": "alex-agr",
+                                        "deniedAssetUsageAgreementRevision": 33,
+                                        "deniedRightToUseId": "proh-2",
+                                        "deniedRightToUseRevision": 33,
+                                        "denialReqItemName": "action",
+                                        "denialReqItemValue": "acumos:deploy",
+                                        "deniedConstraint": {
+                                            "action": "acumos:deploy"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "userId": "alex-usage",
+                    "requestId": "c181ca14-0786-4ee5-9503-8c2b201819b4",
+                    "requested": "2019-12-26T13:19:59.828Z",
+                    "swMgtSystemId": "alex-sys",
+                    "swMgtSystemInstanceId": "123",
+                    "swMgtSystemComponent": "dev",
+                    "usageEntitled": false,
+                    "assetUsage": {
+                        "swTagId": "alex-1",
+                        "assetUsageId": "alex-usage-1",
+                        "action": "acumos:deploy",
+                        "isIncludedAsset": false,
+                        "usageEntitled": false,
+                        "isUsedBySwCreator": false,
+                        "assetUsageSeq": 20,
+                        "softwareLicensorId": "swlic",
+                        "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                        "licenseProfileRevision": 1,
+                        "isRtuRequired": true,
+                        "swidTagRevision": 4,
+                        "assetUsageDenialSummary": "swid-tag(alex-1) has been found but asset-usage is prohibited by prohibition(proh-2) under asset-usage-agreement(alex-agr) for action(acumos:deploy)",
+                        "assetUsageDenial": [
+                            {
+                                "denialType": "usageProhibited",
+                                "denialReason": "swid-tag(alex-1) has been found but asset-usage is prohibited by prohibition(proh-2) under asset-usage-agreement(alex-agr) for action(acumos:deploy)",
+                                "deniedAction": "acumos:deploy",
+                                "deniedAssetUsageAgreementId": "alex-agr",
+                                "deniedAssetUsageAgreementRevision": 33,
+                                "deniedRightToUseId": "proh-2",
+                                "deniedRightToUseRevision": 33,
+                                "denialReqItemName": "action",
+                                "denialReqItemValue": "acumos:deploy",
+                                "deniedConstraint": {
+                                    "action": "acumos:deploy"
+                                }
+                            }
+                        ],
+                        "includedAssetUsage": [
+                            {
+                                "includedSwTagId": "alex-1",
+                                "includedAssetUsageId": "alex-usage-2",
+                                "usageEntitled": false,
+                                "isUsedBySwCreator": false,
+                                "assetUsageSeq": 20,
+                                "softwareLicensorId": "swlic",
+                                "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                                "licenseProfileRevision": 1,
+                                "isRtuRequired": true,
+                                "swidTagRevision": 4,
+                                "assetUsageDenialSummary": "swid-tag(alex-1) has been found but asset-usage is prohibited by prohibition(proh-2) under asset-usage-agreement(alex-agr) for action(acumos:deploy)",
+                                "assetUsageDenial": [
+                                    {
+                                        "denialType": "usageProhibited",
+                                        "denialReason": "swid-tag(alex-1) has been found but asset-usage is prohibited by prohibition(proh-2) under asset-usage-agreement(alex-agr) for action(acumos:deploy)",
+                                        "deniedAction": "acumos:deploy",
+                                        "deniedAssetUsageAgreementId": "alex-agr",
+                                        "deniedAssetUsageAgreementRevision": 33,
+                                        "deniedRightToUseId": "proh-2",
+                                        "deniedRightToUseRevision": 33,
+                                        "denialReqItemName": "action",
+                                        "denialReqItemValue": "acumos:deploy",
+                                        "deniedConstraint": {
+                                            "action": "acumos:deploy"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "userId": "alex-usage",
+                    "requestId": "f931d9b9-7dc9-4670-955b-05bd02ff0363",
+                    "requested": "2019-12-26T09:06:03.828Z",
+                    "swMgtSystemId": "alex-sys",
+                    "swMgtSystemInstanceId": "123",
+                    "swMgtSystemComponent": "dev",
+                    "usageEntitled": false,
+                    "assetUsage": {
+                        "swTagId": "alex-1",
+                        "assetUsageId": "alex-usage-1",
+                        "action": "acumos:deploy",
+                        "isIncludedAsset": false,
+                        "usageEntitled": false,
+                        "isUsedBySwCreator": false,
+                        "assetUsageSeq": 21,
+                        "softwareLicensorId": "swlic",
+                        "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                        "licenseProfileRevision": 1,
+                        "isRtuRequired": true,
+                        "swidTagRevision": 4,
+                        "assetUsageDenialSummary": "swid-tag(alex-1) has been found and an asset-usage-agreement from swlic has been found but 2 constraints on the agreement(alex-agr) deny the usage of this asset",
+                        "assetUsageDenial": [
+                            {
+                                "denialType": "timingConstraint",
+                                "denialReason": "rightToUse expired: (today(2019-12-26) > expireOn(2019-11-30)) on permission(perm-1) under agreement(alex-agr) for action(acumos:deploy)",
+                                "deniedAction": "acumos:deploy",
+                                "deniedAssetUsageAgreementId": "alex-agr",
+                                "deniedAssetUsageAgreementRevision": 34,
+                                "deniedRightToUseId": "perm-1",
+                                "deniedRightToUseRevision": 34,
+                                "denialReqItemName": "date",
+                                "denialReqItemValue": "2019-12-26",
+                                "deniedConstraint": {
+                                    "expireOn": "2019-11-30"
+                                }
+                            },
+                            {
+                                "denialType": "matchingConstraintOnAssignee",
+                                "denialReason": "user not in assignee lum:users: (alex-usage not lum:in [\"alex\", \"ist-tester\", \"justin\", \"michelle\", \"unit-tester\"]) on permission(perm-1) under agreement(alex-agr) for action(acumos:deploy)",
+                                "deniedAction": "acumos:deploy",
+                                "deniedAssetUsageAgreementId": "alex-agr",
+                                "deniedAssetUsageAgreementRevision": 34,
+                                "deniedRightToUseId": "perm-1",
+                                "deniedRightToUseRevision": 34,
+                                "denialReqItemName": "userId",
+                                "denialReqItemValue": "alex-usage",
+                                "deniedConstraint": {
+                                    "origin": "fromRestriction",
+                                    "dataType": "string",
+                                    "operator": "lum:in",
+                                    "leftOperand": "lum:users",
+                                    "rightOperand": [
+                                        "alex",
+                                        "ist-tester",
+                                        "justin",
+                                        "michelle",
+                                        "unit-tester"
+                                    ]
+                                }
+                            }
+                        ],
+                        "includedAssetUsage": [
+                            {
+                                "includedSwTagId": "alex-1",
+                                "includedAssetUsageId": "alex-usage-2",
+                                "usageEntitled": false,
+                                "isUsedBySwCreator": false,
+                                "assetUsageSeq": 21,
+                                "softwareLicensorId": "swlic",
+                                "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                                "licenseProfileRevision": 1,
+                                "isRtuRequired": true,
+                                "swidTagRevision": 4,
+                                "assetUsageDenialSummary": "swid-tag(alex-1) has been found and an asset-usage-agreement from swlic has been found but 2 constraints on the agreement(alex-agr) deny the usage of this asset",
+                                "assetUsageDenial": [
+                                    {
+                                        "denialType": "timingConstraint",
+                                        "denialReason": "rightToUse expired: (today(2019-12-26) > expireOn(2019-11-30)) on permission(perm-1) under agreement(alex-agr) for action(acumos:deploy)",
+                                        "deniedAction": "acumos:deploy",
+                                        "deniedAssetUsageAgreementId": "alex-agr",
+                                        "deniedAssetUsageAgreementRevision": 34,
+                                        "deniedRightToUseId": "perm-1",
+                                        "deniedRightToUseRevision": 34,
+                                        "denialReqItemName": "date",
+                                        "denialReqItemValue": "2019-12-26",
+                                        "deniedConstraint": {
+                                            "expireOn": "2019-11-30"
+                                        }
+                                    },
+                                    {
+                                        "denialType": "matchingConstraintOnAssignee",
+                                        "denialReason": "user not in assignee lum:users: (alex-usage not lum:in [\"alex\", \"ist-tester\", \"justin\", \"michelle\", \"unit-tester\"]) on permission(perm-1) under agreement(alex-agr) for action(acumos:deploy)",
+                                        "deniedAction": "acumos:deploy",
+                                        "deniedAssetUsageAgreementId": "alex-agr",
+                                        "deniedAssetUsageAgreementRevision": 34,
+                                        "deniedRightToUseId": "perm-1",
+                                        "deniedRightToUseRevision": 34,
+                                        "denialReqItemName": "userId",
+                                        "denialReqItemValue": "alex-usage",
+                                        "deniedConstraint": {
+                                            "origin": "fromRestriction",
+                                            "dataType": "string",
+                                            "operator": "lum:in",
+                                            "leftOperand": "lum:users",
+                                            "rightOperand": [
+                                                "alex",
+                                                "ist-tester",
+                                                "justin",
+                                                "michelle",
+                                                "unit-tester"
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "userId": "alex-usage",
+                    "requestId": "c73e8996-0abf-40b7-b6c6-1713bec545f4",
+                    "requested": "2019-12-26T09:31:25.828Z",
+                    "swMgtSystemId": "alex-sys",
+                    "swMgtSystemInstanceId": "123",
+                    "swMgtSystemComponent": "dev",
+                    "usageEntitled": true,
+                    "assetUsage": {
+                        "swTagId": "alex-1",
+                        "assetUsageId": "alex-usage-1",
+                        "action": "acumos:deploy",
+                        "isIncludedAsset": false,
+                        "usageEntitled": true,
+                        "isUsedBySwCreator": false,
+                        "assetUsageSeq": 22,
+                        "softwareLicensorId": "swlic",
+                        "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                        "licenseProfileRevision": 1,
+                        "isRtuRequired": true,
+                        "swidTagRevision": 4,
+                        "entitlement": {
+                            "rightToUseId": "perm-1",
+                            "rightToUseRevision": 35,
+                            "assetUsageAgreementId": "alex-agr",
+                            "assetUsageAgreementRevision": 35,
+                            "licenseKeys": null
+                        },
+                        "includedAssetUsage": [
+                            {
+                                "includedSwTagId": "alex-1",
+                                "includedAssetUsageId": "alex-usage-2",
+                                "usageEntitled": true,
+                                "isUsedBySwCreator": false,
+                                "assetUsageSeq": 22,
+                                "softwareLicensorId": "swlic",
+                                "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                                "licenseProfileRevision": 1,
+                                "isRtuRequired": true,
+                                "swidTagRevision": 4,
+                                "entitlement": {
+                                    "rightToUseId": "perm-1",
+                                    "rightToUseRevision": 35,
+                                    "assetUsageAgreementId": "alex-agr",
+                                    "assetUsageAgreementRevision": 35,
+                                    "licenseKeys": null
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "userId": "alex",
+                    "requestId": "71480054-763d-4d2f-940a-f8384a32a7dc",
+                    "requested": "2019-12-26T11:12:41.828Z",
+                    "swMgtSystemId": "alex-sys",
+                    "swMgtSystemInstanceId": "123",
+                    "swMgtSystemComponent": "dev",
+                    "usageEntitled": true,
+                    "assetUsage": {
+                        "swTagId": "alex-1",
+                        "assetUsageId": "alex-usage-1",
+                        "action": "acumos:deploy",
+                        "isIncludedAsset": false,
+                        "usageEntitled": true,
+                        "isUsedBySwCreator": false,
+                        "assetUsageSeq": 23,
+                        "softwareLicensorId": "swlic",
+                        "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                        "licenseProfileRevision": 1,
+                        "isRtuRequired": true,
+                        "swidTagRevision": 4,
+                        "entitlement": {
+                            "rightToUseId": "perm-1",
+                            "rightToUseRevision": 36,
+                            "assetUsageAgreementId": "alex-agr",
+                            "assetUsageAgreementRevision": 36,
+                            "licenseKeys": null
+                        },
+                        "includedAssetUsage": [
+                            {
+                                "includedSwTagId": "alex-1",
+                                "includedAssetUsageId": "alex-usage-2",
+                                "usageEntitled": true,
+                                "isUsedBySwCreator": false,
+                                "assetUsageSeq": 23,
+                                "softwareLicensorId": "swlic",
+                                "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                                "licenseProfileRevision": 1,
+                                "isRtuRequired": true,
+                                "swidTagRevision": 4,
+                                "entitlement": {
+                                    "rightToUseId": "perm-1",
+                                    "rightToUseRevision": 36,
+                                    "assetUsageAgreementId": "alex-agr",
+                                    "assetUsageAgreementRevision": 36,
+                                    "licenseKeys": null
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "userId": "alex-not-allowed",
+                    "requestId": "71480054-763d-4d2f-940a-f8384a32a7dd",
+                    "requested": "2019-12-26T11:12:41.828Z",
+                    "swMgtSystemId": "alex-sys",
+                    "swMgtSystemInstanceId": "123",
+                    "swMgtSystemComponent": "dev",
+                    "usageEntitled": false,
+                    "assetUsage": {
+                        "swTagId": "alex-1",
+                        "assetUsageId": "alex-usage-1",
+                        "action": "acumos:deploy",
+                        "isIncludedAsset": false,
+                        "usageEntitled": false,
+                        "isUsedBySwCreator": false,
+                        "assetUsageSeq": 24,
+                        "softwareLicensorId": "swlic",
+                        "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                        "licenseProfileRevision": 1,
+                        "isRtuRequired": true,
+                        "swidTagRevision": 4,
+                        "assetUsageDenialSummary": "swid-tag(alex-1) has been found and an asset-usage-agreement from swlic has been found but 1 constraint on the agreement(alex-agr) denies the usage of this asset",
+                        "assetUsageDenial": [
+                            {
+                                "denialType": "matchingConstraintOnAssignee",
+                                "denialReason": "user not in assignee lum:users: (alex-not-allowed not lum:in [\"alex\", \"justin\", \"michelle\"]) on permission(perm-1) under agreement(alex-agr) for action(acumos:deploy)",
+                                "deniedAction": "acumos:deploy",
+                                "deniedAssetUsageAgreementId": "alex-agr",
+                                "deniedAssetUsageAgreementRevision": 36,
+                                "deniedRightToUseId": "perm-1",
+                                "deniedRightToUseRevision": 36,
+                                "denialReqItemName": "userId",
+                                "denialReqItemValue": "alex-not-allowed",
+                                "deniedConstraint": {
+                                    "origin": "fromRestriction",
+                                    "dataType": "string",
+                                    "operator": "lum:in",
+                                    "leftOperand": "lum:users",
+                                    "rightOperand": [
+                                        "alex",
+                                        "justin",
+                                        "michelle"
+                                    ]
+                                }
+                            }
+                        ],
+                        "includedAssetUsage": [
+                            {
+                                "includedSwTagId": "alex-1",
+                                "includedAssetUsageId": "alex-usage-2",
+                                "usageEntitled": false,
+                                "isUsedBySwCreator": false,
+                                "assetUsageSeq": 24,
+                                "softwareLicensorId": "swlic",
+                                "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                                "licenseProfileRevision": 1,
+                                "isRtuRequired": true,
+                                "swidTagRevision": 4,
+                                "assetUsageDenialSummary": "swid-tag(alex-1) has been found and an asset-usage-agreement from swlic has been found but 1 constraint on the agreement(alex-agr) denies the usage of this asset",
+                                "assetUsageDenial": [
+                                    {
+                                        "denialType": "matchingConstraintOnAssignee",
+                                        "denialReason": "user not in assignee lum:users: (alex-not-allowed not lum:in [\"alex\", \"justin\", \"michelle\"]) on permission(perm-1) under agreement(alex-agr) for action(acumos:deploy)",
+                                        "deniedAction": "acumos:deploy",
+                                        "deniedAssetUsageAgreementId": "alex-agr",
+                                        "deniedAssetUsageAgreementRevision": 36,
+                                        "deniedRightToUseId": "perm-1",
+                                        "deniedRightToUseRevision": 36,
+                                        "denialReqItemName": "userId",
+                                        "denialReqItemValue": "alex-not-allowed",
+                                        "deniedConstraint": {
+                                            "origin": "fromRestriction",
+                                            "dataType": "string",
+                                            "operator": "lum:in",
+                                            "leftOperand": "lum:users",
+                                            "rightOperand": [
+                                                "alex",
+                                                "justin",
+                                                "michelle"
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "userId": "alex",
+                    "requestId": "16797ebb-2357-4791-9459-853beba7e192",
+                    "requested": "2019-12-26T11:12:41.828Z",
+                    "swMgtSystemId": "alex-sys",
+                    "swMgtSystemInstanceId": "123",
+                    "swMgtSystemComponent": "dev",
+                    "usageEntitled": true,
+                    "assetUsage": {
+                        "swTagId": "alex-1",
+                        "assetUsageId": "alex-usage-1",
+                        "action": "acumos:deploy",
+                        "isIncludedAsset": false,
+                        "usageEntitled": true,
+                        "isUsedBySwCreator": false,
+                        "assetUsageSeq": 25,
+                        "softwareLicensorId": "swlic",
+                        "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                        "licenseProfileRevision": 1,
+                        "isRtuRequired": true,
+                        "swidTagRevision": 4,
+                        "entitlement": {
+                            "rightToUseId": "perm-1",
+                            "rightToUseRevision": 36,
+                            "assetUsageAgreementId": "alex-agr",
+                            "assetUsageAgreementRevision": 36,
+                            "licenseKeys": null
+                        },
+                        "includedAssetUsage": [
+                            {
+                                "includedSwTagId": "alex-1",
+                                "includedAssetUsageId": "alex-usage-2",
+                                "usageEntitled": true,
+                                "isUsedBySwCreator": false,
+                                "assetUsageSeq": 25,
+                                "softwareLicensorId": "swlic",
+                                "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                                "licenseProfileRevision": 1,
+                                "isRtuRequired": true,
+                                "swidTagRevision": 4,
+                                "entitlement": {
+                                    "rightToUseId": "perm-1",
+                                    "rightToUseRevision": 36,
+                                    "assetUsageAgreementId": "alex-agr",
+                                    "assetUsageAgreementRevision": 36,
+                                    "licenseKeys": null
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "userId": "alex-sw-creator-unit-test",
+                    "requestId": "25434cb2-bae1-46a6-948e-7cefbfc9bc56",
+                    "requested": "2019-12-26T11:28:10.828Z",
+                    "swMgtSystemId": "alex-sys",
+                    "swMgtSystemInstanceId": "123",
+                    "swMgtSystemComponent": "dev",
+                    "usageEntitled": true,
+                    "assetUsage": {
+                        "swTagId": "alex-1",
+                        "assetUsageId": "alex-usage-1",
+                        "action": "acumos:deploy",
+                        "isIncludedAsset": false,
+                        "usageEntitled": true,
+                        "isUsedBySwCreator": true,
+                        "assetUsageSeq": 26,
+                        "softwareLicensorId": "swlic",
+                        "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                        "licenseProfileRevision": 1,
+                        "isRtuRequired": true,
+                        "swidTagRevision": 4,
+                        "includedAssetUsage": [
+                            {
+                                "includedSwTagId": "alex-1",
+                                "includedAssetUsageId": "alex-usage-2",
+                                "usageEntitled": true,
+                                "isUsedBySwCreator": true,
+                                "assetUsageSeq": 26,
+                                "softwareLicensorId": "swlic",
+                                "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                                "licenseProfileRevision": 1,
+                                "isRtuRequired": true,
+                                "swidTagRevision": 4
+                            }
+                        ]
+                    }
+                }
+            ],
+            "assetUsageEvents": [
+                {
+                    "userId": "alex-event",
+                    "requestId": "06550414-d590-4fb3-8bbd-1ac3f99b906a",
+                    "requested": "2019-12-26T12:18:44.828Z",
+                    "swMgtSystemId": "alex-sys",
+                    "swMgtSystemInstanceId": "123",
+                    "swMgtSystemComponent": "dev",
+                    "assetUsageEvent": {
+                        "swTagId": "alex-1",
+                        "assetUsageId": "alex-usage-1",
+                        "action": "add-event",
+                        "event": {
+                            "event-test": "got it"
+                        },
+                        "assetUsageSeq": 27,
+                        "softwareLicensorId": "swlic",
+                        "swidTagRevision": 4,
+                        "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                        "licenseProfileRevision": 1,
+                        "isRtuRequired": true
+                    }
+                }
+            ]
+        }
+    }
+}

@@ -1,7 +1,7 @@
 {
   "name": "lum-server",
   "description": "License Usage Manager (LUM) for Acumos and ONAP",
-  "version": "0.28.1",
+  "version": "0.28.2",
   "main": "lum-server.js",
   "repository": {
     "type": "git",
@@ -11,18 +11,20 @@
     "start:prod": "node lum-server.js",
     "start:dev": "./node_modules/.bin/nodemon --inspect=0.0.0.0:5858 -w lum-server.js -w src",
     "lint": "./node_modules/.bin/eslint  .",
-    "lint-spec": "./node_modules/.bin/speccy lint -s openapi-tags-alphabetical -s  server-trailing-slash -s path-keys-no-trailing-slash lum-server-api/lum-server-API.yaml"
+    "lint-spec": "./node_modules/.bin/speccy lint -s openapi-tags-alphabetical -s  server-trailing-slash -s path-keys-no-trailing-slash lum-server-api/lum-server-API.yaml",
+    "test": "mocha --reporter spec --exit",
+    "coverage": "nyc --reporter html --reporter text npm test"
   },
   "engines": {
     "node": ">=10.16.3"
   },
   "dependencies": {
-    "express": "^4.17.1",
-    "express-promise-router": "^3.0.3",
-    "pg": "^7.12.1",
-    "swagger-ui-express": "^4.0.7",
-    "uuid": "^3.3.3",
-    "winston": "^3.2.1",
+    "express": "4.17.1",
+    "express-promise-router": "3.0.3",
+    "pg": "7.12.1",
+    "swagger-ui-express": "4.0.7",
+    "uuid": "3.3.3",
+    "winston": "3.2.1",
     "yamljs": "0.3.0"
   },
   "author": "Alex Shatov",
@@ -32,5 +34,12 @@
     "asset",
     "right-to-use",
     "entitlement"
-  ]
+  ],
+  "devDependencies": {
+    "chai": "4.2.0",
+    "chai-http": "4.3.0",
+    "mocha": "7.0.0",
+    "mock-require": "3.0.3",
+    "nyc": "15.0.0"
+  }
 }
