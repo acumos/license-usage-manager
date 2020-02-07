@@ -1,0 +1,129 @@
+{
+    "db": [
+        {
+            "sqlCmd": "WITH sw_lp AS ( SELECT swt.*, COALESCE(($3) = ANY (swt.\"swCreators\"), FALSE) AS \"isUsedBySwCreator\", lp.\"licenseProfileRevision\", lp.\"licenseProfileActive\", lp.\"closureReason\" AS lp_closure_reason, lp.\"isRtuRequired\", COALESCE(swt.\"swidTagActive\" = TRUE AND lp.\"licenseProfileActive\" = TRUE AND lp.\"isRtuRequired\" = TRUE AND COALESCE(($3) = ANY (swt.\"swCreators\"), FALSE) = FALSE, FALSE) AS need_rtu FROM \"swidTag\" AS swt LEFT OUTER JOIN LATERAL (SELECT l_p.* FROM \"licenseProfile\" AS l_p WHERE l_p.\"licenseProfileId\" = swt.\"licenseProfileId\" ) AS lp ON TRUE ) , swid_tag AS ( SELECT sw_lp.*, CASE WHEN sw_lp.\"isUsedBySwCreator\" = TRUE  THEN 'bySwCreator' WHEN sw_lp.\"isRtuRequired\"     = FALSE THEN 'freeToUse' WHEN sw_lp.need_rtu            = TRUE  THEN 'rightToUse' ELSE NULL END AS \"usageType\", CASE WHEN sw_lp.\"swidTagActive\" = FALSE THEN JSON_BUILD_OBJECT( 'denialType', 'swidTagRevoked', 'denialReason', FORMAT('swid-tag(%s) %s', sw_lp.\"swTagId\", COALESCE(sw_lp.\"closureReason\", 'revoked')), 'deniedAction', ($1)::TEXT ) WHEN sw_lp.\"licenseProfileRevision\" IS NULL THEN JSON_BUILD_OBJECT( 'denialType', 'licenseProfileNotFound', 'denialReason', FORMAT('license-profile(%s) not found for swid-tag(%s)', sw_lp.\"licenseProfileId\", sw_lp.\"swTagId\"), 'deniedAction', ($1)::TEXT ) WHEN sw_lp.\"licenseProfileActive\" = FALSE THEN JSON_BUILD_OBJECT( 'denialType', 'licenseProfileRevoked', 'denialReason', FORMAT('license-profile(%s) %s for swid-tag(%s)', sw_lp.\"licenseProfileId\", COALESCE(sw_lp.lp_closure_reason, 'revoked'), sw_lp.\"swTagId\"), 'deniedAction', ($1)::TEXT ) ELSE NULL END AS \"denial\" FROM sw_lp ) , swt_ctlg AS ( SELECT stag.\"swTagId\", ARRAY_AGG(DISTINCT ctlg.\"swCatalogId\")   AS \"swCatalogIds\", ARRAY_AGG(DISTINCT ctlg.\"swCatalogType\") AS \"swCatalogTypes\" FROM (SELECT \"swTagId\", \"swCatalogs\" FROM swid_tag WHERE swid_tag.need_rtu = TRUE) AS stag CROSS JOIN LATERAL JSONB_TO_RECORDSET(stag.\"swCatalogs\") AS ctlg(\"swCatalogId\" TEXT, \"swCatalogType\" TEXT) GROUP BY stag.\"swTagId\") , rtu_rule AS ( SELECT DISTINCT ON (swid_tag.\"swTagId\") swid_tag.\"swTagId\" AS rtu_sw_id, rtu.\"assetUsageRuleId\", rtu.\"assetUsageAgreementId\", agr.\"assetUsageAgreementRevision\", rtu.\"rightToUseId\", rtu.\"assetUsageRuleType\", rtu.\"rightToUseRevision\", rtu.\"metricsRevision\", rtu.\"licenseKeys\", \"rtuAction\", usmcs.\"metrics\", rtu.\"assigneeMetrics\", (rtu.\"assigneeMetrics\"->'users')::JSONB ? ($3) AS \"isUserInAssigneeMetrics\" FROM swid_tag JOIN \"rightToUse\" AS rtu ON (rtu.\"softwareLicensorId\" = swid_tag.\"softwareLicensorId\") JOIN \"assetUsageAgreement\" AS agr ON (rtu.\"softwareLicensorId\" = agr.\"softwareLicensorId\" AND rtu.\"assetUsageAgreementId\" = agr.\"assetUsageAgreementId\") CROSS JOIN LATERAL JSON_ARRAY_ELEMENTS_TEXT(ARRAY_TO_JSON(rtu.\"actions\")) AS \"rtuAction\" LEFT OUTER JOIN LATERAL (SELECT ums.* FROM \"usageMetrics\" AS ums WHERE ums.\"usageMetricsId\" = rtu.\"assetUsageRuleId\" AND ums.\"action\" = \"rtuAction\" AND ums.\"usageType\" = 'rightToUse' ) AS usmcs ON TRUE LEFT OUTER JOIN LATERAL (SELECT swt_ctlg.\"swCatalogIds\", swt_ctlg.\"swCatalogTypes\" FROM swt_ctlg WHERE swt_ctlg.\"swTagId\" = swid_tag.\"swTagId\") AS ctlgs ON TRUE WHERE \"rtuAction\" IN (($1),($2)) AND rtu.\"rightToUseActive\" = TRUE AND (rtu.\"expireOn\" IS NULL OR NOW()::DATE <= rtu.\"expireOn\") AND (rtu.\"enableOn\" IS NULL OR NOW()::DATE >= rtu.\"enableOn\") AND (rtu.\"targetRefinement\"#>'{lum:swPersistentId}' IS NULL OR COALESCE(CASE rtu.\"targetRefinement\"#>>'{lum:swPersistentId,operator}' WHEN 'lum:in' THEN (rtu.\"targetRefinement\"#>'{lum:swPersistentId,rightOperand}')::JSONB ? (swid_tag.\"swPersistentId\")::TEXT WHEN 'lt' THEN (swid_tag.\"swPersistentId\")::TEXT < (rtu.\"targetRefinement\"#>'{lum:swPersistentId,rightOperand}')::TEXT WHEN 'lteq' THEN (swid_tag.\"swPersistentId\")::TEXT <= (rtu.\"targetRefinement\"#>'{lum:swPersistentId,rightOperand}')::TEXT WHEN 'eq' THEN (swid_tag.\"swPersistentId\")::TEXT = (rtu.\"targetRefinement\"#>'{lum:swPersistentId,rightOperand}')::TEXT WHEN 'gteq' THEN (swid_tag.\"swPersistentId\")::TEXT >= (rtu.\"targetRefinement\"#>'{lum:swPersistentId,rightOperand}')::TEXT WHEN 'gt' THEN (swid_tag.\"swPersistentId\")::TEXT > (rtu.\"targetRefinement\"#>'{lum:swPersistentId,rightOperand}')::TEXT ELSE FALSE END, FALSE)) AND (rtu.\"targetRefinement\"#>'{lum:swTagId}' IS NULL OR COALESCE(CASE rtu.\"targetRefinement\"#>>'{lum:swTagId,operator}' WHEN 'lum:in' THEN (rtu.\"targetRefinement\"#>'{lum:swTagId,rightOperand}')::JSONB ? (swid_tag.\"swTagId\")::TEXT WHEN 'lt' THEN (swid_tag.\"swTagId\")::TEXT < (rtu.\"targetRefinement\"#>'{lum:swTagId,rightOperand}')::TEXT WHEN 'lteq' THEN (swid_tag.\"swTagId\")::TEXT <= (rtu.\"targetRefinement\"#>'{lum:swTagId,rightOperand}')::TEXT WHEN 'eq' THEN (swid_tag.\"swTagId\")::TEXT = (rtu.\"targetRefinement\"#>'{lum:swTagId,rightOperand}')::TEXT WHEN 'gteq' THEN (swid_tag.\"swTagId\")::TEXT >= (rtu.\"targetRefinement\"#>'{lum:swTagId,rightOperand}')::TEXT WHEN 'gt' THEN (swid_tag.\"swTagId\")::TEXT > (rtu.\"targetRefinement\"#>'{lum:swTagId,rightOperand}')::TEXT ELSE FALSE END, FALSE)) AND (rtu.\"targetRefinement\"#>'{lum:swProductName}' IS NULL OR COALESCE(CASE rtu.\"targetRefinement\"#>>'{lum:swProductName,operator}' WHEN 'lum:in' THEN (rtu.\"targetRefinement\"#>'{lum:swProductName,rightOperand}')::JSONB ? (swid_tag.\"swProductName\")::TEXT WHEN 'lt' THEN (swid_tag.\"swProductName\")::TEXT < (rtu.\"targetRefinement\"#>'{lum:swProductName,rightOperand}')::TEXT WHEN 'lteq' THEN (swid_tag.\"swProductName\")::TEXT <= (rtu.\"targetRefinement\"#>'{lum:swProductName,rightOperand}')::TEXT WHEN 'eq' THEN (swid_tag.\"swProductName\")::TEXT = (rtu.\"targetRefinement\"#>'{lum:swProductName,rightOperand}')::TEXT WHEN 'gteq' THEN (swid_tag.\"swProductName\")::TEXT >= (rtu.\"targetRefinement\"#>'{lum:swProductName,rightOperand}')::TEXT WHEN 'gt' THEN (swid_tag.\"swProductName\")::TEXT > (rtu.\"targetRefinement\"#>'{lum:swProductName,rightOperand}')::TEXT ELSE FALSE END, FALSE)) AND (rtu.\"targetRefinement\"#>'{lum:swCategory}' IS NULL OR COALESCE(CASE rtu.\"targetRefinement\"#>>'{lum:swCategory,operator}' WHEN 'lum:in' THEN (rtu.\"targetRefinement\"#>'{lum:swCategory,rightOperand}')::JSONB ? (swid_tag.\"swCategory\")::TEXT WHEN 'lt' THEN (swid_tag.\"swCategory\")::TEXT < (rtu.\"targetRefinement\"#>'{lum:swCategory,rightOperand}')::TEXT WHEN 'lteq' THEN (swid_tag.\"swCategory\")::TEXT <= (rtu.\"targetRefinement\"#>'{lum:swCategory,rightOperand}')::TEXT WHEN 'eq' THEN (swid_tag.\"swCategory\")::TEXT = (rtu.\"targetRefinement\"#>'{lum:swCategory,rightOperand}')::TEXT WHEN 'gteq' THEN (swid_tag.\"swCategory\")::TEXT >= (rtu.\"targetRefinement\"#>'{lum:swCategory,rightOperand}')::TEXT WHEN 'gt' THEN (swid_tag.\"swCategory\")::TEXT > (rtu.\"targetRefinement\"#>'{lum:swCategory,rightOperand}')::TEXT ELSE FALSE END, FALSE)) AND (rtu.\"targetRefinement\"#>'{lum:swCatalogId}' IS NULL OR COALESCE(rtu.\"targetRefinement\"#>'{lum:swCatalogId,rightOperand}' ?| ctlgs.\"swCatalogIds\", FALSE)) AND (rtu.\"targetRefinement\"#>'{lum:swCatalogType}' IS NULL OR COALESCE(rtu.\"targetRefinement\"#>'{lum:swCatalogType,rightOperand}' ?| ctlgs.\"swCatalogTypes\", FALSE)) AND (rtu.\"assigneeRefinement\"#>'{lum:countUniqueUsers}' IS NULL OR (rtu.\"assigneeMetrics\"->'users')::JSONB ? ($3) OR COALESCE(CASE rtu.\"assigneeRefinement\"#>>'{lum:countUniqueUsers,operator}' WHEN 'lum:in' THEN (rtu.\"assigneeRefinement\"#>'{lum:countUniqueUsers,rightOperand}')::JSONB ? (COALESCE(JSONB_ARRAY_LENGTH((rtu.\"assigneeMetrics\"->'users')::JSONB), 0) + 1)::TEXT WHEN 'lt' THEN (COALESCE(JSONB_ARRAY_LENGTH((rtu.\"assigneeMetrics\"->'users')::JSONB), 0) + 1)::INTEGER < (rtu.\"assigneeRefinement\"#>'{lum:countUniqueUsers,rightOperand}')::INTEGER WHEN 'lteq' THEN (COALESCE(JSONB_ARRAY_LENGTH((rtu.\"assigneeMetrics\"->'users')::JSONB), 0) + 1)::INTEGER <= (rtu.\"assigneeRefinement\"#>'{lum:countUniqueUsers,rightOperand}')::INTEGER WHEN 'eq' THEN (COALESCE(JSONB_ARRAY_LENGTH((rtu.\"assigneeMetrics\"->'users')::JSONB), 0) + 1)::INTEGER = (rtu.\"assigneeRefinement\"#>'{lum:countUniqueUsers,rightOperand}')::INTEGER WHEN 'gteq' THEN (COALESCE(JSONB_ARRAY_LENGTH((rtu.\"assigneeMetrics\"->'users')::JSONB), 0) + 1)::INTEGER >= (rtu.\"assigneeRefinement\"#>'{lum:countUniqueUsers,rightOperand}')::INTEGER WHEN 'gt' THEN (COALESCE(JSONB_ARRAY_LENGTH((rtu.\"assigneeMetrics\"->'users')::JSONB), 0) + 1)::INTEGER > (rtu.\"assigneeRefinement\"#>'{lum:countUniqueUsers,rightOperand}')::INTEGER ELSE FALSE END, FALSE)) AND ((rtu.\"assigneeRefinement\"#>'{lum:users}') IS NULL OR COALESCE(CASE rtu.\"assigneeRefinement\"#>>'{lum:users,operator}' WHEN 'lum:in' THEN (rtu.\"assigneeRefinement\"#>'{lum:users,rightOperand}')::JSONB ? (($3))::TEXT WHEN 'lt' THEN (($3))::TEXT < (rtu.\"assigneeRefinement\"#>'{lum:users,rightOperand}')::TEXT WHEN 'lteq' THEN (($3))::TEXT <= (rtu.\"assigneeRefinement\"#>'{lum:users,rightOperand}')::TEXT WHEN 'eq' THEN (($3))::TEXT = (rtu.\"assigneeRefinement\"#>'{lum:users,rightOperand}')::TEXT WHEN 'gteq' THEN (($3))::TEXT >= (rtu.\"assigneeRefinement\"#>'{lum:users,rightOperand}')::TEXT WHEN 'gt' THEN (($3))::TEXT > (rtu.\"assigneeRefinement\"#>'{lum:users,rightOperand}')::TEXT ELSE FALSE END, FALSE)) AND (rtu.\"usageConstraints\"#>'{count}' IS NULL OR COALESCE(CASE rtu.\"usageConstraints\"#>>'{count,operator}' WHEN 'lum:in' THEN (rtu.\"usageConstraints\"#>'{count,rightOperand}')::JSONB ? (COALESCE((usmcs.\"metrics\"#>'{count}')::INTEGER, 0) + ($4))::TEXT WHEN 'lt' THEN (COALESCE((usmcs.\"metrics\"#>'{count}')::INTEGER, 0) + ($4))::INTEGER < (rtu.\"usageConstraints\"#>'{count,rightOperand}')::INTEGER WHEN 'lteq' THEN (COALESCE((usmcs.\"metrics\"#>'{count}')::INTEGER, 0) + ($4))::INTEGER <= (rtu.\"usageConstraints\"#>'{count,rightOperand}')::INTEGER WHEN 'eq' THEN (COALESCE((usmcs.\"metrics\"#>'{count}')::INTEGER, 0) + ($4))::INTEGER = (rtu.\"usageConstraints\"#>'{count,rightOperand}')::INTEGER WHEN 'gteq' THEN (COALESCE((usmcs.\"metrics\"#>'{count}')::INTEGER, 0) + ($4))::INTEGER >= (rtu.\"usageConstraints\"#>'{count,rightOperand}')::INTEGER WHEN 'gt' THEN (COALESCE((usmcs.\"metrics\"#>'{count}')::INTEGER, 0) + ($4))::INTEGER > (rtu.\"usageConstraints\"#>'{count,rightOperand}')::INTEGER ELSE FALSE END, FALSE)) ORDER BY swid_tag.\"swTagId\", NULLIF(rtu.\"assetUsageRuleType\", 'prohibition') NULLS FIRST, NULLIF(\"rtuAction\", 'use') NULLS LAST, rtu.\"created\", rtu.\"assetUsageRuleId\" ) , swid_tag_entitlement AS ( SELECT swid_tag.\"softwareLicensorId\", swid_tag.\"swTagId\", swid_tag.\"swidTagRevision\", swid_tag.\"swPersistentId\", swid_tag.\"swVersion\", swid_tag.\"swProductName\", swid_tag.\"licenseProfileId\", swid_tag.\"licenseProfileRevision\", swid_tag.\"isUsedBySwCreator\", swid_tag.\"isRtuRequired\", swid_tag.\"usageType\", swid_tag.need_rtu, CASE WHEN swid_tag.\"denial\" IS NOT NULL THEN swid_tag.\"denial\" WHEN swid_tag.need_rtu = FALSE THEN NULL WHEN rtu_rule.\"assetUsageRuleType\" = 'prohibition' THEN JSON_BUILD_OBJECT( 'denialType', 'usageProhibited', 'denialReason', FORMAT('swid-tag(%s) has been found but asset-usage is prohibited by prohibition(%s) under asset-usage-agreement(%s) for action(%s)', swid_tag.\"swTagId\", rtu_rule.\"rightToUseId\", rtu_rule.\"assetUsageAgreementId\", rtu_rule.\"rtuAction\"), 'deniedAction', rtu_rule.\"rtuAction\", 'deniedAssetUsageAgreementId', rtu_rule.\"assetUsageAgreementId\", 'deniedAssetUsageAgreementRevision', rtu_rule.\"assetUsageAgreementRevision\", 'deniedRightToUseId', rtu_rule.\"rightToUseId\", 'deniedRightToUseRevision', rtu_rule.\"rightToUseRevision\", 'denialReqItemName', 'action', 'denialReqItemValue', ($1)::TEXT, 'deniedConstraint', JSON_BUILD_OBJECT('action', rtu_rule.\"rtuAction\") ) ELSE NULL END AS \"denial\", rtu_rule.* FROM swid_tag LEFT OUTER JOIN rtu_rule ON (swid_tag.\"swTagId\" = rtu_rule.rtu_sw_id) ) SELECT \"softwareLicensorId\", \"swTagId\", \"swidTagRevision\", \"swPersistentId\", \"swVersion\", \"swProductName\", \"licenseProfileId\", \"licenseProfileRevision\", \"isUsedBySwCreator\", \"isRtuRequired\", CASE WHEN \"denial\" IS NULL AND swid_tag_entitlement.need_rtu = TRUE AND swid_tag_entitlement.rtu_sw_id IS NOT NULL THEN JSON_BUILD_OBJECT( 'rightToUseId', swid_tag_entitlement.\"rightToUseId\", 'rightToUseRevision', swid_tag_entitlement.\"rightToUseRevision\", 'assetUsageAgreementId', swid_tag_entitlement.\"assetUsageAgreementId\", 'assetUsageAgreementRevision', swid_tag_entitlement.\"assetUsageAgreementRevision\", 'licenseKeys', swid_tag_entitlement.\"licenseKeys\" ) ELSE NULL END AS \"entitlement\" FROM swid_tag_entitlement WHERE \"denial\" IS NULL ORDER BY swid_tag_entitlement.\"softwareLicensorId\", swid_tag_entitlement.\"swTagId\"",
+            "sqlVals": ["acumos:deploy","use","alex",1],
+            "result": {"command": "SELECT", "rowCount": 3,
+                "rows": [
+                    {
+                        "softwareLicensorId": "swlic",
+                        "swTagId": "alex-1",
+                        "swidTagRevision": 1,
+                        "swPersistentId": "fab0954c-d4e5-443a-8d3e-cf7620e80455",
+                        "swVersion": "1",
+                        "swProductName": "alex-product2",
+                        "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                        "licenseProfileRevision": 1,
+                        "isUsedBySwCreator": false,
+                        "isRtuRequired": true,
+                        "entitlement": {
+                            "rightToUseId": "perm-1",
+                            "rightToUseRevision": 14,
+                            "assetUsageAgreementId": "alex-agr",
+                            "assetUsageAgreementRevision": 14,
+                            "licenseKeys": null
+                        }
+                    },
+                    {
+                        "softwareLicensorId": "swlic",
+                        "swTagId": "alex-2",
+                        "swidTagRevision": 1,
+                        "swPersistentId": "fab0954c-d4e5-443a-8d3e-cf7620e80455",
+                        "swVersion": "1",
+                        "swProductName": "alex-product22",
+                        "licenseProfileId": "0d70ca44-2868-2042-8028-6b9a5e7c8eec",
+                        "licenseProfileRevision": 2,
+                        "isUsedBySwCreator": false,
+                        "isRtuRequired": false,
+                        "entitlement": null
+                    },
+                    {
+                        "softwareLicensorId": "swlic",
+                        "swTagId": "alex-3",
+                        "swidTagRevision": 3,
+                        "swPersistentId": "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                        "swVersion": "1",
+                        "swProductName": "alex-product3",
+                        "licenseProfileId": "7118cc9b-3b9e-4a07-a3ba-027f0aaae5e3",
+                        "licenseProfileRevision": 1,
+                        "isUsedBySwCreator": false,
+                        "isRtuRequired": true,
+                        "entitlement": {
+                            "rightToUseId": "perm-1",
+                            "rightToUseRevision": 14,
+                            "assetUsageAgreementId": "alex-agr",
+                            "assetUsageAgreementRevision": 14,
+                            "licenseKeys": null
+                        }
+                    }
+                ]
+            }
+        }
+    ],
+    "req": {
+        "method": "GET",
+        "path": "/api/v1/swid-tags/entitled?userId=alex&action=acumos%3Adeploy",
+        "content-type": "application/json; charset=utf-8"
+    },
+    "res": {
+        "statusCode": 200,
+        "body": {
+            "userId": "alex",
+            "requestId": "__type__uuid__",
+            "requested": "__type__dateTime__",
+            "action": "acumos:deploy",
+            "entitledSwidTags": [
+                {
+                    "softwareLicensorId": "swlic",
+                    "swTagId": "alex-1",
+                    "swidTagRevision": 1,
+                    "swPersistentId": "fab0954c-d4e5-443a-8d3e-cf7620e80455",
+                    "swVersion": "1",
+                    "swProductName": "alex-product2",
+                    "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                    "licenseProfileRevision": 1,
+                    "isUsedBySwCreator": false,
+                    "isRtuRequired": true,
+                    "entitlement": {
+                        "rightToUseId": "perm-1",
+                        "rightToUseRevision": 14,
+                        "assetUsageAgreementId": "alex-agr",
+                        "assetUsageAgreementRevision": 14,
+                        "licenseKeys": null
+                    }
+                },
+                {
+                    "softwareLicensorId": "swlic",
+                    "swTagId": "alex-2",
+                    "swidTagRevision": 1,
+                    "swPersistentId": "fab0954c-d4e5-443a-8d3e-cf7620e80455",
+                    "swVersion": "1",
+                    "swProductName": "alex-product22",
+                    "licenseProfileId": "0d70ca44-2868-2042-8028-6b9a5e7c8eec",
+                    "licenseProfileRevision": 2,
+                    "isUsedBySwCreator": false,
+                    "isRtuRequired": false
+                },
+                {
+                    "softwareLicensorId": "swlic",
+                    "swTagId": "alex-3",
+                    "swidTagRevision": 3,
+                    "swPersistentId": "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                    "swVersion": "1",
+                    "swProductName": "alex-product3",
+                    "licenseProfileId": "7118cc9b-3b9e-4a07-a3ba-027f0aaae5e3",
+                    "licenseProfileRevision": 1,
+                    "isUsedBySwCreator": false,
+                    "isRtuRequired": true,
+                    "entitlement": {
+                        "rightToUseId": "perm-1",
+                        "rightToUseRevision": 14,
+                        "assetUsageAgreementId": "alex-agr",
+                        "assetUsageAgreementRevision": 14,
+                        "licenseKeys": null
+                    }
+                }
+            ]
+        }
+    }
+}

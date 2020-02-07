@@ -20,54 +20,6 @@
 License Usage Manager - Developer Guide
 =======================================
 
-Overview
-========
-
-License Usage Manager (LUM) is intended for answering the question on whether the specific
-action on the software asset is **entitled** by software licensor
-according to the right-to-use provided by an agreement between
-the software licensor (supplier) and the software licensee
-(subscriber).
-
-- LUM expects the software-management-system (Acumos) to globally identify
-  the software up to its unique version and provide the software-identifying
-  tag data (**swidTag**) along with the **license-profile** to LUM.
-  License-Manager-Client-Library (LMCL) in Acumos is responsible for determining
-  whether the swidTag **requires the right-to-use** or not.
-  Open source software usually does not require the right-to-use from the licensor.
-- LUM expects the software-management-system (License-management-client
-  in Acumos) to identify the software **asset usage**.
-  In other words, it is Acumos's
-  responsibility to differentiate between separate **copies** of the
-  software and come up with globally unique identifier for the
-  asset-usage of that specific copy of the software.
-- Open Digital Rights Language (`ODRL <https://www.w3.org/TR/odrl-model/>`_)
-  is used for defining the agreement/entitlement with multiple permission
-  rules - rights-to-use that contain multiple constraints/limits.
-
-  .. note:: LUM only implements a subset of ODRL features that include
-            agreement, permission, and prohibition.
-            LUM does not support Logical Constraint and some other
-            features of ODRL.
-            Please refer to :doc:`LUM API <api-docs>` for more details.
-
-  .. note:: However, LUM has its own set of additional values
-            with the prefix ``lum:`` and a
-            special operator ``lum:in`` to find the match in a list of
-            ``rightOperand`` values.
-
-- The ODRL based agreement between the software licensor (supplier)
-  and software licensee (subscriber) that contains one or more permissions
-  and/or prohibition is expected to be uploaded to LUM through admin API.
-- On request for entitlement of the asset-usage, LUM goes through the
-  following sequence
-
-    #. finds **swidTag** with the **license-profile** in LUM database
-    #. identifies whether the swidTag **requires the right-to-use** or not
-    #. if the **right-to-use** is required, LUM finds the matching right-to-use
-       (prohibition or permission) for the software and determines whether
-       the asset-usage is entitled or not based on the constraints
-
 
 Data model and High-Level Flow
 ==============================
@@ -180,7 +132,7 @@ Technology and Frameworks
 
     node.js, 10.16.3, https://nodejs.org
     express.js, 4.17.1, http://expressjs.com/
-    node-postgres, 7.12.1, https://node-postgres.com/
+    node-postgres, 7.17.1, https://node-postgres.com/
     openapi, 3.0.2, https://swagger.io/specification/
     postgres database, 11.5, https://www.postgresql.org/
 

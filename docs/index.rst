@@ -1,7 +1,7 @@
 .. ===============LICENSE_START=======================================================
 .. Acumos CC-BY-4.0
 .. ===================================================================================
-.. Copyright (C) 2019 AT&T Intellectual Property. All rights reserved.
+.. Copyright (C) 2019-2020 AT&T Intellectual Property. All rights reserved.
 .. ===================================================================================
 .. This Acumos documentation file is distributed by AT&T
 .. under the Creative Commons Attribution 4.0 International License (the "License");
@@ -23,6 +23,7 @@ License Usage Manager (LUM)
 .. toctree::
     :maxdepth: 2
 
+    overview.rst
     api-docs.rst
     developer-guide.rst
     release-notes.rst
