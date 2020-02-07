@@ -1,5 +1,5 @@
 // ================================================================================
-// Copyright (c) 2019 AT&T Intellectual Property. All rights reserved.
+// Copyright (c) 2019-2020 AT&T Intellectual Property. All rights reserved.
 // ================================================================================
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -158,15 +158,22 @@ module.exports = class SqlParams {
         return Array.from(this.values.keys(), idx => `($${idx + 1 + this.offsetIdx})`).join();
     }
     /**
+     * indexed param for the first value
+     * @returns {string} "($1)"
+     */
+    get idxFirstValue() {
+        return `($${1 + this.offsetIdx})`;
+    }
+    /**
      * list of indexed params for the values
-     * @returns {string} either ', ($1),($2),($3),($4), ...' or "($1),($2),($3),($4), ..."
+     * @returns {string} either ', ($2),($3),($4),($5), ...' or "($1),($2),($3),($4), ..."
      */
     get idxValues() {
-        return this.preComma(Array.from(this.values.keys(), idx => `($${idx + 1 + this.offsetIdx})`).join());
+        return this.preComma(this.idxKeyValues);
     }
     /**
      * list of SET items in UPDATE SQL statement
-     * @returns {string} either ', "<name>" = ($1), ...' or '"<name>" = ($1), ...'
+     * @returns {string} either ', "<name>" = ($2), ...' or '"<name>" = ($1), ...'
      */
     get updates() {
         return this.preComma(Array.from(this.values.keys(), idx => `"${this._names[idx]}" = ($${idx + 1 + this.offsetIdx})`).join());

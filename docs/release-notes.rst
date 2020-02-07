@@ -20,6 +20,40 @@
 License Usage Manager - Release Notes
 =====================================
 
+Version 1.0.0, 7 February 2020
+==============================
+
+lum-server
+..........
+
+- new API endpoint ``GET /api/v1/swid-tags/entitled`` that returns the collection of
+  swidTag records entitled for the userId to perform the requested action at this moment.
+  (`ACUMOS-3735 <https://jira.acumos.org/browse/ACUMOS-3735>`_)
+
+  * This API does not increment usage counters since the asset is not used
+  * AcuCompose is expected to check on ``action=aggregate`` to get the entitlement
+    for the model to be included into composition by the current userId
+  * LUM does not expect AcuCompose to call ``PUT /api/v1/asset-usage`` API
+    to record the asset-usage since the model in catalog is not treated as the asset.
+    That also implies that there are no count limits on the number of inclusions in composition -
+    only the yes-no restriction
+
+- new API endpoint ``GET /api/v1/swid-tags`` that returns the collection of active swidTag
+  records stored in LUM database.
+- major refactoring of the logic behind ``PUT /api/v1/asset-usage`` and ``PUT /api/v1/asset-usage-event``
+  that is related to the new API ``GET /api/v1/swid-tags/entitled`` to avoid code duplication.
+  Moved most of denial reason detection into SQL, reduced the number of lum-server to database calls.
+- API spec - cleanup and removed duplicates that are not used by LUM
+- minor code refactoring
+- unit test code coverage stats
+  Stmts  81.77 %
+  Branch 58.51 %
+  Funcs  93.62 %
+  Lines  83.18 %
+- docs - added overview.rst and lum-in-acumos.svg to show the high level view on integration
+  of LUM-server with Acumos
+
+
 Version 0.28.2, 13 January 2020
 ================================
 
