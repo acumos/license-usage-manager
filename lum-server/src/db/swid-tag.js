@@ -1,5 +1,5 @@
 // ================================================================================
-// Copyright (c) 2019 AT&T Intellectual Property. All rights reserved.
+// Copyright (c) 2019-2020 AT&T Intellectual Property. All rights reserved.
 // ================================================================================
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ module.exports = {
                          WHERE ${keys.keyName} IN (${keys.idxValues}) FOR SHARE`;
         const result = await pgclient.sqlQuery(res, sqlCmd, keys.values);
         for (const swidTag of result.rows) {
-            res.locals.dbdata.swidTags[swidTag.swTagId].swidTagBody        = swidTag;
+            res.locals.dbdata.swidTags[swidTag.swTagId].swidTagBody     = swidTag;
             res.locals.dbdata.licenseProfiles[swidTag.licenseProfileId] = null;
         }
         utils.logInfo(res, `out getSwidTag(${JSON.stringify(res.locals.dbdata.swidTags)})`);
@@ -173,5 +173,25 @@ module.exports = {
                 "swidTag", res.locals.params.swTagId, snapshotBody.swidTagRevision, snapshotBody);
         }
         utils.logInfo(res, `out putSwidTagCreators(${res.locals.params.swTagId})`);
+    },
+    /**
+     * get active swid-tags with license-profile fields
+     * @param  {} res
+     */
+    async getActiveSwidTags(res) {
+        utils.logInfo(res, `in getActiveSwidTags`);
+
+        const sqlCmd = `SELECT swt."softwareLicensorId", swt."swTagId", swt."swidTagRevision",
+                               swt."swPersistentId", swt."swVersion", swt."swProductName",
+                               swt."licenseProfileId", lp."licenseProfileRevision",
+                               lp."licenseProfileActive", lp."isRtuRequired"
+                          FROM "swidTag" AS swt
+                               LEFT OUTER JOIN "licenseProfile" AS lp
+                                            ON (lp."licenseProfileId" = swt."licenseProfileId")
+                         WHERE swt."swidTagActive" = TRUE
+                         ORDER BY swt."softwareLicensorId", swt."swTagId"`;
+        const result = await pgclient.standaloneQuery(res, sqlCmd);
+        res.locals.response.activeSwidTags = result.rows;
+        utils.logInfo(res, `out getActiveSwidTags(${result.rowCount})`);
     }
- };
+};
