@@ -1,5 +1,5 @@
 // ================================================================================
-// Copyright (c) 2019 AT&T Intellectual Property. All rights reserved.
+// Copyright (c) 2019-2020 AT&T Intellectual Property. All rights reserved.
 // ================================================================================
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@ const response = require('../response');
 const pgclient = require('../../db/pgclient');
 const dbAssetUsageReq = require('../../db/asset-usage-req');
 const dbAssetUsage = require('../../db/asset-usage');
-const dbSwidTag = require('../../db/swid-tag');
-const dbLicenseProfile = require('../../db/license-profile');
 
 /**
  * validate params received in query
@@ -71,7 +69,6 @@ const putAssetUsage = async (req, res, next) => {
     res.locals.includedAssetUsageIds = [];
 
     res.locals.dbdata.swidTags = {};
-    res.locals.dbdata.licenseProfiles = {};
 
     const assetUsage = dbAssetUsage.convertToAssetUsage(res.locals.reqBody.assetUsageReq);
     res.locals.assetUsages[assetUsage.assetUsageId] = assetUsage;
@@ -87,8 +84,6 @@ const putAssetUsage = async (req, res, next) => {
     utils.logInfo(res, `api putAssetUsage(${res.locals.params.assetUsageId}, ${res.locals.params.action})`);
     await pgclient.runTx(res,
         dbAssetUsageReq.putAssetUsageReq,
-        dbSwidTag.getSwidTag,
-        dbLicenseProfile.getLicenseProfile,
         dbAssetUsage.determineAssetUsageEntitlement,
         dbAssetUsage.putAssetUsage,
         dbAssetUsage.registerIncludedAssetUsage,
