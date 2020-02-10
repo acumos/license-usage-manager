@@ -93,11 +93,12 @@ module.exports = {
                 lumErrors.addError(errors,
                     `expected ?${paramName}=<string> in ${res.locals.requestHttp.method} ${res.locals.requestHttp.requestUrl}`
                 );
+            } else {
+                lumErrors.addError(errors,
+                    `expected string value for ?${paramName}=<string> in ${res.locals.requestHttp.method} ${res.locals.requestHttp.requestUrl}`,
+                    paramName, paramValue
+                );
             }
-            lumErrors.addError(errors,
-                `expected string value for ?${paramName}=<string> in ${res.locals.requestHttp.method} ${res.locals.requestHttp.requestUrl}`,
-                paramName, paramValue
-            );
         }
         if (errors.length) {
             throw new lumErrors.InvalidDataError(errors);

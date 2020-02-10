@@ -2,6 +2,7 @@
 # Acumos Apache-2.0
 # ============================================================================
 # Copyright (C) 2019 Nordix Foundation.
+# Modifications Copyright (c) 2019-2020 AT&T Intellectual Property. All rights reserved.
 #  ============================================================================
 #  This Acumos software file is distributed by Nordix Foundation
 #  under the Apache License, Version 2.0 (the "License");
@@ -25,4 +26,4 @@ helm init
 ## build in minikube docker instance
 eval $(minikube -p acumos-lum docker-env)
 cd ../lum-server
-docker build -t acumos/lum-server:0.28.2 .
+docker build -t acumos/lum-server:1.0.0 .

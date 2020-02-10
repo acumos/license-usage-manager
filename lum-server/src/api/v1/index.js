@@ -1,5 +1,5 @@
 // ================================================================================
-// Copyright (c) 2019 AT&T Intellectual Property. All rights reserved.
+// Copyright (c) 2019-2020 AT&T Intellectual Property. All rights reserved.
 // ================================================================================
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ const Router = require('express-promise-router');
 const router = new Router();
 
 router.use('/swid-tag', require('./swid-tag').router);
+router.use('/swid-tags', require('./swid-tags'));
 router.use('/swid-tag-creators', require('./swid-tag-creators'));
 
 router.use('/asset-usage-agreement', require('./asset-usage-agreement').router);
