@@ -4,7 +4,7 @@
         "result": {"command": "SELECT", "rowCount": 1,
             "rows":[{
                 "pgVersion": "mock-PostgreSQL",
-                "databaseVersion": "0.28.2",
+                "databaseVersion": "1.0.0",
                 "schemaCreated": "2020-01-09T17:12:31.791Z",
                 "schemaModified": "2020-01-09T17:12:31.791Z",
                 "databaseStarted": "2020-01-09T17:12:32.361Z",
@@ -24,12 +24,12 @@
             "requested": "__type__dateTime__",
             "healthcheck": {
                 "serverName":"lum-server",
-                "serverVersion":"0.28.2",
-                "apiVersion":"0.28.2",
+                "serverVersion":"1.0.0",
+                "apiVersion":"1.0.0",
                 "nodeVersion":"__env__NODE_VERSION",
                 "databaseInfo": {
                     "pgVersion": "mock-PostgreSQL",
-                    "databaseVersion": "0.28.2",
+                    "databaseVersion": "1.0.0",
                     "schemaCreated": "2020-01-09T17:12:31.791Z",
                     "schemaModified": "2020-01-09T17:12:31.791Z",
                     "databaseStarted": "2020-01-09T17:12:32.361Z",

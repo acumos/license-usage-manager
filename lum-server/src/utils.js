@@ -199,18 +199,8 @@ module.exports = {
      * @param  {string} denialReason human readable explanation why denied the entitlement
      * @param  {string} deniedAction either requested action on the asset like download, publish, execute, etc.
      *                  or special value of use
-     * @param  {string} denialReqItemName name of the item that came from req or datetime or asset-action-count
-     * @param  {} denialReqItemValue value of the item that came from req or NOW() or +1 for asset-action-count
-     * @param  {string} [deniedAssetUsageAgreementId] id of Asset-Usage-Agreement that caused the denial
-     * @param  {string} [deniedAssetUsageAgreementRevision] 1,2,3,... revision of the assetUsageAgreement
-     * @param  {string} [deniedRightToUseId] id of rightToUse that caused the denial
-     * @param  {string} [deniedRightToUseRevision] 1,2,3,... revision of the rightToUse
-     * @param  {} [deniedConstraint] whole record from usageConstraint or assignee refinement that caused the denial
-     * @param  {} [deniedMetrics] current statistical data that caused the denial
      */
-    addDenial(swidTag, denialType, denialReason, deniedAction, denialReqItemName, denialReqItemValue,
-        deniedAssetUsageAgreementId, deniedAssetUsageAgreementRevision,
-        deniedRightToUseId, deniedRightToUseRevision, deniedConstraint, deniedMetrics) {
+    addDenial(swidTag, denialType, denialReason, deniedAction) {
 
         denialReason = module.exports.makeOneLine(denialReason);
         if (!swidTag.usageDenialSummary) {
@@ -220,15 +210,7 @@ module.exports = {
         swidTag.usageDenials.push({
             "denialType": denialType,
             "denialReason": denialReason,
-            "deniedAction": deniedAction,
-            "deniedAssetUsageAgreementId": deniedAssetUsageAgreementId,
-            "deniedAssetUsageAgreementRevision": deniedAssetUsageAgreementRevision,
-            "deniedRightToUseId": deniedRightToUseId,
-            "deniedRightToUseRevision": deniedRightToUseRevision,
-            "denialReqItemName": denialReqItemName,
-            "denialReqItemValue": denialReqItemValue,
-            "deniedConstraint": deniedConstraint,
-            "deniedMetrics": deniedMetrics
+            "deniedAction": deniedAction
         });
     },
     /**

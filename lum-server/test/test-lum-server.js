@@ -106,12 +106,11 @@ describe('lum-server', function () {
 
             return testReq
                 .then(function(res) {
-                    // console.log(`res for ${testLog}:`, res.text);
                     lumServer.logger.info(`res ${res.statusCode} for ${testLog}:`, res.text);
                     expect(res).to.be.json;
                     if (res.statusCode === 500 && res.body && res.body.error
                         && expectation.res.statusCode !== res.statusCode) {
-                        // console.error(`err ${res.statusCode} for ${testLog}:`, res.body.error);
+                        lumServer.logger.error(`ERROR res ${res.statusCode} for ${testLog}:`, res.body.error);
                         throw res.body.error;
                     }
 

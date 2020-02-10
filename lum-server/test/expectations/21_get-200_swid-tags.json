@@ -1,0 +1,97 @@
+{
+    "db": [
+        {
+            "sqlCmd": "SELECT swt.\"softwareLicensorId\", swt.\"swTagId\", swt.\"swidTagRevision\", swt.\"swPersistentId\", swt.\"swVersion\", swt.\"swProductName\", swt.\"licenseProfileId\", lp.\"licenseProfileRevision\", lp.\"licenseProfileActive\", lp.\"isRtuRequired\" FROM \"swidTag\" AS swt LEFT OUTER JOIN \"licenseProfile\" AS lp ON (lp.\"licenseProfileId\" = swt.\"licenseProfileId\") WHERE swt.\"swidTagActive\" = TRUE ORDER BY swt.\"softwareLicensorId\", swt.\"swTagId\"",
+            "result": {"command": "SELECT", "rowCount": 3,
+                "rows": [
+                    {
+                        "softwareLicensorId": "swlic",
+                        "swTagId": "alex-1",
+                        "swidTagRevision": 1,
+                        "swPersistentId": "fab0954c-d4e5-443a-8d3e-cf7620e80455",
+                        "swVersion": "1",
+                        "swProductName": "alex-product2",
+                        "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                        "licenseProfileRevision": 1,
+                        "licenseProfileActive": true,
+                        "isRtuRequired": true
+                    },
+                    {
+                        "softwareLicensorId": "swlic",
+                        "swTagId": "alex-2",
+                        "swidTagRevision": 1,
+                        "swPersistentId": "fab0954c-d4e5-443a-8d3e-cf7620e80455",
+                        "swVersion": "1",
+                        "swProductName": "alex-product22",
+                        "licenseProfileId": "0d70ca44-2868-2042-8028-6b9a5e7c8eec",
+                        "licenseProfileRevision": 2,
+                        "licenseProfileActive": true,
+                        "isRtuRequired": false
+                    },
+                    {
+                        "softwareLicensorId": "swlic",
+                        "swTagId": "alex-3",
+                        "swidTagRevision": 3,
+                        "swPersistentId": "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                        "swVersion": "1",
+                        "swProductName": "alex-product3",
+                        "licenseProfileId": "7118cc9b-3b9e-4a07-a3ba-027f0aaae5e3",
+                        "licenseProfileRevision": 1,
+                        "licenseProfileActive": true,
+                        "isRtuRequired": true
+                    }
+                ]
+            }
+        }
+    ],
+    "req": {
+        "method": "GET",
+        "path": "/api/v1/swid-tags",
+        "content-type": "application/json; charset=utf-8"
+    },
+    "res": {
+        "statusCode": 200,
+        "body": {
+            "requestId": "__type__uuid__",
+            "requested": "__type__dateTime__",
+            "activeSwidTags": [
+                {
+                    "softwareLicensorId": "swlic",
+                    "swTagId": "alex-1",
+                    "swidTagRevision": 1,
+                    "swPersistentId": "fab0954c-d4e5-443a-8d3e-cf7620e80455",
+                    "swVersion": "1",
+                    "swProductName": "alex-product2",
+                    "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                    "licenseProfileRevision": 1,
+                    "licenseProfileActive": true,
+                    "isRtuRequired": true
+                },
+                {
+                    "softwareLicensorId": "swlic",
+                    "swTagId": "alex-2",
+                    "swidTagRevision": 1,
+                    "swPersistentId": "fab0954c-d4e5-443a-8d3e-cf7620e80455",
+                    "swVersion": "1",
+                    "swProductName": "alex-product22",
+                    "licenseProfileId": "0d70ca44-2868-2042-8028-6b9a5e7c8eec",
+                    "licenseProfileRevision": 2,
+                    "licenseProfileActive": true,
+                    "isRtuRequired": false
+                },
+                {
+                    "softwareLicensorId": "swlic",
+                    "swTagId": "alex-3",
+                    "swidTagRevision": 3,
+                    "swPersistentId": "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                    "swVersion": "1",
+                    "swProductName": "alex-product3",
+                    "licenseProfileId": "7118cc9b-3b9e-4a07-a3ba-027f0aaae5e3",
+                    "licenseProfileRevision": 1,
+                    "licenseProfileActive": true,
+                    "isRtuRequired": true
+                }
+            ]
+        }
+    }
+}

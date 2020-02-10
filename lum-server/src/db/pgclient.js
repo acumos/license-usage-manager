@@ -30,8 +30,6 @@ const pgTx = {
     release: 'pg.client.release'
 };
 
-var pgPool;
-
 /**
  *  log the step info
  * @param  {} res
@@ -53,8 +51,7 @@ function logRunStepInfo(res, runStep) {
 async function connect(res) {
     if (!res.locals.pg.client) {
         logRunStepInfo(res, "pg.pool.connect");
-        const client = await pgPool.connect();
-        res.locals.pg.client = client;
+        res.locals.pg.client = await lumServer.pgPool.connect();
         if (res.locals.pg.txid)         {delete res.locals.pg.txid;}
         if (res.locals.pg.txNow)        {delete res.locals.pg.txNow;}
         if (res.locals.pg.txNowDate)    {delete res.locals.pg.txNowDate;}
@@ -122,7 +119,7 @@ module.exports = {
     initDb() {
         const pgOptions = utils.deepCopyTo({}, lumServer.config.database);
         lumServer.logger.info(`initializing pgclient(${JSON.stringify(pgOptions, utils.hidePass)})...`);
-        pgPool = new pg.Pool(pgOptions);
+        lumServer.pgPool = new pg.Pool(pgOptions);
     },
     /**
      * retrieve the version info from the database
@@ -132,7 +129,7 @@ module.exports = {
     async getLumDbInfo(res, always=false) {
         if (always || !lumServer.healthcheck.databaseInfo) {
             utils.logInfo(res, "in getLumDbInfo", lumServer.healthcheck.databaseInfo || '');
-            const {rows} = await pgPool.query(utils.makeOneLine(
+            const {rows} = await lumServer.pgPool.query(utils.makeOneLine(
                 `SELECT VERSION() AS "pgVersion", "lumVersion" AS "databaseVersion",
                     "created" AS "schemaCreated", "modified" AS "schemaModified",
                     PG_POSTMASTER_START_TIME() AS "databaseStarted",
@@ -169,10 +166,10 @@ module.exports = {
     async standaloneQuery(res, sqlCmd, sqlVals) {
         sqlCmd = utils.makeOneLine(sqlCmd);
         logRunStepInfo(res, `standaloneQuery (${sqlCmd}) with (${JSON.stringify(sqlVals)})`);
-        const rslt = await pgPool.query(sqlCmd, sqlVals);
+        const rslt = await lumServer.pgPool.query(sqlCmd, sqlVals);
         const result = {command: rslt.command, rowCount: rslt.rowCount, rows: rslt.rows};
         logRunStepInfo(res, `standaloneQuery result (${JSON.stringify(result)}) for (${sqlCmd}) with (${JSON.stringify(sqlVals)})`);
-        delete res.locals.pg.runStep;
+        if (res.locals.pg.runStep) {delete res.locals.pg.runStep;}
         return result;
     },
     /**

@@ -19,7 +19,7 @@
 openapi: '3.0.2'
 
 info:
-  version: "0.28.2"
+  version: "1.0.0"
   title: "License Usage Manager (LUM) API"
   contact:
     name: Acumos License Management
@@ -85,6 +85,7 @@ paths:
         required: true
         in: query
         description: globally unique identifier of the software tag up to its version
+          (in Acumos it is revisionId)
         schema:
           type: string
 
@@ -116,7 +117,7 @@ paths:
                 format: date-time
             swTagId:
               description: echo back swTagId
-              example: 0BDE3CF2-7A91-40FF-AF5F-2D314E677E6A
+              example: "0bde3cf2-7a91-40ff-af5f-2d314e677e6a"
               schema:
                 type: string
             status:
@@ -144,7 +145,7 @@ paths:
             example:
               userId: admin
               swidTag:
-                swTagId: ee48b699-3b16-4391-884c-1bec557f32b9
+                swTagId: "ee48b699-3b16-4391-884c-1bec557f32b9"
                 swPersistentId: 0d70ca44-2868-2042-8028-6b9a5e7c8eec
                 swVersion: '1'
                 licenseProfileId: 08731dff-2a30-44b7-b46c-aec1c2d0a4d7
@@ -222,6 +223,7 @@ paths:
         example: ee48b699-3b16-4391-884c-1bec557f32b9
         in: query
         description: globally unique identifier of the software tag up to its version
+          (in Acumos it is revisionId)
         schema:
           type: string
 
@@ -269,6 +271,50 @@ paths:
                 type: string
                 default: "swidTag not found"
 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+  /api/v1/swid-tags:
+    get:
+      tags: ["swid-tag"]
+      operationId: getActiveSwidTags
+      description: returns the collection of active swidTag records
+
+      responses:
+        200:
+          description: success
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: '#/components/schemas/GetActiveSwidTagsResponse'
+
+  /api/v1/swid-tags/available-entitlement:
+    get:
+      tags: ["swid-tag"]
+      operationId: getSwidTagsWithAvailableEntitlement
+      description: returns the collection of swidTag records with available-entitlement for the userId
+        to perform the requested action at this moment
+      parameters:
+        - name: userId
+          required: true
+          example: acu-composer
+          in: query
+          description: identifier of the user per action
+          schema:
+            type: string
+        - name: action
+          required: true
+          example: aggregate
+          in: query
+          description: identifier of the action on swidTags with available-entitlement
+          schema:
+            type: string
+
+      responses:
+        200:
+          description: success
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: '#/components/schemas/GetEntitledSwidTagsResponse'
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
   /api/v1/asset-usage-agreement:
@@ -282,7 +328,7 @@ paths:
           type: string
 
       - name: assetUsageAgreementId
-        example:  acumos://software-licensor/Company A/agreement/3eb8c43a-bf19-46ab-8392-99c7efdf4106
+        example: "acumos://software-licensor/Company A/agreement/3eb8c43a-bf19-46ab-8392-99c7efdf4106"
         required: true
         in: query
         description: urlencoded UID key to assetUsageAgreement in IRI or URI format
@@ -346,15 +392,18 @@ paths:
         content:
           'application/json; charset=utf-8':
             example:
+              userId: admin
+              requestId: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+              requested: "2020-02-06T19:03:12.240Z"
               assetUsageAgreement:
                 softwareLicensorId: Company A
-                assetUsageAgreementId: acumos://software-licensor/Company A/agreement/3eb8c43a-bf19-46ab-8392-99c7efdf4106
+                assetUsageAgreementId: "acumos://software-licensor/Company A/agreement/3eb8c43a-bf19-46ab-8392-99c7efdf4106"
                 agreement:
                   "@context":
                     "@vocab": https://www.w3.org/ns/odrl.jsonld#
                     vcard: http://www.w3.org/2006/vcard/ns#
                   "@type": Agreement
-                  uid: acumos://software-licensor/Company%2520A/agreement/3eb8c43a-bf19-46ab-8392-99c7efdf4106
+                  uid: "acumos://software-licensor/Company A/agreement/3eb8c43a-bf19-46ab-8392-99c7efdf4106"
                   assignee:
                     "@type":
                     - Party
@@ -385,7 +434,7 @@ paths:
                       - face-detect
                     "@type": Target
                   permission:
-                  - uid: acumos://software-licensor/Company%252520A/permission/98378924-84ff-41f5-87ac-02fd2012c727
+                  - uid: "acumos://software-licensor/Company A/permission/98378924-84ff-41f5-87ac-02fd2012c727"
                     "@type": Rule
                     action:
                     - acumos:deploy
@@ -404,7 +453,7 @@ paths:
                     action:
                     - transfer
                     - aggregate
-                    uid: acumos://software-licensor/Company%2520A/prohibition/85f6ab36-3ede-461a-ad57-23b941264d10
+                    uid: "acumos://software-licensor/Company A/prohibition/85f6ab36-3ede-461a-ad57-23b941264d10"
             schema:
               $ref: '#/components/schemas/PutAssetUsageAgreementRequest'
 
@@ -484,7 +533,7 @@ paths:
 
       - name: assetUsageAgreementId
         required: true
-        example:  acumos://software-licensor/Company A/agreement/3eb8c43a-bf19-46ab-8392-99c7efdf4106
+        example: "acumos://software-licensor/Company A/agreement/3eb8c43a-bf19-46ab-8392-99c7efdf4106"
         in: query
         description: urlencoded UID key to assetUsageAgreement in IRI or URI format.
           possible format "http://software-licensor/<softwareLicensorId>/agreement/<agreement-uuid>"
@@ -530,7 +579,7 @@ paths:
                 type: string
             assetUsageAgreementId:
               description: echo back UID key to assetUsageAgreement in IRI or URI format
-              example:  acumos://software-licensor/Company A/agreement/3eb8c43a-bf19-46ab-8392-99c7efdf4106
+              example: "acumos://software-licensor/Company A/agreement/3eb8c43a-bf19-46ab-8392-99c7efdf4106"
               schema:
                 type: string
             status:
@@ -587,7 +636,7 @@ paths:
                 type: string
             assetUsageAgreementId:
               description: echo back UID key to assetUsageAgreement in IRI or URI format
-              example:  acumos://software-licensor/Company A/agreement/3eb8c43a-bf19-46ab-8392-99c7efdf4106
+              example: "acumos://software-licensor/Company A/agreement/3eb8c43a-bf19-46ab-8392-99c7efdf4106"
               schema:
                 type: string
             status:
@@ -813,8 +862,9 @@ components:
         userId:
           description: identifier of the user
           type: string
+          example: "alex"
 
-    RequestTop:
+    RequestTopSwSystem:
       description: request and response header
       type: object
       required:
@@ -822,17 +872,31 @@ components:
 
       properties:
         swMgtSystemId:
-          description: system that manages the software pieces and sent the request - like "Acumos"
+          description: system that manages the software pieces and sent the request
           type: string
+          example: Acumos
 
         swMgtSystemInstanceId:
           description: system instance id that manages the software pieces
-            and sent the request - like "Acumos#22"
+            and sent the request
           type: string
+          example: "Acumos#22"
 
         swMgtSystemComponent:
-          description: component inside the system that sent the request like "model-runner"
+          description: component inside the system that sent the request
+          example: "model-runner"
+
+    RequestTopAction:
+      description: request and response header
+      type: object
+      required:
+        - action
+
+      properties:
+        action:
+          description: requested action on the asset like download, publish, execute, ...
           type: string
+          example: "acumos:download"
 
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
     Healthcheck:
@@ -898,12 +962,12 @@ components:
               type: string
           example:
             serverName: "lum-server"
-            serverVersion: "0.28.2"
-            apiVersion: "0.28.2"
+            serverVersion: "1.0.0"
+            apiVersion: "1.0.0"
             nodeVersion: "10.16.3"
             databaseInfo:
               pgVersion: "PostgreSQL 11.5 on x86_64-pc-linux-musl, compiled by gcc (Alpine 8.3.0) 8.3.0, 64-bit"
-              databaseVersion: "0.28.2"
+              databaseVersion: "1.0.0"
               schemaCreated: "2020-01-09T17:12:31.791Z"
               schemaModified: "2020-01-09T17:12:31.791Z"
               databaseStarted: "2020-01-09T17:12:32.361Z"
@@ -947,9 +1011,10 @@ components:
       properties:
         swTagId:
           description: globally unique identifier of the software tag up to its version
-            possible format <swPersistentId>_<swVersion>
-            example "c0de3e70-e815-461f-9734-a239c450bf77_7.5.3.123-t1"
+            (in Acumos it is revisionId)
+            possible format <swPersistentId>_<swVersion> like "c0de3e70-e815-461f-9734-a239c450bf77_7.5.3.123-t1"
           type: string
+          example: "0bde3cf2-7a91-40ff-af5f-2d314e677e6a"
 
     SWIDCreators:
       description: collection of creators for swidTag
@@ -966,16 +1031,16 @@ components:
     SetSwidTagCreatorsRequest:
       description: request to set swidTag Creators
       allOf:
-        - $ref: '#/components/schemas/BaseRequestTop'
         - $ref: '#/components/schemas/RequestTopUser'
+        - $ref: '#/components/schemas/BaseRequestTop'
         - $ref: '#/components/schemas/SwTagIdTop'
         - $ref: '#/components/schemas/SWIDCreators'
 
     SetSwidTagCreatorsResponse:
       description: response to update the creators on swidTag request
       allOf:
-        - $ref: '#/components/schemas/BaseRequestTop'
         - $ref: '#/components/schemas/RequestTopUser'
+        - $ref: '#/components/schemas/BaseRequestTop'
         - $ref: '#/components/schemas/SWIDResponse'
 
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -992,20 +1057,20 @@ components:
       properties:
         swTagId:
           description: globally unique identifier of the software tag up to its version
-            format <swPersistentId>_<swVersion>
-            example "c0de3e70-e815-461f-9734-a239c450bf77_7.5.3.123-t1"
+            (in Acumos it is revisionId)
+            possible format <swPersistentId>_<swVersion>
           type: string
+          example: "f36b925c-618f-4284-a8d7-650d4e41fcbb"
 
         swPersistentId:
-          description: versionless product-id
-            format <swPersistentId>_<swVersion>
-            example "c0de3e70-e815-461f-9734-a239c450bf77"
+          description: versionless product-id (in Acumos it is solutionId)
           type: string
           format: uuid
+          example: "c0de3e70-e815-461f-9734-a239c450bf77"
 
         swVersion:
           description: version of the software piece
-            format semver
+            possible format semver
             example "7.5.3.123-t1"
           type: string
 
@@ -1020,6 +1085,7 @@ components:
             FK to licenseProfile
           type: string
           format: uuid
+          example: "2f3cc0aa-5a15-416a-80c6-76ba0c9e1a67"
 
         softwareLicensorId:
           description: identifier of the entity that issued the licenseProfile
@@ -1048,6 +1114,7 @@ components:
         swProductName:
           description: name of the software product
           type: string
+          example: example-model
 
         swidTagDetails:
           description: more details on software identifying tag
@@ -1152,6 +1219,7 @@ components:
       properties:
         swTagId:
           description: globally unique identifier of the software tag up to its version
+            (in Acumos it is revisionId)
           type: string
         status:
           description: status of swidTag revoking
@@ -1168,16 +1236,16 @@ components:
     PutSwidTagRequest:
       description: request to set swidTag
       allOf:
-        - $ref: '#/components/schemas/BaseRequestTop'
         - $ref: '#/components/schemas/RequestTopUser'
+        - $ref: '#/components/schemas/BaseRequestTop'
         - $ref: '#/components/schemas/SWIDRequest'
         - $ref: '#/components/schemas/LicenseProfileRequest'
 
     PutSwidTagResponse:
       description: response to swidTag request
       allOf:
-        - $ref: '#/components/schemas/BaseRequestTop'
         - $ref: '#/components/schemas/RequestTopUser'
+        - $ref: '#/components/schemas/BaseRequestTop'
         - $ref: '#/components/schemas/SWIDResponse'
         - $ref: '#/components/schemas/LicenseProfileResponse'
 
@@ -1186,6 +1254,169 @@ components:
       allOf:
         - $ref: '#/components/schemas/BaseRequestTop'
         - $ref: '#/components/schemas/SWIDRevokedResponse'
+
+    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+    GetActiveSwidTagsResponse:
+      description: response to GET swid-tags
+      allOf:
+        - $ref: '#/components/schemas/BaseRequestTop'
+        - $ref: '#/components/schemas/ActiveSwidTags'
+
+    ActiveSwidTags:
+      description: collection of keys for the active swidTags
+      required: [activeSwidTags]
+      properties:
+        activeSwidTags:
+          description: collection of keys for the active swidTags
+          type: array
+          default: []
+          nullable: true
+          items:
+            description: slim info (keys) on single active swidTag with license
+            type: object
+            required:
+              - softwareLicensorId
+              - swTagId
+              - swidTagRevision
+              - swPersistentId
+              - swVersion
+              - swProductName
+              - licenseProfileId
+              - licenseProfileRevision
+              - licenseProfileActive
+              - isRtuRequired
+            properties:
+              softwareLicensorId:
+                description: supplier or owner of the software
+                example: Company A
+                type: string
+              swTagId:
+                description: globally unique identifier of the software tag up to its version
+                  (in Acumos it is revisionId)
+                type: string
+                example: "c8606a77-c39d-4060-bd7d-1051f4c6d316"
+              swidTagRevision:
+                description: 1,2,3,... revision of the swidTag - updates are allowed - auto-incremented by LUM
+                type: integer
+                format: int64
+                example: 5
+              swPersistentId:
+                description: versionless product-id (in Acumos it is solutionId)
+                type: string
+                format: uuid
+                example: "c0de3e70-e815-461f-9734-a239c450bf77"
+              swVersion:
+                description: version of the software piece
+                  possible format semver
+                  example "7.5.3.123-t1"
+                type: string
+              swProductName:
+                description: name of the software product
+                type: string
+                example: example-model
+
+              licenseProfileId:
+                description: GUID FK to licenseProfile
+                type: string
+                format: uuid
+                example: "c75ddb24-0410-49f4-8550-98b06f9a0a51"
+              licenseProfileRevision:
+                description: 1,2,3,... revision of the licenseProfile
+                type: integer
+                format: int64
+                example: 5
+              licenseProfileActive:
+                description: whether the license profile is currently active - not revoked
+                type: boolean
+              isRtuRequired:
+                description: whether requires the right-to-use for usage, when false goes directly to usageMetrics
+                type: boolean
+
+    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+    GetEntitledSwidTagsResponse:
+      description: response to GET swid-tags/available-entitlement
+      allOf:
+        - $ref: '#/components/schemas/RequestTopUser'
+        - $ref: '#/components/schemas/BaseRequestTop'
+        - $ref: '#/components/schemas/RequestTopAction'
+        - $ref: '#/components/schemas/SwidTagsWithAvailableEntitlement'
+
+    SwidTagsWithAvailableEntitlement:
+      description: collection of keys for the swidTags
+        with available-entitlement for the userId and action
+      required: [swidTagsWithAvailableEntitlement]
+      properties:
+        swidTagsWithAvailableEntitlement:
+          description: collection of keys for the swidTags
+            with available-entitlement for the userId and action
+          type: array
+          default: []
+          nullable: true
+          items:
+            description: slim info (keys) on single swidTag with availableEntitlement
+            type: object
+            required:
+              - softwareLicensorId
+              - swTagId
+              - swidTagRevision
+              - swPersistentId
+              - swVersion
+              - swProductName
+              - licenseProfileId
+              - licenseProfileRevision
+              - isUsedBySwCreator
+              - isRtuRequired
+            properties:
+              softwareLicensorId:
+                description: supplier or owner of the software
+                example: Company A
+                type: string
+              swTagId:
+                description: globally unique identifier of the software tag up to its version
+                  (in Acumos it is revisionId)
+                type: string
+                example: "c8606a77-c39d-4060-bd7d-1051f4c6d316"
+              swidTagRevision:
+                description: 1,2,3,... revision of the swidTag - updates are allowed - auto-incremented by LUM
+                type: integer
+                format: int64
+                example: 5
+              swPersistentId:
+                description: versionless product-id (in Acumos it is solutionId)
+                type: string
+                format: uuid
+                example: "c0de3e70-e815-461f-9734-a239c450bf77"
+              swVersion:
+                description: version of the software piece
+                  possible format is a semver like "7.5.3.123-t1"
+                type: string
+                example: "1.2.3"
+              swProductName:
+                description: name of the software product
+                type: string
+                example: example-model
+
+              licenseProfileId:
+                description: GUID FK to licenseProfile
+                type: string
+                format: uuid
+                example: "c75ddb24-0410-49f4-8550-98b06f9a0a51"
+              licenseProfileRevision:
+                description: 1,2,3,... revision of the licenseProfile
+                type: integer
+                format: int64
+                example: 5
+              isUsedBySwCreator:
+                description: whether the userId listed in swCreators of the software
+                type: boolean
+                example: false
+              isRtuRequired:
+                description: whether requires the right-to-use for usage, when false goes directly to usageMetrics
+                type: boolean
+                example: true
+
+              availableEntitlement:
+                $ref: '#/components/schemas/AssetUsageEntitlementBody'
 
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
     LicenseProfile:
@@ -1234,7 +1465,7 @@ components:
           format: int64
 
         licenseProfileActive:
-          description: whether the license profile is currently active - not closed and not expired and not revoked
+          description: whether the license profile is currently active - not revoked
           type: boolean
           default: true
 
@@ -1309,7 +1540,7 @@ components:
               type: string
             assetUsageAgreementId:
               description: urlencoded UID key to assetUsageAgreement in IRI or URI format
-              example:  acumos://software-licensor/Company A/agreement/3eb8c43a-bf19-46ab-8392-99c7efdf4106
+              example: "acumos://software-licensor/Company A/agreement/3eb8c43a-bf19-46ab-8392-99c7efdf4106"
               type: string
 
     AssetUsageAgreement:
@@ -1420,16 +1651,16 @@ components:
     PutAssetUsageAgreementRequest:
       description: request to set assetUsageAgreement
       allOf:
-        - $ref: '#/components/schemas/BaseRequestTop'
         - $ref: '#/components/schemas/RequestTopUser'
+        - $ref: '#/components/schemas/BaseRequestTop'
         - $ref: '#/components/schemas/AssetUsageAgreementTop'
         - $ref: '#/components/schemas/AssetUsageAgreement'
 
     PutAssetUsageAgreementResponse:
       description: response to assetUsageAgreement request
       allOf:
-        - $ref: '#/components/schemas/BaseRequestTop'
         - $ref: '#/components/schemas/RequestTopUser'
+        - $ref: '#/components/schemas/BaseRequestTop'
         - $ref: '#/components/schemas/AssetUsageAgreementTop'
         - $ref: '#/components/schemas/AssetUsageAgreement'
         - $ref: '#/components/schemas/AssetUsageAgreementRestriction'
@@ -1460,8 +1691,8 @@ components:
     PutAssetUsageAgreementRestrictionRequest:
       description: request to set assetUsageAgreementRestriction
       allOf:
-        - $ref: '#/components/schemas/BaseRequestTop'
         - $ref: '#/components/schemas/RequestTopUser'
+        - $ref: '#/components/schemas/BaseRequestTop'
         - $ref: '#/components/schemas/AssetUsageAgreementTop'
         - $ref: '#/components/schemas/AssetUsageAgreementRestriction'
 
@@ -1489,7 +1720,7 @@ components:
           description: |
             globally unique identifier of the software tag up to its version
             that is included by or composed into the current software piece.
-            it is FK to swidTag
+            (in Acumos it is revisionId)
           type: string
 
         includedAssetUsageId:
@@ -1511,6 +1742,7 @@ components:
       properties:
         swTagId:
           description: globally unique identifier of the software tag up to its version
+            (in Acumos it is revisionId)
           type: string
 
         assetUsageId:
@@ -1551,15 +1783,15 @@ components:
       properties:
         assetUsageReq:
           description: request for entitlement on the assetUsage
-          $ref: '#/components/schemas/AssetUseageRequestTopMixin'
+          $ref: '#/components/schemas/AssetUsageRequestTopMixin'
 
 
-    AssetUseageRequestTopMixin:
+    AssetUsageRequestTopMixin:
       description: mixin for asset usage request
       type: object
       allOf:
-          - $ref: '#/components/schemas/AssetUsageRequestTop'
-          - $ref: '#/components/schemas/AssetUsageIncludedRequestTop'
+        - $ref: '#/components/schemas/AssetUsageRequestTop'
+        - $ref: '#/components/schemas/AssetUsageIncludedRequestTop'
 
     AssetUsageEventBody:
       description: body of the notification of asset-usage event to be tracked by LUM with no decision on the entitlement of the action
@@ -1596,6 +1828,9 @@ components:
         assetUsageEvent:
           description: adding assetUsageSeq into assetUsageEvent
           properties:
+            softwareLicensorId:
+              description: supplier or owner of the software
+              type: string
             swidTagRevision:
               description: 1,2,3,... revision of the swidTag - updates are allowed - auto-incremented by LUM
               type: integer
@@ -1612,10 +1847,6 @@ components:
               description: whether requires the right-to-use for usage, when false goes directly to usageMetrics
               type: boolean
               default: true
-            softwareLicensorId:
-              description: supplier or owner of the software
-              type: string
-
             assetUsageSeq:
               description: sequential number of the asset-usage for the assetUsageId
               type: integer
@@ -1682,39 +1913,46 @@ components:
         - $ref: '#/components/schemas/AssetUsageRequestTop'
         - $ref: '#/components/schemas/AssetUsageEntitled'
 
+    AssetUsageEntitlementBody:
+      description: asset usage entitlement details
+      properties:
+        rightToUseId:
+          description: uid for the rightToUse that is permission
+          type: string
+          example: "acumos://software-licensor/Company A/permission/98378924-84ff-41f5-87ac-02fd2012c727"
+
+        rightToUseRevision:
+          description: 1,2,3,... revision of the rightToUse - auto-incremented by LUM
+          type: integer
+          format: int64
+          example: 3
+
+        assetUsageAgreementId:
+          description: UID key to assetUsageAgreement in IRI or URI format. FK to assetUsageAgreement
+          type: string
+          example:  "acumos://software-licensor/Company A/agreement/3eb8c43a-bf19-46ab-8392-99c7efdf4106"
+
+        assetUsageAgreementRevision:
+          description: 1,2,3,... revision of the AssetUsageAgreement - updates are allowed - auto-incremented by LUM
+          type: integer
+          format: int64
+          example: 3
+
+        licenseKeys:
+          description: list of licenseKey values
+          type: array
+          default: []
+          items:
+            description: licenseKey is provided by supplier in the right-to-use
+              and consumed by the software to unlock the functionality
+            type: string
+
     AssetUsageEntitlement:
       description: entitled response to assetUsageReq request per single asset-usage
       type: object
       properties:
         entitlement:
-          description: entitlement details
-          properties:
-            rightToUseId:
-              description: uid for the rightToUse that is permission
-              type: string
-
-            rightToUseRevision:
-              description: 1,2,3,... revision of the rightToUse - auto-incremented by LUM
-              type: integer
-              format: int64
-
-            assetUsageAgreementId:
-              description: UID key to assetUsageAgreement in IRI or URI format. FK to assetUsageAgreement
-              type: string
-
-            assetUsageAgreementRevision:
-              description: 1,2,3,... revision of the AssetUsageAgreement - updates are allowed - auto-incremented by LUM
-              type: integer
-              format: int64
-
-            licenseKeys:
-              description: list of licenseKey values
-              type: array
-              default: []
-              items:
-                description: licenseKey is provided by supplier in the right-to-use
-                  and consumed by the software to unlock the functionality
-                type: string
+          $ref: '#/components/schemas/AssetUsageEntitlementBody'
 
     IncludedAssetUsageSuccess:
       description: entitled response to assetUsageReq request for included asset-usage
@@ -1837,8 +2075,8 @@ components:
         - If usageEntitled = true, entitlement is provided for that assetUsage
       # oneOf:
       allOf:
-          - $ref: '#/components/schemas/AssetUsageEntitlement'
-          - $ref: '#/components/schemas/AssetUsageDenial'
+        - $ref: '#/components/schemas/AssetUsageEntitlement'
+        - $ref: '#/components/schemas/AssetUsageDenial'
       # discriminator:
       #   propertyName: usageEntitled
 
@@ -1846,17 +2084,17 @@ components:
     PutAssetUsageRequest:
       description: request for entitlement on assetUsage
       allOf:
-        - $ref: '#/components/schemas/BaseRequestTop'
         - $ref: '#/components/schemas/RequestTopUser'
-        - $ref: '#/components/schemas/RequestTop'
+        - $ref: '#/components/schemas/RequestTopSwSystem'
+        - $ref: '#/components/schemas/BaseRequestTop'
         - $ref: '#/components/schemas/AssetUsageRequest'
 
     PutAssetUsageSuccessResponse:
       description: response to assetUsage request
       allOf:
-        - $ref: '#/components/schemas/BaseRequestTop'
         - $ref: '#/components/schemas/RequestTopUser'
-        - $ref: '#/components/schemas/RequestTop'
+        - $ref: '#/components/schemas/RequestTopSwSystem'
+        - $ref: '#/components/schemas/BaseRequestTop'
         - $ref: '#/components/schemas/ReqUsageEntitled'
         - $ref: '#/components/schemas/AssetUsageResponseBase'
         - $ref: '#/components/schemas/AssetUsageSuccessResponse'
@@ -1864,9 +2102,9 @@ components:
     AssetUsageResponse:
       description: response to assetUsage request on denial - either denial or entitlement per each asset
       allOf:
-        - $ref: '#/components/schemas/BaseRequestTop'
         - $ref: '#/components/schemas/RequestTopUser'
-        - $ref: '#/components/schemas/RequestTop'
+        - $ref: '#/components/schemas/RequestTopSwSystem'
+        - $ref: '#/components/schemas/BaseRequestTop'
         - $ref: '#/components/schemas/ReqUsageEntitled'
         - $ref: '#/components/schemas/AssetUsage'
 
@@ -1901,17 +2139,17 @@ components:
     AssetUsageEventRequest:
       description: notification of asset-usage event to be tracked by LUM with no decision on the entitlement of the action
       allOf:
-        - $ref: '#/components/schemas/BaseRequestTop'
         - $ref: '#/components/schemas/RequestTopUser'
-        - $ref: '#/components/schemas/RequestTop'
+        - $ref: '#/components/schemas/RequestTopSwSystem'
+        - $ref: '#/components/schemas/BaseRequestTop'
         - $ref: '#/components/schemas/AssetUsageEvent'
 
     AssetUsageEventResponse:
       description: response to assetUsageEvent request
       allOf:
-        - $ref: '#/components/schemas/BaseRequestTop'
         - $ref: '#/components/schemas/RequestTopUser'
-        - $ref: '#/components/schemas/RequestTop'
+        - $ref: '#/components/schemas/RequestTopSwSystem'
+        - $ref: '#/components/schemas/BaseRequestTop'
         - $ref: '#/components/schemas/AssetUsageEvent'
         - $ref: '#/components/schemas/AssetUsageEventSeqResponse'
 
@@ -2007,12 +2245,10 @@ components:
 
     ODRLAssignee:
       description: filter the application of permission/prohibition
-        by the users - refinement on assignee - matching constraint on assignee
+        by the users - refinement on assignee - matching constraint on assignee.
+        The ODRL defined source property is not used and is ignored by LUM
+        because the source for LUM is all software-users
       properties:
-        # source:
-        #   description: selection of the user counts
-        #     the source value is ignored by LUM because the source for LUM is all software by softwareLicensorId
-        #   type: string
         refinement:
           description: collection of constraints that limit the selection of the software users
           type: array
@@ -2055,12 +2291,10 @@ components:
 
     ODRLTarget:
       description: filter the application of permission/prohibition
-        by software attributes - refinement on target
+        by software attributes - refinement on target.
+        The ODRL defined source property is not used and is ignored by LUM
+        because the source for LUM is all software by softwareLicensorId
       properties:
-        # source:
-        #   description: selection of the [target software](http://lum/software-licensor/<softwareLicensorId>)
-        #     the source value is ignored by LUM because the source for LUM is all software by softwareLicensorId
-        #   type: string
         refinement:
           description: collection of constraints that limit the selection of the software
           type: array
