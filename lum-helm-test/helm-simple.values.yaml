@@ -19,7 +19,7 @@
 
 image:
   repository: acumos/lum-server
-  tag: 1.0.0
+  tag: 1.0.1
   pullPolicy: Never
 
 ingress:

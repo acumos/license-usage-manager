@@ -17,7 +17,7 @@
  * @file reusable functions that are either totally generic or LUM specific
  */
 
-const uuid = require('uuid/v4');
+const uuid = require('uuid');
 
 const {performance} = require('perf_hooks');
 
@@ -31,7 +31,7 @@ module.exports = {
      * uuid version 4
      * @returns {string} uuid version 4
      */
-    uuid() {return uuid();},
+    uuid() {return uuid.v4();},
     /**
      * await sleep(milliSecs) to wake up after milliSecs
      * @param  {number} milliSecs

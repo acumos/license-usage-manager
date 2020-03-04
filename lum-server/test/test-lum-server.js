@@ -90,6 +90,7 @@ describe('lum-server', function () {
         const testLog = `api[${index.toString().padStart(2,'0')}]: ${expectationFile} ${expectation.req.method} ${expectation.res.statusCode}`;
         it(testLog, function() {
             console.log(`    -> ${utils.milliSecsToString(utils.now())}: ${testLog}`);
+            lumServer.logger.info(`---->> start ${testLog}`);
             chai.assert.isOk(expectation, `unexpected expectation: ${JSON.stringify(expectation)}`);
             mockPg.pgClientMock.reset(expectation.db);
 
@@ -106,7 +107,7 @@ describe('lum-server', function () {
 
             return testReq
                 .then(function(res) {
-                    lumServer.logger.info(`res ${res.statusCode} for ${testLog}:`, res.text);
+                    lumServer.logger.info(`<<---- res ${res.statusCode} for ${testLog}:`, res.text);
                     expect(res).to.be.json;
                     if (res.statusCode === 500 && res.body && res.body.error
                         && expectation.res.statusCode !== res.statusCode) {

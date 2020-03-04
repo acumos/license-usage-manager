@@ -132,7 +132,7 @@ Technology and Frameworks
 
     node.js, 10.16.3, https://nodejs.org
     express.js, 4.17.1, http://expressjs.com/
-    node-postgres, 7.17.1, https://node-postgres.com/
+    node-postgres, 7.18.2, https://node-postgres.com/
     openapi, 3.0.2, https://swagger.io/specification/
     postgres database, 11.5, https://www.postgresql.org/
 

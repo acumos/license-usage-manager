@@ -20,6 +20,22 @@
 License Usage Manager - Release Notes
 =====================================
 
+Version 1.0.1, 4 March 2020
+===========================
+
+lum-server
+..........
+
+- fixed bug on ``GET /api/v1/swid-tags/available-entitlement``
+  that was returning the false positives - the swidTags that require RTU but not having the agreement
+  (`ACUMOS-4051 <https://jira.acumos.org/browse/ACUMOS-4051>`_)
+- unit test code coverage stats
+  Stmts  81.74 %
+  Branch 58.51 %
+  Funcs  93.62 %
+  Lines  83.2  %
+
+
 Version 1.0.0, 7 February 2020
 ==============================
 

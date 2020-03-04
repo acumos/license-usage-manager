@@ -121,8 +121,10 @@ function genSqlToEntitle(getSwidTagForUsage, keys, actionField, userField, reqUs
         sqlOptions.limitFor = ``;
         sqlOptions.selectFields = ``;
         sqlOptions.entitlement = `"availableEntitlement"`;
-        sqlOptions.excludeDenials = `WHERE "denial" IS NULL`;
-        sqlOptions.orderBy = `ORDER BY swid_tag_entitlement."softwareLicensorId", swid_tag_entitlement."swTagId"`;
+        sqlOptions.excludeDenials = `WHERE swtags_ent."denial" IS NULL
+                                       AND (swtags_ent.need_rtu = FALSE
+                                         OR swtags_ent.rtu_sw_id IS NOT NULL)`;
+        sqlOptions.orderBy = `ORDER BY swtags_ent."softwareLicensorId", swtags_ent."swTagId"`;
     }
     return `WITH sw_lp AS (
         SELECT swt.*,
@@ -260,18 +262,18 @@ function genSqlToEntitle(getSwidTagForUsage, keys, actionField, userField, reqUs
                "isUsedBySwCreator", "isRtuRequired",
                ${sqlOptions.selectFields}
                CASE WHEN "denial" IS NULL
-                     AND swid_tag_entitlement.need_rtu = TRUE
-                     AND swid_tag_entitlement.rtu_sw_id IS NOT NULL THEN
+                     AND swtags_ent.need_rtu = TRUE
+                     AND swtags_ent.rtu_sw_id IS NOT NULL THEN
                         JSON_BUILD_OBJECT(
-                            'rightToUseId', swid_tag_entitlement."rightToUseId",
-                            'rightToUseRevision', swid_tag_entitlement."rightToUseRevision",
-                            'assetUsageAgreementId', swid_tag_entitlement."assetUsageAgreementId",
-                            'assetUsageAgreementRevision', swid_tag_entitlement."assetUsageAgreementRevision",
-                            'licenseKeys', swid_tag_entitlement."licenseKeys"
+                            'rightToUseId', swtags_ent."rightToUseId",
+                            'rightToUseRevision', swtags_ent."rightToUseRevision",
+                            'assetUsageAgreementId', swtags_ent."assetUsageAgreementId",
+                            'assetUsageAgreementRevision', swtags_ent."assetUsageAgreementRevision",
+                            'licenseKeys', swtags_ent."licenseKeys"
                         )
                     ELSE NULL END
                     AS ${sqlOptions.entitlement}
-          FROM swid_tag_entitlement
+          FROM swid_tag_entitlement AS swtags_ent
          ${sqlOptions.excludeDenials}
          ${sqlOptions.orderBy}`;
 }
