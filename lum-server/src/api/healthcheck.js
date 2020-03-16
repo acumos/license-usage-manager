@@ -60,7 +60,7 @@ module.exports = {
         try {
             await pgclient.getLumDbInfo(res, true);
         } catch (error) {
-            utils.logError(res, "ERROR checkPg", error.code, error.stack);
+            lumServer.logger.error(res, "ERROR checkPg", error.code, error.stack);
             lumServer.healthcheck.databaseInfo = null;
         }
     },

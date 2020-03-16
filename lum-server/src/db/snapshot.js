@@ -30,7 +30,7 @@ module.exports = {
      */
     async storeSnapshot(res, softwareLicensorId, snapshotType, snapshotKey, snapshotRevision, snapshotBody) {
         const logSnapshot = `storeSnapshot[${softwareLicensorId},${snapshotType},${snapshotKey},${snapshotRevision}]`;
-        utils.logInfo(res, `in ${logSnapshot}`);
+        lumServer.logger.debug(res, `in ${logSnapshot}`);
 
         const keys = new SqlParams();
         keys.addField("softwareLicensorId", softwareLicensorId || "");
@@ -48,6 +48,6 @@ module.exports = {
                         ON CONFLICT (${keys.fields}) DO NOTHING`;
         await pgclient.sqlQuery(res, sqlCmd, keys.getAllValues());
 
-        utils.logInfo(res, `out ${logSnapshot}`);
+        lumServer.logger.debug(res, `out ${logSnapshot}`);
     }
  };

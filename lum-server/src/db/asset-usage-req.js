@@ -49,7 +49,7 @@ module.exports = {
      * @param  {} res
      */
     async putAssetUsageReq(res) {
-        utils.logInfo(res, `in putAssetUsageReq(${res.locals.requestId})`);
+        lumServer.logger.debug(res, `in putAssetUsageReq(${res.locals.requestId})`);
 
         const keys = new SqlParams();
         keys.addField("assetUsageReqId", res.locals.requestId);
@@ -65,14 +65,14 @@ module.exports = {
             (${keys.fields} ${putFields.fields}, "requestStarted")
             VALUES (${keys.idxValues} ${putFields.idxValues}, NOW())`;
         await pgclient.sqlQuery(res, sqlCmd, keys.getAllValues());
-        utils.logInfo(res, `out putAssetUsageReq(${res.locals.requestId})`);
+        lumServer.logger.debug(res, `out putAssetUsageReq(${res.locals.requestId})`);
     },
     /**
      * update asset-usage-req record in database with response to be sent back to the client
      * @param  {} res
      */
     async putAssetUsageResponse(res) {
-        utils.logInfo(res, `in putAssetUsageResponse(${res.locals.requestId})`);
+        lumServer.logger.debug(res, `in putAssetUsageResponse(${res.locals.requestId})`);
 
         const keys = new SqlParams();
         keys.addField("assetUsageReqId", res.locals.requestId);
@@ -87,6 +87,6 @@ module.exports = {
             WHERE ${keys.getWhere("aur")}`;
 
         await pgclient.sqlQuery(res, sqlCmd, keys.getAllValues());
-        utils.logInfo(res, `out putAssetUsageResponse(${res.locals.requestId})`);
+        lumServer.logger.debug(res, `out putAssetUsageResponse(${res.locals.requestId})`);
     }
  };

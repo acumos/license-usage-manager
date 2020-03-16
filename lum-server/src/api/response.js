@@ -14,14 +14,25 @@
 // limitations under the License.
 // ============LICENSE_END=========================================================
 
+const http = require('http');
 const utils = require('../utils');
 const healthcheck = require('./healthcheck');
 const lumErrors = require('../error');
+const acuLogger = require('../logger-acumos');
 
 const resHeader = {requestId: "requestId", requested: "requested", status: "status"};
 
-const lumHttpCodes = {notFound: 204, revoked: 224, denied: 402, invalidDataError: 400, serverError: 500};
-const httpStatuses = {[lumHttpCodes.notFound]: "Not Found", [lumHttpCodes.revoked]: "Revoked", [lumHttpCodes.denied]: "Denied"};
+const lumHttpCodes = {
+    ok: 200, notFound: 204, revoked: 224, denied: 402, invalidDataError: 400, serverError: 500
+};
+
+const lumHttpStatuses = {
+    [lumHttpCodes.notFound]: "Not Found",
+    [lumHttpCodes.revoked]: "Revoked",
+    [lumHttpCodes.denied]: "Denied",
+    [lumHttpCodes.invalidDataError]: "Invalid data error"
+};
+
 
 module.exports = {
     /**
@@ -33,18 +44,27 @@ module.exports = {
     newReq(req, res, next) {
         res.locals.started = utils.now();
         res.locals.stepStarted = res.locals.started;
+
+        const acumosRequestID = req.get('X-ACUMOS-RequestID');
+        res.locals.reqBody = utils.deepCopyTo({}, req.body || {});
+        res.locals.requestId = res.locals.reqBody.requestId || acumosRequestID || utils.uuid();
+
         res.locals.requestHttp = {
-            method: req.method, requestUrl: `${req.protocol}://${req.get('Host')}${req.originalUrl}`,
-            query: req.query, 'Content-Type': req.get('Content-Type'),
-            remoteAddress: req.connection.remoteAddress, ip: req.ip, ips: req.ips
+            method: req.method,
+            requestUrl: `${req.protocol}://${req.get('Host')}${req.originalUrl}`,
+            serverFQDN: req.hostname,
+            path: `${req.baseUrl}${req.path}`,
+            query: req.query,
+            'Content-Type': req.get('Content-Type'),
+            'X-ACUMOS-RequestID': acumosRequestID,
+            userAgent: req.get('User-Agent'),
+            clientIPAddress: req.ip,
+            ips: req.ips
         };
         res.locals.isHealthcheck = req.path.includes('/healthcheck');
         res.locals.params = {};
         res.locals.response = {};
         res.locals.dbdata = {};
-
-        res.locals.reqBody = utils.deepCopyTo({}, req.body || {});
-        res.locals.requestId = res.locals.reqBody.requestId || utils.uuid();
 
         if (req.query.userId && typeof req.query.userId === 'string') {
             res.locals.params.userId = req.query.userId;
@@ -69,7 +89,7 @@ module.exports = {
         res.locals.response.requested = res.locals.reqBody.requested || (new Date()).toISOString();
         res.set(res.locals.response);
         res.set(res.locals.params);
-        utils.logInfo(res, 'newReq', res.locals.requestHttp, res.locals.reqBody);
+        utils.logInfo(res, 'newReq', res.locals.requestHttp, res.locals.reqBody, req.headers);
         next();
     },
     /**
@@ -106,15 +126,21 @@ module.exports = {
         utils.logInfo(res, `params: ${params.join()}`);
     },
     /**
+     * http status codes returned by lum-server
+     * @enum {number} ok: 200, notFound: 204, revoked: 224, denied: 402, invalidDataError: 400, serverError: 500
+     */
+    lumHttpCodes: lumHttpCodes,
+    /**
      * send the response back to the client at the end of successful request processing
      * @param  {} req
      * @param  {} res
      * @param  {} next
      */
     respond(req, res, next) {
-        utils.logInfo(res, `response ${utils.calcReqTime(res)}`, res.statusCode, res.locals.response,
-            'to', res.locals.requestHttp, 'headers:', module.exports.getResHeader(res));
+        utils.logInfo(res, `response ${utils.calcReqTime(res)}`, res.statusCode, res.statusMessage,
+            res.locals.response, 'to', res.locals.requestHttp, 'headers:', module.exports.getResHeader(res));
         res.json(res.locals.response);
+        acuLogger.logForAcumos(res, acuLogger.reqStatuses.exit, 'response', res.locals.response);
         next();
     },
     /**
@@ -125,18 +151,20 @@ module.exports = {
      * @param  {} next
      */
     responseError(error, req, res, next) {
-        utils.logError(res, "responseError - exception on", error, error.stack);
+        lumServer.logger.error(res, "responseError - exception on", error, error.stack);
         if (error instanceof lumErrors.InvalidDataError) {
-            res.status(lumHttpCodes.invalidDataError);
+            res.statusCode = 200;
+            module.exports.setHttpStatus(res, lumHttpCodes.invalidDataError)
         } else {
-            res.status(lumHttpCodes.serverError);
+            module.exports.setHttpStatus(res, lumHttpCodes.serverError)
         }
 
-        utils.logInfo(res, `ERROR response ${utils.calcReqTime(res)}`, res.statusCode, error.stack,
-            'to', res.locals.requestHttp, 'headers:', module.exports.getResHeader(res));
+        utils.logInfo(res, `ERROR response ${utils.calcReqTime(res)}`, res.statusCode, res.statusMessage,
+            error.stack, 'to', res.locals.requestHttp, 'headers:', module.exports.getResHeader(res));
         healthcheck.calcUptime();
         if (res.statusCode < lumHttpCodes.serverError && error.stack) {delete error.stack;}
-        res.json({
+
+        const errorResponse = {
             requestId: res.locals.response.requestId,
             requested: res.locals.response.requested,
             "error": {
@@ -156,33 +184,31 @@ module.exports = {
                 pgStep:   utils.getPgStepInfo(res)
             },
             healthcheck: lumServer.healthcheck
-        });
+        };
+        res.json(errorResponse);
+        acuLogger.logForAcumos(res, acuLogger.reqStatuses.exit, 'response', errorResponse, true);
         next();
     },
     /**
-     * non-200 http status codes returned by lum-server
-     * @enum {number} notFound: 204, revoked: 224, denied: 402, invalidDataError: 400, serverError: 500
-     */
-    lumHttpCodes: lumHttpCodes,
-    /**
      * set the http status at any time of the request processing
      * @param  {} res
-     * @param  {} statusCode
-     * @param  {} recordlName
+     * @param  {number} statusCode
+     * @param  {string} [recordlName]
      */
     setHttpStatus(res, statusCode, recordlName) {
         if (res.statusCode && res.statusCode < statusCode) {
-            const statusMessage = httpStatuses[statusCode];
-            if (statusMessage) {res.statusMessage = statusMessage;}
             res.status(statusCode);
+            res.statusMessage = lumHttpStatuses[res.statusCode] || http.STATUS_CODES[res.statusCode] || 'unknown';
 
-            const status = `${recordlName} ${(statusMessage || statusCode).toString().toLowerCase()}`;
-            if (statusCode !== lumHttpCodes.denied) {
-                res.locals.response.status = status;
+            if (recordlName) {
+                const status = `${recordlName} ${(res.statusMessage || statusCode).toString().toLowerCase()}`;
+                if (statusCode !== lumHttpCodes.denied) {
+                    res.locals.response.status = status;
+                }
+                res.set(resHeader.status, status);
             }
-            res.set(resHeader.status, status);
             res.set(res.locals.params);
-            utils.logInfo(res, "setHttpStatus", res.statusCode, res.locals.response);
+            lumServer.logger.debug(res, "setHttpStatus", res.statusCode, res.statusMessage, res.locals.response);
         }
     },
     /**

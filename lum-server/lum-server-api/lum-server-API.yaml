@@ -19,7 +19,7 @@
 openapi: '3.0.2'
 
 info:
-  version: "1.0.0"
+  version: "1.1.0"
   title: "License Usage Manager (LUM) API"
   contact:
     name: Acumos License Management
@@ -48,6 +48,8 @@ tags:
     description: "reports of all requests with decisions per supplier"
   - name: "info"
     description: "LUM healthcheck and info"
+  - name: "admin"
+    description: "LUM admin to see and change the settings"
 
 paths:
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -76,6 +78,40 @@ paths:
             'application/json; charset=utf-8':
               schema:
                 $ref: '#/components/schemas/HealthcheckResponse'
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+  /admin/config:
+    get:
+      tags: ["admin"]
+      description: returns current configuration of LUM server
+      operationId: getAdminConfig
+      responses:
+        200:
+          description: success
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: '#/components/schemas/AdminConfigResponse'
+
+    put:
+      tags: ["admin"]
+      description: update the current configuration of LUM server
+      operationId: putAdminConfig
+      requestBody:
+        description: request to update the current configuration of LUM server
+        required: true
+        content:
+          'application/json; charset=utf-8':
+            schema:
+              $ref: '#/components/schemas/AdminConfigRequest'
+
+      responses:
+        200:
+          description: success
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: '#/components/schemas/AdminConfigResponse'
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
   /api/v1/swid-tag:
@@ -2428,3 +2464,146 @@ components:
           items:
             $ref: '#/components/schemas/ODRLRule'
 
+    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+    AdminConfigRequest:
+      description: updatable config for LUM server
+      required: [config]
+      properties:
+        config:
+          description: updatable config for LUM server
+          properties:
+            logging:
+              description: updatable config for logging in LUM server
+              properties:
+                logLevel:
+                  description: log level in LUM server
+                  type: string
+                  enum:
+                    - error
+                    - warn
+                    - info
+                    - debug
+
+                logTo:
+                  description: collection of file loggers to turn off or on on LUM server
+                  properties:
+                    devLog:
+                      description: whether to log dev info into file in LUM's internal format
+                      type: boolean
+                    healthcheck:
+                      description: whether to log healthcheck into a separate file
+                      type: boolean
+                    acumos:
+                      description: whether to log info in Acumos specific format (json)
+                      type: boolean
+
+      example:
+        config:
+          logging:
+            logLevel: "debug"
+            logTo:
+              healthcheck: false
+              acumos: true
+
+
+    AdminConfig:
+      description: config for LUM server
+      required: [config]
+      properties:
+        config:
+          description: config for LUM server
+          required: [database]
+          properties:
+            database:
+              description: config of lum-database LUM server
+              properties:
+                user:
+                  description: user on lum-database
+                  type: string
+                password:
+                  description: hex sha256 hash value of password to lum-database. masked format is ***-sha256(<hash>)***
+                  type: string
+                host:
+                  description: hostname of lum-database
+                  type: string
+                database:
+                  description: database schema inside lum-database
+                  type: string
+                port:
+                  description: port for lum-database
+                  type: integer
+                max:
+                  description: maximum number of clients in the pool of connections in LUM server to lum-database
+                  type: integer
+                idleTimeoutMillis:
+                  description: number of milliseconds a client must sit idle in the pool and not be checked out
+                    before it is disconnected from the backend and discarded.
+                  type: integer
+
+            serverName:
+              description: name of the LUM-server service
+              type: string
+            port:
+              description: port for lum-database
+              type: integer
+            maxTxRetryCount:
+              description: maximum number of retries to connect to the database
+                or mitigate the deadlock between the transactions in lum-database
+              type: integer
+
+            logging:
+              description: logging config on LUM server
+              properties:
+                logLevel:
+                  description: log level on LUM server
+                  type: string
+                  enum:
+                    - error
+                    - warn
+                    - info
+                    - debug
+
+                logTo:
+                  description: collection of active loggers on LUM server
+                  properties:
+                    console:
+                      description: always logging to console
+                      type: boolean
+                      default: true
+                    devLog:
+                      description: path to dev log file in LUM's internal format.
+                        this logger is enabled by non-empty env var $LOGDIR
+                      type: string
+                    healthcheck:
+                      description: path to log file for separate logging of healthcheck queries.
+                        this logger is enabled by non-empty env var $LOGDIR
+                      type: string
+                    acumos:
+                      description: path to log file in Acumos specific format (json)
+                      type: string
+
+          example:
+            database:
+              user: lumdb
+              password: "***-sha256(66c199d8a03e95599c1043bc484995d44619be2f2c0d82fe6b3d66fb838533a4)***"
+              host: "lum-database"
+              database: lumdb
+              port: 5432
+              max: 100
+              idleTimeoutMillis: 30000
+            serverName: "lum-server"
+            port: 2080
+            maxTxRetryCount: 10
+            logging:
+              logLevel: "debug"
+              logTo:
+                console: true
+                devLog: "/opt/app/lum/logs/dev_lum-server.log"
+                healthcheck: "/opt/app/lum/logs/healthcheck_lum-server.log"
+                acumos: "/opt/app/lum/log-acu/lum-server.log"
+
+    AdminConfigResponse:
+      description: request to revoke any record to conatin the userId
+      allOf:
+        - $ref: '#/components/schemas/BaseRequestTop'
+        - $ref: '#/components/schemas/AdminConfig'

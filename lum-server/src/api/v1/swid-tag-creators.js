@@ -26,7 +26,7 @@ const dbLicenseProfile = require('../../db/license-profile');
  * @param  {} next
  */
 const putSwidTagCreators = async (req, res, next) => {
-    utils.logInfo(res, `api putSwidTagCreators(${res.locals.params.swTagId})`);
+    lumServer.logger.info(res, `api putSwidTagCreators(${res.locals.params.swTagId})`);
     await pgclient.runTx(res, dbLicenseProfile.activateLicenseProfile, dbSwidTag.putSwidTagCreators);
     next();
 };

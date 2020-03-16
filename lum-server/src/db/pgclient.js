@@ -45,17 +45,25 @@ function logRunStepInfo(res, runStep) {
     utils.logInfo(res, utils.getPgStepInfo(res));
 }
 /**
+ * prepare to run new transaction
+ * @param  {} res
+ */
+function startTx(res, startTxTxt) {
+    if (!res.locals.pg) {res.locals.pg = {};}
+    if (res.locals.pg.txid)         {delete res.locals.pg.txid;}
+    if (res.locals.pg.txNow)        {delete res.locals.pg.txNow;}
+    if (res.locals.pg.txNowDate)    {delete res.locals.pg.txNowDate;}
+    if (res.locals.pg.txStep)       {delete res.locals.pg.txStep;}
+    logRunStepInfo(res, startTxTxt);
+}
+/**
  * connect to database through the pool
  * @param  {} res
  */
 async function connect(res) {
     if (!res.locals.pg.client) {
-        logRunStepInfo(res, "pg.pool.connect");
+        startTx(res, "pg.pool.connect");
         res.locals.pg.client = await lumServer.pgPool.connect();
-        if (res.locals.pg.txid)         {delete res.locals.pg.txid;}
-        if (res.locals.pg.txNow)        {delete res.locals.pg.txNow;}
-        if (res.locals.pg.txNowDate)    {delete res.locals.pg.txNowDate;}
-        if (res.locals.pg.txStep)       {delete res.locals.pg.txStep;}
     }
 }
 /**
@@ -153,7 +161,7 @@ module.exports = {
         const rslt = await res.locals.pg.client.query(sqlCmd, sqlVals);
         const result = {command: rslt.command, rowCount: rslt.rowCount, rows: rslt.rows};
         if (sqlCmd.length > 100) {sqlCmd = `${sqlCmd.substr(0,100)}...`;}
-        logRunStepInfo(res, `sqlQuery result: (${JSON.stringify(result)}) for (${sqlCmd}) with (${JSON.stringify(sqlVals)})`);
+        logRunStepInfo(res, `sqlQuery result: ${JSON.stringify(result)}`);
         delete res.locals.pg.runStep;
         return result;
     },
@@ -168,7 +176,7 @@ module.exports = {
         logRunStepInfo(res, `standaloneQuery (${sqlCmd}) with (${JSON.stringify(sqlVals)})`);
         const rslt = await lumServer.pgPool.query(sqlCmd, sqlVals);
         const result = {command: rslt.command, rowCount: rslt.rowCount, rows: rslt.rows};
-        logRunStepInfo(res, `standaloneQuery result (${JSON.stringify(result)}) for (${sqlCmd}) with (${JSON.stringify(sqlVals)})`);
+        logRunStepInfo(res, `standaloneQuery result: ${JSON.stringify(result)}`);
         if (res.locals.pg.runStep) {delete res.locals.pg.runStep;}
         return result;
     },
@@ -178,7 +186,7 @@ module.exports = {
      * @param  {...function} txSteps
      */
     async runTx(res, ...txSteps) {
-        logRunStepInfo(res, `runTx txSteps[${txSteps.length}]`);
+        startTx(res, `runTx txSteps[${txSteps.length}]`);
         if (txSteps.length) {
             const responseBackup = JSON.stringify(res.locals.response);
             for (res.locals.pg.txRetryCount = 1; res.locals.pg.txRetryCount <= lumServer.config.maxTxRetryCount; ++res.locals.pg.txRetryCount) {
@@ -209,7 +217,7 @@ module.exports = {
                     release(res);
                     break;
                 } catch (error) {
-                    utils.logError(res, utils.getPgStepInfo(res), "ERROR runTx", error.code, error.stack);
+                    lumServer.logger.error(res, utils.getPgStepInfo(res), "ERROR runTx", error.code, error.stack);
                     await rollback(res);
                     release(res);
                     if (error instanceof InvalidDataError) {

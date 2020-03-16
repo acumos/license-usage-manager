@@ -35,7 +35,7 @@ const validateParams = (req, res, next) => {
  * @param  {} next
  */
 const getAssetUsageAgreement = async (req, res, next) => {
-    utils.logInfo(res, `api getAssetUsageAgreement(${res.locals.paramKeys})`);
+    lumServer.logger.info(res, `api getAssetUsageAgreement(${res.locals.paramKeys})`);
     res.locals.dbdata.assetUsageAgreement = null;
     await pgclient.runTx(res, dbAssetUsageAgreement.getAssetUsageAgreement);
 
@@ -51,7 +51,7 @@ const getAssetUsageAgreement = async (req, res, next) => {
         }
     }
 
-    utils.logInfo(res, "out api getAssetUsageAgreement", res.statusCode, response.getResHeader(res));
+    lumServer.logger.debug(res, "out api getAssetUsageAgreement", res.statusCode, response.getResHeader(res));
     next();
 };
 /**
@@ -61,6 +61,7 @@ const getAssetUsageAgreement = async (req, res, next) => {
  * @param  {} next
  */
 const revokeAssetUsageAgreement = async (req, res, next) => {
+    lumServer.logger.info(res, `api revokeAssetUsageAgreement(${res.locals.paramKeys})`);
     await pgclient.runTx(res,
         dbAssetUsageAgreement.revokeAssetUsageAgreement,
         dbAssetUsageAgreement.revokeObsoleteRightToUse
@@ -74,7 +75,7 @@ const revokeAssetUsageAgreement = async (req, res, next) => {
  * @param  {} next
  */
 const putAssetUsageAgreement = async (req, res, next) => {
-    utils.logInfo(res, `api putAssetUsageAgreement(${res.locals.paramKeys})`);
+    lumServer.logger.info(res, `api putAssetUsageAgreement(${res.locals.paramKeys})`);
     await pgclient.runTx(res,
         dbAssetUsageAgreement.validateAssetUsageAgreement,
         dbAssetUsageAgreement.putAssetUsageAgreement,

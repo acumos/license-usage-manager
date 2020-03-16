@@ -19,12 +19,14 @@
                 {
                     "method": "PUT",
                     "requestUrl": "__type__ignore__",
+                    "serverFQDN": "127.0.0.1",
+                    "path": "/api/v1/asset-usage",
                     "query": {
                         "assetUsageId": "alex-usage-1"
                     },
+                    "userAgent": "__type__ignore__",
                     "Content-Type": "application/json; charset=utf-8",
-                    "remoteAddress": "__type__ignore__",
-                    "ip": "__type__ignore__",
+                    "clientIPAddress": "__type__ignore__",
                     "ips": []
                 },
                 {

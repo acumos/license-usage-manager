@@ -20,6 +20,35 @@
 License Usage Manager - Release Notes
 =====================================
 
+Version 1.1.0, 16 March 2020
+============================
+
+lum-server
+..........
+
+- logging ``PUT /asset-usage`` requests, ``PUT /asset-usage-event`` and ``PUT + DELETE /swid-tag``
+  modifications into file ``/opt/app/lum/log-acu/lum-server.log`` for Acumos logging platform
+  to gather from (`ACUMOS-3175 <https://jira.acumos.org/browse/ACUMOS-3175>`_,
+  `ACUMOS-3820 <https://jira.acumos.org/browse/ACUMOS-3820>`_)
+- new API endpoint ``GET-PUT /admin/config`` to see the LUM-server config and allow the admin to
+
+  * change the ``logLevel``
+  * turn on or off the selected file loggers for ``devLog``, ``healthcheck``, ``acumos``
+
+- hide secrets now uses sha256 has instead of * for passwords
+- http status message on response is now populated with LUM values
+- using X-ACUMOS-RequestID from headers if requestId is not provided in the request
+- logging refactored
+- moved some logging to debug level
+- added unit test cases for the new API
+- unit test code coverage stats
+
+  * ``Statements 81.65% 1606/1967``
+  * ``Branches   58.98%  509/863``
+  * ``Functions  94.5%  189/200``
+  * ``Lines      83.07% 1551/1867``
+
+
 Version 1.0.1, 4 March 2020
 ===========================
 

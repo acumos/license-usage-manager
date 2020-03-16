@@ -22,7 +22,7 @@ global.lumServer = {started: new Date()};
 const utils = require('./src/utils');
 
 require('./src/config.js').loadConfig();
-require('./src/logger.js').initLogger(lumServer.config.serverName);
+require('./src/logger.js').initLogger();
 require('./src/db/pgclient.js').initDb();
 
 const healthcheck = require('./src/api/healthcheck');
@@ -43,6 +43,8 @@ lumServer.app.use(express.json({strict: true, limit: '150mb'}));
 lumServer.app.use('/api', lumApi);
 
 lumServer.app.get('/', lumApi);
+
+lumServer.app.use('/admin', require('./src/admin'));
 
 const lumHttpServer = require('http').createServer(lumServer.app);
 

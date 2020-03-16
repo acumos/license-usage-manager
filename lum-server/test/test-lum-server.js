@@ -83,6 +83,11 @@ describe('lum-server', function () {
         console.log('-'.repeat(50));
     });
 
+    afterEach(async function() {
+        lumServer.logger.info(`waiting for logs to flush...`);
+        await utils.sleep(10);
+    });
+
     const expectationFiles = fs.readdirSync('./test/expectations');
     console.log(`${utils.milliSecsToString(utils.now())}: lumServer testing: ${JSON.stringify(expectationFiles)}`);
     expectationFiles.forEach(function(expectationFile, index) {
