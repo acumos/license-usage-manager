@@ -1,5 +1,5 @@
 // ================================================================================
-// Copyright (c) 2019 AT&T Intellectual Property. All rights reserved.
+// Copyright (c) 2019-2020 AT&T Intellectual Property. All rights reserved.
 // ================================================================================
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,6 @@
 // limitations under the License.
 // ============LICENSE_END=========================================================
 
-const utils = require('../../utils');
 const response = require('../response');
 const pgclient = require('../../db/pgclient');
 const dbAssetUsage = require('../../db/asset-usage');
@@ -35,7 +34,7 @@ const validateParams = (req, res, next) => {
  * @param  {} next
  */
 const getAssetUsageTracking = async (req, res, next) => {
-    utils.logInfo(res, `api getAssetUsageTracking(${res.locals.params.softwareLicensorId})`);
+    lumServer.logger.info(res, `api getAssetUsageTracking(${res.locals.params.softwareLicensorId})`);
     res.locals.response.title = `asset-usage-tracking for software-licensor ${res.locals.params.softwareLicensorId}`;
     res.locals.response.asOf = new Date();
     res.locals.response.softwareLicensorId = res.locals.params.softwareLicensorId;
@@ -45,7 +44,7 @@ const getAssetUsageTracking = async (req, res, next) => {
     res.locals.response.assetUsages      = res.locals.dbdata.assetUsageTracking.filter(row =>row.assetUsageType === 'assetUsage'     ).map(row => row.response);
     res.locals.response.assetUsageEvents = res.locals.dbdata.assetUsageTracking.filter(row =>row.assetUsageType === 'assetUsageEvent').map(row => row.response);
 
-    utils.logInfo(res, `out api getAssetUsageTracking(${res.locals.params.softwareLicensorId})`);
+    lumServer.logger.debug(res, `out api getAssetUsageTracking(${res.locals.params.softwareLicensorId})`);
     next();
 };
 

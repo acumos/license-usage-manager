@@ -1,5 +1,5 @@
 // ================================================================================
-// Copyright (c) 2019 AT&T Intellectual Property. All rights reserved.
+// Copyright (c) 2019-2020 AT&T Intellectual Property. All rights reserved.
 // ================================================================================
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ const response = require('../response');
 const pgclient = require('../../db/pgclient');
 const dbSwidTag = require('../../db/swid-tag');
 const dbLicenseProfile = require('../../db/license-profile');
+const acuLogger = require('../../logger-acumos');
+
 /**
  * validate params received in query
  * @param  {} req
@@ -36,7 +38,7 @@ const validateParams = (req, res, next) => {
  * @param  {} next
  */
 const getSwidTag = async (req, res, next) => {
-    utils.logInfo(res, `api getSwidTag(${res.locals.params.swTagId})`);
+    lumServer.logger.info(res, `api getSwidTag(${res.locals.paramKeys})`);
     res.locals.dbdata.swidTags = {};
     utils.addSwidTag(res.locals.dbdata.swidTags, res.locals.params.swTagId);
     res.locals.dbdata.licenseProfiles = {};
@@ -59,7 +61,7 @@ const getSwidTag = async (req, res, next) => {
         }
     }
 
-    utils.logInfo(res, "out api getSwidTag", res.statusCode, response.getResHeader(res));
+    lumServer.logger.debug(res, "out api getSwidTag", res.statusCode, response.getResHeader(res));
     next();
 };
 /**
@@ -69,6 +71,7 @@ const getSwidTag = async (req, res, next) => {
  * @param  {} next
  */
 const revokeSwidTag = async (req, res, next) => {
+    lumServer.logger.info(res, `api revokeSwidTag(${res.locals.paramKeys})`);
     await pgclient.runTx(res, dbSwidTag.revokeSwidTag);
     next();
 };
@@ -79,7 +82,7 @@ const revokeSwidTag = async (req, res, next) => {
  * @param  {} next
  */
 const putSwidTag = async (req, res, next) => {
-    utils.logInfo(res, `api putSwidTag(${res.locals.params.swTagId})`);
+    lumServer.logger.info(res, `api putSwidTag(${res.locals.paramKeys})`);
     await pgclient.runTx(res, dbLicenseProfile.putLicenseProfile, dbSwidTag.putSwidTag);
     next();
 };
@@ -90,8 +93,8 @@ const router = new Router();
 router.use(validateParams);
 router.route('/')
     .get(getSwidTag)
-    .delete(revokeSwidTag, getSwidTag)
-    .put(putSwidTag, getSwidTag);
+    .delete(acuLogger.startLogForAcumos, revokeSwidTag, getSwidTag)
+    .put(acuLogger.startLogForAcumos, putSwidTag, getSwidTag);
 
 module.exports = {
      router: router,

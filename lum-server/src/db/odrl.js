@@ -211,7 +211,7 @@ function consumeConstraint(consumedConstraints, status, ...constraints) {
  */
 function groomConstraint(res, constraint) {
     constraint = utils.deepCopyTo({}, constraint);
-    utils.logDebug(res, 'groomConstraint to groom constraint', constraint);
+    lumServer.logger.debug(res, 'groomConstraint to groom constraint', constraint);
     constraint.dataType = (LEFT_OPERANDS[constraint.leftOperand] || {}).dataType || TYPES.string;
 
     if (constraint.rightOperand == null) {
@@ -267,7 +267,7 @@ function groomConstraint(res, constraint) {
 function mergeTwoConstraints(res, constraint, addon, consumedConstraints) {
     if (!constraint || !addon) {return;}
     if (constraint.leftOperand !== addon.leftOperand) {return;}
-    utils.logDebug(res, 'mergeTwoConstraints constraint', constraint, '<- addon', addon);
+    lumServer.logger.debug(res, 'mergeTwoConstraints constraint', constraint, '<- addon', addon);
 
     if ([constraint.operator, addon.operator].includes(OPERATORS.lumIn)) {
         if (constraint.operator === addon.operator) {
@@ -286,7 +286,7 @@ function mergeTwoConstraints(res, constraint, addon, consumedConstraints) {
             constraint.dataType = addon.dataType;
             constraint.rightOperand = addon.rightOperand.filter(x => compareTwoValues(constraint.operator, x, constraint.rightOperand));
         }
-        utils.logDebug(res, 'merged mergeTwoConstraints constraint', constraint);
+        lumServer.logger.debug(res, 'merged mergeTwoConstraints constraint', constraint);
         return true;
     }
 
@@ -298,7 +298,7 @@ function mergeTwoConstraints(res, constraint, addon, consumedConstraints) {
             } else {
                 consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.ignored, addon);
             }
-            utils.logDebug(res, 'merged mergeTwoConstraints constraint', constraint);
+            lumServer.logger.debug(res, 'merged mergeTwoConstraints constraint', constraint);
             return true;
         }
         if (compareTwoValues(constraint.operator, addon.rightOperand, constraint.rightOperand)) {
@@ -307,7 +307,7 @@ function mergeTwoConstraints(res, constraint, addon, consumedConstraints) {
         } else {
             consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.ignored, addon);
         }
-        utils.logDebug(res, 'merged mergeTwoConstraints constraint', constraint);
+        lumServer.logger.debug(res, 'merged mergeTwoConstraints constraint', constraint);
         return true;
     }
 
@@ -319,7 +319,7 @@ function mergeTwoConstraints(res, constraint, addon, consumedConstraints) {
         } else {
             consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.ignored, addon);
         }
-        utils.logDebug(res, 'merged mergeTwoConstraints constraint', constraint);
+        lumServer.logger.debug(res, 'merged mergeTwoConstraints constraint', constraint);
         return true;
     }
     if (addon.operator === OPERATORS.eq) {
@@ -330,7 +330,7 @@ function mergeTwoConstraints(res, constraint, addon, consumedConstraints) {
             consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.conflicted, constraint, addon);
             constraint.rightOperand = null;
         }
-        utils.logDebug(res, 'merged mergeTwoConstraints constraint', constraint);
+        lumServer.logger.debug(res, 'merged mergeTwoConstraints constraint', constraint);
         return true;
     }
 
@@ -345,7 +345,7 @@ function mergeTwoConstraints(res, constraint, addon, consumedConstraints) {
         consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.overridden, constraint);
         utils.deepCopyTo(constraint, addon);
     }
-    utils.logDebug(res, 'merged mergeTwoConstraints constraint', constraint);
+    lumServer.logger.debug(res, 'merged mergeTwoConstraints constraint', constraint);
     return true;
 }
 /**
@@ -359,7 +359,7 @@ function mergeTwoConstraints(res, constraint, addon, consumedConstraints) {
  */
 function expandProhibitionConstraint(res, constraint, expansion, consumedConstraints) {
     if (!constraint || !expansion) {return;}
-    utils.logDebug(res, 'expandProhibitionConstraint', constraint, '<- expansion', expansion);
+    lumServer.logger.debug(res, 'expandProhibitionConstraint', constraint, '<- expansion', expansion);
 
     if ([constraint.operator, expansion.operator].includes(OPERATORS.lumIn)) {
         if (constraint.operator === expansion.operator) {
@@ -369,14 +369,14 @@ function expandProhibitionConstraint(res, constraint, expansion, consumedConstra
                 Array.prototype.push.apply(constraint.rightOperand, toAdd);
                 constraint.rightOperand.sort();
                 constraint.expanded = true;
-                utils.logDebug(res, 'expanded constraint', constraint);
+                lumServer.logger.debug(res, 'expanded constraint', constraint);
             } else {
                 consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.ignored, expansion);
-                utils.logDebug(res, 'ignored expansion for constraint', constraint);
+                lumServer.logger.debug(res, 'ignored expansion for constraint', constraint);
             }
         } else {
             consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.ignored, expansion);
-            utils.logDebug(res, 'ignored expansion for constraint', constraint);
+            lumServer.logger.debug(res, 'ignored expansion for constraint', constraint);
         }
         return;
     }
@@ -384,17 +384,17 @@ function expandProhibitionConstraint(res, constraint, expansion, consumedConstra
     if (constraint.operator === expansion.operator) {
         if (constraint.operator === OPERATORS.eq) {
             consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.ignored, expansion);
-            utils.logDebug(res, 'ignored expansion for constraint', constraint);
+            lumServer.logger.debug(res, 'ignored expansion for constraint', constraint);
             return;
         }
         if (compareTwoValues(constraint.operator, constraint.rightOperand, expansion.rightOperand)) {
             consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.expanded, constraint);
             utils.deepCopyTo(constraint, expansion);
             constraint.expanded = true;
-            utils.logDebug(res, 'expanded constraint', constraint);
+            lumServer.logger.debug(res, 'expanded constraint', constraint);
         } else {
             consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.ignored, expansion);
-            utils.logDebug(res, 'ignored expansion for constraint', constraint);
+            lumServer.logger.debug(res, 'ignored expansion for constraint', constraint);
         }
         return;
     }
@@ -402,19 +402,19 @@ function expandProhibitionConstraint(res, constraint, expansion, consumedConstra
     // ... here when different operators...
     if (constraint.operator === OPERATORS.eq) {
         consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.ignored, expansion);
-        utils.logDebug(res, 'ignored expansion for constraint', constraint);
+        lumServer.logger.debug(res, 'ignored expansion for constraint', constraint);
         return;
     }
     if (expansion.operator === OPERATORS.eq) {
         consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.ignored, expansion);
-        utils.logDebug(res, 'ignored expansion for constraint', constraint);
+        lumServer.logger.debug(res, 'ignored expansion for constraint', constraint);
         return;
     }
 
     const similarOperators = getSimilarOperators(constraint.operator);
     if (!similarOperators.includes(expansion.operator) || similarOperators.length === 1) {
         consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.ignored, expansion);
-        utils.logDebug(res, 'ignored expansion for constraint', constraint);
+        lumServer.logger.debug(res, 'ignored expansion for constraint', constraint);
         return;
     }
     const weakOperator = similarOperators[similarOperators.length - 1];
@@ -424,10 +424,10 @@ function expandProhibitionConstraint(res, constraint, expansion, consumedConstra
             consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.expanded, constraint, expansion);
             constraint.operator = weakOperator;
             constraint.expanded = true;
-            utils.logDebug(res, 'expanded constraint', constraint);
+            lumServer.logger.debug(res, 'expanded constraint', constraint);
         } else {
             consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.ignored, expansion);
-            utils.logDebug(res, 'ignored expansion for constraint', constraint);
+            lumServer.logger.debug(res, 'ignored expansion for constraint', constraint);
         }
         return;
     }
@@ -436,7 +436,7 @@ function expandProhibitionConstraint(res, constraint, expansion, consumedConstra
         consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.expanded, constraint);
         utils.deepCopyTo(constraint, expansion);
         constraint.expanded = true;
-        utils.logDebug(res, 'expanded constraint', constraint);
+        lumServer.logger.debug(res, 'expanded constraint', constraint);
     }
 }
 
@@ -460,18 +460,18 @@ function groomConstraints(res, constraints, baseConstraints, consumedConstraints
     const mergedConstraints = [];
     for (let addon of baseConstraints.concat(constraints)) {
         addon = groomConstraint(res, addon);
-        utils.logDebug(res, 'groomConstraints groomed addon', addon);
+        lumServer.logger.debug(res, 'groomConstraints groomed addon', addon);
 
         let merged = false;
         for (const constraint of mergedConstraints) {
             merged = mergeTwoConstraints(res, constraint, addon, consumedConstraints);
             if (merged) {
-                utils.logDebug(res, 'groomConstraints merged constraint', constraint);
+                lumServer.logger.debug(res, 'groomConstraints merged constraint', constraint);
                 break;
             }
         }
         if (!merged) {
-            utils.logDebug(res, 'groomConstraints added addon', addon);
+            lumServer.logger.debug(res, 'groomConstraints added addon', addon);
             mergedConstraints.push(addon);
         }
     }
@@ -529,7 +529,7 @@ function groomRules(res, rules, assetUsageRuleType, agreement) {
         const targetRefinement = groomRefinement(res, rule.target, agreement.target,
                                                  groomedRule.consumedConstraints.onTarget);
         if (targetRefinement) {
-            utils.logInfo(res, `${ruleInfo} targetRefinement`, targetRefinement);
+            lumServer.logger.debug(res, `${ruleInfo} targetRefinement`, targetRefinement);
             targetRefinement.forEach(trfn => {
                 const prevConstraint = groomedRule.targetRefinement[trfn.leftOperand];
                 if (prevConstraint) {
@@ -544,10 +544,10 @@ function groomRules(res, rules, assetUsageRuleType, agreement) {
         const assigneeRefinement = groomRefinement(res, rule.assignee, agreement.assignee,
                                                    groomedRule.consumedConstraints.onAssignee);
         if (assigneeRefinement) {
-            utils.logInfo(res, `${ruleInfo} assigneeRefinement`, assigneeRefinement);
+            lumServer.logger.debug(res, `${ruleInfo} assigneeRefinement`, assigneeRefinement);
             assigneeRefinement.forEach(arfn => {
                 if (!((LEFT_OPERANDS[arfn.leftOperand] || {}).assigneeConstraintOn || []).includes(assetUsageRuleType)) {
-                    utils.logInfo(res, `groomRules unexpected assignee constraint`, arfn, 'on', assetUsageRuleType);
+                    lumServer.logger.debug(res, `groomRules unexpected assignee constraint`, arfn, 'on', assetUsageRuleType);
                     consumeConstraint(groomedRule.consumedConstraints.onAssignee, CONSUMED_CONSTRAINTS.unexpected, arfn);
                     return;
                 }
@@ -563,7 +563,7 @@ function groomRules(res, rules, assetUsageRuleType, agreement) {
         }
         const constraints = groomConstraints(res, rule.constraint, null, groomedRule.consumedConstraints.onRule);
         if (constraints) {
-            utils.logInfo(res, `${ruleInfo} constraints`, constraints);
+            lumServer.logger.debug(res, `${ruleInfo} constraints`, constraints);
             constraints.forEach(constraint => {
                 if (((LEFT_OPERANDS[constraint.leftOperand] || {}).usageConstraintOn || []).includes(assetUsageRuleType)) {
                     const prevConstraint = groomedRule.usageConstraints[constraint.leftOperand];
@@ -602,7 +602,7 @@ function groomRules(res, rules, assetUsageRuleType, agreement) {
                     }
                     setTimingFieldsOnRule(res, groomedRule);
                 } else {
-                    utils.logInfo(res, `groomRules unexpected constraint`, constraint, 'on', assetUsageRuleType);
+                    lumServer.logger.debug(res, `groomRules unexpected constraint`, constraint, 'on', assetUsageRuleType);
                     consumeConstraint(groomedRule.consumedConstraints.onRule, CONSUMED_CONSTRAINTS.unexpected, constraint);
                 }
             });
@@ -899,7 +899,7 @@ module.exports = {
             }
         }
 
-        utils.logInfo(res, `groomedAgreement(${res.locals.paramKeys}):`, groomedAgreement);
+        lumServer.logger.debug(res, `groomedAgreement(${res.locals.paramKeys}):`, groomedAgreement);
         return groomedAgreement;
     }
 };

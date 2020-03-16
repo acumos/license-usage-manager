@@ -14,18 +14,26 @@
 // limitations under the License.
 // ============LICENSE_END=========================================================
 
+const utils = require('./utils');
+
 module.exports = {
     /**
      * load config for lum-server from etc/config.json
      * and store it in the global lumServer.config
      */
     loadConfig() {
-        lumServer.config = require('../etc/config.json').lumServer || {};
-        lumServer.config.port              = process.env.APPPORT || lumServer.config.port || 2080;
+        lumServer.config                   = require('../etc/config.json').lumServer || {};
         lumServer.config.serverName        = lumServer.config.serverName || "lum-server";
-        lumServer.config.maxTxRetryCount   = lumServer.config.maxTxRetryCount || 10;
+        lumServer.config.port              = (!isNaN(process.env.APPPORT) && Number(process.env.APPPORT))
+                                            || lumServer.config.port || 2080;
+        lumServer.config.maxTxRetryCount   = lumServer.config.maxTxRetryCount || 100;
         lumServer.config.database          = lumServer.config.database || {};
         lumServer.config.database.password = process.env.DATABASE_PASSWORD || lumServer.config.database.password;
-        lumServer.config.loggerLevel       = process.env.LOGGER_LEVEL || 'info';
+    },
+    /**
+     * @returns copy of the current config with hidden secrets
+     */
+    getConfigForShare() {
+        return JSON.parse(JSON.stringify(lumServer.config, utils.hidePass));
     }
 };

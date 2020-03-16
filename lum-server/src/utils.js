@@ -17,8 +17,8 @@
  * @file reusable functions that are either totally generic or LUM specific
  */
 
+const crypto = require("crypto");
 const uuid = require('uuid');
-
 const {performance} = require('perf_hooks');
 
 module.exports = {
@@ -38,11 +38,15 @@ module.exports = {
      */
     sleep(milliSecs) {return new Promise(resolve => setTimeout(resolve, milliSecs));},
     /**
-     * hide pass* and *password fields in JSON.stringify
+     * hide pass* and *password fields as sha256 hash in JSON.stringify
      * @param  {string} key
      * @param  {} value
      */
-    hidePass(key, value) {return (key && key.toLowerCase().includes("passw") && "*") || value;},
+    hidePass(key, value) {
+        return (key && key.toLowerCase().includes("passw") &&
+            `***-sha256(${crypto.createHash("sha256").update(value).digest("hex")})***`
+        ) || value;
+    },
     /**
      * remove new line symbols from the text
      * @param  {} text
@@ -99,43 +103,24 @@ module.exports = {
         return `[${(res.locals.stepStarted - stepStarted).toFixed(3).padStart(7,' ')} ms]`;
     },
     /**
+     * log prefix with requestId and step timer
+     * @param  {} res
+     */
+    getLogPrefix(res) {
+        return (res && typeof res === 'object' && res.locals
+            && `${res.locals.requestId} ${module.exports.trackStepTime(res)}`) || '';
+    },
+    /**
      * log the info per request
      * @param  {} res
      * @param  {...} args
      */
     logInfo(res, ...args) {
-        const logPrefix = (res && `${res.locals.requestId} ${module.exports.trackStepTime(res)}`) || '';
         if (res && res.locals.isHealthcheck) {
-            lumServer.logForHealthcheck(logPrefix, ...args);
+            lumServer.logForHealthcheck(res, ...args);
         } else {
-            lumServer.logger.info(logPrefix, ...args);
+            lumServer.logger.info(res, ...args);
         }
-    },
-    /**
-     * log the debug per request
-     * @param  {} res
-     * @param  {...} args
-     */
-    logDebug(res, ...args) {
-        const logPrefix = (res && `${res.locals.requestId} ${module.exports.trackStepTime(res)}`) || '';
-        lumServer.logger.debug(logPrefix, ...args);
-    },
-    /**
-     * log the warning per request
-     * @param  {} res
-     * @param  {...} args
-     */
-    logWarn(res, ...args) {
-        lumServer.logger.warn(`${res.locals.requestId} ${module.exports.trackStepTime(res)}`, ...args);
-    },
-    /**
-     * log the error per request
-     * @param  {} res
-     * @param  {...} args
-     */
-    logError(res, ...args) {
-        const logPrefix = (res && `${res.locals.requestId} ${module.exports.trackStepTime(res)}`) || '';
-        lumServer.logger.error(logPrefix, ...args);
     },
     /**
      * safely retrieve a field from any object - body

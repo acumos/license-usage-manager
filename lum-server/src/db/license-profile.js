@@ -1,5 +1,5 @@
 // ================================================================================
-// Copyright (c) 2019 AT&T Intellectual Property. All rights reserved.
+// Copyright (c) 2019-2020 AT&T Intellectual Property. All rights reserved.
 // ================================================================================
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -46,10 +46,10 @@ module.exports = {
      */
     async getLicenseProfile(res) {
         if (Object.keys(res.locals.dbdata.licenseProfiles).every(lp => !lp)) {
-            utils.logInfo(res, `skipped getLicenseProfile(${JSON.stringify(res.locals.dbdata.licenseProfiles)})`);
+            lumServer.logger.debug(res, `skipped getLicenseProfile(${JSON.stringify(res.locals.dbdata.licenseProfiles)})`);
             return;
         }
-        utils.logInfo(res, `in getLicenseProfile(${JSON.stringify(res.locals.dbdata.licenseProfiles)})`);
+        lumServer.logger.debug(res, `in getLicenseProfile(${JSON.stringify(res.locals.dbdata.licenseProfiles)})`);
 
         const keys = new SqlParams();
         keys.setKeyValues("licenseProfileId", res.locals.dbdata.licenseProfiles);
@@ -63,7 +63,7 @@ module.exports = {
         for (const licenseProfile of result.rows) {
             res.locals.dbdata.licenseProfiles[licenseProfile.licenseProfileId] = licenseProfile;
         }
-        utils.logInfo(res, `out getLicenseProfile(${JSON.stringify(res.locals.dbdata.licenseProfiles)})`);
+        lumServer.logger.debug(res, `out getLicenseProfile(${JSON.stringify(res.locals.dbdata.licenseProfiles)})`);
     },
     /**
      * insert/update licenseProfile into database
@@ -79,10 +79,10 @@ module.exports = {
         }
 
         if (!res.locals.params.licenseProfileId) {
-            utils.logInfo(res, `skipped putLicenseProfile(${res.locals.params.licenseProfileId})`);
+            lumServer.logger.debug(res, `skipped putLicenseProfile(${res.locals.params.licenseProfileId})`);
             return;
         }
-        utils.logInfo(res, `in putLicenseProfile(${res.locals.params.licenseProfileId})`);
+        lumServer.logger.debug(res, `in putLicenseProfile(${res.locals.params.licenseProfileId})`);
 
         const keys = new SqlParams();
         keys.addField("licenseProfileId", res.locals.params.licenseProfileId);
@@ -113,7 +113,7 @@ module.exports = {
                 "licenseProfile", res.locals.params.licenseProfileId,
                 snapshotBody.licenseProfileRevision, snapshotBody);
         }
-        utils.logInfo(res, `out putLicenseProfile(${res.locals.params.licenseProfileId})`);
+        lumServer.logger.debug(res, `out putLicenseProfile(${res.locals.params.licenseProfileId})`);
     },
     /**
      * mark the license-profile as active in the database
@@ -121,10 +121,10 @@ module.exports = {
      */
     async activateLicenseProfile(res) {
         if (!res.locals.params.swTagId) {
-            utils.logInfo(res, `skipped activateLicenseProfile(${res.locals.params.swTagId})`);
+            lumServer.logger.debug(res, `skipped activateLicenseProfile(${res.locals.params.swTagId})`);
             return;
         }
-        utils.logInfo(res, `in activateLicenseProfile(${res.locals.params.swTagId})`);
+        lumServer.logger.debug(res, `in activateLicenseProfile(${res.locals.params.swTagId})`);
 
         const keys = new SqlParams();
         keys.addField("swTagId", res.locals.params.swTagId);
@@ -147,6 +147,6 @@ module.exports = {
                 "licenseProfile", res.locals.params.licenseProfileId,
                 snapshotBody.licenseProfileRevision, snapshotBody);
         }
-        utils.logInfo(res, `out activateLicenseProfile(${res.locals.params.swTagId})`);
+        lumServer.logger.debug(res, `out activateLicenseProfile(${res.locals.params.swTagId})`);
     }
 }

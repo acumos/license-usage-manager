@@ -1,5 +1,5 @@
 // ================================================================================
-// Copyright (c) 2019 AT&T Intellectual Property. All rights reserved.
+// Copyright (c) 2019-2020 AT&T Intellectual Property. All rights reserved.
 // ================================================================================
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,6 @@
 // limitations under the License.
 // ============LICENSE_END=========================================================
 
-const utils = require('../utils');
 const pgclient = require('./pgclient');
 const SqlParams = require('./sql-params');
 
@@ -30,7 +29,7 @@ module.exports = {
      */
     async storeSnapshot(res, softwareLicensorId, snapshotType, snapshotKey, snapshotRevision, snapshotBody) {
         const logSnapshot = `storeSnapshot[${softwareLicensorId},${snapshotType},${snapshotKey},${snapshotRevision}]`;
-        utils.logInfo(res, `in ${logSnapshot}`);
+        lumServer.logger.debug(res, `in ${logSnapshot}`);
 
         const keys = new SqlParams();
         keys.addField("softwareLicensorId", softwareLicensorId || "");
@@ -48,6 +47,6 @@ module.exports = {
                         ON CONFLICT (${keys.fields}) DO NOTHING`;
         await pgclient.sqlQuery(res, sqlCmd, keys.getAllValues());
 
-        utils.logInfo(res, `out ${logSnapshot}`);
+        lumServer.logger.debug(res, `out ${logSnapshot}`);
     }
  };

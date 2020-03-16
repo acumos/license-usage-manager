@@ -1,0 +1,39 @@
+{
+    "db": [],
+    "req": {
+        "method": "PUT",
+        "path": "/admin/config",
+        "content-type": "application/json; charset=utf-8",
+        "send": {"config":{"logging":{"logLevel":"debug"}}}
+    },
+    "res": {
+        "statusCode": 200,
+        "body": {
+            "requestId": "__type__uuid__",
+            "requested": "__type__dateTime__",
+            "config": {
+                "database": {
+                    "user": "lumdb",
+                    "password": "***-sha256(66c199d8a03e95599c1043bc484995d44619be2f2c0d82fe6b3d66fb838533a4)***",
+                    "host": "__type__ignore__",
+                    "database": "lumdb",
+                    "port": 5432,
+                    "max": 100,
+                    "idleTimeoutMillis": 30000
+                },
+                "serverName": "lum-server",
+                "maxTxRetryCount": 10,
+                "port": 2080,
+                "logging":{
+                    "logLevel": "debug",
+                    "logTo": {
+                        "console": true,
+                        "devLog": "__type__ignore__",
+                        "healthcheck": "__type__ignore__",
+                        "acumos": "__type__ignore__"
+                    }
+                }
+            }
+        }
+    }
+}

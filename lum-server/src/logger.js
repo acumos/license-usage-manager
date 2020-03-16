@@ -15,6 +15,7 @@
 // limitations under the License.
 // ============LICENSE_END=========================================================
 /* eslint-disable no-console */
+/* eslint-disable no-sync */
 
 const winston = require("winston")
     , path = require('path')
@@ -26,79 +27,233 @@ const fileRotateSize = 100 * 1024 * 1024;
 const logFolder = path.join(__dirname, '../logs');
 try {if (!fs.existsSync(logFolder)) {fs.mkdirSync(logFolder);}}
 catch (e) {console.error(`failed to create log folder ${logFolder}`, e);}
+
+const logLevels = {
+    error: 'error',
+    warn: 'warn',
+    info: 'info',
+    debug: 'debug'
+};
+const transports = {};
+const logFolders = {};
+
 /**
- * setup the log line format
+ * gets the vaid log level
+ * @param  {string} logLevel
+ */
+const getLogLevel = (logLevel) => {
+    return logLevels[(logLevel || '').toString().toLowerCase()];
+};
+/**
+ * log line format for regular logging
  */
 const logFormatText = winston.format.printf(({level, message, timestamp}) => {
   return `${timestamp} ${level.toUpperCase().padStart(10, ' ')}: ${message}`;
 });
+
 /**
- * convert args to the logger into one line string
+ * stringify the arg object into a single line
+ * @param  {} arg
+ * @returns {string}
+ */
+const logStringify = (arg) => {
+    if (typeof arg === 'object') {return JSON.stringify(arg);}
+    if (typeof arg === 'string') {return utils.makeOneLine(arg);}
+    return arg;
+};
+
+/**
+ * log line format for stringified json
+ */
+const logFormatLine = winston.format.printf(({message}) => {return logStringify(message);});
+
+/**
+ * convert args to the logger into one line string.
+ *      When the first arg is res with locals - creates the logPrefix with requestId and timer
  * @param  {function} original
  */
 const logWrapper = (original) => {
-    return (...args) => original(args.map(arg => {
-            if (typeof arg === 'object') {return JSON.stringify(arg);}
-            if (typeof arg === 'string') {return utils.makeOneLine(arg);}
-            return arg;
-        }).join(" "));
+    return (...args) => original(args.map((arg, idx) => {
+        if (!idx) {
+            const logPrefix = utils.getLogPrefix(arg);
+            if (logPrefix) {return logPrefix;}
+        }
+        return logStringify(arg);}
+    ).join(" "));
+};
+
+const setupMainLogger = () => {
+    const coutLogLevel = getLogLevel(process.env.COUT_LEVEL || lumServer.config.logging.logLevel) || logLevels.info;
+    transports.console = new (winston.transports.Console)({level: coutLogLevel});
+
+    const logFile = path.join(logFolder, `dev_${lumServer.config.serverName}.log`);
+    logFolders.devLog = logFolder;
+    try {
+        transports.devLog = new (winston.transports.File)({
+            level: lumServer.config.logging.logLevel,
+            silent: !lumServer.config.logging.logTo.devLog,
+            filename: logFile,
+            tailable: true, maxsize: fileRotateSize, maxFiles: 20, zippedArchive: true
+        });
+        if (lumServer.config.logging.logTo.devLog) {
+            lumServer.config.logging.logTo.devLog = logFile;
+        }
+    } catch (e) {
+        console.error(`no dev logging - failed to create log file ${logFile}`, e);
+        if (transports.devLog) {
+            delete transports.devLog;
+        }
+        if (lumServer.config.logging.logTo.devLog) {
+            delete lumServer.config.logging.logTo.devLog;
+        }
+    }
+
+    const logger = winston.createLogger({
+        format: winston.format.combine(winston.format.timestamp(),
+                                       winston.format.errors({stack: true}), logFormatText),
+        transports: Object.values(transports)
+    });
+
+    logger.error = logWrapper(logger.error);
+    logger.warn  = logWrapper(logger.warn);
+    logger.info  = logWrapper(logger.info);
+    logger.debug = logWrapper(logger.debug);
+
+    lumServer.logger = logger;
+};
+
+/**
+ * setup the logger for healthcheck into a separate file when writing to log files
+ */
+const setupLogForHealthcheck = () => {
+    const logFile = path.join(logFolder, `healthcheck_${lumServer.config.serverName}.log`);
+    logFolders.healthcheck = logFolder;
+    try {
+        transports.healthcheck = new (winston.transports.File)({
+            level: lumServer.config.logging.logLevel,
+            silent: !lumServer.config.logging.logTo.healthcheck,
+            filename: logFile,
+            tailable: true, maxsize: fileRotateSize, maxFiles: 20, zippedArchive: true});
+        const logForHealthcheck = winston.createLogger({
+            format: winston.format.combine(winston.format.timestamp(), logFormatText),
+            transports: [transports.healthcheck]
+        });
+        lumServer.logForHealthcheck = logWrapper(logForHealthcheck.debug);
+        if (lumServer.config.logging.logTo.healthcheck) {
+            lumServer.config.logging.logTo.healthcheck = logFile;
+        }
+    } catch (e) {
+        console.error(`no healthcheck logging - failed to create log file ${logFile}`, e);
+        if (transports.healthcheck) {
+            delete transports.healthcheck;
+        }
+        if (lumServer.config.logging.logTo.healthcheck) {
+            delete lumServer.config.logging.logTo.healthcheck;
+        }
+        lumServer.logForHealthcheck = () => {
+            /* no logging for healthcheck */
+        };
+        lumServer.logger.error(`no logForHealthcheck - failed to create log file ${logFile}`, e);
+    }
+
+};
+
+/**
+ * setup the logger for Acumos logging
+ * -- does not rotate the file per Acumos logging platform reqs
+ * {@link https://wiki.acumos.org/display/OAM/Acumos+Log+Standards}
+ */
+const setupLogForAcumos = () => {
+    const logFolder   = path.join(__dirname, '../log-acu');
+    logFolders.acumos = logFolder;
+    const logFile     = path.join(logFolder, `${lumServer.config.serverName}.log`);
+    try {
+        if (!fs.existsSync(logFolder)) {fs.mkdirSync(logFolder);}
+        transports.acumos = new (winston.transports.File)({
+            level: lumServer.config.logging.logLevel,
+            silent: !lumServer.config.logging.logTo.acumos,
+            filename: logFile
+        });
+        const logForAcumos = winston.createLogger({format: logFormatLine, transports: [transports.acumos]});
+        lumServer.logForAcumos = logWrapper(logForAcumos.info);
+        if (lumServer.config.logging.logTo.acumos) {
+            lumServer.config.logging.logTo.acumos = logFile;
+        }
+    } catch (e) {
+        console.error(`no logForAcumos - failed to create log file ${logFile}`, e);
+        if (transports.acumos) {
+            delete transports.acumos;
+        }
+        if (lumServer.config.logging.logTo.acumos) {
+            delete lumServer.config.logging.logTo.acumos;
+        }
+        lumServer.logForAcumos = () => {
+            /* no logging for Acumos */
+        };
+        lumServer.logger.error(`no logForAcumos - failed to create log file ${logFile}`, e);
+    }
 };
 
 module.exports = {
     /**
-     * setup logger
-     * @param  {string} serverName name of the server
+     * setup loggers
      */
-    initLogger(serverName) {
-        const logFileName = (serverName || '') + '_' + new Date().toISOString().substr(0, 19).replace(/:/g, "") + ".log";
+    initLogger() {
+        lumServer.config.logging          = lumServer.config.logging || {};
+        lumServer.config.logging.logLevel = getLogLevel(process.env.LOGGER_LEVEL
+                                                    || (lumServer.config.logging || {}).logLevel)
+                                                    || logLevels.info;
 
-        const logTo      = [];
-        const transports = [];
-
-        transports.push(new (winston.transports.Console)({
-            level: (process.env.COUT_LEVEL || lumServer.config.loggerLevel)}));
-        logTo.push('console');
-
-        if (process.env.LOGDIR) {
-            const logFile = path.join(logFolder, logFileName);
-            transports.push(new (winston.transports.File)({
-                filename: logFile, level: lumServer.config.loggerLevel,
-                tailable: true, maxsize: fileRotateSize, maxFiles: 20, zippedArchive: true}));
-            logTo.push(logFile);
+        lumServer.config.logging.logTo    = lumServer.config.logging.logTo || {};
+        if (lumServer.config.logging.logTo.console == null) {
+            lumServer.config.logging.logTo.console = true;
+        }
+        if (!lumServer.config.logging.logTo.devLog && process.env.LOGDIR != null) {
+            lumServer.config.logging.logTo.devLog = true;
+        }
+        if (!lumServer.config.logging.logTo.healthcheck && process.env.LOGDIR != null) {
+            lumServer.config.logging.logTo.healthcheck = true;
+        }
+        if (lumServer.config.logging.logTo.acumos == null) {
+            lumServer.config.logging.logTo.acumos = true;
         }
 
-        const logger = winston.createLogger({
-            format: winston.format.combine(winston.format.timestamp(), winston.format.errors({stack: true}),
-                                           logFormatText),
-            transports: transports
-        });
-
-        logger.error   = logWrapper(logger.error);
-        logger.warn    = logWrapper(logger.warn);
-        logger.info    = logWrapper(logger.info);
-        logger.verbose = logWrapper(logger.verbose);
-        logger.debug   = logWrapper(logger.debug);
-        logger.silly   = logWrapper(logger.silly);
-
-        lumServer.logger = logger;
+        setupMainLogger();
 
         lumServer.logger.info("-----------------------------------------------------------------------");
-        lumServer.logger.info("logger started for", serverName, 'to', logTo.join(' and '));
+        lumServer.logger.info(`setup loggers on ${lumServer.config.serverName} with logLevel(${
+            lumServer.config.logging.logLevel})`);
 
-        if (process.env.LOGDIR) {
-            const logFile = path.join(logFolder, 'healthcheck_' + logFileName);
-            const logForHealthcheck = winston.createLogger({
-                format: winston.format.combine(winston.format.timestamp(), winston.format.errors({stack: true}),
-                                               logFormatText),
-                transports: [new (winston.transports.File)({json: false, filename: logFile, maxsize: fileRotateSize})]
-            });
-            lumServer.logForHealthcheck = logWrapper(logForHealthcheck.info);
-            lumServer.logger.info("logForHealthcheck for", serverName, 'to', logFile);
-        } else {
-            lumServer.logForHealthcheck = () => {
-                /* no logging for healthcheck - too often and too many lines */
-            };
-            lumServer.logger.info("no logForHealthcheck for", serverName);
+        setupLogForHealthcheck();
+        setupLogForAcumos();
+
+        lumServer.logger.info('logging to:', lumServer.config.logging.logTo);
+    },
+    /**
+     * change the log level on all loggers and/or silence the file loggers
+     * @param  {} logging new value for log level and silencing files
+     */
+    setLogging(res, logging) {
+        if (!logging) {return;}
+        const logLevel = getLogLevel(logging.logLevel);
+        if (logLevel && logLevel !== lumServer.config.logging.logLevel) {
+            lumServer.logger.info(res, `changing log level from ${lumServer.config.logging.logLevel} to ${logLevel}`);
+            lumServer.config.logging.logLevel = logLevel;
         }
+        for (const trspKey in transports) {
+            const transport = transports[trspKey];
+            if (trspKey === 'console') {
+                transport.level = getLogLevel(process.env.COUT_LEVEL
+                                           || lumServer.config.logging.logLevel) || logLevels.info;
+            } else {
+                transport.level = lumServer.config.logging.logLevel;
+                if (logging.logTo) {
+                    transport.silent = (logging.logTo[trspKey] === false);
+                    lumServer.config.logging.logTo[trspKey] = (!transport.silent &&
+                        path.join(logFolders[trspKey], transport.filename)) || false;
+                }
+            }
+        }
+        lumServer.logger.info('logging settings:', lumServer.config.logging);
     }
 };

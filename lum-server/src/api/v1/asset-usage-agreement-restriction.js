@@ -1,5 +1,5 @@
 // ================================================================================
-// Copyright (c) 2019 AT&T Intellectual Property. All rights reserved.
+// Copyright (c) 2019-2020 AT&T Intellectual Property. All rights reserved.
 // ================================================================================
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,6 @@
 // limitations under the License.
 // ============LICENSE_END=========================================================
 
-const utils = require('../../utils');
 const pgclient = require('../../db/pgclient');
 const assetUsageAgreement = require('./asset-usage-agreement');
 const dbAssetUsageAgreement = require('../../db/asset-usage-agreement');
@@ -26,7 +25,7 @@ const dbAssetUsageAgreement = require('../../db/asset-usage-agreement');
  * @param  {} next
  */
 const putAssetUsageAgreementRestriction = async (req, res, next) => {
-    utils.logInfo(res, `api putAssetUsageAgreementRestriction(${res.locals.paramKeys})`);
+    lumServer.logger.info(res, `api putAssetUsageAgreementRestriction(${res.locals.paramKeys})`);
     await pgclient.runTx(res,
         dbAssetUsageAgreement.validateAssetUsageAgreementRestriction,
         dbAssetUsageAgreement.putAssetUsageAgreementRestriction,
@@ -43,7 +42,7 @@ const putAssetUsageAgreementRestriction = async (req, res, next) => {
  * @param  {} next
  */
 const revokeAssetUsageAgreementRestriction = async (req, res, next) => {
-    utils.logInfo(res, `api revokeAssetUsageAgreementRestriction(${res.locals.paramKeys})`);
+    lumServer.logger.info(res, `api revokeAssetUsageAgreementRestriction(${res.locals.paramKeys})`);
     await pgclient.runTx(res,
         dbAssetUsageAgreement.revokeAssetUsageAgreementRestriction,
         dbAssetUsageAgreement.groomAssetUsageAgreement,

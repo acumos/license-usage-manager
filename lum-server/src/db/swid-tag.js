@@ -54,7 +54,7 @@ module.exports = {
      * @param  {} res
      */
     async getSwidTag(res) {
-        utils.logInfo(res, `in getSwidTag(${JSON.stringify(res.locals.dbdata.swidTags)})`);
+        lumServer.logger.debug(res, `in getSwidTag(${JSON.stringify(res.locals.dbdata.swidTags)})`);
 
         const keys = new SqlParams();
         keys.setKeyValues("swTagId", res.locals.dbdata.swidTags);
@@ -70,14 +70,14 @@ module.exports = {
             res.locals.dbdata.swidTags[swidTag.swTagId].swidTagBody     = swidTag;
             res.locals.dbdata.licenseProfiles[swidTag.licenseProfileId] = null;
         }
-        utils.logInfo(res, `out getSwidTag(${JSON.stringify(res.locals.dbdata.swidTags)})`);
+        lumServer.logger.debug(res, `out getSwidTag(${JSON.stringify(res.locals.dbdata.swidTags)})`);
     },
     /**
      * revoke swid-tag in the database
      * @param  {} res
      */
     async revokeSwidTag(res) {
-        utils.logInfo(res, `in revokeSwidTag(${res.locals.params.swTagId})`);
+        lumServer.logger.debug(res, `in revokeSwidTag(${res.locals.params.swTagId})`);
         const keys = new SqlParams();
         keys.addField("swTagId", res.locals.params.swTagId);
         const putFields = new SqlParams(keys);
@@ -93,7 +93,7 @@ module.exports = {
             await snapshot.storeSnapshot(res, snapshotBody.softwareLicensorId,
                 "swidTag", res.locals.params.swTagId, snapshotBody.swidTagRevision, snapshotBody);
         }
-        utils.logInfo(res, `out revokeSwidTag(${res.locals.params.swTagId})`);
+        lumServer.logger.debug(res, `out revokeSwidTag(${res.locals.params.swTagId})`);
     },
     /**
      * put swid-tag into database
@@ -101,10 +101,10 @@ module.exports = {
      */
     async putSwidTag(res) {
         if (!res.locals.params.swTagId) {
-            utils.logInfo(res, `skipped putSwidTag(${res.locals.params.swTagId})`);
+            lumServer.logger.debug(res, `skipped putSwidTag(${res.locals.params.swTagId})`);
             return;
         }
-        utils.logInfo(res, `in putSwidTag(${res.locals.params.swTagId})`);
+        lumServer.logger.debug(res, `in putSwidTag(${res.locals.params.swTagId})`);
 
         const swidTag = utils.getFromReqByPath(res, "swidTag");
 
@@ -138,7 +138,7 @@ module.exports = {
             await snapshot.storeSnapshot(res, snapshotBody.softwareLicensorId,
                 "swidTag", res.locals.params.swTagId, snapshotBody.swidTagRevision, snapshotBody);
         }
-        utils.logInfo(res, `out putSwidTag(${res.locals.params.swTagId})`);
+        lumServer.logger.debug(res, `out putSwidTag(${res.locals.params.swTagId})`);
     },
     /**
      * put swid-tag creators on swid-tag in the database
@@ -146,10 +146,10 @@ module.exports = {
      */
     async putSwidTagCreators(res) {
         if (!res.locals.params.swTagId) {
-            utils.logInfo(res, `skipped putSwidTagCreators(${res.locals.params.swTagId})`);
+            lumServer.logger.debug(res, `skipped putSwidTagCreators(${res.locals.params.swTagId})`);
             return;
         }
-        utils.logInfo(res, `in putSwidTagCreators(${res.locals.params.swTagId})`);
+        lumServer.logger.debug(res, `in putSwidTagCreators(${res.locals.params.swTagId})`);
 
         const keys = new SqlParams();
         keys.addField("swTagId", res.locals.params.swTagId);
@@ -172,14 +172,14 @@ module.exports = {
             await snapshot.storeSnapshot(res, snapshotBody.softwareLicensorId,
                 "swidTag", res.locals.params.swTagId, snapshotBody.swidTagRevision, snapshotBody);
         }
-        utils.logInfo(res, `out putSwidTagCreators(${res.locals.params.swTagId})`);
+        lumServer.logger.debug(res, `out putSwidTagCreators(${res.locals.params.swTagId})`);
     },
     /**
      * get active swid-tags with license-profile fields
      * @param  {} res
      */
     async getActiveSwidTags(res) {
-        utils.logInfo(res, `in getActiveSwidTags`);
+        lumServer.logger.debug(res, `in getActiveSwidTags`);
 
         const sqlCmd = `SELECT swt."softwareLicensorId", swt."swTagId", swt."swidTagRevision",
                                swt."swPersistentId", swt."swVersion", swt."swProductName",
@@ -192,6 +192,6 @@ module.exports = {
                          ORDER BY swt."softwareLicensorId", swt."swTagId"`;
         const result = await pgclient.standaloneQuery(res, sqlCmd);
         res.locals.response.activeSwidTags = result.rows;
-        utils.logInfo(res, `out getActiveSwidTags(${result.rowCount})`);
+        lumServer.logger.debug(res, `out getActiveSwidTags(${result.rowCount})`);
     }
 };

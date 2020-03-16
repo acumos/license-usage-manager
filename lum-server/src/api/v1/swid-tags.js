@@ -36,6 +36,7 @@ const validateParams = (req, res, next) => {
  * @param  {} next
  */
 const getActiveSwidTags = async (req, res, next) => {
+    lumServer.logger.info(res, `api getActiveSwidTags`);
     await dbSwidTag.getActiveSwidTags(res);
     next();
 };
@@ -46,6 +47,7 @@ const getActiveSwidTags = async (req, res, next) => {
  * @param  {} next
  */
 const getSwidTagsWithAvailableEntitlement = async (req, res, next) => {
+    lumServer.logger.info(res, `api getSwidTagsWithAvailableEntitlement(${res.locals.paramKeys})`);
     await dbAssetUsage.getSwidTagsWithAvailableEntitlement(res);
     next();
 };

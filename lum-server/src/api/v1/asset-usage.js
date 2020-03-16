@@ -19,6 +19,7 @@ const response = require('../response');
 const pgclient = require('../../db/pgclient');
 const dbAssetUsageReq = require('../../db/asset-usage-req');
 const dbAssetUsage = require('../../db/asset-usage');
+const acuLogger = require('../../logger-acumos');
 
 /**
  * validate params received in query
@@ -38,7 +39,7 @@ const validateParams = (req, res, next) => {
  * @param  {} next
  */
 const getAssetUsage = async (req, res, next) => {
-    utils.logInfo(res, `api getAssetUsage(${res.locals.params.assetUsageId})`);
+    lumServer.logger.info(res, `api getAssetUsage(${res.locals.params.assetUsageId})`);
     res.locals.dbdata.assetUsage = null;
     await pgclient.runTx(res, dbAssetUsage.getAssetUsage);
     if (!res.locals.dbdata.assetUsage) {
@@ -49,7 +50,7 @@ const getAssetUsage = async (req, res, next) => {
             response.setHttpStatus(res, res.locals.dbdata.assetUsage.responseHttpCode, "assetUsage");
         }
     }
-    utils.logInfo(res, `out api getAssetUsage(${res.locals.params.assetUsageId})`);
+    lumServer.logger.debug(res, `out api getAssetUsage(${res.locals.params.assetUsageId})`);
     next();
 };
 
@@ -64,6 +65,7 @@ const putAssetUsage = async (req, res, next) => {
     res.locals.response.usageEntitled = null;
 
     res.locals.params.action = res.locals.reqBody.assetUsageReq.action;
+    lumServer.logger.info(res, `api putAssetUsage(${res.locals.params.assetUsageId}, ${res.locals.params.action})`);
 
     res.locals.assetUsages = {};
     res.locals.includedAssetUsageIds = [];
@@ -81,7 +83,6 @@ const putAssetUsage = async (req, res, next) => {
         utils.addSwidTag(res.locals.dbdata.swidTags, assetUsage.swTagId, assetUsage.isIncludedAsset);
     }
 
-    utils.logInfo(res, `api putAssetUsage(${res.locals.params.assetUsageId}, ${res.locals.params.action})`);
     await pgclient.runTx(res,
         dbAssetUsageReq.putAssetUsageReq,
         dbAssetUsage.determineAssetUsageEntitlement,
@@ -98,7 +99,7 @@ const putAssetUsage = async (req, res, next) => {
  * @param  {} res
  */
 const setAssetUsageResponse = (res) => {
-    utils.logInfo(res, `api setAssetUsageResponse(${res.locals.params.assetUsageId}, ${res.locals.params.action})`);
+    lumServer.logger.debug(res, `api setAssetUsageResponse(${res.locals.params.assetUsageId}, ${res.locals.params.action})`);
 
     if (!res.locals.response.usageEntitled) {
         response.setHttpStatus(res, response.lumHttpCodes.denied, "assetUsage");
@@ -113,7 +114,7 @@ const setAssetUsageResponse = (res) => {
         delete assetUsage.isIncludedAsset;
         res.locals.response.assetUsage.includedAssetUsage.push(assetUsage);
     }
-    utils.logInfo(res, `out api setAssetUsageResponse(${res.locals.params.assetUsageId}, ${res.locals.params.action})`);
+    lumServer.logger.debug(res, `out api setAssetUsageResponse(${res.locals.params.assetUsageId}, ${res.locals.params.action})`);
 };
 
 // router
@@ -124,7 +125,7 @@ router.use(validateParams);
 
 router.route('/')
     .get(getAssetUsage)
-    .put(putAssetUsage);
+    .put(acuLogger.startLogForAcumos, putAssetUsage);
 
 module.exports = {
      router: router,
