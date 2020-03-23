@@ -196,5 +196,59 @@
             "swTagId": "alex-1",
             "status": "swidTag revoked"
         }
-    }
+    },
+    "acuLogs": [
+        {
+            "LogTimestamp": "__type__dateTime__",
+            "RequestID": "__type__uuid__",
+            "InvocationID": "DELETE /api/v1/swid-tag",
+            "InstanceID": "__type__uuid__",
+            "Thread": "main",
+            "ServiceName": "lum-server/api/v1/swid-tag",
+            "Partnername": "__type__ignore__",
+            "StatusCode": "INPROGRESS",
+            "ResponseCode": null,
+            "ResponseDescription": null,
+            "Level": "DEBUG",
+            "Severity": "INFO",
+            "ServerFQDN": "__type__ignore__",
+            "ClientIPAddress": "__type__ignore__",
+            "TargetEntity": null,
+            "TargetServiceName": null,
+            "User": "swid-tag-revoker",
+            "Logger": "__type__ignore__",
+            "Mdc": null,
+            "Message": {},
+            "Marker": "ENTRY"
+        },
+        {
+            "LogTimestamp": "__type__dateTime__",
+            "RequestID": "__type__uuid__",
+            "InvocationID": "response",
+            "InstanceID": "__type__uuid__",
+            "Thread": "main",
+            "ServiceName": "lum-server/api/v1/swid-tag",
+            "Partnername": "__type__ignore__",
+            "StatusCode": "COMPLETE",
+            "ResponseCode": 224,
+            "ResponseDescription": "Revoked",
+            "Level": "DEBUG",
+            "Severity": "INFO",
+            "ServerFQDN": "__type__ignore__",
+            "ClientIPAddress": "__type__ignore__",
+            "TargetEntity": null,
+            "TargetServiceName": null,
+            "User": "swid-tag-revoker",
+            "Logger": "__type__ignore__",
+            "Mdc": null,
+            "Message": {
+                "userId": "swid-tag-revoker",
+                "requestId": "__type__uuid__",
+                "requested": "__type__dateTime__",
+                "swTagId": "alex-1",
+                "status": "swidTag revoked"
+            },
+            "Marker": "EXIT"
+        }
+    ]
 }

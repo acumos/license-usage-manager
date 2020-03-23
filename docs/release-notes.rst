@@ -20,6 +20,50 @@
 License Usage Manager - Release Notes
 =====================================
 
+Version 1.2.0, 23 March 2020
+============================
+
+lum-server
+..........
+
+- added optional filtering by start and end date-time or date to
+  ``GET /api/v1/asset-usage-tracking/software-licensor``
+  (`ACUMOS-3630 <https://jira.acumos.org/browse/ACUMOS-3630>`_)
+
+  * ``softwareLicensorId: <Company A>``
+    // required identifier of the entity that issued the licenseProfile
+  * ``startDateTime: <2020-03-10T10:05:02.123Z>``
+    // start date-time or date of the asset-usage request to filter the results by.
+    It is optional and the filtering is inclusive (``startDateTime<=requested``)
+  * ``endDateTime: <2020-03-20T15:26:38.033Z>``
+    // end date-time or date of the asset-usage request to filter the results by.
+    It is optional and the filtering is inclusive (``requested<=endDateTime``).
+    When date is provided in the query, it is converted to
+    the maximal date-time of the same date in GMT time zone.
+    For instance, ``2020-03-19`` converted to ``2020-03-19T23:59:59.999Z``
+
+  * added unit test cases for the changed API
+
+- upgraded to ``node:12.16.1-alpine`` that is LTS now
+- made two docker compose configurations
+
+  * ``docker-compose.yaml`` for testing and production.
+    This config contains the volume mapping with comments on the usage
+
+  * ``docker-compose-dev.yaml`` for development with nodemon
+
+- added Acumos logging to ``PUT /swid-tag-creators`` requests
+  (`ACUMOS-3175 <https://jira.acumos.org/browse/ACUMOS-3175>`_,
+  `ACUMOS-3820 <https://jira.acumos.org/browse/ACUMOS-3820>`_)
+- enhanced the unit tests for the Acumos logging of release ``1.1.0``
+- unit test code coverage stats
+
+  * ``Statements 81.82% 1647/2013``
+  * ``Branches   59.78%  541/905``
+  * ``Functions  94.5%   189/200``
+  * ``Lines      83.28% 1594/1914``
+
+
 Version 1.1.0, 16 March 2020
 ============================
 

@@ -338,5 +338,107 @@
                 ]
             }
         }
-    }
+    },
+    "acuLogs": [
+        {
+            "LogTimestamp": "__type__dateTime__",
+            "RequestID": "02698233-dccc-41c8-bfe6-581108720280",
+            "InvocationID": "PUT /api/v1/asset-usage",
+            "InstanceID": "__type__uuid__",
+            "Thread": "main",
+            "ServiceName": "lum-server/api/v1/asset-usage",
+            "Partnername": "__type__ignore__",
+            "StatusCode": "INPROGRESS",
+            "ResponseCode": null,
+            "ResponseDescription": null,
+            "Level": "DEBUG",
+            "Severity": "INFO",
+            "ServerFQDN": "__type__ignore__",
+            "ClientIPAddress": "__type__ignore__",
+            "TargetEntity": null,
+            "TargetServiceName": null,
+            "User": "alex-sw-creator",
+            "Logger": "__type__ignore__",
+            "Mdc": null,
+            "Message": {
+                "userId": "alex-sw-creator",
+                "requestId": "02698233-dccc-41c8-bfe6-581108720280",
+                "requested": "2020-03-04T18:54:33.031Z",
+                "swMgtSystemId": "alex-sys",
+                "swMgtSystemInstanceId": "123",
+                "swMgtSystemComponent": "dev",
+                "assetUsageReq": {
+                    "swTagId": "alex-1",
+                    "assetUsageId": "alex-usage-1",
+                    "action": "acumos:deploy",
+                    "isIncludedAsset": false,
+                    "includedAssetUsage": [
+                        {
+                            "includedSwTagId": "alex-1",
+                            "includedAssetUsageId": "alex-usage-2"
+                        }
+                    ]
+                }
+            },
+            "Marker": "ENTRY"
+        },
+        {
+            "LogTimestamp": "__type__dateTime__",
+            "RequestID": "02698233-dccc-41c8-bfe6-581108720280",
+            "InvocationID": "response",
+            "InstanceID": "__type__uuid__",
+            "Thread": "main",
+            "ServiceName": "lum-server/api/v1/asset-usage",
+            "Partnername": "__type__ignore__",
+            "StatusCode": "COMPLETE",
+            "ResponseCode": 200,
+            "ResponseDescription": "OK",
+            "Level": "DEBUG",
+            "Severity": "INFO",
+            "ServerFQDN": "__type__ignore__",
+            "ClientIPAddress": "__type__ignore__",
+            "TargetEntity": null,
+            "TargetServiceName": null,
+            "User": "alex-sw-creator",
+            "Logger": "__type__ignore__",
+            "Mdc": null,
+            "Message": {
+                "userId": "alex-sw-creator",
+                "requestId": "02698233-dccc-41c8-bfe6-581108720280",
+                "requested": "2020-03-04T18:54:33.031Z",
+                "swMgtSystemId": "alex-sys",
+                "swMgtSystemInstanceId": "123",
+                "swMgtSystemComponent": "dev",
+                "usageEntitled": true,
+                "assetUsage": {
+                    "swTagId": "alex-1",
+                    "assetUsageId": "alex-usage-1",
+                    "action": "acumos:deploy",
+                    "usageEntitled": true,
+                    "isUsedBySwCreator": true,
+                    "assetUsageSeq": 54,
+                    "swidTagRevision": 1,
+                    "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                    "licenseProfileRevision": 1,
+                    "isRtuRequired": true,
+                    "softwareLicensorId": "swlic",
+                    "includedAssetUsage": [
+                        {
+                            "includedSwTagId": "alex-1",
+                            "includedAssetUsageId": "alex-usage-2",
+                            "usageEntitled": true,
+                            "isUsedBySwCreator": true,
+                            "assetUsageSeq": 46,
+                            "swidTagRevision": 1,
+                            "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                            "licenseProfileRevision": 1,
+                            "isRtuRequired": true,
+                            "softwareLicensorId": "swlic"
+                        }
+                    ]
+                }
+            },
+            "Marker": "EXIT"
+        }
+    ]
 }

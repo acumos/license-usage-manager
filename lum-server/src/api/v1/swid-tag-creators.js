@@ -18,6 +18,8 @@ const pgclient = require('../../db/pgclient');
 const swidTag = require('./swid-tag');
 const dbSwidTag = require('../../db/swid-tag');
 const dbLicenseProfile = require('../../db/license-profile');
+const acuLogger = require('../../logger-acumos');
+
 /**
  * api to put swid-tag-creators on swidTag in database
  * @param  {} req
@@ -25,7 +27,7 @@ const dbLicenseProfile = require('../../db/license-profile');
  * @param  {} next
  */
 const putSwidTagCreators = async (req, res, next) => {
-    lumServer.logger.info(res, `api putSwidTagCreators(${res.locals.params.swTagId})`);
+    lumServer.logger.info(res, `api putSwidTagCreators(${res.locals.paramsStr})`);
     await pgclient.runTx(res, dbLicenseProfile.activateLicenseProfile, dbSwidTag.putSwidTagCreators);
     next();
 };
@@ -33,6 +35,6 @@ const putSwidTagCreators = async (req, res, next) => {
 const Router = require('express-promise-router');
 const router = new Router();
 
-router.put('/', swidTag.validateParams, putSwidTagCreators, swidTag.getSwidTag);
+router.put('/', acuLogger.startLogForAcumos, swidTag.validateParams, putSwidTagCreators, swidTag.getSwidTag);
 
 module.exports = router;

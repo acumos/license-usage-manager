@@ -21,28 +21,21 @@ services:
     build: ./lum-db/
     # replace username/repo:tag with your name and image details
     image: lum-database:1.2.0-SNAPSHOT
-    restart: always
     ports:
       - "5432:5432"
-
-    # uncomment the next line to enable volumes mapping for postgres database
-    # volumes:
-      # replace ./lum/pgdata with the proper path to postgres data folder on next line and uncomment the next line
-      # - ./lum/pgdata:/var/lib/postgresql/data
   lum-server:
-    build: ./lum-server/
+    build:
+      context: ./lum-server/
+      target: build-stage
+      args:
+      - BUILD_DEVELOPMENT=1
+    command: npm run start:dev
     # replace username/repo:tag with your name and image details
     image: lum-server:1.2.0-SNAPSHOT
     depends_on:
       - lum-database
     ports:
       - "2080:2080"
+      - "5858:5858"
     volumes:
-      # if you have the config.json for lum-server put it on next line and uncomment the next line
-      # - ./lum/etc/config.json:/opt/app/lum/etc/config.json
-
-      # Acumos logging - replace ./lum/log-acu with /maven/logs/lum-server or the proper path
-      - ./lum/log-acu:/opt/app/lum/log-acu
-
-      # lum-server dev logs - replace ./lum/logs with the proper path
-      - ./lum/logs:/opt/app/lum/logs
+      - ./lum-server/src:/work/src

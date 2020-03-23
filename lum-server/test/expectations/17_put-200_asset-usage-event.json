@@ -223,5 +223,89 @@
                 "assetUsageSeq": 34
             }
         }
-    }
+    },
+    "acuLogs": [
+        {
+            "LogTimestamp": "__type__dateTime__",
+            "RequestID": "974d44dd-0504-42cd-99ee-aa16804f898c",
+            "InvocationID": "PUT /api/v1/asset-usage-event",
+            "InstanceID": "__type__uuid__",
+            "Thread": "main",
+            "ServiceName": "lum-server/api/v1/asset-usage-event",
+            "Partnername": "__type__ignore__",
+            "StatusCode": "INPROGRESS",
+            "ResponseCode": null,
+            "ResponseDescription": null,
+            "Level": "DEBUG",
+            "Severity": "INFO",
+            "ServerFQDN": "__type__ignore__",
+            "ClientIPAddress": "__type__ignore__",
+            "TargetEntity": null,
+            "TargetServiceName": null,
+            "User": "alex-event",
+            "Logger": "__type__ignore__",
+            "Mdc": null,
+            "Message": {
+                "userId": "alex-event",
+                "requestId": "974d44dd-0504-42cd-99ee-aa16804f898c",
+                "requested": "2020-02-04T20:59:38.715Z",
+                "swMgtSystemId": "alex-sys",
+                "swMgtSystemInstanceId": "123",
+                "swMgtSystemComponent": "dev",
+                "assetUsageEvent": {
+                    "swTagId": "alex-1",
+                    "assetUsageId": "alex-usage-1",
+                    "action": "add-event",
+                    "event": {
+                        "event-test": "got it"
+                    }
+                }
+            },
+            "Marker": "ENTRY"
+        },
+        {
+            "LogTimestamp": "__type__dateTime__",
+            "RequestID": "974d44dd-0504-42cd-99ee-aa16804f898c",
+            "InvocationID": "response",
+            "InstanceID": "__type__uuid__",
+            "Thread": "main",
+            "ServiceName": "lum-server/api/v1/asset-usage-event",
+            "Partnername": "__type__ignore__",
+            "StatusCode": "COMPLETE",
+            "ResponseCode": 200,
+            "ResponseDescription": "OK",
+            "Level": "DEBUG",
+            "Severity": "INFO",
+            "ServerFQDN": "__type__ignore__",
+            "ClientIPAddress": "__type__ignore__",
+            "TargetEntity": null,
+            "TargetServiceName": null,
+            "User": "alex-event",
+            "Logger": "__type__ignore__",
+            "Mdc": null,
+            "Message": {
+                "userId": "alex-event",
+                "requestId": "974d44dd-0504-42cd-99ee-aa16804f898c",
+                "requested": "2020-02-04T20:59:38.715Z",
+                "swMgtSystemId": "alex-sys",
+                "swMgtSystemInstanceId": "123",
+                "swMgtSystemComponent": "dev",
+                "assetUsageEvent": {
+                    "swTagId": "alex-1",
+                    "assetUsageId": "alex-usage-1",
+                    "action": "add-event",
+                    "event": {
+                        "event-test": "got it"
+                    },
+                    "softwareLicensorId": "swlic",
+                    "swidTagRevision": 1,
+                    "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                    "licenseProfileRevision": 1,
+                    "isRtuRequired": true,
+                    "assetUsageSeq": 34
+                }
+            },
+            "Marker": "EXIT"
+        }
+    ]
 }

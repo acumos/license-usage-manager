@@ -948,10 +948,10 @@ module.exports = {
      */
     async getAssetUsage(res) {
         if (!res.locals.params.assetUsageId) {
-            lumServer.logger.debug(res, `skipped getAssetUsage(${res.locals.params.assetUsageId})`);
+            lumServer.logger.debug(res, `skipped getAssetUsage(${res.locals.paramsStr})`);
             return;
         }
-        lumServer.logger.debug(res, `in getAssetUsage(${res.locals.params.assetUsageId})`);
+        lumServer.logger.debug(res, `in getAssetUsage(${res.locals.paramsStr})`);
 
         const keys = new SqlParams();
         keys.addField("assetUsageId", res.locals.params.assetUsageId);
@@ -967,7 +967,7 @@ module.exports = {
         if (result.rows.length) {
             res.locals.dbdata.assetUsage = result.rows[0];
         }
-        lumServer.logger.debug(res, `out getAssetUsage(${res.locals.params.assetUsageId})`);
+        lumServer.logger.debug(res, `out getAssetUsage(${res.locals.paramsStr})`);
     },
     /**
      * main decision entry point to determine the asset-usage entitlement result
@@ -975,10 +975,10 @@ module.exports = {
      */
     async determineAssetUsageEntitlement(res) {
         if (!res.locals.params.assetUsageId) {
-            lumServer.logger.debug(res, `skipped determineAssetUsageEntitlement(${res.locals.params.assetUsageId})`);
+            lumServer.logger.debug(res, `skipped determineAssetUsageEntitlement(${res.locals.paramsStr})`);
             return;
         }
-        lumServer.logger.debug(res, `in determineAssetUsageEntitlement(${res.locals.params.assetUsageId})`);
+        lumServer.logger.debug(res, `in determineAssetUsageEntitlement(${res.locals.paramsStr})`);
 
         for await (const swidTag of Object.values(res.locals.dbdata.swidTags)) {
             await checkRtuForSwidTag(res, swidTag);
@@ -1002,7 +1002,7 @@ module.exports = {
             }
         }
 
-        lumServer.logger.debug(res, `out determineAssetUsageEntitlement(${res.locals.params.assetUsageId})`);
+        lumServer.logger.debug(res, `out determineAssetUsageEntitlement(${res.locals.paramsStr})`);
     },
     /**
      * insert assetUsage records into database
@@ -1010,16 +1010,16 @@ module.exports = {
      */
     async putAssetUsage(res) {
         if (!res.locals.params.assetUsageId) {
-            lumServer.logger.debug(res, `skipped putAssetUsage(${res.locals.params.assetUsageId})`);
+            lumServer.logger.debug(res, `skipped putAssetUsage(${res.locals.paramsStr})`);
             return;
         }
-        lumServer.logger.debug(res, `in putAssetUsage(${res.locals.params.assetUsageId})`);
+        lumServer.logger.debug(res, `in putAssetUsage(${res.locals.paramsStr})`);
 
         for await (const assetUsage of Object.values(res.locals.assetUsages)) {
             await storeAssetUsage(res, assetUsage);
         }
 
-        lumServer.logger.debug(res, `out putAssetUsage(${res.locals.params.assetUsageId})`);
+        lumServer.logger.debug(res, `out putAssetUsage(${res.locals.paramsStr})`);
     },
     /**
      * insert included asset-usage ids into includedAssetUsage table in database
@@ -1027,10 +1027,10 @@ module.exports = {
      */
     async registerIncludedAssetUsage(res) {
         if (!res.locals.includedAssetUsageIds.length) {
-            lumServer.logger.debug(res, `skipped registerIncludedAssetUsage(${res.locals.params.assetUsageId}) - nothing included`);
+            lumServer.logger.debug(res, `skipped registerIncludedAssetUsage(${res.locals.paramsStr}) - nothing included`);
             return;
         }
-        lumServer.logger.debug(res, `in registerIncludedAssetUsage(${res.locals.params.assetUsageId}) ${JSON.stringify(res.locals.includedAssetUsageIds)}`);
+        lumServer.logger.debug(res, `in registerIncludedAssetUsage(${res.locals.paramsStr}) ${JSON.stringify(res.locals.includedAssetUsageIds)}`);
 
         const keys = new SqlParams();
         keys.addField("assetUsageId", res.locals.params.assetUsageId);
@@ -1045,7 +1045,7 @@ module.exports = {
                 ON CONFLICT (${keys.fields}, ${includedKey.keyName}) DO NOTHING`;
         await pgclient.sqlQuery(res, sqlCmd, keys.getAllValues());
 
-        lumServer.logger.debug(res, `out registerIncludedAssetUsage(${res.locals.params.assetUsageId})`);
+        lumServer.logger.debug(res, `out registerIncludedAssetUsage(${res.locals.paramsStr})`);
     },
     /**
      * get the last assetUsageEvent record from database
@@ -1053,10 +1053,10 @@ module.exports = {
      */
     async getAssetUsageEvent(res) {
         if (!res.locals.params.assetUsageId) {
-            lumServer.logger.debug(res, `skipped getAssetUsageEvent(${res.locals.params.assetUsageId})`);
+            lumServer.logger.debug(res, `skipped getAssetUsageEvent(${res.locals.paramsStr})`);
             return;
         }
-        lumServer.logger.debug(res, `in getAssetUsageEvent(${res.locals.params.assetUsageId})`);
+        lumServer.logger.debug(res, `in getAssetUsageEvent(${res.locals.paramsStr})`);
 
         const keys = new SqlParams();
         keys.addField("assetUsageId", res.locals.params.assetUsageId);
@@ -1072,7 +1072,7 @@ module.exports = {
         if (result.rows.length) {
             res.locals.dbdata.assetUsageEvent = result.rows[0];
         }
-        lumServer.logger.debug(res, `out getAssetUsageEvent(${res.locals.params.assetUsageId})`);
+        lumServer.logger.debug(res, `out getAssetUsageEvent(${res.locals.paramsStr})`);
     },
     /**
      * insert the assetUsageReq record for the event into database
@@ -1080,10 +1080,10 @@ module.exports = {
      */
     async putAssetUsageEvent(res) {
         if (!res.locals.params.assetUsageId) {
-            lumServer.logger.debug(res, `skipped putAssetUsageEvent(${res.locals.params.assetUsageId})`);
+            lumServer.logger.debug(res, `skipped putAssetUsageEvent(${res.locals.paramsStr})`);
             return;
         }
-        lumServer.logger.debug(res, `in putAssetUsageEvent(${res.locals.params.assetUsageId})`);
+        lumServer.logger.debug(res, `in putAssetUsageEvent(${res.locals.paramsStr})`);
 
         const keys = new SqlParams();
         keys.addField("assetUsageId", res.locals.params.assetUsageId);
@@ -1140,7 +1140,7 @@ module.exports = {
             utils.copyTo(res.locals.response.assetUsageEvent, licenseProfileAttributes, assetUsageEvent);
             res.locals.response.assetUsageEvent.assetUsageSeq = assetUsageEvent.assetUsageSeq;
         }
-        lumServer.logger.debug(res, `out putAssetUsageEvent(${res.locals.params.assetUsageId})`);
+        lumServer.logger.debug(res, `out putAssetUsageEvent(${res.locals.paramsStr})`);
     },
     /**
      * update the usageMetrics record for the event into database
@@ -1148,10 +1148,10 @@ module.exports = {
      */
     async putAssetUsageEventMetrics(res) {
         if (!res.locals.params.assetUsageId) {
-            lumServer.logger.debug(res, `skipped putAssetUsageEventMetrics(${res.locals.params.assetUsageId})`);
+            lumServer.logger.debug(res, `skipped putAssetUsageEventMetrics(${res.locals.paramsStr})`);
             return;
         }
-        lumServer.logger.debug(res, `in putAssetUsageEventMetrics(${res.locals.params.assetUsageId})`);
+        lumServer.logger.debug(res, `in putAssetUsageEventMetrics(${res.locals.paramsStr})`);
 
         const swidTag = {
             swTagId: res.locals.params.swTagId,
@@ -1162,7 +1162,7 @@ module.exports = {
             }
         };
         await incrementUsageMetrics(res, swidTag);
-        lumServer.logger.debug(res, `out putAssetUsageEventMetrics(${res.locals.params.assetUsageId})`);
+        lumServer.logger.debug(res, `out putAssetUsageEventMetrics(${res.locals.paramsStr})`);
     },
     /**
      * get assetUsageReq records per softwareLicensorId from the database
@@ -1170,21 +1170,42 @@ module.exports = {
      */
     async getAssetUsageTracking(res) {
         if (!res.locals.params.softwareLicensorId) {
-            lumServer.logger.debug(res, `skipped getAssetUsageTracking(${res.locals.params.softwareLicensorId})`);
+            lumServer.logger.debug(res, `skipped getAssetUsageTracking(${res.locals.paramsStr})`);
             return;
         }
-        lumServer.logger.debug(res, `in getAssetUsageTracking(${res.locals.params.softwareLicensorId})`);
+        lumServer.logger.debug(res, `in getAssetUsageTracking(${res.locals.paramsStr})`);
 
         const keys = new SqlParams();
         keys.addField("softwareLicensorId", res.locals.params.softwareLicensorId);
+        const startDateTime = new SqlParams(keys);
+        const requested = `COALESCE((aur."response"->>'requested')::TIMESTAMPTZ, aur."requestStarted")`;
+        let startDateTimeFilter = '';
+        if (res.locals.params.startDateTime) {
+            startDateTime.addField("startDateTime", res.locals.params.startDateTime);
+            startDateTimeFilter = `AND ${requested} >= ${startDateTime.idxFirstValue}::TIMESTAMPTZ`;
+        }
 
-        const sqlCmd = `WITH req_ids AS (SELECT DISTINCT auh."assetUsageReqId" FROM "assetUsageHistory" AS auh WHERE ${keys.getWhere("auh")})
-            SELECT aur."assetUsageType", aur."response" FROM "assetUsageReq" AS aur, req_ids
-            WHERE aur."assetUsageReqId" = req_ids."assetUsageReqId" ORDER BY aur."requestStarted", aur."assetUsageReqId"`;
+        const endDateTime = new SqlParams(startDateTime);
+        let endDateTimeFilter = '';
+        if (res.locals.params.endDateTime) {
+            endDateTime.addField("endDateTime", res.locals.params.endDateTime);
+            endDateTimeFilter = `AND ${requested} <= ${endDateTime.idxFirstValue}::TIMESTAMPTZ`;
+        }
 
-        const result = await pgclient.sqlQuery(res, sqlCmd, keys.values);
+        const sqlCmd = `WITH req_ids AS (
+                SELECT DISTINCT auh."assetUsageReqId"
+                  FROM "assetUsageHistory" AS auh
+                 WHERE ${keys.getWhere("auh")})
+            SELECT aur."assetUsageType", aur."response"
+              FROM "assetUsageReq" AS aur, req_ids
+             WHERE aur."assetUsageReqId" = req_ids."assetUsageReqId"
+                ${startDateTimeFilter}
+                ${endDateTimeFilter}
+             ORDER BY ${requested}, aur."assetUsageReqId"`;
+
+        const result = await pgclient.sqlQuery(res, sqlCmd, keys.getAllValues());
         res.locals.dbdata.assetUsageTracking = result.rows;
-        lumServer.logger.debug(res, `out getAssetUsageTracking(${res.locals.params.softwareLicensorId})`);
+        lumServer.logger.debug(res, `out getAssetUsageTracking(${res.locals.paramsStr})`);
     },
     /**
      * get swid-tags with available-entitlement from database per userId and action
@@ -1192,10 +1213,10 @@ module.exports = {
      */
     async getSwidTagsWithAvailableEntitlement(res) {
         if (!res.locals.params.action || !res.locals.params.userId) {
-            lumServer.logger.debug(res, `skipped getSwidTagsWithAvailableEntitlement(${res.locals.paramKeys})`);
+            lumServer.logger.debug(res, `skipped getSwidTagsWithAvailableEntitlement(${res.locals.paramsStr})`);
             return;
         }
-        lumServer.logger.debug(res, `in getSwidTagsWithAvailableEntitlement(${res.locals.paramKeys})`);
+        lumServer.logger.debug(res, `in getSwidTagsWithAvailableEntitlement(${res.locals.paramsStr})`);
 
         const keys = new SqlParams();
         const actionField = new SqlParams();
@@ -1211,6 +1232,6 @@ module.exports = {
 
         result.rows.forEach(est => {if (est.availableEntitlement == null) {delete est.availableEntitlement;}});
         res.locals.response.swidTagsWithAvailableEntitlement = result.rows;
-        lumServer.logger.debug(res, `out getSwidTagsWithAvailableEntitlement(${res.locals.paramKeys}): ${result.rows.length} rows`);
+        lumServer.logger.debug(res, `out getSwidTagsWithAvailableEntitlement(${res.locals.paramsStr}): ${result.rows.length} rows`);
     }
  };

@@ -38,7 +38,7 @@ const validateParams = (req, res, next) => {
  * @param  {} next
  */
 const getSwidTag = async (req, res, next) => {
-    lumServer.logger.info(res, `api getSwidTag(${res.locals.paramKeys})`);
+    lumServer.logger.info(res, `api getSwidTag(${res.locals.paramsStr})`);
     res.locals.dbdata.swidTags = {};
     utils.addSwidTag(res.locals.dbdata.swidTags, res.locals.params.swTagId);
     res.locals.dbdata.licenseProfiles = {};
@@ -71,7 +71,7 @@ const getSwidTag = async (req, res, next) => {
  * @param  {} next
  */
 const revokeSwidTag = async (req, res, next) => {
-    lumServer.logger.info(res, `api revokeSwidTag(${res.locals.paramKeys})`);
+    lumServer.logger.info(res, `api revokeSwidTag(${res.locals.paramsStr})`);
     await pgclient.runTx(res, dbSwidTag.revokeSwidTag);
     next();
 };
@@ -82,7 +82,7 @@ const revokeSwidTag = async (req, res, next) => {
  * @param  {} next
  */
 const putSwidTag = async (req, res, next) => {
-    lumServer.logger.info(res, `api putSwidTag(${res.locals.paramKeys})`);
+    lumServer.logger.info(res, `api putSwidTag(${res.locals.paramsStr})`);
     await pgclient.runTx(res, dbLicenseProfile.putLicenseProfile, dbSwidTag.putSwidTag);
     next();
 };

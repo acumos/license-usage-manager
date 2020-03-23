@@ -19,6 +19,7 @@
 global.lumServer = {};
 
 const fs = require('fs')
+    , readline = require('readline')
     , chai = require('chai')
     , chaiHttp = require('chai-http')
     , mockRequire = require('mock-require')
@@ -30,6 +31,8 @@ const utils  = require('../src/utils')
 
 chai.use(chaiHttp);
 
+const acuLogPath = './log-acu/lum-server.log';
+
 /**
  * generate integer steps
  * @param  {number} maxCount
@@ -38,12 +41,43 @@ async function* asyncCountGenerator(maxCount = 5) {
     for (var i = 0; i < maxCount; ++i) {yield i;}
 }
 
+/**
+ * remove the log file from fs
+ * @param  {string} path to the file
+ */
+function removeFile(path) {
+    if (fs.existsSync(path)) {fs.unlinkSync(path);}
+}
+
+/**
+ * read json lines from the acumos log file and filter by requestId
+ * @param  {string} requestId filter record by RequestID
+ * @returns {[]} array of parsed lines
+ */
+async function readAcuLog(requestId) {
+    await utils.sleep(10);
+    const rl = readline.createInterface({input: fs.createReadStream(acuLogPath), crlfDelay: Infinity});
+    const lines = [];
+    for await (const line of rl) {
+        const logEntry = JSON.parse(line);
+        if (logEntry.RequestID === requestId) {
+            lines.push(logEntry);
+        }
+    }
+    return lines;
+}
+
+
 before(function() {
     process.env.NODE_VERSION = process.env.NODE_VERSION || 'test-version';
     process.env.COUT_LEVEL = "error";
     process.env.LOGDIR = "logs";
 
     console.log(`${utils.milliSecsToString(utils.now())}: before all testing ${process.env.NODE_VERSION} ${(new Date()).toISOString()}`);
+
+    removeFile(acuLogPath);
+    removeFile('./logs/dev_lum-server.log');
+    removeFile('./logs/healthcheck_lum-server.log');
     mockRequire('pg', './mock-pg');
 });
 
@@ -103,7 +137,8 @@ describe('lum-server', function () {
             chai.assert.oneOf(expectation.req.method, ["GET", "PUT", "DELETE"], `unexpected expectation.req.method: ${expectation.req.method}`);
             chai.assert.isString(expectation.req.path, `unexpected expectation.req.path: ${expectation.req.path}`);
 
-            var testReq = chai.request(lumServer.app);
+            let testReq = chai.request(lumServer.app);
+            let requestId;
             if (expectation.req.method === "GET")           {testReq = testReq.get(expectation.req.path);
             } else if (expectation.req.method === "PUT")    {testReq = testReq.put(expectation.req.path);
             } else if (expectation.req.method === "DELETE") {testReq = testReq.delete(expectation.req.path);}
@@ -124,6 +159,19 @@ describe('lum-server', function () {
                     mockPg.pgClientMock.verify();
 
                     mockUtils.assertDeepEqual(res.body, expectation.res.body, `Unexpected res for ${testLog}`);
+                    requestId = res.body.requestId;
+                    if (expectation.acuLogs) {
+                        lumServer.logger.info(`<<---- expecting ${
+                            expectation.acuLogs.length} acuLogs for ${requestId}`);
+                        return readAcuLog(requestId);
+                    }
+                })
+                .then(function(acuLogs) {
+                    if (expectation.acuLogs) {
+                        lumServer.logger.info(`<<---- got ${acuLogs.length} acuLogs:`, acuLogs);
+                        mockUtils.assertDeepEqual(acuLogs, expectation.acuLogs, `Unexpected acuLogs for ${testLog}`);
+                        lumServer.logger.info(`<<---- done`);
+                    }
                 });
         });
     });

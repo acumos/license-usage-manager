@@ -18,7 +18,7 @@
 # Dockerfile for lum-server
 
 # The instructions for the first stage
-FROM node:10.16.3-alpine as build-stage
+FROM node:12.16.1-alpine as build-stage
 
 ARG BUILD_DEVELOPMENT
 # if --build-arg BUILD_DEVELOPMENT=1, set NODE_ENV to 'development' or set to null otherwise.
@@ -28,12 +28,11 @@ ENV NODE_ENV=${NODE_ENV:-production}
 
 WORKDIR /work/
 COPY package*.json       ./
-COPY ./lum-server-api/   ./lum-server-api/
+COPY ./*.txt             .
 COPY ./lum-server.js     ./lum-server.js
 COPY ./src/              ./src/
-COPY ./*.txt             .
-COPY ./etc/              ./etc/
 COPY ./lum-server-api/   ./lum-server-api/
+COPY ./etc/              ./etc/
 RUN ls -la && npm install --production --quiet \
  && ls -la && npm ls --depth 0 && echo "$(ls -l node_modules | grep -c ^d) folders in node_modules"
 
@@ -41,7 +40,7 @@ RUN if [ "$BUILD_DEVELOPMENT" == "1" ]; \
     then echo 'installing nodemon' && npm install nodemon ; \
     fi
 
-FROM node:10.16.3-alpine as lint-stage
+FROM node:12.16.1-alpine as lint-stage
 
 ## ES lint
 WORKDIR /js-lint-work/
@@ -61,7 +60,7 @@ RUN npm install speccy@0.11.0 --no-save --production \
  && npm run lint-spec
 
 # unit testing with coverage
-FROM node:10.16.3-alpine as unit-test-stage
+FROM node:12.16.1-alpine as unit-test-stage
 
 WORKDIR /unit-test-stage/
 COPY --from=build-stage /work .
@@ -73,7 +72,7 @@ RUN ls -la && npm ls --depth 0 && echo "$(ls -l node_modules | grep -c ^d) folde
  && npm run coverage
 
 # The instructions for last runtime stage
-FROM node:10.16.3-alpine
+FROM node:12.16.1-alpine
 
 ARG BUILD_DEVELOPMENT
 # if --build-arg BUILD_DEVELOPMENT=1, set NODE_ENV to 'development' or set to null otherwise.
@@ -90,9 +89,8 @@ WORKDIR ${APPDIR}
 COPY --from=build-stage /work/ .
 
 RUN if [ "$NODE_ENV" == "production" ]; \
-    then echo 'prune packages' && npm prune --production \
-      && ls -la && npm ls --depth 0 && echo "$(ls -l node_modules | grep -c ^d) folders in node_modules" \
-      && echo 'removing npm'   && npm remove -g npm; \
+    then ls -la && npm ls --depth 0 && echo "$(ls -l node_modules | grep -c ^d) folders in node_modules" \
+      && echo 'removing npm' && npm remove -g npm; \
     fi
 
 RUN addgroup ${APPUSER} \

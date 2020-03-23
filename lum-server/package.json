@@ -1,7 +1,7 @@
 {
   "name": "lum-server",
   "description": "License Usage Manager (LUM) for Acumos and ONAP",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "main": "lum-server.js",
   "repository": {
     "type": "git",
@@ -16,7 +16,7 @@
     "coverage": "nyc --reporter html --reporter text npm test"
   },
   "engines": {
-    "node": ">=10.16.3"
+    "node": ">=12.16.1"
   },
   "dependencies": {
     "express": "4.17.1",
@@ -38,7 +38,7 @@
   "devDependencies": {
     "chai": "4.2.0",
     "chai-http": "4.3.0",
-    "mocha": "7.1.0",
+    "mocha": "7.1.1",
     "mock-require": "3.0.3",
     "nyc": "15.0.0"
   }

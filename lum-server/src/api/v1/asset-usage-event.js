@@ -29,7 +29,7 @@ const acuLogger = require('../../logger-acumos');
  * @param  {} next
  */
 const getAssetUsageEvent = async (req, res, next) => {
-    lumServer.logger.info(res, `api getAssetUsageEvent(${res.locals.params.assetUsageId})`);
+    lumServer.logger.info(res, `api getAssetUsageEvent(${res.locals.paramsStr})`);
     res.locals.dbdata.assetUsageEvent = null;
     await pgclient.runTx(res, dbAssetUsage.getAssetUsageEvent);
     if (!res.locals.dbdata.assetUsageEvent) {
@@ -40,7 +40,7 @@ const getAssetUsageEvent = async (req, res, next) => {
             response.setHttpStatus(res, res.locals.dbdata.assetUsageEvent.responseHttpCode, "assetUsageEvent");
         }
     }
-    lumServer.logger.debug(res, `out api getAssetUsageEvent(${res.locals.params.assetUsageId})`);
+    lumServer.logger.debug(res, `out api getAssetUsageEvent(${res.locals.paramsStr})`);
     next();
 };
 /**
@@ -56,8 +56,9 @@ const putAssetUsageEvent = async (req, res, next) => {
 
     res.locals.params.action = assetUsageEvent.action;
     res.locals.params.swTagId = assetUsageEvent.swTagId;
+    res.locals.paramsStr = JSON.stringify(res.locals.params);
 
-    lumServer.logger.info(res, `api putAssetUsageEvent(${res.locals.params.assetUsageId}, ${res.locals.params.action})`);
+    lumServer.logger.info(res, `api putAssetUsageEvent(${res.locals.paramsStr})`);
     await pgclient.runTx(res,
         dbAssetUsageReq.putAssetUsageReq,
         dbAssetUsage.putAssetUsageEvent,

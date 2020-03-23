@@ -552,5 +552,201 @@
                 ]
             }
         }
-    }
+    },
+    "acuLogs": [
+        {
+            "LogTimestamp": "__type__dateTime__",
+            "RequestID": "98bf9b67-e0a1-412e-84c0-e0856fa6a816",
+            "InvocationID": "PUT /api/v1/asset-usage",
+            "InstanceID": "__type__uuid__",
+            "Thread": "main",
+            "ServiceName": "lum-server/api/v1/asset-usage",
+            "Partnername": "__type__ignore__",
+            "StatusCode": "INPROGRESS",
+            "ResponseCode": null,
+            "ResponseDescription": null,
+            "Level": "DEBUG",
+            "Severity": "INFO",
+            "ServerFQDN": "__type__ignore__",
+            "ClientIPAddress": "__type__ignore__",
+            "TargetEntity": null,
+            "TargetServiceName": null,
+            "User": "alex-usage",
+            "Logger": "__type__ignore__",
+            "Mdc": null,
+            "Message": {
+                "userId": "alex-usage",
+                "requestId": "98bf9b67-e0a1-412e-84c0-e0856fa6a816",
+                "requested": "2020-03-04T18:45:55.399Z",
+                "swMgtSystemId": "alex-sys",
+                "swMgtSystemInstanceId": "123",
+                "swMgtSystemComponent": "dev",
+                "assetUsageReq": {
+                    "swTagId": "alex-1",
+                    "assetUsageId": "alex-usage-1",
+                    "action": "acumos:deploy",
+                    "isIncludedAsset": false,
+                    "includedAssetUsage": [
+                        {
+                            "includedSwTagId": "alex-1",
+                            "includedAssetUsageId": "alex-usage-2"
+                        }
+                    ]
+                }
+            },
+            "Marker": "ENTRY"
+        },
+        {
+            "LogTimestamp": "__type__dateTime__",
+            "RequestID": "98bf9b67-e0a1-412e-84c0-e0856fa6a816",
+            "InvocationID": "response",
+            "InstanceID": "__type__uuid__",
+            "Thread": "main",
+            "ServiceName": "lum-server/api/v1/asset-usage",
+            "Partnername": "__type__ignore__",
+            "StatusCode": "COMPLETE",
+            "ResponseCode": 402,
+            "ResponseDescription": "Denied",
+            "Level": "DEBUG",
+            "Severity": "INFO",
+            "ServerFQDN": "__type__ignore__",
+            "ClientIPAddress": "__type__ignore__",
+            "TargetEntity": null,
+            "TargetServiceName": null,
+            "User": "alex-usage",
+            "Logger": "__type__ignore__",
+            "Mdc": null,
+            "Message": {
+                "userId": "alex-usage",
+                "requestId": "98bf9b67-e0a1-412e-84c0-e0856fa6a816",
+                "requested": "2020-03-04T18:45:55.399Z",
+                "swMgtSystemId": "alex-sys",
+                "swMgtSystemInstanceId": "123",
+                "swMgtSystemComponent": "dev",
+                "usageEntitled": false,
+                "assetUsage": {
+                    "swTagId": "alex-1",
+                    "assetUsageId": "alex-usage-1",
+                    "action": "acumos:deploy",
+                    "usageEntitled": false,
+                    "isUsedBySwCreator": false,
+                    "assetUsageSeq": 53,
+                    "swidTagRevision": 1,
+                    "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                    "licenseProfileRevision": 1,
+                    "isRtuRequired": true,
+                    "softwareLicensorId": "swlic",
+                    "assetUsageDenialSummary": "swid-tag(alex-1) has been found and asset-usage-agreements from swlic have been found but 3 constraints on the agreements(alex-agr, alex-agr2) deny the usage of this asset",
+                    "assetUsageDenial": [
+                        {
+                            "denialType": "matchingConstraintOnAssignee",
+                            "denialReason": "user not in assignee lum:users: (alex-usage not lum:in [\"alex\", \"justin\", \"michelle\"]) on permission(perm-1) under agreement(alex-agr) for action(acumos:deploy)",
+                            "deniedAction": "acumos:deploy",
+                            "deniedAssetUsageAgreementId": "alex-agr",
+                            "deniedAssetUsageAgreementRevision": 23,
+                            "deniedRightToUseId": "perm-1",
+                            "deniedRightToUseRevision": 23,
+                            "denialReqItemName": "userId",
+                            "denialReqItemValue": "alex-usage",
+                            "deniedConstraint": {
+                                "origin": "fromRestriction",
+                                "dataType": "string",
+                                "operator": "lum:in",
+                                "leftOperand": "lum:users",
+                                "rightOperand": [
+                                    "alex",
+                                    "justin",
+                                    "michelle"
+                                ]
+                            }
+                        },
+                        {
+                            "denialType": "rightToUseRevoked",
+                            "denialReason": "rightToUse revoked on permission(perm-1) under agreement(alex-agr2) for action(acumos:deploy)",
+                            "deniedAction": "acumos:deploy",
+                            "deniedAssetUsageAgreementId": "alex-agr2",
+                            "deniedAssetUsageAgreementRevision": 4,
+                            "deniedRightToUseId": "perm-1",
+                            "deniedRightToUseRevision": 2,
+                            "denialReqItemName": "rightToUseActive",
+                            "denialReqItemValue": true
+                        },
+                        {
+                            "denialType": "rightToUseRevoked",
+                            "denialReason": "rightToUse revoked on permission(perm-21) under agreement(alex-agr2) for action(acumos:deploy)",
+                            "deniedAction": "acumos:deploy",
+                            "deniedAssetUsageAgreementId": "alex-agr2",
+                            "deniedAssetUsageAgreementRevision": 4,
+                            "deniedRightToUseId": "perm-21",
+                            "deniedRightToUseRevision": 4,
+                            "denialReqItemName": "rightToUseActive",
+                            "denialReqItemValue": true
+                        }
+                    ],
+                    "includedAssetUsage": [
+                        {
+                            "includedSwTagId": "alex-1",
+                            "includedAssetUsageId": "alex-usage-2",
+                            "usageEntitled": false,
+                            "isUsedBySwCreator": false,
+                            "assetUsageSeq": 45,
+                            "swidTagRevision": 1,
+                            "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                            "licenseProfileRevision": 1,
+                            "isRtuRequired": true,
+                            "softwareLicensorId": "swlic",
+                            "assetUsageDenialSummary": "swid-tag(alex-1) has been found and asset-usage-agreements from swlic have been found but 3 constraints on the agreements(alex-agr, alex-agr2) deny the usage of this asset",
+                            "assetUsageDenial": [
+                                {
+                                    "denialType": "matchingConstraintOnAssignee",
+                                    "denialReason": "user not in assignee lum:users: (alex-usage not lum:in [\"alex\", \"justin\", \"michelle\"]) on permission(perm-1) under agreement(alex-agr) for action(acumos:deploy)",
+                                    "deniedAction": "acumos:deploy",
+                                    "deniedAssetUsageAgreementId": "alex-agr",
+                                    "deniedAssetUsageAgreementRevision": 23,
+                                    "deniedRightToUseId": "perm-1",
+                                    "deniedRightToUseRevision": 23,
+                                    "denialReqItemName": "userId",
+                                    "denialReqItemValue": "alex-usage",
+                                    "deniedConstraint": {
+                                        "origin": "fromRestriction",
+                                        "dataType": "string",
+                                        "operator": "lum:in",
+                                        "leftOperand": "lum:users",
+                                        "rightOperand": [
+                                            "alex",
+                                            "justin",
+                                            "michelle"
+                                        ]
+                                    }
+                                },
+                                {
+                                    "denialType": "rightToUseRevoked",
+                                    "denialReason": "rightToUse revoked on permission(perm-1) under agreement(alex-agr2) for action(acumos:deploy)",
+                                    "deniedAction": "acumos:deploy",
+                                    "deniedAssetUsageAgreementId": "alex-agr2",
+                                    "deniedAssetUsageAgreementRevision": 4,
+                                    "deniedRightToUseId": "perm-1",
+                                    "deniedRightToUseRevision": 2,
+                                    "denialReqItemName": "rightToUseActive",
+                                    "denialReqItemValue": true
+                                },
+                                {
+                                    "denialType": "rightToUseRevoked",
+                                    "denialReason": "rightToUse revoked on permission(perm-21) under agreement(alex-agr2) for action(acumos:deploy)",
+                                    "deniedAction": "acumos:deploy",
+                                    "deniedAssetUsageAgreementId": "alex-agr2",
+                                    "deniedAssetUsageAgreementRevision": 4,
+                                    "deniedRightToUseId": "perm-21",
+                                    "deniedRightToUseRevision": 4,
+                                    "denialReqItemName": "rightToUseActive",
+                                    "denialReqItemValue": true
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "Marker": "EXIT"
+        }
+    ]
 }

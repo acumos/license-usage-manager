@@ -361,5 +361,141 @@
                 ]
             }
         }
-    }
+    },
+    "acuLogs": [
+        {
+            "LogTimestamp": "__type__dateTime__",
+            "RequestID": "a9923eb2-8ee2-4059-8130-18fb08886128",
+            "InvocationID": "PUT /api/v1/asset-usage",
+            "InstanceID": "__type__uuid__",
+            "Thread": "main",
+            "ServiceName": "lum-server/api/v1/asset-usage",
+            "Partnername": "__type__ignore__",
+            "StatusCode": "INPROGRESS",
+            "ResponseCode": null,
+            "ResponseDescription": null,
+            "Level": "DEBUG",
+            "Severity": "INFO",
+            "ServerFQDN": "__type__ignore__",
+            "ClientIPAddress": "__type__ignore__",
+            "TargetEntity": null,
+            "TargetServiceName": null,
+            "User": "alex-usage",
+            "Logger": "__type__ignore__",
+            "Mdc": null,
+            "Message": {
+                "userId": "alex-usage",
+                "requestId": "a9923eb2-8ee2-4059-8130-18fb08886128",
+                "requested": "2020-03-04T18:02:19.492Z",
+                "swMgtSystemId": "alex-sys",
+                "swMgtSystemInstanceId": "123",
+                "swMgtSystemComponent": "dev",
+                "assetUsageReq": {
+                    "swTagId": "alex-1",
+                    "assetUsageId": "alex-usage-1",
+                    "action": "acumos:deploy",
+                    "isIncludedAsset": false,
+                    "includedAssetUsage": [
+                        {
+                            "includedSwTagId": "alex-1",
+                            "includedAssetUsageId": "alex-usage-2"
+                        }
+                    ]
+                }
+            },
+            "Marker": "ENTRY"
+        },
+        {
+            "LogTimestamp": "__type__dateTime__",
+            "RequestID": "a9923eb2-8ee2-4059-8130-18fb08886128",
+            "InvocationID": "response",
+            "InstanceID": "__type__uuid__",
+            "Thread": "main",
+            "ServiceName": "lum-server/api/v1/asset-usage",
+            "Partnername": "__type__ignore__",
+            "StatusCode": "COMPLETE",
+            "ResponseCode": 402,
+            "ResponseDescription": "Denied",
+            "Level": "DEBUG",
+            "Severity": "INFO",
+            "ServerFQDN": "__type__ignore__",
+            "ClientIPAddress": "__type__ignore__",
+            "TargetEntity": null,
+            "TargetServiceName": null,
+            "User": "alex-usage",
+            "Logger": "__type__ignore__",
+            "Mdc": null,
+            "Message": {
+                "userId": "alex-usage",
+                "requestId": "a9923eb2-8ee2-4059-8130-18fb08886128",
+                "requested": "2020-03-04T18:02:19.492Z",
+                "swMgtSystemId": "alex-sys",
+                "swMgtSystemInstanceId": "123",
+                "swMgtSystemComponent": "dev",
+                "usageEntitled": false,
+                "assetUsage": {
+                    "swTagId": "alex-1",
+                    "assetUsageId": "alex-usage-1",
+                    "action": "acumos:deploy",
+                    "usageEntitled": false,
+                    "isUsedBySwCreator": false,
+                    "assetUsageSeq": 49,
+                    "swidTagRevision": 1,
+                    "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                    "licenseProfileRevision": 1,
+                    "isRtuRequired": true,
+                    "softwareLicensorId": "swlic",
+                    "assetUsageDenialSummary": "swid-tag(alex-1) has been found but asset-usage is prohibited by prohibition(proh-2) under asset-usage-agreement(alex-agr) for action(acumos:deploy)",
+                    "assetUsageDenial": [
+                        {
+                            "denialType": "usageProhibited",
+                            "denialReason": "swid-tag(alex-1) has been found but asset-usage is prohibited by prohibition(proh-2) under asset-usage-agreement(alex-agr) for action(acumos:deploy)",
+                            "deniedAction": "acumos:deploy",
+                            "deniedAssetUsageAgreementId": "alex-agr",
+                            "deniedAssetUsageAgreementRevision": 19,
+                            "deniedRightToUseId": "proh-2",
+                            "deniedRightToUseRevision": 19,
+                            "denialReqItemName": "action",
+                            "denialReqItemValue": "acumos:deploy",
+                            "deniedConstraint": {
+                                "action": "acumos:deploy"
+                            }
+                        }
+                    ],
+                    "includedAssetUsage": [
+                        {
+                            "includedSwTagId": "alex-1",
+                            "includedAssetUsageId": "alex-usage-2",
+                            "usageEntitled": false,
+                            "isUsedBySwCreator": false,
+                            "assetUsageSeq": 41,
+                            "swidTagRevision": 1,
+                            "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                            "licenseProfileRevision": 1,
+                            "isRtuRequired": true,
+                            "softwareLicensorId": "swlic",
+                            "assetUsageDenialSummary": "swid-tag(alex-1) has been found but asset-usage is prohibited by prohibition(proh-2) under asset-usage-agreement(alex-agr) for action(acumos:deploy)",
+                            "assetUsageDenial": [
+                                {
+                                    "denialType": "usageProhibited",
+                                    "denialReason": "swid-tag(alex-1) has been found but asset-usage is prohibited by prohibition(proh-2) under asset-usage-agreement(alex-agr) for action(acumos:deploy)",
+                                    "deniedAction": "acumos:deploy",
+                                    "deniedAssetUsageAgreementId": "alex-agr",
+                                    "deniedAssetUsageAgreementRevision": 19,
+                                    "deniedRightToUseId": "proh-2",
+                                    "deniedRightToUseRevision": 19,
+                                    "denialReqItemName": "action",
+                                    "denialReqItemValue": "acumos:deploy",
+                                    "deniedConstraint": {
+                                        "action": "acumos:deploy"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "Marker": "EXIT"
+        }
+    ]
 }

@@ -11,7 +11,7 @@
             }
         },
         {
-            "sqlCmd": "WITH req_ids AS (SELECT DISTINCT auh.\"assetUsageReqId\" FROM \"assetUsageHistory\" AS auh WHERE auh.\"softwareLicensorId\" = ($1)) SELECT aur.\"assetUsageType\", aur.\"response\" FROM \"assetUsageReq\" AS aur, req_ids WHERE aur.\"assetUsageReqId\" = req_ids.\"assetUsageReqId\" ORDER BY aur.\"requestStarted\", aur.\"assetUsageReqId\"",
+            "sqlCmd": "WITH req_ids AS ( SELECT DISTINCT auh.\"assetUsageReqId\" FROM \"assetUsageHistory\" AS auh WHERE auh.\"softwareLicensorId\" = ($1)) SELECT aur.\"assetUsageType\", aur.\"response\" FROM \"assetUsageReq\" AS aur, req_ids WHERE aur.\"assetUsageReqId\" = req_ids.\"assetUsageReqId\" ORDER BY COALESCE((aur.\"response\"->>'requested')::TIMESTAMPTZ, aur.\"requestStarted\"), aur.\"assetUsageReqId\"",
             "sqlVals": ["swlic"],
             "result": {"command": "SELECT", "rowCount": 9,
                 "rows": [
@@ -620,7 +620,6 @@
             "requestId": "__type__uuid__",
             "requested": "__type__dateTime__",
             "title": "asset-usage-tracking for software-licensor swlic",
-            "asOf": "__type__dateTime__",
             "softwareLicensorId": "swlic",
             "assetUsages": [
                 {

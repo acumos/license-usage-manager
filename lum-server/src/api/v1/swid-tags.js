@@ -47,7 +47,7 @@ const getActiveSwidTags = async (req, res, next) => {
  * @param  {} next
  */
 const getSwidTagsWithAvailableEntitlement = async (req, res, next) => {
-    lumServer.logger.info(res, `api getSwidTagsWithAvailableEntitlement(${res.locals.paramKeys})`);
+    lumServer.logger.info(res, `api getSwidTagsWithAvailableEntitlement(${res.locals.paramsStr})`);
     await dbAssetUsage.getSwidTagsWithAvailableEntitlement(res);
     next();
 };

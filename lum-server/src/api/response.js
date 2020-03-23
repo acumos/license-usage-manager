@@ -78,7 +78,7 @@ module.exports = {
                 res.locals.params[paramKey] = paramValue;
             }
         }
-        res.locals.paramKeys = JSON.stringify(res.locals.params);
+        res.locals.paramsStr = JSON.stringify(res.locals.params);
 
         for (const [key, value] of Object.entries(res.locals.reqBody)) {
             if (value && typeof value === 'string') {

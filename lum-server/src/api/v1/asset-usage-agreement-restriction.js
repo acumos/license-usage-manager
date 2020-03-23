@@ -25,7 +25,7 @@ const dbAssetUsageAgreement = require('../../db/asset-usage-agreement');
  * @param  {} next
  */
 const putAssetUsageAgreementRestriction = async (req, res, next) => {
-    lumServer.logger.info(res, `api putAssetUsageAgreementRestriction(${res.locals.paramKeys})`);
+    lumServer.logger.info(res, `api putAssetUsageAgreementRestriction(${res.locals.paramsStr})`);
     await pgclient.runTx(res,
         dbAssetUsageAgreement.validateAssetUsageAgreementRestriction,
         dbAssetUsageAgreement.putAssetUsageAgreementRestriction,
@@ -42,7 +42,7 @@ const putAssetUsageAgreementRestriction = async (req, res, next) => {
  * @param  {} next
  */
 const revokeAssetUsageAgreementRestriction = async (req, res, next) => {
-    lumServer.logger.info(res, `api revokeAssetUsageAgreementRestriction(${res.locals.paramKeys})`);
+    lumServer.logger.info(res, `api revokeAssetUsageAgreementRestriction(${res.locals.paramsStr})`);
     await pgclient.runTx(res,
         dbAssetUsageAgreement.revokeAssetUsageAgreementRestriction,
         dbAssetUsageAgreement.groomAssetUsageAgreement,

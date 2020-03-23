@@ -248,5 +248,145 @@
                 "closureReason": null
             }
         }
-    }
+    },
+    "acuLogs": [
+        {
+            "LogTimestamp": "__type__dateTime__",
+            "RequestID": "47d38b14-ee99-476e-be3f-0f5b1c809dba",
+            "InvocationID": "PUT /api/v1/swid-tag",
+            "InstanceID": "__type__uuid__",
+            "Thread": "main",
+            "ServiceName": "lum-server/api/v1/swid-tag",
+            "Partnername": "__type__ignore__",
+            "StatusCode": "INPROGRESS",
+            "ResponseCode": null,
+            "ResponseDescription": null,
+            "Level": "DEBUG",
+            "Severity": "INFO",
+            "ServerFQDN": "__type__ignore__",
+            "ClientIPAddress": "__type__ignore__",
+            "TargetEntity": null,
+            "TargetServiceName": null,
+            "User": "alex-dev",
+            "Logger": "__type__ignore__",
+            "Mdc": null,
+            "Message": {
+                "requestId": "47d38b14-ee99-476e-be3f-0f5b1c809dba",
+                "requested": "2019-12-19T16:26:11.424Z",
+                "userId": "alex-dev",
+                "swidTag": {
+                    "swTagId": "alex-1",
+                    "swPersistentId": "fab0954c-d4e5-443a-8d3e-cf7620e80455",
+                    "swVersion": "1",
+                    "swVersionComparable": "1",
+                    "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                    "softwareLicensorId": "swlic",
+                    "swCategory": "image-processing",
+                    "swCatalogs": [
+                        {
+                            "swCatalogId": "XYZ models",
+                            "swCatalogType": "restricted"
+                        },
+                        {
+                            "swCatalogId": "ABC models",
+                            "swCatalogType": "restricted"
+                        }
+                    ],
+                    "swCreators": [
+                        "alex-sw-creator"
+                    ],
+                    "swProductName": "alex-product2020",
+                    "swidTagDetails": null
+                },
+                "licenseProfile": {
+                    "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                    "licenseProfile": null,
+                    "isRtuRequired": true,
+                    "licenseTxt": null,
+                    "licenseName": null,
+                    "licenseDescription": null,
+                    "licenseNotes": null
+                }
+            },
+            "Marker": "ENTRY"
+        },
+        {
+            "LogTimestamp": "__type__dateTime__",
+            "RequestID": "47d38b14-ee99-476e-be3f-0f5b1c809dba",
+            "InvocationID": "response",
+            "InstanceID": "__type__uuid__",
+            "Thread": "main",
+            "ServiceName": "lum-server/api/v1/swid-tag",
+            "Partnername": "__type__ignore__",
+            "StatusCode": "COMPLETE",
+            "ResponseCode": 200,
+            "ResponseDescription": "OK",
+            "Level": "DEBUG",
+            "Severity": "INFO",
+            "ServerFQDN": "__type__ignore__",
+            "ClientIPAddress": "__type__ignore__",
+            "TargetEntity": null,
+            "TargetServiceName": null,
+            "User": "alex-dev",
+            "Logger": "__type__ignore__",
+            "Mdc": null,
+            "Message": {
+                "requestId": "47d38b14-ee99-476e-be3f-0f5b1c809dba",
+                "requested": "2019-12-19T16:26:11.424Z",
+                "userId": "alex-dev",
+                "swidTag": {
+                    "swTagId": "alex-1",
+                    "swPersistentId": "fab0954c-d4e5-443a-8d3e-cf7620e80455",
+                    "swVersion": "1",
+                    "swVersionComparable": "1",
+                    "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                    "softwareLicensorId": "swlic",
+                    "swCategory": "image-processing",
+                    "swCreators": [
+                        "alex-sw-creator"
+                    ],
+                    "swProductName": "alex-product2020",
+                    "swidTagDetails": null,
+                    "swCatalogs": [
+                        {
+                            "swCatalogId": "XYZ models",
+                            "swCatalogType": "restricted"
+                        },
+                        {
+                            "swCatalogId": "ABC models",
+                            "swCatalogType": "restricted"
+                        }
+                    ],
+                    "swidTagRevision": 2,
+                    "swidTagActive": true,
+                    "creator": "alex-dev",
+                    "created": "2019-10-23T15:14:21.888Z",
+                    "modifier": "alex-dev",
+                    "modified": "2019-12-19T16:26:11.433Z",
+                    "closer": null,
+                    "closed": null,
+                    "closureReason": null
+                },
+                "licenseProfile": {
+                    "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                    "licenseProfile": null,
+                    "isRtuRequired": true,
+                    "licenseTxt": null,
+                    "licenseName": null,
+                    "licenseDescription": null,
+                    "licenseNotes": null,
+                    "licenseProfileRevision": 1,
+                    "licenseProfileActive": true,
+                    "creator": "alex-dev",
+                    "created": "2019-10-23T15:14:21.888Z",
+                    "modifier": "alex-dev",
+                    "modified": "2019-10-23T15:14:21.888Z",
+                    "closer": null,
+                    "closed": null,
+                    "closureReason": null
+                }
+            },
+            "Marker": "EXIT"
+        }
+    ]
 }

@@ -39,7 +39,7 @@ const validateParams = (req, res, next) => {
  * @param  {} next
  */
 const getAssetUsage = async (req, res, next) => {
-    lumServer.logger.info(res, `api getAssetUsage(${res.locals.params.assetUsageId})`);
+    lumServer.logger.info(res, `api getAssetUsage(${res.locals.paramsStr})`);
     res.locals.dbdata.assetUsage = null;
     await pgclient.runTx(res, dbAssetUsage.getAssetUsage);
     if (!res.locals.dbdata.assetUsage) {
@@ -50,7 +50,7 @@ const getAssetUsage = async (req, res, next) => {
             response.setHttpStatus(res, res.locals.dbdata.assetUsage.responseHttpCode, "assetUsage");
         }
     }
-    lumServer.logger.debug(res, `out api getAssetUsage(${res.locals.params.assetUsageId})`);
+    lumServer.logger.debug(res, `out api getAssetUsage(${res.locals.paramsStr})`);
     next();
 };
 
@@ -65,7 +65,9 @@ const putAssetUsage = async (req, res, next) => {
     res.locals.response.usageEntitled = null;
 
     res.locals.params.action = res.locals.reqBody.assetUsageReq.action;
-    lumServer.logger.info(res, `api putAssetUsage(${res.locals.params.assetUsageId}, ${res.locals.params.action})`);
+    res.locals.paramsStr = JSON.stringify(res.locals.params);
+
+    lumServer.logger.info(res, `api putAssetUsage(${res.locals.paramsStr})`);
 
     res.locals.assetUsages = {};
     res.locals.includedAssetUsageIds = [];
@@ -99,7 +101,7 @@ const putAssetUsage = async (req, res, next) => {
  * @param  {} res
  */
 const setAssetUsageResponse = (res) => {
-    lumServer.logger.debug(res, `api setAssetUsageResponse(${res.locals.params.assetUsageId}, ${res.locals.params.action})`);
+    lumServer.logger.debug(res, `api setAssetUsageResponse(${res.locals.paramsStr})`);
 
     if (!res.locals.response.usageEntitled) {
         response.setHttpStatus(res, response.lumHttpCodes.denied, "assetUsage");
@@ -114,7 +116,7 @@ const setAssetUsageResponse = (res) => {
         delete assetUsage.isIncludedAsset;
         res.locals.response.assetUsage.includedAssetUsage.push(assetUsage);
     }
-    lumServer.logger.debug(res, `out api setAssetUsageResponse(${res.locals.params.assetUsageId}, ${res.locals.params.action})`);
+    lumServer.logger.debug(res, `out api setAssetUsageResponse(${res.locals.paramsStr})`);
 };
 
 // router

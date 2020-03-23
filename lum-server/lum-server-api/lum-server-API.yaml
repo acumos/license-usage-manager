@@ -19,7 +19,7 @@
 openapi: '3.0.2'
 
 info:
-  version: "1.1.0"
+  version: "1.2.0"
   title: "License Usage Manager (LUM) API"
   contact:
     name: Acumos License Management
@@ -367,7 +367,7 @@ paths:
         example: "acumos://software-licensor/Company A/agreement/3eb8c43a-bf19-46ab-8392-99c7efdf4106"
         required: true
         in: query
-        description: urlencoded UID key to assetUsageAgreement in IRI or URI format
+        description: UID key to assetUsageAgreement in IRI or URI format
         schema:
           type: string
 
@@ -401,6 +401,7 @@ paths:
               description: identifier of the entity that issued the licenseProfile
               schema:
                 type: string
+                example: Company A
             assetUsageAgreementId:
               description: echo back UID key to assetUsageAgreement in IRI or URI format
               schema:
@@ -539,6 +540,7 @@ paths:
               description: identifier of the entity that issued the licenseProfile
               schema:
                 type: string
+                example: Company A
             assetUsageAgreementId:
               description: echo back UID key to assetUsageAgreement in IRI or URI format
               schema:
@@ -571,7 +573,7 @@ paths:
         required: true
         example: "acumos://software-licensor/Company A/agreement/3eb8c43a-bf19-46ab-8392-99c7efdf4106"
         in: query
-        description: urlencoded UID key to assetUsageAgreement in IRI or URI format.
+        description: UID key to assetUsageAgreement in IRI or URI format.
           possible format "http://software-licensor/<softwareLicensorId>/agreement/<agreement-uuid>"
         schema:
           type: string
@@ -613,6 +615,7 @@ paths:
               description: identifier of the entity that issued the licenseProfile
               schema:
                 type: string
+                example: Company A
             assetUsageAgreementId:
               description: echo back UID key to assetUsageAgreement in IRI or URI format
               example: "acumos://software-licensor/Company A/agreement/3eb8c43a-bf19-46ab-8392-99c7efdf4106"
@@ -630,6 +633,13 @@ paths:
             'application/json; charset=utf-8':
               schema:
                 $ref: '#/components/schemas/RevokeAgreementResponse'
+
+        400:
+          description: invalid input data
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
     delete:
       tags: ["asset-usage-agreement-restriction"]
@@ -670,6 +680,7 @@ paths:
               description: identifier of the entity that issued the licenseProfile
               schema:
                 type: string
+                example: Company A
             assetUsageAgreementId:
               description: echo back UID key to assetUsageAgreement in IRI or URI format
               example: "acumos://software-licensor/Company A/agreement/3eb8c43a-bf19-46ab-8392-99c7efdf4106"
@@ -695,7 +706,7 @@ paths:
         required: true
         example: 38935f5c-293b-4e00-91ad-14d5de66eee3
         in: query
-        description: urlencoded UID key to assetUsage in IRI or URI format
+        description: UID key to assetUsage in IRI or URI format
         schema:
           type: string
 
@@ -788,7 +799,7 @@ paths:
         required: true
         example: 38935f5c-293b-4e00-91ad-14d5de66eee3
         in: query
-        description: urlencoded UID key to assetUsage in IRI or URI format
+        description: UID key to assetUsage in IRI or URI format
         schema:
           type: string
 
@@ -857,6 +868,26 @@ paths:
         description: identifier of the entity that issued the licenseProfile
         schema:
           type: string
+      - name: startDateTime
+        example: "2020-01-30T20:45:01.123Z"
+        in: query
+        description: start date-time or date of the asset-usage request to filter the results by.
+          It is optional and the filtering is inclusive (startDateTime<=requested)
+        schema:
+          type: string
+          format: date-time
+      - name: endDateTime
+        example: "2020-01-31T23:02:01.310Z"
+        in: query
+        description: end date-time or date of the asset-usage request to filter the results by.
+          It is optional and the filtering is inclusive (requested<=endDateTime)
+
+          - When date is provided in the query, it is converted to
+          the maximal date-time of the same date in GMT time zone.
+          For instance, '2020-03-19' converted to '2020-03-19T23:59:59.999Z'
+        schema:
+          type: string
+          format: date-time
 
     get:
       tags: ["asset-usage-tracking"]
@@ -870,6 +901,13 @@ paths:
             'application/json; charset=utf-8':
               schema:
                 $ref: '#/components/schemas/GetAssetUsageTrackingResponse'
+
+        400:
+          description: invalid input data
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -998,19 +1036,19 @@ components:
               type: string
           example:
             serverName: "lum-server"
-            serverVersion: "1.0.0"
-            apiVersion: "1.0.0"
-            nodeVersion: "10.16.3"
+            serverVersion: "1.2.0"
+            apiVersion: "1.2.0"
+            nodeVersion: "12.16.1"
             databaseInfo:
               pgVersion: "PostgreSQL 11.5 on x86_64-pc-linux-musl, compiled by gcc (Alpine 8.3.0) 8.3.0, 64-bit"
-              databaseVersion: "1.0.0"
+              databaseVersion: "1.2.0"
               schemaCreated: "2020-01-09T17:12:31.791Z"
               schemaModified: "2020-01-09T17:12:31.791Z"
               databaseStarted: "2020-01-09T17:12:32.361Z"
               databaseUptime: "00:22:38.660894"
               checked: "2020-01-09T17:35:11.022Z"
             serverRunInstanceId: "faa08408-59fd-44d2-b815-9ceb9b8fdf92"
-            serverStarted": "2020-01-09T17:33:35.001Z"
+            serverStarted: "2020-01-09T17:33:35.001Z"
             serverUptime: "00:01:36.095038"
             pathToOpenapiUi: "/ui/openapi"
 
@@ -1126,6 +1164,7 @@ components:
         softwareLicensorId:
           description: identifier of the entity that issued the licenseProfile
           type: string
+          example: Company A
 
         swCategory:
           description: image processing, software, image, video, data. - used for matching to the right-to-use
@@ -1324,8 +1363,8 @@ components:
             properties:
               softwareLicensorId:
                 description: supplier or owner of the software
-                example: Company A
                 type: string
+                example: Company A
               swTagId:
                 description: globally unique identifier of the software tag up to its version
                   (in Acumos it is revisionId)
@@ -1405,8 +1444,8 @@ components:
             properties:
               softwareLicensorId:
                 description: supplier or owner of the software
-                example: Company A
                 type: string
+                example: Company A
               swTagId:
                 description: globally unique identifier of the software tag up to its version
                   (in Acumos it is revisionId)
@@ -1572,10 +1611,10 @@ components:
           properties:
             softwareLicensorId:
               description: supplier or owner of the software
-              example: Company A
               type: string
+              example: Company A
             assetUsageAgreementId:
-              description: urlencoded UID key to assetUsageAgreement in IRI or URI format
+              description: UID key to assetUsageAgreement in IRI or URI format
               example: "acumos://software-licensor/Company A/agreement/3eb8c43a-bf19-46ab-8392-99c7efdf4106"
               type: string
 
@@ -1666,8 +1705,9 @@ components:
         softwareLicensorId:
           description: supplier or owner of the software
           type: string
+          example: Company A
         assetUsageAgreementId:
-          description: urlencoded UID key to assetUsageAgreement in IRI or URI format
+          description: UID key to assetUsageAgreement in IRI or URI format
           type: string
         status:
           description: status of assetUsageAgreement revoking
@@ -1780,6 +1820,7 @@ components:
           description: globally unique identifier of the software tag up to its version
             (in Acumos it is revisionId)
           type: string
+          example: "0bde3cf2-7a91-40ff-af5f-2d314e677e6a"
 
         assetUsageId:
           description: UID key to assetUsage in IRI or URI format -
@@ -1791,6 +1832,7 @@ components:
         action:
           description: requested action on the asset like download, publish, execute, ...
           type: string
+          example: "acumos:deploy"
 
     AssetUsageIncludedRequestTop:
       description: request for entitlement on the included assetUsage
@@ -1838,6 +1880,8 @@ components:
           description: any object that contains the event details
           type: object
           nullable: false
+          example:
+            hello: world
 
     AssetUsageEvent:
       description: notification of asset-usage event to be tracked by LUM with no decision on the entitlement of the action
@@ -1867,6 +1911,7 @@ components:
             softwareLicensorId:
               description: supplier or owner of the software
               type: string
+              example: Company A
             swidTagRevision:
               description: 1,2,3,... revision of the swidTag - updates are allowed - auto-incremented by LUM
               type: integer
@@ -1932,6 +1977,7 @@ components:
         softwareLicensorId:
           description: supplier or owner of the software
           type: string
+          example: Company A
 
     AssetUsageResponseBase:
       description: response to assetUsageReq request
@@ -1966,7 +2012,7 @@ components:
         assetUsageAgreementId:
           description: UID key to assetUsageAgreement in IRI or URI format. FK to assetUsageAgreement
           type: string
-          example:  "acumos://software-licensor/Company A/agreement/3eb8c43a-bf19-46ab-8392-99c7efdf4106"
+          example: "acumos://software-licensor/Company A/agreement/3eb8c43a-bf19-46ab-8392-99c7efdf4106"
 
         assetUsageAgreementRevision:
           description: 1,2,3,... revision of the AssetUsageAgreement - updates are allowed - auto-incremented by LUM
@@ -2031,6 +2077,11 @@ components:
         assetUsageDenialSummary:
           description: human readable summary for denial of the asset-usage
           type: string
+          example: "swid-tag(ee48b699-3b16-4391-884c-1bec557f32b9) has been found
+            but asset-usage is prohibited by
+            prohibition(acumos://software-licensor/Company A/permission/98378924-84ff-41f5-87ac-02fd2012c727)
+            under asset-usage-agreement(acumos://software-licensor/Company A/agreement/3eb8c43a-bf19-46ab-8392-99c7efdf4106)
+            for action(acumos:deploy)"
 
         assetUsageDenial:
           description: collection of denial info to assetUsageReq request
@@ -2102,6 +2153,24 @@ components:
               deniedMetrics:
                 description: current statistical data that caused the denial. It is optional and its structure can very
                 type: object
+
+          example:
+            - denialType: usageProhibited
+              denialReason: "swid-tag(ee48b699-3b16-4391-884c-1bec557f32b9) has been found
+                but asset-usage is prohibited by
+                prohibition(acumos://software-licensor/Company A/permission/98378924-84ff-41f5-87ac-02fd2012c727)
+                under asset-usage-agreement(acumos://software-licensor/Company A/agreement/3eb8c43a-bf19-46ab-8392-99c7efdf4106)
+                for action(acumos:deploy)"
+              deniedAction: "acumos:deploy"
+              deniedAssetUsageAgreementId: "acumos://software-licensor/Company A/agreement/3eb8c43a-bf19-46ab-8392-99c7efdf4106"
+              deniedAssetUsageAgreementRevision: 19
+              deniedRightToUseId: "acumos://software-licensor/Company A/permission/98378924-84ff-41f5-87ac-02fd2012c727"
+              deniedRightToUseRevision: 19
+              denialReqItemName: action
+              denialReqItemValue: "acumos:deploy"
+              deniedConstraint:
+                action: "acumos:deploy"
+
 
     AssetUsageDenialOrEntitlement:
       description: either denial or entitlement for denied response to assetUsageReq request.
@@ -2193,18 +2262,73 @@ components:
     GetAssetUsageTrackingResponse:
       description: returns all assetUsage request records for supplier softwareLicensorId
       type: object
+      required:
+        - title
+        - softwareLicensorId
+        - assetUsages
+        - assetUsageEvents
       properties:
         title:
           description: title of the report
           type: string
-          default: "assetUsage tracking records for supplier softwareLicensorId"
-        asOf:
-          description: report date-time-stamp
-          type: string
-          format: date-time
+          example: assetUsage tracking records for supplier softwareLicensorId
         softwareLicensorId:
           description: supplier or owner of the software
           type: string
+          example: Company A
+        startDateTime:
+          description: start date-time of the asset-usage request to filter the results by.
+            It is optional and the filtering is inclusive (startDateTime<=requested)
+          type: string
+          format: date-time
+          example: "2020-01-30T20:45:01.123Z"
+        endDateTime:
+          description: end date-time of the asset-usage request to filter the results by.
+            It is optional and the filtering is inclusive (requested<=endDateTime).
+
+            - When date is provided in the query, it is converted to the maximal date-time of the same date.
+            For instance, '2020-03-19' converted to '2020-03-19T23:59:59.999Z'
+          type: string
+          format: date-time
+          example: "2020-01-31T23:02:01.310Z"
+        stats:
+          description: statistics of found assetUsages and assetUsageEvents
+          properties:
+            assetUsages:
+              description: statistics of found assetUsages
+              properties:
+                count:
+                  description: count of found assetUsages
+                  type: integer
+                  example: 2
+                minDateTime:
+                  description: minimal value of "requested" field in found assetUsages
+                  type: string
+                  format: date-time
+                  example: "2020-01-30T20:46:10.531Z"
+                maxDateTime:
+                  description: maximal value of "requested" field in found assetUsages
+                  type: string
+                  format: date-time
+                  example: "2020-01-30T20:50:22.812Z"
+            assetUsageEvents:
+              description: statistics of found assetUsageEvents
+              properties:
+                count:
+                  description: count of found assetUsageEvents
+                  type: integer
+                  example: 2
+                minDateTime:
+                  description: minimal value of "requested" field in found assetUsageEvents
+                  type: string
+                  format: date-time
+                  example: "2020-01-31T17:11:45.653Z"
+                maxDateTime:
+                  description: maximal value of "requested" field in found assetUsageEvents
+                  type: string
+                  format: date-time
+                  example: "2020-01-31T18:08:01.310Z"
+
         assetUsages:
           description: list of either denial or entitlement responses to assetUsageReq request
           type: array
@@ -2249,7 +2373,9 @@ components:
             - gteq
 
         rightOperand:
-          description: 'string or stringified number like "2019-08-01" "5" {"@value": "2019-08-01", "@type": "xsd:date"} {"@value": "5", "@type": "xsd:integer"}'
+          description: 'string or stringified number like
+            "2019-08-01" "5" {"@value": "2019-08-01", "@type": "xsd:date"} {"@value": "5", "@type": "xsd:integer"}
+            when the value is date it is expected to be in GMT timezone in ISO "CCYY-MM-DD" format'
           type: object
 
     ODRLAssigneeRefinement:

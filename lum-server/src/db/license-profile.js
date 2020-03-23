@@ -79,10 +79,10 @@ module.exports = {
         }
 
         if (!res.locals.params.licenseProfileId) {
-            lumServer.logger.debug(res, `skipped putLicenseProfile(${res.locals.params.licenseProfileId})`);
+            lumServer.logger.debug(res, `skipped putLicenseProfile(${res.locals.paramsStr})`);
             return;
         }
-        lumServer.logger.debug(res, `in putLicenseProfile(${res.locals.params.licenseProfileId})`);
+        lumServer.logger.debug(res, `in putLicenseProfile(${res.locals.paramsStr})`);
 
         const keys = new SqlParams();
         keys.addField("licenseProfileId", res.locals.params.licenseProfileId);
@@ -113,7 +113,7 @@ module.exports = {
                 "licenseProfile", res.locals.params.licenseProfileId,
                 snapshotBody.licenseProfileRevision, snapshotBody);
         }
-        lumServer.logger.debug(res, `out putLicenseProfile(${res.locals.params.licenseProfileId})`);
+        lumServer.logger.debug(res, `out putLicenseProfile(${res.locals.paramsStr})`);
     },
     /**
      * mark the license-profile as active in the database
@@ -121,10 +121,10 @@ module.exports = {
      */
     async activateLicenseProfile(res) {
         if (!res.locals.params.swTagId) {
-            lumServer.logger.debug(res, `skipped activateLicenseProfile(${res.locals.params.swTagId})`);
+            lumServer.logger.debug(res, `skipped activateLicenseProfile(${res.locals.paramsStr})`);
             return;
         }
-        lumServer.logger.debug(res, `in activateLicenseProfile(${res.locals.params.swTagId})`);
+        lumServer.logger.debug(res, `in activateLicenseProfile(${res.locals.paramsStr})`);
 
         const keys = new SqlParams();
         keys.addField("swTagId", res.locals.params.swTagId);
@@ -147,6 +147,6 @@ module.exports = {
                 "licenseProfile", res.locals.params.licenseProfileId,
                 snapshotBody.licenseProfileRevision, snapshotBody);
         }
-        lumServer.logger.debug(res, `out activateLicenseProfile(${res.locals.params.swTagId})`);
+        lumServer.logger.debug(res, `out activateLicenseProfile(${res.locals.paramsStr})`);
     }
 }

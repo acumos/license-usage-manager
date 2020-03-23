@@ -899,7 +899,7 @@ module.exports = {
             }
         }
 
-        lumServer.logger.debug(res, `groomedAgreement(${res.locals.paramKeys}):`, groomedAgreement);
+        lumServer.logger.debug(res, `groomedAgreement(${res.locals.paramsStr}):`, groomedAgreement);
         return groomedAgreement;
     }
 };

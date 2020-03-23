@@ -261,5 +261,117 @@
                 "closureReason": null
             }
         }
-    }
+    },
+    "acuLogs": [
+        {
+            "LogTimestamp": "__type__dateTime__",
+            "RequestID": "ee698399-1251-49f9-ab01-b3fde3d9ed3b",
+            "InvocationID": "PUT /api/v1/swid-tag-creators",
+            "InstanceID": "__type__uuid__",
+            "Thread": "main",
+            "ServiceName": "lum-server/api/v1/swid-tag-creators",
+            "Partnername": "__type__ignore__",
+            "StatusCode": "INPROGRESS",
+            "ResponseCode": null,
+            "ResponseDescription": null,
+            "Level": "DEBUG",
+            "Severity": "INFO",
+            "ServerFQDN": "__type__ignore__",
+            "ClientIPAddress": "__type__ignore__",
+            "TargetEntity": null,
+            "TargetServiceName": null,
+            "User": "alex--creator",
+            "Logger": "__type__ignore__",
+            "Mdc": null,
+            "Message": {
+                "requestId": "ee698399-1251-49f9-ab01-b3fde3d9ed3b",
+                "requested": "2019-08-21T20:13:58.662Z",
+                "userId": "alex--creator",
+                "swTagId": "alex-1",
+                "swCreators": [
+                    "alex-sw-creator-unit-test"
+                ]
+            },
+            "Marker": "ENTRY"
+        },
+        {
+            "LogTimestamp": "__type__dateTime__",
+            "RequestID": "ee698399-1251-49f9-ab01-b3fde3d9ed3b",
+            "InvocationID": "response",
+            "InstanceID": "__type__uuid__",
+            "Thread": "main",
+            "ServiceName": "lum-server/api/v1/swid-tag-creators",
+            "Partnername": "__type__ignore__",
+            "StatusCode": "COMPLETE",
+            "ResponseCode": 200,
+            "ResponseDescription": "OK",
+            "Level": "DEBUG",
+            "Severity": "INFO",
+            "ServerFQDN": "__type__ignore__",
+            "ClientIPAddress": "__type__ignore__",
+            "TargetEntity": null,
+            "TargetServiceName": null,
+            "User": "alex--creator",
+            "Logger": "__type__ignore__",
+            "Mdc": null,
+            "Message": {
+                "requestId": "ee698399-1251-49f9-ab01-b3fde3d9ed3b",
+                "requested": "2019-08-21T20:13:58.662Z",
+                "userId": "alex--creator",
+                "swTagId": "alex-1",
+                "swidTag": {
+                    "swTagId": "alex-1",
+                    "swPersistentId": "fab0954c-d4e5-443a-8d3e-cf7620e80455",
+                    "swVersion": "1",
+                    "swVersionComparable": "1",
+                    "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                    "softwareLicensorId": "swlic",
+                    "swCategory": "image-processing",
+                    "swCreators": [
+                        "alex-sw-creator-unit-test"
+                    ],
+                    "swProductName": "alex-product2020",
+                    "swidTagDetails": null,
+                    "swCatalogs": [
+                        {
+                            "swCatalogId": "XYZ models",
+                            "swCatalogType": "restricted"
+                        },
+                        {
+                            "swCatalogId": "ABC models",
+                            "swCatalogType": "restricted"
+                        }
+                    ],
+                    "swidTagRevision": 4,
+                    "swidTagActive": true,
+                    "creator": "alex-dev",
+                    "created": "2019-10-23T15:14:21.888Z",
+                    "modifier": "alex--creator",
+                    "modified": "2019-12-20T16:57:34.119Z",
+                    "closer": null,
+                    "closed": null,
+                    "closureReason": null
+                },
+                "licenseProfile": {
+                    "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                    "licenseProfile": null,
+                    "isRtuRequired": true,
+                    "licenseTxt": null,
+                    "licenseName": null,
+                    "licenseDescription": null,
+                    "licenseNotes": null,
+                    "licenseProfileRevision": 1,
+                    "licenseProfileActive": true,
+                    "creator": "alex-dev",
+                    "created": "2019-10-23T15:14:21.888Z",
+                    "modifier": "alex-dev",
+                    "modified": "2019-10-23T15:14:21.888Z",
+                    "closer": null,
+                    "closed": null,
+                    "closureReason": null
+                }
+            },
+            "Marker": "EXIT"
+        }
+    ]
 }

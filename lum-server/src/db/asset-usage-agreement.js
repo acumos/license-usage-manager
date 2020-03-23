@@ -121,7 +121,7 @@ module.exports = {
      * @param  {} res
      */
     async getAssetUsageAgreement(res) {
-        lumServer.logger.debug(res, `in getAssetUsageAgreement(${res.locals.paramKeys})`);
+        lumServer.logger.debug(res, `in getAssetUsageAgreement(${res.locals.paramsStr})`);
 
         const keys = new SqlParams();
         keys.addField("softwareLicensorId", res.locals.params.softwareLicensorId);
@@ -143,7 +143,7 @@ module.exports = {
      * @param  {} res
      */
     async revokeAssetUsageAgreement(res) {
-        lumServer.logger.debug(res, `in revokeAssetUsageAgreement(${res.locals.paramKeys})`);
+        lumServer.logger.debug(res, `in revokeAssetUsageAgreement(${res.locals.paramsStr})`);
         const keys = new SqlParams();
         keys.addField("softwareLicensorId", res.locals.params.softwareLicensorId);
         keys.addField("assetUsageAgreementId", res.locals.params.assetUsageAgreementId);
@@ -166,7 +166,7 @@ module.exports = {
                 res.locals.dbdata.assetUsageAgreement
             );
         }
-        lumServer.logger.debug(res, `out revokeAssetUsageAgreement(${res.locals.paramKeys})`);
+        lumServer.logger.debug(res, `out revokeAssetUsageAgreement(${res.locals.paramsStr})`);
     },
     /**
      * verify that all required properties are provided in request to PUT asset-usage-agreement
@@ -174,7 +174,7 @@ module.exports = {
      * @throws {InvalidDataError} when invalid data
      */
     validateAssetUsageAgreement(res) {
-        lumServer.logger.debug(res, `validateAssetUsageAgreement(${res.locals.paramKeys})`);
+        lumServer.logger.debug(res, `validateAssetUsageAgreement(${res.locals.paramsStr})`);
         res.locals.assetUsageAgreement = utils.getFromReqByPath(res, "assetUsageAgreement") || {};
 
         const errors = [];
@@ -195,10 +195,10 @@ module.exports = {
      */
     async putAssetUsageAgreement(res) {
         if (!res.locals.params.assetUsageAgreementId) {
-            lumServer.logger.debug(res, `skipped putAssetUsageAgreement(${res.locals.paramKeys})`);
+            lumServer.logger.debug(res, `skipped putAssetUsageAgreement(${res.locals.paramsStr})`);
             return;
         }
-        lumServer.logger.debug(res, `in putAssetUsageAgreement(${res.locals.paramKeys})`);
+        lumServer.logger.debug(res, `in putAssetUsageAgreement(${res.locals.paramsStr})`);
 
         const keys = new SqlParams();
         keys.addField("softwareLicensorId", res.locals.assetUsageAgreement.softwareLicensorId);
@@ -227,7 +227,7 @@ module.exports = {
         if (result.rows.length) {
             res.locals.dbdata.assetUsageAgreement = result.rows[0];
         }
-        lumServer.logger.debug(res, `out putAssetUsageAgreement(${res.locals.paramKeys})`);
+        lumServer.logger.debug(res, `out putAssetUsageAgreement(${res.locals.paramsStr})`);
     },
     /**
      * groom assetUsageAgreement and its restriction into format used by LUM for entitlement evaluation
@@ -235,10 +235,10 @@ module.exports = {
      */
     async groomAssetUsageAgreement(res) {
         if (!res.locals.dbdata.assetUsageAgreement) {
-            lumServer.logger.debug(res, `skipped groomAssetUsageAgreement(${res.locals.paramKeys})`);
+            lumServer.logger.debug(res, `skipped groomAssetUsageAgreement(${res.locals.paramsStr})`);
             return;
         }
-        lumServer.logger.debug(res, `in groomAssetUsageAgreement(${res.locals.paramKeys})`);
+        lumServer.logger.debug(res, `in groomAssetUsageAgreement(${res.locals.paramsStr})`);
         res.locals.groomedAgreement = odrl.groomAgreement(res,
             res.locals.dbdata.assetUsageAgreement.agreement,
             res.locals.dbdata.assetUsageAgreement.agreementRestriction
@@ -266,7 +266,7 @@ module.exports = {
                 res.locals.dbdata.assetUsageAgreement
             );
         }
-        lumServer.logger.debug(res, `out groomAssetUsageAgreement(${res.locals.paramKeys})`);
+        lumServer.logger.debug(res, `out groomAssetUsageAgreement(${res.locals.paramsStr})`);
     },
     /**
      * insert-update rightToUse records into database per agreement
@@ -278,10 +278,10 @@ module.exports = {
         || !res.locals.dbdata.assetUsageAgreement.assetUsageAgreementRevision
         || !res.locals.groomedAgreement
         || (!res.locals.groomedAgreement.permission && !res.locals.groomedAgreement.prohibition)) {
-            lumServer.logger.debug(res, `skipped putRightToUse(${res.locals.paramKeys})`);
+            lumServer.logger.debug(res, `skipped putRightToUse(${res.locals.paramsStr})`);
             return;
         }
-        lumServer.logger.debug(res, `in putRightToUse(${res.locals.paramKeys})`);
+        lumServer.logger.debug(res, `in putRightToUse(${res.locals.paramsStr})`);
 
         for await (const rightToUse of Object.values(res.locals.groomedAgreement.permission || {})) {
             await storeRightToUse(res, rightToUse);
@@ -290,7 +290,7 @@ module.exports = {
             await storeRightToUse(res, rightToUse);
         }
 
-        lumServer.logger.debug(res, `out putRightToUse(${res.locals.paramKeys})`);
+        lumServer.logger.debug(res, `out putRightToUse(${res.locals.paramsStr})`);
     },
     /**
      * mark rightToUse records as non-active if not in agreement
@@ -300,10 +300,10 @@ module.exports = {
         if (!res.locals.params.assetUsageAgreementId
             || !res.locals.dbdata.assetUsageAgreement
             || !res.locals.dbdata.assetUsageAgreement.assetUsageAgreementRevision) {
-                lumServer.logger.debug(res, `skipped revokeObsoleteRightToUse(${res.locals.paramKeys})`);
+                lumServer.logger.debug(res, `skipped revokeObsoleteRightToUse(${res.locals.paramsStr})`);
                 return;
             }
-            lumServer.logger.debug(res, `in revokeObsoleteRightToUse(${res.locals.paramKeys})`);
+            lumServer.logger.debug(res, `in revokeObsoleteRightToUse(${res.locals.paramsStr})`);
 
             const keys = new SqlParams();
             keys.addField("softwareLicensorId", res.locals.params.softwareLicensorId);
@@ -327,7 +327,7 @@ module.exports = {
                         "rightToUse", rightToUse.assetUsageRuleId, rightToUse.rightToUseRevision, rightToUse);
                 }
             }
-            lumServer.logger.debug(res, `out revokeObsoleteRightToUse(${res.locals.paramKeys})`);
+            lumServer.logger.debug(res, `out revokeObsoleteRightToUse(${res.locals.paramsStr})`);
     },
     /**
      * verify that all required properties are provided in request to PUT asset-usage-agreement-restriction
@@ -335,7 +335,7 @@ module.exports = {
      * @throws {InvalidDataError} when invalid data
      */
     validateAssetUsageAgreementRestriction(res) {
-        lumServer.logger.debug(res, `validateAssetUsageAgreementRestriction(${res.locals.paramKeys})`);
+        lumServer.logger.debug(res, `validateAssetUsageAgreementRestriction(${res.locals.paramsStr})`);
         res.locals.assetUsageAgreement = utils.getFromReqByPath(res, "assetUsageAgreement") || {};
 
         const errors = [];
@@ -353,10 +353,10 @@ module.exports = {
      */
     async putAssetUsageAgreementRestriction(res) {
         if (!res.locals.params.assetUsageAgreementId) {
-            lumServer.logger.debug(res, `skipped putAssetUsageAgreementRestriction(${res.locals.paramKeys})`);
+            lumServer.logger.debug(res, `skipped putAssetUsageAgreementRestriction(${res.locals.paramsStr})`);
             return;
         }
-        lumServer.logger.debug(res, `in putAssetUsageAgreementRestriction(${res.locals.paramKeys})`);
+        lumServer.logger.debug(res, `in putAssetUsageAgreementRestriction(${res.locals.paramsStr})`);
 
         const keys = new SqlParams();
         keys.addField("softwareLicensorId", res.locals.params.softwareLicensorId);
@@ -374,7 +374,7 @@ module.exports = {
         if (result.rows.length) {
             res.locals.dbdata.assetUsageAgreement = result.rows[0];
         }
-        lumServer.logger.debug(res, `out putAssetUsageAgreementRestriction(${res.locals.paramKeys})`);
+        lumServer.logger.debug(res, `out putAssetUsageAgreementRestriction(${res.locals.paramsStr})`);
     },
     /**
      * remove assetUsageAgreementRestriction from assetUsageAgreement in database
@@ -382,10 +382,10 @@ module.exports = {
      */
     async revokeAssetUsageAgreementRestriction(res) {
         if (!res.locals.params.assetUsageAgreementId) {
-            lumServer.logger.debug(res, `skipped revokeAssetUsageAgreementRestriction(${res.locals.paramKeys})`);
+            lumServer.logger.debug(res, `skipped revokeAssetUsageAgreementRestriction(${res.locals.paramsStr})`);
             return;
         }
-        lumServer.logger.debug(res, `in revokeAssetUsageAgreementRestriction(${res.locals.paramKeys})`);
+        lumServer.logger.debug(res, `in revokeAssetUsageAgreementRestriction(${res.locals.paramsStr})`);
 
         const keys = new SqlParams();
         keys.addField("softwareLicensorId", res.locals.params.softwareLicensorId);
@@ -403,7 +403,7 @@ module.exports = {
         if (result.rows.length) {
             res.locals.dbdata.assetUsageAgreement = result.rows[0];
         }
-        lumServer.logger.debug(res, `out revokeAssetUsageAgreementRestriction(${res.locals.paramKeys})`);
+        lumServer.logger.debug(res, `out revokeAssetUsageAgreementRestriction(${res.locals.paramsStr})`);
     }
 };
 

@@ -17,14 +17,48 @@
 const response = require('../response');
 const pgclient = require('../../db/pgclient');
 const dbAssetUsage = require('../../db/asset-usage');
+const lumErrors = require('../../error');
+
 /**
  * validate params received in query
+ *  - softwareLicensorId
+ *  - startDateTime
+ *  - endDateTime
  * @param  {} req
  * @param  {} res
  * @param  {} next
+ * @throws {InvalidDataError} when invalid date-time format on startDateTime or endDateTime
  */
 const validateParams = (req, res, next) => {
     response.validateParamInQuery(res, 'softwareLicensorId');
+
+    const errors = [];
+    if (res.locals.params.startDateTime) {
+        const startDateTime = new Date(res.locals.params.startDateTime);
+        if (isNaN(startDateTime.getTime())) {
+            lumErrors.addError(errors, `expected date-time value for startDateTime(${res.locals.params.startDateTime})`);
+        } else {
+            res.locals.params.startDateTime = startDateTime.toISOString();
+        }
+    }
+
+    if (res.locals.params.endDateTime) {
+        const endDateTime = new Date(res.locals.params.endDateTime);
+        if (isNaN(endDateTime.getTime())) {
+            lumErrors.addError(errors, `expected date-time value for endDateTime(${res.locals.params.endDateTime})`);
+        } else {
+            if (!res.locals.params.endDateTime.includes(':')) {
+                // convert '2020-03-19' to '2020-03-19T23:59:59.999Z'
+                endDateTime.setDate(endDateTime.getDate() + 1);
+                endDateTime.setTime(endDateTime.getTime() - 1);
+            }
+            res.locals.params.endDateTime = endDateTime.toISOString();
+        }
+    }
+    if (errors.length) {
+        throw new lumErrors.InvalidDataError(errors);
+    }
+    res.locals.paramsStr = JSON.stringify(res.locals.params);
     next();
 };
 /**
@@ -34,17 +68,60 @@ const validateParams = (req, res, next) => {
  * @param  {} next
  */
 const getAssetUsageTracking = async (req, res, next) => {
-    lumServer.logger.info(res, `api getAssetUsageTracking(${res.locals.params.softwareLicensorId})`);
+    lumServer.logger.info(res, `api getAssetUsageTracking(${res.locals.paramsStr})`);
     res.locals.response.title = `asset-usage-tracking for software-licensor ${res.locals.params.softwareLicensorId}`;
-    res.locals.response.asOf = new Date();
-    res.locals.response.softwareLicensorId = res.locals.params.softwareLicensorId;
+    if (res.locals.params.startDateTime) {
+        res.locals.response.title = `${res.locals.response.title} starting from ${res.locals.params.startDateTime}`;
+    }
+    if (res.locals.params.endDateTime) {
+        res.locals.response.title = `${res.locals.response.title} up to ${res.locals.params.endDateTime}`;
+    }
+
+    Object.assign(res.locals.response, res.locals.params);
 
     res.locals.dbdata.assetUsageTracking = [];
     await pgclient.runTx(res, dbAssetUsage.getAssetUsageTracking);
-    res.locals.response.assetUsages      = res.locals.dbdata.assetUsageTracking.filter(row =>row.assetUsageType === 'assetUsage'     ).map(row => row.response);
-    res.locals.response.assetUsageEvents = res.locals.dbdata.assetUsageTracking.filter(row =>row.assetUsageType === 'assetUsageEvent').map(row => row.response);
 
-    lumServer.logger.debug(res, `out api getAssetUsageTracking(${res.locals.params.softwareLicensorId})`);
+    res.locals.response.stats = {
+        assetUsages:{count:0,minDateTime:null,maxDateTime:null},
+        assetUsageEvents:{count:0,minDateTime:null,maxDateTime:null}
+    };
+    res.locals.response.assetUsages = res.locals.dbdata.assetUsageTracking
+        .filter(row =>row.assetUsageType === 'assetUsage')
+        .map(row => {
+            res.locals.response.stats.assetUsages.count += 1;
+            const requested = row.response.requested;
+            if (requested) {
+                if (!res.locals.response.stats.assetUsages.minDateTime
+                    || requested < res.locals.response.stats.assetUsages.minDateTime) {
+                        res.locals.response.stats.assetUsages.minDateTime = requested;
+                    }
+                if (!res.locals.response.stats.assetUsages.maxDateTime
+                    || requested > res.locals.response.stats.assetUsages.maxDateTime) {
+                        res.locals.response.stats.assetUsages.maxDateTime = requested;
+                    }
+            }
+            return row.response;
+        });
+    res.locals.response.assetUsageEvents = res.locals.dbdata.assetUsageTracking
+        .filter(row =>row.assetUsageType === 'assetUsageEvent')
+        .map(row => {
+            res.locals.response.stats.assetUsageEvents.count += 1;
+            const requested = row.response.requested;
+            if (requested) {
+                if (!res.locals.response.stats.assetUsageEvents.minDateTime
+                    || requested < res.locals.response.stats.assetUsageEvents.minDateTime) {
+                        res.locals.response.stats.assetUsageEvents.minDateTime = requested;
+                    }
+                if (!res.locals.response.stats.assetUsageEvents.maxDateTime
+                    || requested > res.locals.response.stats.assetUsageEvents.maxDateTime) {
+                        res.locals.response.stats.assetUsageEvents.maxDateTime = requested;
+                    }
+            }
+            return row.response;
+        });
+
+    lumServer.logger.debug(res, `out api getAssetUsageTracking(${res.locals.paramsStr})`);
     next();
 };
 

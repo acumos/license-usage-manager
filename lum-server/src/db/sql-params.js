@@ -211,15 +211,11 @@ module.exports = class SqlParams {
      */
     getAllValues(allValues) {
         if (allValues) {
-            allValues.push(this.values);
-            if (this._next) {
-                this._next.getAllValues(allValues);
-            }
+            if (this.values.length) {allValues.push(this.values);}
+            if (this._next) {this._next.getAllValues(allValues);}
             return allValues;
         }
-        if (!this._next) {
-            return this.values;
-        }
+        if (!this._next) {return this.values;}
         return this.values.concat(...this._next.getAllValues([]));
     }
 };
