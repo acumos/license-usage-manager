@@ -27,7 +27,7 @@ const assert = require('chai').assert;
  */
 function assertUuid(value, fieldName, message) {
     assert.match(value, /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
-        `${message}: expected ${fieldName}(${value}) to be uuid`);
+        `expected ${fieldName}(${value}) to be uuid: ${message}`);
 }
 
 /**
@@ -38,7 +38,7 @@ function assertUuid(value, fieldName, message) {
  */
 function assertDateTime(value, fieldName, message) {
     assert.isNotNaN(new Date(value).getTime(),
-        `${message}: expected ${fieldName}(${value}) to be a stringified DateTime`);
+        `expected ${fieldName}(${value}) to be a stringified DateTime: ${message}`);
 }
 
 /**
@@ -47,17 +47,30 @@ function assertDateTime(value, fieldName, message) {
  * @param  {} expected
  * @param  {string} key name of the field or index under comparison
  * @param  {string} message explanation of the values
+ * @param  {[string]} breadcrumbs chain of key names and indexes
  */
-function assertEqual(value, expected, key, message) {
+function assertEqual(value, expected, key, message, breadcrumbs) {
+    breadcrumbs = Array.from(breadcrumbs || []);
+    breadcrumbs.push(key);
+    key = strBreadcrumbs(breadcrumbs);
     if (expected == null) {
-        return assert.isNull(value, `${message}: unexpected ${key}: ${value} instead of ${expected}`);
+        return assert.isNull(value, `unexpected ${key}(${value}) instead of ${expected}: ${message}`);
     }
     if (expected === '__type__uuid__')      {return assertUuid(value, key, message);}
     if (expected === '__type__dateTime__')  {return assertDateTime(value, key, message);}
     if (expected === '__type__ignore__')    {return;}
     if (expected === '__env__NODE_VERSION') {return process.env.NODE_VERSION;}
-    if (typeof expected === 'object')       {return module.exports.assertDeepEqual(value, expected, message);}
-    assert.equal(value, expected, `${message}: unexpected ${key}: ${value} instead of ${expected}`);
+    if (typeof expected === 'object')       {return module.exports.assertDeepEqual(value, expected, message, breadcrumbs);}
+    assert.equal(value, expected, `unexpected value of ${key}(${value}): ${message}`);
+}
+
+/**
+ * convert the array of breadcrumbs into a string
+ * @param  {[string]} breadcrumbs chain of key names and indexes
+ * @returns {string} 'a->[3]->b'
+ */
+function strBreadcrumbs(breadcrumbs) {
+    return (Array.isArray(breadcrumbs) && breadcrumbs.join('->')) || '';
 }
 
 module.exports = {
@@ -66,23 +79,36 @@ module.exports = {
      * @param  {} value
      * @param  {} expected
      * @param  {string} message explanation of the values
+     * @param  {string|[string]} [breadcrumbs] chain of key names and indexes
      */
-    assertDeepEqual(value, expected, message) {
+    assertDeepEqual(value, expected, message, breadcrumbs) {
         if (expected == null) {return;}
         if (typeof value !== typeof expected) {
             assert.fail(value, expected,
-                `${message}: unmatched typeof(${typeof value}) for ${value} versus expected typeof(${typeof expected}) for ${expected}`);
+                `unmatched typeof(${typeof value}) for ${strBreadcrumbs(breadcrumbs)}(${value}) versus expected typeof(${typeof expected}) for ${expected}: ${message}`);
         }
         if (Array.isArray(value)) {
-            assert.equal(value.length, expected.length, `${message}: unexpected length(value.length) of array ${value}`);
+            assert.equal(value.length, expected.length,
+                `unexpected length(${value.length}) of array ${strBreadcrumbs(breadcrumbs)}(${
+                    module.exports.shortenString(JSON.stringify(value))}): ${message}`);
             for (let idx = 0; idx < value.length; ++idx) {
-                assertEqual(value[idx], expected[idx], `[${idx}]`, message);
+                assertEqual(value[idx], expected[idx], `[${idx}]`, message, breadcrumbs);
             }
             return;
         }
         for (const key in expected) {
-            assertEqual(value[key], expected[key], key, message);
+            assertEqual(value[key], expected[key], key, message, breadcrumbs);
         }
+    },
+    /**
+     * when the text is too long, returns the
+     * @param  {string} txt
+     * @param  {number} [maxLength]=100
+     * @returns {string} shorten txt if longer than maxLength
+     */
+    shortenString(txt, maxLength=100) {
+        if (txt && txt.length > maxLength) {return `${txt.substr(0,maxLength)}...`;}
+        return txt;
     }
 };
 

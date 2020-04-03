@@ -25,7 +25,7 @@
         {
             "sqlCmd": "INSERT INTO \"assetUsageReq\" (\"assetUsageReqId\" , \"action\",\"assetUsageType\",\"requestHttp\",\"request\",\"userId\",\"status\", \"requestStarted\") VALUES (($1) , ($2),($3),($4),($5),($6),($7), NOW())",
             "sqlVals": [
-                "cfe36a00-a603-4a8f-be32-0f6d5100afa7",
+                "d85e3695-98e7-4350-ba36-b89c515ab302",
                 "acumos:deploy",
                 "assetUsage",
                 {
@@ -43,7 +43,7 @@
                     "ips": []
                 },
                 {
-                    "userId": "alex-usage",
+                    "userId": "alex",
                     "swMgtSystemId": "alex-sys",
                     "swMgtSystemInstanceId": "123",
                     "swMgtSystemComponent": "dev",
@@ -60,7 +60,7 @@
                         ]
                     }
                 },
-                "alex-usage",
+                "alex",
                 "started"
             ],
             "result": {
@@ -75,7 +75,7 @@
                 "alex-1",
                 "acumos:deploy",
                 "use",
-                "alex-usage",
+                "alex",
                 2
             ],
             "result": {
@@ -117,7 +117,7 @@
                 "alex-1",
                 "acumos:deploy",
                 "use",
-                "alex-usage",
+                "alex",
                 2
             ],
             "result": {
@@ -126,22 +126,24 @@
                 "rows": [
                     {
                         "denied_due_rightToUseRevoked": null,
-                        "denied_due_expireOn": {
-                            "denialCode": "denied_due_expireOn",
+                        "denied_due_expireOn": null,
+                        "denied_due_goodFor": {
+                            "denialCode": "denied_due_goodFor",
                             "denialType": "timingConstraint",
-                            "denialReason": "rightToUse expired: (today(2020-04-03) > expireOn(2018-12-31)) on permission(perm-1) under agreement(alex-agr) for action(acumos:deploy)",
+                            "denialReason": "rightToUse too late: (now(2020-04-03T18:54:03.681Z) > end-of-good-for(2020-02-26T16:13:20.279Z)), usage started(2020-01-27T16:13:20.279Z), was good for(30 days) on permission(perm-1) under agreement(alex-agr) for action(acumos:deploy)",
                             "deniedAction": "acumos:deploy",
                             "deniedAssetUsageAgreementId": "alex-agr",
-                            "deniedAssetUsageAgreementRevision": 48,
+                            "deniedAssetUsageAgreementRevision": 56,
                             "deniedRightToUseId": "perm-1",
-                            "deniedRightToUseRevision": 48,
-                            "denialReqItemName": "date",
-                            "denialReqItemValue": "2020-04-03",
+                            "deniedRightToUseRevision": 56,
+                            "denialReqItemName": "datetime",
+                            "denialReqItemValue": "2020-04-03T18:54:03.681Z",
                             "deniedConstraint": {
-                                "expireOn": "2018-12-31"
+                                "goodFor": "P30D",
+                                "usageStarted": "2020-01-27T16:13:20.279Z",
+                                "usageEnded": "2020-02-26T16:13:20.279Z"
                             }
                         },
-                        "denied_due_goodFor": null,
                         "denied_due_enableOn": null,
                         "denied_due_swPersistentIdOnTarget": null,
                         "denied_due_swTagIdOnTarget": null,
@@ -213,13 +215,13 @@
             "sqlVals": [
                 "alex-usage-1",
                 false,
-                "alex-usage",
-                "alex-usage",
+                "alex",
+                "alex",
                 "alex-sys",
                 "123",
                 "dev",
                 false,
-                "cfe36a00-a603-4a8f-be32-0f6d5100afa7",
+                "d85e3695-98e7-4350-ba36-b89c515ab302",
                 "assetUsage",
                 "acumos:deploy",
                 "alex-1",
@@ -238,14 +240,14 @@
                 null,
                 null,
                 "swid-tag(alex-1) has been found and asset-usage-agreements from swlic have been found but 3 constraints on the agreements(alex-agr, alex-agr2) deny the usage of this asset",
-                "[{\"denialCode\":\"denied_due_expireOn\",\"denialType\":\"timingConstraint\",\"denialReason\":\"rightToUse expired: (today(2020-04-03) > expireOn(2018-12-31)) on permission(perm-1) under agreement(alex-agr) for action(acumos:deploy)\",\"deniedAction\":\"acumos:deploy\",\"deniedAssetUsageAgreementId\":\"alex-agr\",\"deniedAssetUsageAgreementRevision\":48,\"deniedRightToUseId\":\"perm-1\",\"deniedRightToUseRevision\":48,\"denialReqItemName\":\"date\",\"denialReqItemValue\":\"2020-04-03\",\"deniedConstraint\":{\"expireOn\":\"2018-12-31\"}},{\"denialCode\":\"denied_due_rightToUseRevoked\",\"denialType\":\"rightToUseRevoked\",\"denialReason\":\"rightToUse revoked on permission(perm-1) under agreement(alex-agr2) for action(acumos:deploy)\",\"deniedAction\":\"acumos:deploy\",\"deniedAssetUsageAgreementId\":\"alex-agr2\",\"deniedAssetUsageAgreementRevision\":4,\"deniedRightToUseId\":\"perm-1\",\"deniedRightToUseRevision\":2,\"denialReqItemName\":\"rightToUseActive\",\"denialReqItemValue\":true},{\"denialCode\":\"denied_due_rightToUseRevoked\",\"denialType\":\"rightToUseRevoked\",\"denialReason\":\"rightToUse revoked on permission(perm-21) under agreement(alex-agr2) for action(acumos:deploy)\",\"deniedAction\":\"acumos:deploy\",\"deniedAssetUsageAgreementId\":\"alex-agr2\",\"deniedAssetUsageAgreementRevision\":4,\"deniedRightToUseId\":\"perm-21\",\"deniedRightToUseRevision\":4,\"denialReqItemName\":\"rightToUseActive\",\"denialReqItemValue\":true}]"
+                "[{\"denialCode\":\"denied_due_goodFor\",\"denialType\":\"timingConstraint\",\"denialReason\":\"rightToUse too late: (now(2020-04-03T18:54:03.681Z) > end-of-good-for(2020-02-26T16:13:20.279Z)), usage started(2020-01-27T16:13:20.279Z), was good for(30 days) on permission(perm-1) under agreement(alex-agr) for action(acumos:deploy)\",\"deniedAction\":\"acumos:deploy\",\"deniedAssetUsageAgreementId\":\"alex-agr\",\"deniedAssetUsageAgreementRevision\":56,\"deniedRightToUseId\":\"perm-1\",\"deniedRightToUseRevision\":56,\"denialReqItemName\":\"datetime\",\"denialReqItemValue\":\"2020-04-03T18:54:03.681Z\",\"deniedConstraint\":{\"goodFor\":\"P30D\",\"usageStarted\":\"2020-01-27T16:13:20.279Z\",\"usageEnded\":\"2020-02-26T16:13:20.279Z\"}},{\"denialCode\":\"denied_due_rightToUseRevoked\",\"denialType\":\"rightToUseRevoked\",\"denialReason\":\"rightToUse revoked on permission(perm-1) under agreement(alex-agr2) for action(acumos:deploy)\",\"deniedAction\":\"acumos:deploy\",\"deniedAssetUsageAgreementId\":\"alex-agr2\",\"deniedAssetUsageAgreementRevision\":4,\"deniedRightToUseId\":\"perm-1\",\"deniedRightToUseRevision\":2,\"denialReqItemName\":\"rightToUseActive\",\"denialReqItemValue\":true},{\"denialCode\":\"denied_due_rightToUseRevoked\",\"denialType\":\"rightToUseRevoked\",\"denialReason\":\"rightToUse revoked on permission(perm-21) under agreement(alex-agr2) for action(acumos:deploy)\",\"deniedAction\":\"acumos:deploy\",\"deniedAssetUsageAgreementId\":\"alex-agr2\",\"deniedAssetUsageAgreementRevision\":4,\"deniedRightToUseId\":\"perm-21\",\"deniedRightToUseRevision\":4,\"denialReqItemName\":\"rightToUseActive\",\"denialReqItemValue\":true}]"
             ],
             "result": {
                 "command": "INSERT",
                 "rowCount": 1,
                 "rows": [
                     {
-                        "assetUsageSeq": 78
+                        "assetUsageSeq": 89
                     }
                 ]
             }
@@ -255,13 +257,13 @@
             "sqlVals": [
                 "alex-usage-2",
                 true,
-                "alex-usage",
-                "alex-usage",
+                "alex",
+                "alex",
                 "alex-sys",
                 "123",
                 "dev",
                 false,
-                "cfe36a00-a603-4a8f-be32-0f6d5100afa7",
+                "d85e3695-98e7-4350-ba36-b89c515ab302",
                 "assetUsage",
                 "acumos:deploy",
                 "alex-1",
@@ -280,14 +282,14 @@
                 null,
                 null,
                 "swid-tag(alex-1) has been found and asset-usage-agreements from swlic have been found but 3 constraints on the agreements(alex-agr, alex-agr2) deny the usage of this asset",
-                "[{\"denialCode\":\"denied_due_expireOn\",\"denialType\":\"timingConstraint\",\"denialReason\":\"rightToUse expired: (today(2020-04-03) > expireOn(2018-12-31)) on permission(perm-1) under agreement(alex-agr) for action(acumos:deploy)\",\"deniedAction\":\"acumos:deploy\",\"deniedAssetUsageAgreementId\":\"alex-agr\",\"deniedAssetUsageAgreementRevision\":48,\"deniedRightToUseId\":\"perm-1\",\"deniedRightToUseRevision\":48,\"denialReqItemName\":\"date\",\"denialReqItemValue\":\"2020-04-03\",\"deniedConstraint\":{\"expireOn\":\"2018-12-31\"}},{\"denialCode\":\"denied_due_rightToUseRevoked\",\"denialType\":\"rightToUseRevoked\",\"denialReason\":\"rightToUse revoked on permission(perm-1) under agreement(alex-agr2) for action(acumos:deploy)\",\"deniedAction\":\"acumos:deploy\",\"deniedAssetUsageAgreementId\":\"alex-agr2\",\"deniedAssetUsageAgreementRevision\":4,\"deniedRightToUseId\":\"perm-1\",\"deniedRightToUseRevision\":2,\"denialReqItemName\":\"rightToUseActive\",\"denialReqItemValue\":true},{\"denialCode\":\"denied_due_rightToUseRevoked\",\"denialType\":\"rightToUseRevoked\",\"denialReason\":\"rightToUse revoked on permission(perm-21) under agreement(alex-agr2) for action(acumos:deploy)\",\"deniedAction\":\"acumos:deploy\",\"deniedAssetUsageAgreementId\":\"alex-agr2\",\"deniedAssetUsageAgreementRevision\":4,\"deniedRightToUseId\":\"perm-21\",\"deniedRightToUseRevision\":4,\"denialReqItemName\":\"rightToUseActive\",\"denialReqItemValue\":true}]"
+                "[{\"denialCode\":\"denied_due_goodFor\",\"denialType\":\"timingConstraint\",\"denialReason\":\"rightToUse too late: (now(2020-04-03T18:54:03.681Z) > end-of-good-for(2020-02-26T16:13:20.279Z)), usage started(2020-01-27T16:13:20.279Z), was good for(30 days) on permission(perm-1) under agreement(alex-agr) for action(acumos:deploy)\",\"deniedAction\":\"acumos:deploy\",\"deniedAssetUsageAgreementId\":\"alex-agr\",\"deniedAssetUsageAgreementRevision\":56,\"deniedRightToUseId\":\"perm-1\",\"deniedRightToUseRevision\":56,\"denialReqItemName\":\"datetime\",\"denialReqItemValue\":\"2020-04-03T18:54:03.681Z\",\"deniedConstraint\":{\"goodFor\":\"P30D\",\"usageStarted\":\"2020-01-27T16:13:20.279Z\",\"usageEnded\":\"2020-02-26T16:13:20.279Z\"}},{\"denialCode\":\"denied_due_rightToUseRevoked\",\"denialType\":\"rightToUseRevoked\",\"denialReason\":\"rightToUse revoked on permission(perm-1) under agreement(alex-agr2) for action(acumos:deploy)\",\"deniedAction\":\"acumos:deploy\",\"deniedAssetUsageAgreementId\":\"alex-agr2\",\"deniedAssetUsageAgreementRevision\":4,\"deniedRightToUseId\":\"perm-1\",\"deniedRightToUseRevision\":2,\"denialReqItemName\":\"rightToUseActive\",\"denialReqItemValue\":true},{\"denialCode\":\"denied_due_rightToUseRevoked\",\"denialType\":\"rightToUseRevoked\",\"denialReason\":\"rightToUse revoked on permission(perm-21) under agreement(alex-agr2) for action(acumos:deploy)\",\"deniedAction\":\"acumos:deploy\",\"deniedAssetUsageAgreementId\":\"alex-agr2\",\"deniedAssetUsageAgreementRevision\":4,\"deniedRightToUseId\":\"perm-21\",\"deniedRightToUseRevision\":4,\"denialReqItemName\":\"rightToUseActive\",\"denialReqItemValue\":true}]"
             ],
             "result": {
                 "command": "INSERT",
                 "rowCount": 1,
                 "rows": [
                     {
-                        "assetUsageSeq": 69
+                        "assetUsageSeq": 80
                     }
                 ]
             }
@@ -297,8 +299,8 @@
             "sqlVals": [
                 "alex-usage-1",
                 "alex-usage-2",
-                "alex-usage",
-                "cfe36a00-a603-4a8f-be32-0f6d5100afa7"
+                "alex",
+                "d85e3695-98e7-4350-ba36-b89c515ab302"
             ],
             "result": {
                 "command": "INSERT",
@@ -309,15 +311,15 @@
         {
             "sqlCmd": "UPDATE \"assetUsageReq\" AS aur SET \"requestDone\" = TRUE, \"responseSent\" = CLOCK_TIMESTAMP() , \"responseHttpCode\" = ($2),\"response\" = ($3),\"usageEntitled\" = ($4),\"status\" = ($5) WHERE aur.\"assetUsageReqId\" = ($1)",
             "sqlVals": [
-                "cfe36a00-a603-4a8f-be32-0f6d5100afa7",
+                "d85e3695-98e7-4350-ba36-b89c515ab302",
                 402,
                 {
-                    "userId": "alex-usage",
+                    "userId": "alex",
                     "swMgtSystemId": "alex-sys",
                     "swMgtSystemInstanceId": "123",
                     "swMgtSystemComponent": "dev",
-                    "requestId": "cfe36a00-a603-4a8f-be32-0f6d5100afa7",
-                    "requested": "2020-04-03T17:29:00.665Z",
+                    "requestId": "d85e3695-98e7-4350-ba36-b89c515ab302",
+                    "requested": "2020-04-03T18:54:03.680Z",
                     "usageEntitled": false,
                     "assetUsage": {
                         "swTagId": "alex-1",
@@ -325,7 +327,7 @@
                         "action": "acumos:deploy",
                         "usageEntitled": false,
                         "isUsedBySwCreator": false,
-                        "assetUsageSeq": 78,
+                        "assetUsageSeq": 89,
                         "swidTagRevision": 1,
                         "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
                         "licenseProfileRevision": 1,
@@ -334,18 +336,20 @@
                         "assetUsageDenialSummary": "swid-tag(alex-1) has been found and asset-usage-agreements from swlic have been found but 3 constraints on the agreements(alex-agr, alex-agr2) deny the usage of this asset",
                         "assetUsageDenial": [
                             {
-                                "denialCode": "denied_due_expireOn",
+                                "denialCode": "denied_due_goodFor",
                                 "denialType": "timingConstraint",
-                                "denialReason": "rightToUse expired: (today(2020-04-03) > expireOn(2018-12-31)) on permission(perm-1) under agreement(alex-agr) for action(acumos:deploy)",
+                                "denialReason": "rightToUse too late: (now(2020-04-03T18:54:03.681Z) > end-of-good-for(2020-02-26T16:13:20.279Z)), usage started(2020-01-27T16:13:20.279Z), was good for(30 days) on permission(perm-1) under agreement(alex-agr) for action(acumos:deploy)",
                                 "deniedAction": "acumos:deploy",
                                 "deniedAssetUsageAgreementId": "alex-agr",
-                                "deniedAssetUsageAgreementRevision": 48,
+                                "deniedAssetUsageAgreementRevision": 56,
                                 "deniedRightToUseId": "perm-1",
-                                "deniedRightToUseRevision": 48,
-                                "denialReqItemName": "date",
-                                "denialReqItemValue": "2020-04-03",
+                                "deniedRightToUseRevision": 56,
+                                "denialReqItemName": "datetime",
+                                "denialReqItemValue": "2020-04-03T18:54:03.681Z",
                                 "deniedConstraint": {
-                                    "expireOn": "2018-12-31"
+                                    "goodFor": "P30D",
+                                    "usageStarted": "2020-01-27T16:13:20.279Z",
+                                    "usageEnded": "2020-02-26T16:13:20.279Z"
                                 }
                             },
                             {
@@ -379,7 +383,7 @@
                                 "includedAssetUsageId": "alex-usage-2",
                                 "usageEntitled": false,
                                 "isUsedBySwCreator": false,
-                                "assetUsageSeq": 69,
+                                "assetUsageSeq": 80,
                                 "swidTagRevision": 1,
                                 "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
                                 "licenseProfileRevision": 1,
@@ -388,18 +392,20 @@
                                 "assetUsageDenialSummary": "swid-tag(alex-1) has been found and asset-usage-agreements from swlic have been found but 3 constraints on the agreements(alex-agr, alex-agr2) deny the usage of this asset",
                                 "assetUsageDenial": [
                                     {
-                                        "denialCode": "denied_due_expireOn",
+                                        "denialCode": "denied_due_goodFor",
                                         "denialType": "timingConstraint",
-                                        "denialReason": "rightToUse expired: (today(2020-04-03) > expireOn(2018-12-31)) on permission(perm-1) under agreement(alex-agr) for action(acumos:deploy)",
+                                        "denialReason": "rightToUse too late: (now(2020-04-03T18:54:03.681Z) > end-of-good-for(2020-02-26T16:13:20.279Z)), usage started(2020-01-27T16:13:20.279Z), was good for(30 days) on permission(perm-1) under agreement(alex-agr) for action(acumos:deploy)",
                                         "deniedAction": "acumos:deploy",
                                         "deniedAssetUsageAgreementId": "alex-agr",
-                                        "deniedAssetUsageAgreementRevision": 48,
+                                        "deniedAssetUsageAgreementRevision": 56,
                                         "deniedRightToUseId": "perm-1",
-                                        "deniedRightToUseRevision": 48,
-                                        "denialReqItemName": "date",
-                                        "denialReqItemValue": "2020-04-03",
+                                        "deniedRightToUseRevision": 56,
+                                        "denialReqItemName": "datetime",
+                                        "denialReqItemValue": "2020-04-03T18:54:03.681Z",
                                         "deniedConstraint": {
-                                            "expireOn": "2018-12-31"
+                                            "goodFor": "P30D",
+                                            "usageStarted": "2020-01-27T16:13:20.279Z",
+                                            "usageEnded": "2020-02-26T16:13:20.279Z"
                                         }
                                     },
                                     {
@@ -454,9 +460,9 @@
         "path": "/api/v1/asset-usage?assetUsageId=alex-usage-1",
         "content-type": "application/json; charset=utf-8",
         "send": {
-            "requestId": "cfe36a00-a603-4a8f-be32-0f6d5100afa7",
-            "requested": "2020-04-03T17:29:00.665Z",
-            "userId": "alex-usage",
+            "requestId": "d85e3695-98e7-4350-ba36-b89c515ab302",
+            "requested": "2020-04-03T18:54:03.680Z",
+            "userId": "alex",
             "swMgtSystemId": "alex-sys",
             "swMgtSystemInstanceId": "123",
             "swMgtSystemComponent": "dev",
@@ -477,12 +483,12 @@
     "res": {
         "statusCode": 402,
         "body": {
-            "userId": "alex-usage",
+            "userId": "alex",
             "swMgtSystemId": "alex-sys",
             "swMgtSystemInstanceId": "123",
             "swMgtSystemComponent": "dev",
-            "requestId": "cfe36a00-a603-4a8f-be32-0f6d5100afa7",
-            "requested": "2020-04-03T17:29:00.665Z",
+            "requestId": "d85e3695-98e7-4350-ba36-b89c515ab302",
+            "requested": "2020-04-03T18:54:03.680Z",
             "usageEntitled": false,
             "assetUsage": {
                 "swTagId": "alex-1",
@@ -490,7 +496,7 @@
                 "action": "acumos:deploy",
                 "usageEntitled": false,
                 "isUsedBySwCreator": false,
-                "assetUsageSeq": 78,
+                "assetUsageSeq": 89,
                 "swidTagRevision": 1,
                 "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
                 "licenseProfileRevision": 1,
@@ -499,18 +505,20 @@
                 "assetUsageDenialSummary": "swid-tag(alex-1) has been found and asset-usage-agreements from swlic have been found but 3 constraints on the agreements(alex-agr, alex-agr2) deny the usage of this asset",
                 "assetUsageDenial": [
                     {
-                        "denialCode": "denied_due_expireOn",
+                        "denialCode": "denied_due_goodFor",
                         "denialType": "timingConstraint",
-                        "denialReason": "rightToUse expired: (today(2020-04-03) > expireOn(2018-12-31)) on permission(perm-1) under agreement(alex-agr) for action(acumos:deploy)",
+                        "denialReason": "rightToUse too late: (now(2020-04-03T18:54:03.681Z) > end-of-good-for(2020-02-26T16:13:20.279Z)), usage started(2020-01-27T16:13:20.279Z), was good for(30 days) on permission(perm-1) under agreement(alex-agr) for action(acumos:deploy)",
                         "deniedAction": "acumos:deploy",
                         "deniedAssetUsageAgreementId": "alex-agr",
-                        "deniedAssetUsageAgreementRevision": 48,
+                        "deniedAssetUsageAgreementRevision": 56,
                         "deniedRightToUseId": "perm-1",
-                        "deniedRightToUseRevision": 48,
-                        "denialReqItemName": "date",
-                        "denialReqItemValue": "2020-04-03",
+                        "deniedRightToUseRevision": 56,
+                        "denialReqItemName": "datetime",
+                        "denialReqItemValue": "2020-04-03T18:54:03.681Z",
                         "deniedConstraint": {
-                            "expireOn": "2018-12-31"
+                            "goodFor": "P30D",
+                            "usageStarted": "2020-01-27T16:13:20.279Z",
+                            "usageEnded": "2020-02-26T16:13:20.279Z"
                         }
                     },
                     {
@@ -544,7 +552,7 @@
                         "includedAssetUsageId": "alex-usage-2",
                         "usageEntitled": false,
                         "isUsedBySwCreator": false,
-                        "assetUsageSeq": 69,
+                        "assetUsageSeq": 80,
                         "swidTagRevision": 1,
                         "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
                         "licenseProfileRevision": 1,
@@ -553,18 +561,20 @@
                         "assetUsageDenialSummary": "swid-tag(alex-1) has been found and asset-usage-agreements from swlic have been found but 3 constraints on the agreements(alex-agr, alex-agr2) deny the usage of this asset",
                         "assetUsageDenial": [
                             {
-                                "denialCode": "denied_due_expireOn",
+                                "denialCode": "denied_due_goodFor",
                                 "denialType": "timingConstraint",
-                                "denialReason": "rightToUse expired: (today(2020-04-03) > expireOn(2018-12-31)) on permission(perm-1) under agreement(alex-agr) for action(acumos:deploy)",
+                                "denialReason": "rightToUse too late: (now(2020-04-03T18:54:03.681Z) > end-of-good-for(2020-02-26T16:13:20.279Z)), usage started(2020-01-27T16:13:20.279Z), was good for(30 days) on permission(perm-1) under agreement(alex-agr) for action(acumos:deploy)",
                                 "deniedAction": "acumos:deploy",
                                 "deniedAssetUsageAgreementId": "alex-agr",
-                                "deniedAssetUsageAgreementRevision": 48,
+                                "deniedAssetUsageAgreementRevision": 56,
                                 "deniedRightToUseId": "perm-1",
-                                "deniedRightToUseRevision": 48,
-                                "denialReqItemName": "date",
-                                "denialReqItemValue": "2020-04-03",
+                                "deniedRightToUseRevision": 56,
+                                "denialReqItemName": "datetime",
+                                "denialReqItemValue": "2020-04-03T18:54:03.681Z",
                                 "deniedConstraint": {
-                                    "expireOn": "2018-12-31"
+                                    "goodFor": "P30D",
+                                    "usageStarted": "2020-01-27T16:13:20.279Z",
+                                    "usageEnded": "2020-02-26T16:13:20.279Z"
                                 }
                             },
                             {
@@ -600,7 +610,7 @@
     "acuLogs": [
         {
             "LogTimestamp": "__type__dateTime__",
-            "RequestID": "cfe36a00-a603-4a8f-be32-0f6d5100afa7",
+            "RequestID": "d85e3695-98e7-4350-ba36-b89c515ab302",
             "InvocationID": "PUT /api/v1/asset-usage",
             "InstanceID": "__type__uuid__",
             "Thread": "main",
@@ -615,13 +625,13 @@
             "ClientIPAddress": "__type__ignore__",
             "TargetEntity": null,
             "TargetServiceName": null,
-            "User": "alex-usage",
+            "User": "alex",
             "Logger": "__type__ignore__",
             "Mdc": null,
             "Message": {
-                "requestId": "cfe36a00-a603-4a8f-be32-0f6d5100afa7",
-                "requested": "2020-04-03T17:29:00.665Z",
-                "userId": "alex-usage",
+                "requestId": "d85e3695-98e7-4350-ba36-b89c515ab302",
+                "requested": "2020-04-03T18:54:03.680Z",
+                "userId": "alex",
                 "swMgtSystemId": "alex-sys",
                 "swMgtSystemInstanceId": "123",
                 "swMgtSystemComponent": "dev",
@@ -642,7 +652,7 @@
         },
         {
             "LogTimestamp": "__type__dateTime__",
-            "RequestID": "cfe36a00-a603-4a8f-be32-0f6d5100afa7",
+            "RequestID": "d85e3695-98e7-4350-ba36-b89c515ab302",
             "InvocationID": "response",
             "InstanceID": "__type__uuid__",
             "Thread": "main",
@@ -657,16 +667,16 @@
             "ClientIPAddress": "__type__ignore__",
             "TargetEntity": null,
             "TargetServiceName": null,
-            "User": "alex-usage",
+            "User": "alex",
             "Logger": "__type__ignore__",
             "Mdc": null,
             "Message": {
-                "userId": "alex-usage",
+                "userId": "alex",
                 "swMgtSystemId": "alex-sys",
                 "swMgtSystemInstanceId": "123",
                 "swMgtSystemComponent": "dev",
-                "requestId": "cfe36a00-a603-4a8f-be32-0f6d5100afa7",
-                "requested": "2020-04-03T17:29:00.665Z",
+                "requestId": "d85e3695-98e7-4350-ba36-b89c515ab302",
+                "requested": "2020-04-03T18:54:03.680Z",
                 "usageEntitled": false,
                 "assetUsage": {
                     "swTagId": "alex-1",
@@ -674,7 +684,7 @@
                     "action": "acumos:deploy",
                     "usageEntitled": false,
                     "isUsedBySwCreator": false,
-                    "assetUsageSeq": 78,
+                    "assetUsageSeq": 89,
                     "swidTagRevision": 1,
                     "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
                     "licenseProfileRevision": 1,
@@ -683,18 +693,20 @@
                     "assetUsageDenialSummary": "swid-tag(alex-1) has been found and asset-usage-agreements from swlic have been found but 3 constraints on the agreements(alex-agr, alex-agr2) deny the usage of this asset",
                     "assetUsageDenial": [
                         {
-                            "denialCode": "denied_due_expireOn",
+                            "denialCode": "denied_due_goodFor",
                             "denialType": "timingConstraint",
-                            "denialReason": "rightToUse expired: (today(2020-04-03) > expireOn(2018-12-31)) on permission(perm-1) under agreement(alex-agr) for action(acumos:deploy)",
+                            "denialReason": "rightToUse too late: (now(2020-04-03T18:54:03.681Z) > end-of-good-for(2020-02-26T16:13:20.279Z)), usage started(2020-01-27T16:13:20.279Z), was good for(30 days) on permission(perm-1) under agreement(alex-agr) for action(acumos:deploy)",
                             "deniedAction": "acumos:deploy",
                             "deniedAssetUsageAgreementId": "alex-agr",
-                            "deniedAssetUsageAgreementRevision": 48,
+                            "deniedAssetUsageAgreementRevision": 56,
                             "deniedRightToUseId": "perm-1",
-                            "deniedRightToUseRevision": 48,
-                            "denialReqItemName": "date",
-                            "denialReqItemValue": "2020-04-03",
+                            "deniedRightToUseRevision": 56,
+                            "denialReqItemName": "datetime",
+                            "denialReqItemValue": "2020-04-03T18:54:03.681Z",
                             "deniedConstraint": {
-                                "expireOn": "2018-12-31"
+                                "goodFor": "P30D",
+                                "usageStarted": "2020-01-27T16:13:20.279Z",
+                                "usageEnded": "2020-02-26T16:13:20.279Z"
                             }
                         },
                         {
@@ -728,7 +740,7 @@
                             "includedAssetUsageId": "alex-usage-2",
                             "usageEntitled": false,
                             "isUsedBySwCreator": false,
-                            "assetUsageSeq": 69,
+                            "assetUsageSeq": 80,
                             "swidTagRevision": 1,
                             "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
                             "licenseProfileRevision": 1,
@@ -737,18 +749,20 @@
                             "assetUsageDenialSummary": "swid-tag(alex-1) has been found and asset-usage-agreements from swlic have been found but 3 constraints on the agreements(alex-agr, alex-agr2) deny the usage of this asset",
                             "assetUsageDenial": [
                                 {
-                                    "denialCode": "denied_due_expireOn",
+                                    "denialCode": "denied_due_goodFor",
                                     "denialType": "timingConstraint",
-                                    "denialReason": "rightToUse expired: (today(2020-04-03) > expireOn(2018-12-31)) on permission(perm-1) under agreement(alex-agr) for action(acumos:deploy)",
+                                    "denialReason": "rightToUse too late: (now(2020-04-03T18:54:03.681Z) > end-of-good-for(2020-02-26T16:13:20.279Z)), usage started(2020-01-27T16:13:20.279Z), was good for(30 days) on permission(perm-1) under agreement(alex-agr) for action(acumos:deploy)",
                                     "deniedAction": "acumos:deploy",
                                     "deniedAssetUsageAgreementId": "alex-agr",
-                                    "deniedAssetUsageAgreementRevision": 48,
+                                    "deniedAssetUsageAgreementRevision": 56,
                                     "deniedRightToUseId": "perm-1",
-                                    "deniedRightToUseRevision": 48,
-                                    "denialReqItemName": "date",
-                                    "denialReqItemValue": "2020-04-03",
+                                    "deniedRightToUseRevision": 56,
+                                    "denialReqItemName": "datetime",
+                                    "denialReqItemValue": "2020-04-03T18:54:03.681Z",
                                     "deniedConstraint": {
-                                        "expireOn": "2018-12-31"
+                                        "goodFor": "P30D",
+                                        "usageStarted": "2020-01-27T16:13:20.279Z",
+                                        "usageEnded": "2020-02-26T16:13:20.279Z"
                                     }
                                 },
                                 {

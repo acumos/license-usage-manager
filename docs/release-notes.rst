@@ -20,6 +20,57 @@
 License Usage Manager - Release Notes
 =====================================
 
+
+Version 1.3.0, 3 April 2020
+============================
+
+lum-server
+..........
+
+- ``"lum:goodFor"`` constraint on ODRL permission
+  (`ACUMOS-3734 <https://jira.acumos.org/browse/ACUMOS-3734>`_)
+
+  * ``"lum:goodFor"`` is using formats `ISO-8601 for duration <https://en.wikipedia.org/wiki/ISO_8601#Durations>`_
+  * in addition to ISO-8601 format, when the value of the rightOperand is a stringified number,
+    LUM assumes that is the duration in **days** (default)
+
+    For instance, ``"30"`` is converted by LUM to ``"P30D"`` and is ``30 days``
+
+    ``{ "leftOperand": "lum:goodFor", "operator": "lteq", "rightOperand": "30" }``
+
+    is the same as the following
+
+    ``{ "leftOperand": "lum:goodFor", "operator": "lteq", "rightOperand": "P30D" }``
+
+  * **ISO-8601 formats** - always start with ``P`` and put ``T`` to separate date from time -
+    at least one number part is required, but any combination is ok:
+    ``PnYnMnDTnHnMnS``, ``PnW``
+
+      ``"P30D"`` = 30 days,
+      ``"P3Y6M4DT12H30M5S"`` = 3 years 6 mons 4 days 12:30:05,
+      ``"P123.5DT23H"`` = 123 days 35:00:00,
+      ``"P4.7Y"`` = 4 years 8 mons,
+      ``"P1.3M"``= 1 mon 9 days,
+      ``"P1.55W"`` = 10 days 20:24:00,
+      ``"P0.5Y"`` = 6 mons,
+      ``"PT36H"`` = 36:00:00,
+      ``"P1YT5S"`` = 1 year 00:00:05
+
+- upgraded to `openapi 3.0.3 <https://swagger.io/specification/>`_ on API specification
+
+- for unit-test runs
+
+  * option to turn off logging to console ``$LOG_CONSOLE_OFF=yes``
+  * removed ``$COUT_LEVEL``
+
+- unit test code coverage stats
+
+  * ``Statements 81.25% 1707/2101``
+  * ``Branches   59.98%  580/967``
+  * ``Functions  94.55%  191/202``
+  * ``Lines      82.83% 1655/1998``
+
+
 Version 1.2.0, 23 March 2020
 ============================
 

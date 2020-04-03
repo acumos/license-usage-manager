@@ -175,27 +175,23 @@ module.exports = {
     },
     /**
      * add a single denial to the collection of denials
+     *      - most denials come directly from SQL instead of through here
      * @param  {Object} swidTag contains usageDenials
-     * @param  {string} denialType ENUM {swidTagNotFound, swidTagRevoked,
-     *                                   licenseProfileNotFound, licenseProfileRevoked,
-     *                                   agreementNotFound, rightToUseRevoked, usageProhibited,
-     *                                   matchingConstraintOnAssignee, matchingConstraintOnTarget,
-     *                                   timingConstraint, usageConstraint}
+     * @param  {string} denialCode ENUM {denied_due_swidTagNotFound, denied_due_agreementNotFound}
+     * @param  {string} denialType ENUM {swidTagNotFound, agreementNotFound}
      * @param  {string} denialReason human readable explanation why denied the entitlement
      * @param  {string} deniedAction either requested action on the asset like download, publish, execute, etc.
      *                  or special value of use
      */
-    addDenial(swidTag, denialType, denialReason, deniedAction) {
+    addDenial(swidTag, denialCode, denialType, denialReason, deniedAction) {
 
         denialReason = module.exports.makeOneLine(denialReason);
         if (!swidTag.usageDenialSummary) {
             swidTag.usageDenialSummary = denialReason;
         }
 
-        swidTag.usageDenials.push({
-            "denialType": denialType,
-            "denialReason": denialReason,
-            "deniedAction": deniedAction
+        swidTag.usageDenials.push({"denialCode": denialCode, "denialType": denialType,
+                                   "denialReason": denialReason, "deniedAction": deniedAction
         });
     },
     /**

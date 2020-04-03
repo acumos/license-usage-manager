@@ -70,7 +70,7 @@ async function readAcuLog(requestId) {
 
 before(function() {
     process.env.NODE_VERSION = process.env.NODE_VERSION || 'test-version';
-    process.env.COUT_LEVEL = "error";
+    process.env.LOG_CONSOLE_OFF = "yes";
     process.env.LOGDIR = "logs";
 
     console.log(`${utils.milliSecsToString(utils.now())}: before all testing ${process.env.NODE_VERSION} ${(new Date()).toISOString()}`);
@@ -158,7 +158,7 @@ describe('lum-server', function () {
                     expect(res).to.have.status(expectation.res.statusCode);
                     mockPg.pgClientMock.verify();
 
-                    mockUtils.assertDeepEqual(res.body, expectation.res.body, `Unexpected res for ${testLog}`);
+                    mockUtils.assertDeepEqual(res.body, expectation.res.body, `unexpected res for ${testLog}`);
                     requestId = res.body.requestId;
                     if (expectation.acuLogs) {
                         lumServer.logger.info(`<<---- expecting ${
@@ -169,7 +169,7 @@ describe('lum-server', function () {
                 .then(function(acuLogs) {
                     if (expectation.acuLogs) {
                         lumServer.logger.info(`<<---- got ${acuLogs.length} acuLogs:`, acuLogs);
-                        mockUtils.assertDeepEqual(acuLogs, expectation.acuLogs, `Unexpected acuLogs for ${testLog}`);
+                        mockUtils.assertDeepEqual(acuLogs, expectation.acuLogs, `unexpected acuLogs for ${testLog}`);
                         lumServer.logger.info(`<<---- done`);
                     }
                 });

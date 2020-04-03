@@ -68,6 +68,11 @@ const assetUsageHistoryRtuAttributes = {
     "assigneeMetrics"           : true
 };
 
+const sqlRtuActiveAndTimingOK = `rtu."rightToUseActive" = TRUE
+                            AND COALESCE(NOW()::DATE >= rtu."enableOn", TRUE)
+                            AND COALESCE(NOW()::DATE <= rtu."expireOn", TRUE)
+                            AND COALESCE(NOW() <= rtu."usageEnds", TRUE)`;
+
 /**
  * generate SQL CASE WHEN lines for all of the ODRL operators
  * @param  {string} operator on the constraint
@@ -148,22 +153,25 @@ function genSqlToEntitle(getSwidTagForUsage, keys, actionField, userField, reqUs
                     ELSE NULL END AS "usageType",
                CASE WHEN sw_lp."swidTagActive" = FALSE THEN
                         JSON_BUILD_OBJECT(
-                           'denialType', 'swidTagRevoked',
-                           'denialReason', FORMAT('swid-tag(%s) %s', sw_lp."swTagId", COALESCE(sw_lp."closureReason", 'revoked')),
-                           'deniedAction', ${actionField.idxFirstValue}::TEXT
+                            'denialCode', 'denied_due_swidTagRevoked',
+                            'denialType', 'swidTagRevoked',
+                            'denialReason', FORMAT('swid-tag(%s) %s', sw_lp."swTagId", COALESCE(sw_lp."closureReason", 'revoked')),
+                            'deniedAction', ${actionField.idxFirstValue}::TEXT
                         )
                     WHEN sw_lp."licenseProfileRevision" IS NULL THEN
                         JSON_BUILD_OBJECT(
-                           'denialType', 'licenseProfileNotFound',
-                           'denialReason', FORMAT('license-profile(%s) not found for swid-tag(%s)', sw_lp."licenseProfileId", sw_lp."swTagId"),
-                           'deniedAction', ${actionField.idxFirstValue}::TEXT
+                            'denialCode', 'denied_due_licenseProfileNotFound',
+                            'denialType', 'licenseProfileNotFound',
+                            'denialReason', FORMAT('license-profile(%s) not found for swid-tag(%s)', sw_lp."licenseProfileId", sw_lp."swTagId"),
+                            'deniedAction', ${actionField.idxFirstValue}::TEXT
                         )
                     WHEN sw_lp."licenseProfileActive" = FALSE THEN
                         JSON_BUILD_OBJECT(
-                           'denialType', 'licenseProfileRevoked',
-                           'denialReason', FORMAT('license-profile(%s) %s for swid-tag(%s)', sw_lp."licenseProfileId",
-                               COALESCE(sw_lp.lp_closure_reason, 'revoked'), sw_lp."swTagId"),
-                           'deniedAction', ${actionField.idxFirstValue}::TEXT
+                            'denialCode', 'denied_due_licenseProfileRevoked',
+                            'denialType', 'licenseProfileRevoked',
+                            'denialReason', FORMAT('license-profile(%s) %s for swid-tag(%s)', sw_lp."licenseProfileId",
+                                COALESCE(sw_lp.lp_closure_reason, 'revoked'), sw_lp."swTagId"),
+                            'deniedAction', ${actionField.idxFirstValue}::TEXT
                         )
                     ELSE NULL END AS "denial"
           FROM sw_lp
@@ -195,9 +203,7 @@ function genSqlToEntitle(getSwidTagForUsage, keys, actionField, userField, reqUs
                LEFT OUTER JOIN LATERAL (SELECT swt_ctlg."swCatalogIds", swt_ctlg."swCatalogTypes" FROM swt_ctlg
                                          WHERE swt_ctlg."swTagId" = swid_tag."swTagId") AS ctlgs ON TRUE
          WHERE "rtuAction" IN (${actionField.idxKeyValues})
-           AND rtu."rightToUseActive" = TRUE
-           AND (rtu."expireOn" IS NULL OR NOW()::DATE <= rtu."expireOn")
-           AND (rtu."enableOn" IS NULL OR NOW()::DATE >= rtu."enableOn")
+           AND ${sqlRtuActiveAndTimingOK}
            AND (rtu."targetRefinement"#>'{lum:swPersistentId}' IS NULL
              OR ${genCasesByOperator(`rtu."targetRefinement"#>>'{lum:swPersistentId,operator}'`,
                  `swid_tag."swPersistentId"`, `rtu."targetRefinement"#>'{lum:swPersistentId,rightOperand}'`, 'TEXT')})
@@ -241,6 +247,7 @@ function genSqlToEntitle(getSwidTagForUsage, keys, actionField, userField, reqUs
                     WHEN swid_tag.need_rtu = FALSE THEN NULL
                     WHEN rtu_rule."assetUsageRuleType" = 'prohibition' THEN
                         JSON_BUILD_OBJECT(
+                            'denialCode', 'denied_due_usageProhibited',
                             'denialType', 'usageProhibited',
                             'denialReason', FORMAT('swid-tag(%s) has been found but asset-usage is prohibited by prohibition(%s) under asset-usage-agreement(%s) for action(%s)',
                                 swid_tag."swTagId", rtu_rule."rightToUseId", rtu_rule."assetUsageAgreementId", rtu_rule."rtuAction"),
@@ -318,7 +325,7 @@ async function checkRtuForSwidTag(res, swidTag) {
     await findRtuForSwidTag(res, swidTag);
 
     if (swidTag.rightToUse == null) {
-        utils.addDenial(swidTag, "swidTagNotFound", `swid-tag(${swidTag.swTagId}) not found`, res.locals.params.action);
+        utils.addDenial(swidTag, "denied_due_swidTagNotFound", "swidTagNotFound", `swid-tag(${swidTag.swTagId}) not found`, res.locals.params.action);
         return;
     }
     if (swidTag.rightToUse.denial) {
@@ -355,7 +362,7 @@ async function checkRtuForSwidTag(res, swidTag) {
     if (swidTag.rightToUse.entitlement == null) {
         const denialsCount = await collectDenialsForSwidTag(res, swidTag);
         if (!denialsCount) {
-            utils.addDenial(swidTag, "agreementNotFound",
+            utils.addDenial(swidTag, "denied_due_agreementNotFound", "agreementNotFound",
                 `swid-tag(${swidTag.swTagId}) has been found
                     but no asset-usage-agreement from ${swidTag.rightToUse.softwareLicensorId}
                     currently provide the right to use this asset for action(${res.locals.params.action})`,
@@ -403,6 +410,7 @@ async function collectDenialsForSwidTag(res, swidTag) {
         SELECT
             CASE WHEN NOT rtu."rightToUseActive" THEN
                 JSON_BUILD_OBJECT(
+                    'denialCode', 'denied_due_rightToUseRevoked',
                     'denialType', 'rightToUseRevoked',
                     'denialReason', FORMAT(
                         'rightToUse %s on %s(%s) under agreement(%s) for action(%s)',
@@ -415,15 +423,16 @@ async function collectDenialsForSwidTag(res, swidTag) {
                     'deniedRightToUseRevision', rtu."rightToUseRevision",
                     'denialReqItemName', 'rightToUseActive',
                     'denialReqItemValue', TRUE
-                ) ELSE NULL END AS "denied_rightToUseRevoked",
+                ) ELSE NULL END AS "denied_due_rightToUseRevoked",
 
             CASE WHEN rtu."rightToUseActive"
-                  AND NOT (rtu."expireOn" IS NULL OR NOW()::DATE <= rtu."expireOn") THEN
+                  AND NOT COALESCE(NOW()::DATE <= rtu."expireOn", TRUE) THEN
                 JSON_BUILD_OBJECT(
+                    'denialCode', 'denied_due_expireOn',
                     'denialType', 'timingConstraint',
                     'denialReason', FORMAT(
                         'rightToUse expired: (today(%s) > expireOn(%s)) on %s(%s) under agreement(%s) for action(%s)',
-                        NOW()::DATE::TEXT, rtu."expireOn"::TEXT,
+                        NOW()::DATE, rtu."expireOn",
                         rtu."assetUsageRuleType", rtu."rightToUseId", rtu."assetUsageAgreementId", "rtuAction"),
                     'deniedAction', "rtuAction",
                     'deniedAssetUsageAgreementId', rtu."assetUsageAgreementId",
@@ -433,15 +442,53 @@ async function collectDenialsForSwidTag(res, swidTag) {
                     'denialReqItemName', 'date',
                     'denialReqItemValue', NOW()::DATE,
                     'deniedConstraint', JSON_BUILD_OBJECT('expireOn', rtu."expireOn")
-                ) ELSE NULL END AS "denied_expired",
+                ) ELSE NULL END AS "denied_due_expireOn",
 
             CASE WHEN rtu."rightToUseActive"
-                  AND NOT (rtu."enableOn" IS NULL OR NOW()::DATE >= rtu."enableOn") THEN
+                  AND NOT COALESCE(NOW() <= rtu."usageEnds", TRUE) THEN
                 JSON_BUILD_OBJECT(
+                    'denialCode', 'denied_due_goodFor',
+                    'denialType', 'timingConstraint',
+                    'denialReason', FORMAT(
+                        'rightToUse too late: (now(%s) > end-of-good-for(%s)), usage started(%s), was good for(%s) on %s(%s) under agreement(%s) for action(%s)',
+                        TO_CHAR(NOW() AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'),
+                        TO_CHAR(rtu."usageEnds" AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'),
+                        TO_CHAR(rtu."usageStarted" AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'),
+                        TRIM(REGEXP_REPLACE(REGEXP_REPLACE(REGEXP_REPLACE(REGEXP_REPLACE(REGEXP_REPLACE(
+                            TO_CHAR(rtu."goodFor",
+                                ' YYYY "years" MM "months" DD "days" HH24 "hours" MI "minutes" SS.MS "seconds"'),
+                            ' 0+([1-9]\\d*[.]?\\d*|0[.]\\d*) ', ' \\1 ', 'g'),
+                            '\\m0+[.]?0* [a-z]+s\\M', '', 'g'),
+                            '[.]-', '.', 'g'),
+                            '\\m1 ([a-z]+)s\\M', '1 \\1', 'g'),
+                            '  ', ' ', 'g')),
+                        rtu."assetUsageRuleType", rtu."rightToUseId", rtu."assetUsageAgreementId", "rtuAction"),
+                    'deniedAction', "rtuAction",
+                    'deniedAssetUsageAgreementId', rtu."assetUsageAgreementId",
+                    'deniedAssetUsageAgreementRevision', agr."assetUsageAgreementRevision",
+                    'deniedRightToUseId', rtu."rightToUseId",
+                    'deniedRightToUseRevision', rtu."rightToUseRevision",
+                    'denialReqItemName', 'datetime',
+                    'denialReqItemValue', TO_CHAR(NOW() AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'),
+                    'deniedConstraint', JSON_BUILD_OBJECT(
+                        'goodFor', REGEXP_REPLACE(REGEXP_REPLACE(REGEXP_REPLACE(REGEXP_REPLACE(
+                            TO_CHAR(rtu."goodFor", '"P" YYYY "Y" MM "M" DD "D" "T" HH24 "H" MI "M" SS.MS "S"'),
+                            ' 0+([1-9]\\d*[.]?\\d*|0[.]\\d*) ', ' \\1 ', 'g'),
+                            '\\m0+[.]?0* [A-Z]\\M', '', 'g'),
+                            '[.]-', '.', 'g'), '(\\s+|T\\s+$)', '', 'g'),
+                        'usageStarted', TO_CHAR(rtu."usageStarted" AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'),
+                        'usageEnded', TO_CHAR(rtu."usageEnds" AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"')
+                    )
+                ) ELSE NULL END AS "denied_due_goodFor",
+
+            CASE WHEN rtu."rightToUseActive"
+                  AND NOT COALESCE(NOW()::DATE >= rtu."enableOn", TRUE) THEN
+                JSON_BUILD_OBJECT(
+                    'denialCode', 'denied_due_enableOn',
                     'denialType', 'timingConstraint',
                     'denialReason', FORMAT(
                         'rightToUse not enabled yet: (today(%s) < enableOn(%s)) on %s(%s) under agreement(%s) for action(%s)',
-                        NOW()::DATE::TEXT, rtu."enableOn"::TEXT,
+                        NOW()::DATE, rtu."enableOn",
                         rtu."assetUsageRuleType", rtu."rightToUseId", rtu."assetUsageAgreementId", "rtuAction"),
                     'deniedAction', "rtuAction",
                     'deniedAssetUsageAgreementId', rtu."assetUsageAgreementId",
@@ -451,15 +498,14 @@ async function collectDenialsForSwidTag(res, swidTag) {
                     'denialReqItemName', 'date',
                     'denialReqItemValue', NOW()::DATE,
                     'deniedConstraint', JSON_BUILD_OBJECT('enableOn', rtu."enableOn")
-                ) ELSE NULL END AS "denied_tooSoon",
+                ) ELSE NULL END AS "denied_due_enableOn",
 
-            CASE WHEN rtu."rightToUseActive"
-                  AND (rtu."enableOn" IS NULL OR NOW()::DATE >= rtu."enableOn")
-                  AND (rtu."expireOn" IS NULL OR NOW()::DATE <= rtu."expireOn")
+            CASE WHEN ${sqlRtuActiveAndTimingOK}
                   AND NOT (rtu."targetRefinement"#>'{lum:swPersistentId}' IS NULL
                    OR ${genCasesByOperator(`rtu."targetRefinement"#>>'{lum:swPersistentId,operator}'`,
                        `swid_tag."swPersistentId"`, `rtu."targetRefinement"#>'{lum:swPersistentId,rightOperand}'`, 'TEXT')}) THEN
                 JSON_BUILD_OBJECT(
+                    'denialCode', 'denied_due_swPersistentIdOnTarget',
                     'denialType', 'matchingConstraintOnTarget',
                     'denialReason', FORMAT(
                         'not targeted by %s: (%s not %s %s) on %s(%s) under agreement(%s) for action(%s)',
@@ -476,15 +522,14 @@ async function collectDenialsForSwidTag(res, swidTag) {
                     'denialReqItemName', 'swPersistentId',
                     'denialReqItemValue', swid_tag."swPersistentId",
                     'deniedConstraint', rtu."targetRefinement"#>'{lum:swPersistentId}'
-                ) ELSE NULL END AS "denied_swPersistentId",
+                ) ELSE NULL END AS "denied_due_swPersistentIdOnTarget",
 
-            CASE WHEN rtu."rightToUseActive"
-                  AND (rtu."enableOn" IS NULL OR NOW()::DATE >= rtu."enableOn")
-                  AND (rtu."expireOn" IS NULL OR NOW()::DATE <= rtu."expireOn")
+            CASE WHEN ${sqlRtuActiveAndTimingOK}
                   AND NOT (rtu."targetRefinement"#>'{lum:swTagId}' IS NULL
                    OR ${genCasesByOperator(`rtu."targetRefinement"#>>'{lum:swTagId,operator}'`,
                        `swid_tag."swTagId"`, `rtu."targetRefinement"#>'{lum:swTagId,rightOperand}'`, 'TEXT')}) THEN
                 JSON_BUILD_OBJECT(
+                    'denialCode', 'denied_due_swTagIdOnTarget',
                     'denialType', 'matchingConstraintOnTarget',
                     'denialReason', FORMAT(
                         'not targeted by %s: (%s not %s %s) on %s(%s) under agreement(%s) for action(%s)',
@@ -501,15 +546,14 @@ async function collectDenialsForSwidTag(res, swidTag) {
                     'denialReqItemName', 'swTagId',
                     'denialReqItemValue', swid_tag."swTagId",
                     'deniedConstraint', rtu."targetRefinement"#>'{lum:swTagId}'
-                ) ELSE NULL END AS "denied_swTagId",
+                ) ELSE NULL END AS "denied_due_swTagIdOnTarget",
 
-            CASE WHEN rtu."rightToUseActive"
-                  AND (rtu."enableOn" IS NULL OR NOW()::DATE >= rtu."enableOn")
-                  AND (rtu."expireOn" IS NULL OR NOW()::DATE <= rtu."expireOn")
+            CASE WHEN ${sqlRtuActiveAndTimingOK}
                   AND NOT (rtu."targetRefinement"#>'{lum:swProductName}' IS NULL
                    OR ${genCasesByOperator(`rtu."targetRefinement"#>>'{lum:swProductName,operator}'`,
                        `swid_tag."swProductName"`, `rtu."targetRefinement"#>'{lum:swProductName,rightOperand}'`, 'TEXT')}) THEN
                 JSON_BUILD_OBJECT(
+                    'denialCode', 'denied_due_swProductNameOnTarget',
                     'denialType', 'matchingConstraintOnTarget',
                     'denialReason', FORMAT(
                         'not targeted by %s: (%s not %s %s) on %s(%s) under agreement(%s) for action(%s)',
@@ -526,15 +570,14 @@ async function collectDenialsForSwidTag(res, swidTag) {
                     'denialReqItemName', 'swProductName',
                     'denialReqItemValue', swid_tag."swProductName",
                     'deniedConstraint', rtu."targetRefinement"#>'{lum:swProductName}'
-                ) ELSE NULL END AS "denied_swProductName",
+                ) ELSE NULL END AS "denied_due_swProductNameOnTarget",
 
-            CASE WHEN rtu."rightToUseActive"
-                  AND (rtu."enableOn" IS NULL OR NOW()::DATE >= rtu."enableOn")
-                  AND (rtu."expireOn" IS NULL OR NOW()::DATE <= rtu."expireOn")
+            CASE WHEN ${sqlRtuActiveAndTimingOK}
                   AND NOT (rtu."targetRefinement"#>'{lum:swCategory}' IS NULL
                    OR ${genCasesByOperator(`rtu."targetRefinement"#>>'{lum:swCategory,operator}'`,
                        `swid_tag."swCategory"`, `rtu."targetRefinement"#>'{lum:swCategory,rightOperand}'`, 'TEXT')}) THEN
                 JSON_BUILD_OBJECT(
+                    'denialCode', 'denied_due_swCategoryOnTarget',
                     'denialType', 'matchingConstraintOnTarget',
                     'denialReason', FORMAT(
                         'not targeted by %s: (%s not %s %s) on %s(%s) under agreement(%s) for action(%s)',
@@ -551,14 +594,13 @@ async function collectDenialsForSwidTag(res, swidTag) {
                     'denialReqItemName', 'swCategory',
                     'denialReqItemValue', swid_tag."swCategory",
                     'deniedConstraint', rtu."targetRefinement"#>'{lum:swCategory}'
-                ) ELSE NULL END AS "denied_swCategory",
+                ) ELSE NULL END AS "denied_due_swCategoryOnTarget",
 
-            CASE WHEN rtu."rightToUseActive"
-                  AND (rtu."enableOn" IS NULL OR NOW()::DATE >= rtu."enableOn")
-                  AND (rtu."expireOn" IS NULL OR NOW()::DATE <= rtu."expireOn")
+            CASE WHEN ${sqlRtuActiveAndTimingOK}
                   AND NOT (rtu."targetRefinement"#>'{lum:swCatalogId}' IS NULL
                    OR COALESCE(rtu."targetRefinement"#>'{lum:swCatalogId,rightOperand}' ?| ctlgs."swCatalogIds", FALSE)) THEN
                 JSON_BUILD_OBJECT(
+                    'denialCode', 'denied_due_swCatalogIdOnTarget',
                     'denialType', 'matchingConstraintOnTarget',
                     'denialReason', FORMAT(
                         'not targeted by %s: (none of %s %s %s) on %s(%s) under agreement(%s) for action(%s)',
@@ -575,14 +617,13 @@ async function collectDenialsForSwidTag(res, swidTag) {
                     'denialReqItemName', 'swCatalogId',
                     'denialReqItemValue', ctlgs."swCatalogIds",
                     'deniedConstraint', rtu."targetRefinement"#>'{lum:swCatalogId}'
-                ) ELSE NULL END AS "denied_swCatalogId",
+                ) ELSE NULL END AS "denied_due_swCatalogIdOnTarget",
 
-            CASE WHEN rtu."rightToUseActive"
-                  AND (rtu."enableOn" IS NULL OR NOW()::DATE >= rtu."enableOn")
-                  AND (rtu."expireOn" IS NULL OR NOW()::DATE <= rtu."expireOn")
+            CASE WHEN ${sqlRtuActiveAndTimingOK}
                   AND NOT (rtu."targetRefinement"#>'{lum:swCatalogType}' IS NULL
                    OR COALESCE(rtu."targetRefinement"#>'{lum:swCatalogType,rightOperand}' ?| ctlgs."swCatalogTypes", FALSE)) THEN
                 JSON_BUILD_OBJECT(
+                    'denialCode', 'denied_due_swCatalogTypeOnTarget',
                     'denialType', 'matchingConstraintOnTarget',
                     'denialReason', FORMAT(
                         'not targeted by %s: (none of %s %s %s) on %s(%s) under agreement(%s) for action(%s)',
@@ -599,17 +640,16 @@ async function collectDenialsForSwidTag(res, swidTag) {
                     'denialReqItemName', 'swCatalogType',
                     'denialReqItemValue', ctlgs."swCatalogTypes",
                     'deniedConstraint', rtu."targetRefinement"#>'{lum:swCatalogType}'
-                ) ELSE NULL END AS "denied_swCatalogType",
+                ) ELSE NULL END AS "denied_due_swCatalogTypeOnTarget",
 
-            CASE WHEN rtu."rightToUseActive"
-                  AND (rtu."enableOn" IS NULL OR NOW()::DATE >= rtu."enableOn")
-                  AND (rtu."expireOn" IS NULL OR NOW()::DATE <= rtu."expireOn")
+            CASE WHEN ${sqlRtuActiveAndTimingOK}
                   AND NOT (rtu."assigneeRefinement"#>'{lum:countUniqueUsers}' IS NULL
                    OR (rtu."assigneeMetrics"->'users')::JSONB ? ${userField.idxKeyValues}
                    OR ${genCasesByOperator(`rtu."assigneeRefinement"#>>'{lum:countUniqueUsers,operator}'`,
                        `COALESCE(JSONB_ARRAY_LENGTH((rtu."assigneeMetrics"->'users')::JSONB), 0) + 1`,
                        `rtu."assigneeRefinement"#>'{lum:countUniqueUsers,rightOperand}'`, 'INTEGER')}) THEN
                 JSON_BUILD_OBJECT(
+                    'denialCode', 'denied_due_countUniqueUsersOnAssignee',
                     'denialType', 'matchingConstraintOnAssignee',
                     'denialReason', FORMAT(
                         'too many users: (%s not in %s) on %s(%s) under agreement(%s) for action(%s)',
@@ -624,15 +664,14 @@ async function collectDenialsForSwidTag(res, swidTag) {
                     'denialReqItemValue', ${userField.idxKeyValues},
                     'deniedConstraint', rtu."assigneeRefinement"#>'{lum:countUniqueUsers}',
                     'deniedMetrics', rtu."assigneeMetrics"
-                ) ELSE NULL END AS "denied_countUniqueUsers",
+                ) ELSE NULL END AS "denied_due_countUniqueUsersOnAssignee",
 
-            CASE WHEN rtu."rightToUseActive"
-                  AND (rtu."enableOn" IS NULL OR NOW()::DATE >= rtu."enableOn")
-                  AND (rtu."expireOn" IS NULL OR NOW()::DATE <= rtu."expireOn")
+            CASE WHEN ${sqlRtuActiveAndTimingOK}
                   AND NOT ((rtu."assigneeRefinement"#>'{lum:users}') IS NULL
                    OR ${genCasesByOperator(`rtu."assigneeRefinement"#>>'{lum:users,operator}'`,
                        `${userField.idxKeyValues}`, `rtu."assigneeRefinement"#>'{lum:users,rightOperand}'`, 'TEXT')}) THEN
                 JSON_BUILD_OBJECT(
+                    'denialCode', 'denied_due_usersOnAssignee',
                     'denialType', 'matchingConstraintOnAssignee',
                     'denialReason', FORMAT(
                         'user not in assignee %s: (%s not %s %s) on %s(%s) under agreement(%s) for action(%s)',
@@ -649,16 +688,15 @@ async function collectDenialsForSwidTag(res, swidTag) {
                     'denialReqItemName', 'userId',
                     'denialReqItemValue', ${userField.idxKeyValues},
                     'deniedConstraint', rtu."assigneeRefinement"#>'{lum:users}'
-                ) ELSE NULL END AS "denied_users",
+                ) ELSE NULL END AS "denied_due_usersOnAssignee",
 
-            CASE WHEN rtu."rightToUseActive"
-                  AND (rtu."enableOn" IS NULL OR NOW()::DATE >= rtu."enableOn")
-                  AND (rtu."expireOn" IS NULL OR NOW()::DATE <= rtu."expireOn")
+            CASE WHEN ${sqlRtuActiveAndTimingOK}
                   AND NOT (rtu."usageConstraints"#>'{count}' IS NULL
                    OR ${genCasesByOperator(`rtu."usageConstraints"#>>'{count,operator}'`,
                        `COALESCE((usmcs."metrics"#>'{count}')::INTEGER, 0) + ${reqUsageCountField.idxKeyValues}`,
                        `rtu."usageConstraints"#>'{count,rightOperand}'`, 'INTEGER')}) THEN
                 JSON_BUILD_OBJECT(
+                    'denialCode', 'denied_due_usageCount',
                     'denialType', 'usageConstraint',
                     'denialReason', FORMAT(
                         'exceeding the usage %s: (%s not %s %s) on %s(%s) under agreement(%s) for action(%s)',
@@ -676,7 +714,7 @@ async function collectDenialsForSwidTag(res, swidTag) {
                     'denialReqItemValue', ${reqUsageCountField.idxKeyValues},
                     'deniedConstraint', rtu."usageConstraints"#>'{count}',
                     'deniedMetrics', COALESCE((usmcs."metrics"#>'{count}')::INTEGER, 0)
-                ) ELSE NULL END AS "denied_usageCount"
+                ) ELSE NULL END AS "denied_due_usageCount"
           FROM (SELECT * FROM "swidTag" WHERE ${keys.where}) AS swid_tag
                JOIN "rightToUse" AS rtu ON (rtu."softwareLicensorId" = swid_tag."softwareLicensorId")
                JOIN "assetUsageAgreement" AS agr ON (rtu."softwareLicensorId" = agr."softwareLicensorId"
@@ -690,10 +728,7 @@ async function collectDenialsForSwidTag(res, swidTag) {
                                          WHERE swt_ctlg."swTagId" = swid_tag."swTagId") AS ctlgs ON TRUE
          WHERE "rtuAction" IN (${actionField.idxKeyValues})
            AND rtu."assetUsageRuleType" != '${odrl.RULE_TYPES.prohibition}'
-         ORDER BY CASE WHEN rtu."rightToUseActive"
-                        AND (rtu."enableOn" IS NULL OR NOW()::DATE >= rtu."enableOn")
-                        AND (rtu."expireOn" IS NULL OR NOW()::DATE <= rtu."expireOn")
-                       THEN '0' ELSE '1' END,
+         ORDER BY CASE WHEN ${sqlRtuActiveAndTimingOK} THEN '0' ELSE '1' END,
                   NULLIF("rtuAction", 'use') NULLS LAST,
                   rtu."created", rtu."assetUsageRuleId"
          LIMIT 100`;
@@ -800,13 +835,15 @@ async function updateAssigneeMetrics(res, swidTag) {
     const requestIdField = new SqlParams(houseFields);
     requestIdField.addField("requestId", res.locals.requestId);
 
-    const sqlCmd = `UPDATE "rightToUse" SET "metricsModified" = NOW(), "metricsRevision" = "metricsRevision" + 1,
+    const sqlCmd = `UPDATE "rightToUse" SET "metricsModified" = NOW(),
+            "metricsRevision" = "metricsRevision" + 1,
             "assigneeMetrics" = "assigneeMetrics"
                 || CASE WHEN ("assigneeMetrics"->'users')::JSONB ? ${userField.idxKeyValues} THEN '{}'::JSONB
                         ELSE JSONB_BUILD_OBJECT('users', ("assigneeMetrics"->'users')::JSONB
                                               || ('["' || ${userField.idxKeyValues} || '"]')::JSONB) END,
             "usageStartReqId" = COALESCE("usageStartReqId", ${requestIdField.idxKeyValues}),
-            "usageStarted"    = COALESCE("usageStarted", NOW())
+            "usageStarted"    = COALESCE("usageStarted", NOW()),
+            "usageEnds"       = COALESCE("usageEnds", NOW() + "goodFor")
             ${houseFields.updates} WHERE ${keys.where}`;
     await pgclient.sqlQuery(res, sqlCmd, keys.getAllValues());
     lumServer.logger.debug(res, `out updateAssigneeMetrics(${swidTag.swTagId}`);
