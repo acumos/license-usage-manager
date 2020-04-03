@@ -94,24 +94,26 @@
 
 "use strict";
 
+const moment = require('moment');
 const utils = require('../utils');
 const lumErrors = require('../error');
 
 
-const RULE_TYPES = {permission:'permission', prohibition:'prohibition'};
+const RULE_TYPES = {permission: 'permission', prohibition: 'prohibition'};
 const OPERATORS = {lt:'lt', lteq:'lteq', eq:'eq', gt:'gt', gteq:'gteq', lumIn:'lum:in'};
 const CONSUMED_CONSTRAINTS = {
     merged:'merged', overridden:'overridden', conflicted:'conflicted',
-    errored:'errored', ignored:'ignored', consumed:'consumed', expanded:'expanded', unexpected:'unexpected',
-    same:'same'
+    errored:'errored', ignored:'ignored', consumed:'consumed', expanded:'expanded',
+    unexpected:'unexpected', same:'same', groomed: "groomed"
 };
 
 const FIELDS = {value:'@value', type: '@type'};
-const TYPES = {"integer": "integer", "string": "string"};
+const TYPES = {string: "string", integer: "integer", date: "date", duration: "duration"};
 const LEFT_OPERANDS = {
-    "count": {dataType: "integer", usageConstraintOn: [RULE_TYPES.permission]},
-    "date":  {dataType: "date"},
-    "lum:countUniqueUsers": {dataType: "integer", assigneeConstraintOn: [RULE_TYPES.permission]},
+    "count": {dataType: TYPES.integer, usageConstraintOn: [RULE_TYPES.permission]},
+    "date":  {dataType: TYPES.date},
+    "lum:goodFor": {dataType: TYPES.duration, goodForConstraintOn: [RULE_TYPES.permission]},
+    "lum:countUniqueUsers": {dataType: TYPES.integer, assigneeConstraintOn: [RULE_TYPES.permission]},
     "lum:users": {assigneeConstraintOn: [RULE_TYPES.permission, RULE_TYPES.prohibition]}
 };
 
@@ -152,6 +154,23 @@ function compareTwoValues(operator, lhv, rhv) {
     if (operator === OPERATORS.eq)      {return lhv == rhv;}
 }
 /**
+ * compare rightOperand values on two constraints
+ *    depending on the optionally precalculated rightOperandComparable
+ *
+ * @param  {string} operator
+ * @param  {} lhc left hand constraint
+ * @param  {} rhc right hand constraint
+ * @returns {boolean} whether comparison succeeded - whether the lhc is better fit than rhc
+ */
+function compareTwoConstraints(operator, lhc, rhc) {
+    if (lhc == null || rhc == null) {return false;}
+
+    return compareTwoValues(operator,
+        lhc.rightOperandComparable != null ? lhc.rightOperandComparable : lhc.rightOperand,
+        rhc.rightOperandComparable != null ? rhc.rightOperandComparable : rhc.rightOperand
+    );
+}
+/**
  * convert the action value into an array of strings
  *
  * for example
@@ -188,6 +207,111 @@ function consumeConstraint(consumedConstraints, status, ...constraints) {
     }
 }
 /**
+ * groom constraint for the integer data type
+ * @param  {} constraint
+ * @param  {[]} consumedConstraints
+ */
+function groomConstraintInteger(constraint, consumedConstraints) {
+    if (constraint.dataType !== TYPES.integer) {return;}
+
+    if (isNaN(constraint.rightOperand)) {
+        consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.errored, constraint);
+        constraint.rightOperand = null;
+        return true;
+    }
+    let rightOperand = Number(constraint.rightOperand);
+    let operator = constraint.operator;
+    if (operator === OPERATORS.lt) {
+        operator = OPERATORS.lteq;
+        --rightOperand;
+    } else if (operator === OPERATORS.gt) {
+        operator = OPERATORS.gteq;
+        ++rightOperand;
+    }
+    if (rightOperand !== constraint.rightOperand || operator !== constraint.operator) {
+        consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.groomed, constraint);
+        constraint.rightOperand = rightOperand;
+        constraint.operator = operator;
+    }
+    return true;
+}
+/**
+ * groom constraint for the date data type
+ * @param  {} constraint
+ * @param  {[]} consumedConstraints
+ */
+function groomConstraintDate(constraint, consumedConstraints) {
+    if (constraint.dataType !== TYPES.date) {return;}
+
+    let rightOperand = new Date(constraint.rightOperand);
+    if (isNaN(rightOperand.getTime())) {
+        consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.errored, constraint);
+        constraint.rightOperand = null;
+        return true;
+    }
+
+    let operator = constraint.operator;
+    if (operator === OPERATORS.lt) {
+        operator = OPERATORS.lteq;
+        rightOperand.setDate(rightOperand.getDate() - 1);
+    } else if (operator === OPERATORS.gt) {
+        operator = OPERATORS.gteq;
+        rightOperand.setDate(rightOperand.getDate() + 1);
+    }
+    rightOperand = rightOperand.toISOString().substr(0, 10);
+    if (rightOperand !== constraint.rightOperand || operator !== constraint.operator) {
+        consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.groomed, constraint);
+        constraint.rightOperand = rightOperand;
+        constraint.operator = operator;
+    }
+    return true;
+}
+/**
+ * groom constraint for the date data type
+ * @param  {} constraint
+ * @param  {[]} consumedConstraints
+ */
+function groomConstraintDuration(constraint, consumedConstraints) {
+    if (constraint.dataType !== TYPES.duration) {return;}
+
+    let rightOperand = constraint.rightOperand;
+    if (rightOperand != null && !isNaN(rightOperand)) {
+        rightOperand = `P${Number(rightOperand)}D`;
+    } else {
+        rightOperand = `${rightOperand}`.toUpperCase();
+    }
+    const emptyGoodFor = (rightOperand === 'P0D');
+    rightOperand = moment.duration(rightOperand);
+    if (!emptyGoodFor && !rightOperand.asMilliseconds()) {
+        consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.errored, constraint);
+        // lumServer.logger.debug(res, 'unexpected rightOperand value on constraint', constraint);
+        constraint.rightOperand = null;
+        if ('rightOperandComparable' in constraint) {
+            delete constraint.rightOperandComparable;
+        }
+        return true;
+    }
+    let operator = constraint.operator;
+    if (operator === OPERATORS.lt) {
+        operator = OPERATORS.lteq;
+        rightOperand.subtract(1);
+    } else if (operator === OPERATORS.gt) {
+        operator = OPERATORS.gteq;
+        rightOperand.add(1);
+    }
+
+    const rightOperandComparable = rightOperand.asMilliseconds();
+    rightOperand = rightOperand.toISOString();
+    if (rightOperand !== constraint.rightOperand || operator !== constraint.operator
+     || rightOperandComparable !== constraint.rightOperandComparable) {
+        consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.groomed, constraint);
+        constraint.rightOperand = rightOperand;
+        constraint.operator = operator;
+        constraint.rightOperandComparable = rightOperandComparable;
+    }
+    return true;
+}
+/**
  * groom the rightOperand, dataType, unit in constraint to the form
  * ```rightOperand: [<typed-value>], dataType: <type-of-value>, unit: <unit>```
  *
@@ -203,13 +327,15 @@ function consumeConstraint(consumedConstraints, status, ...constraints) {
  * ```rightOperand: 20, dataType: "integer"```
  *
  * ```rightOperand: {"@value": "2019-09-16", "@type": "xsd:date"}``` ->
- * ```rightOperand: "2019-09-16", dataType: "date"}```
+ * ```rightOperand: "2019-09-16", dataType: "date"```
  *
  * @param  {} res
- * @param   {} constraint
+ * @param  {} constraint
+ * @param  {[]} consumedConstraints collection of merged and conflicted constraints
+ *                                that got consumed by grooming
  * @returns {} groomed copy of constraint
  */
-function groomConstraint(res, constraint) {
+function groomConstraint(res, constraint, consumedConstraints) {
     constraint = utils.deepCopyTo({}, constraint);
     lumServer.logger.debug(res, 'groomConstraint to groom constraint', constraint);
     constraint.dataType = (LEFT_OPERANDS[constraint.leftOperand] || {}).dataType || TYPES.string;
@@ -226,8 +352,8 @@ function groomConstraint(res, constraint) {
         if (typeof rop === 'string') {return rop;}
         if (typeof rop !== 'object') {return rop;}
 
-        constraint.dataType = (rop[FIELDS.type] || '').toLowerCase().replace('xsd:', '')
-                           || constraint.dataType;
+        const ropDataType = (rop[FIELDS.type] || '').toLowerCase().replace('xsd:', '');
+        constraint.dataType = (ropDataType in TYPES && ropDataType) || constraint.dataType;
         const ropValue = rop[FIELDS.value];
         if (ropValue == null) {return;}
         if (typeof ropValue !== 'string') {return JSON.stringify(ropValue);}
@@ -241,15 +367,11 @@ function groomConstraint(res, constraint) {
         return constraint;
     }
     constraint.rightOperand = constraint.rightOperand[0];
-    if (constraint.dataType === TYPES.integer) {
-        constraint.rightOperand = +constraint.rightOperand;
-        if (constraint.operator === OPERATORS.lt) {
-            --constraint.rightOperand;
-            constraint.operator = OPERATORS.lteq;
-        } else if (constraint.operator === OPERATORS.gt) {
-            ++constraint.rightOperand;
-            constraint.operator = OPERATORS.gteq;
-        }
+
+    if (groomConstraintInteger(constraint, consumedConstraints)
+        || groomConstraintDate(constraint, consumedConstraints)
+        || groomConstraintDuration(constraint, consumedConstraints)) {
+        return constraint;
     }
     return constraint;
 }
@@ -301,7 +423,7 @@ function mergeTwoConstraints(res, constraint, addon, consumedConstraints) {
             lumServer.logger.debug(res, 'merged mergeTwoConstraints constraint', constraint);
             return true;
         }
-        if (compareTwoValues(constraint.operator, addon.rightOperand, constraint.rightOperand)) {
+        if (compareTwoConstraints(constraint.operator, addon, constraint)) {
             consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.overridden, constraint);
             utils.deepCopyTo(constraint, addon);
         } else {
@@ -313,7 +435,7 @@ function mergeTwoConstraints(res, constraint, addon, consumedConstraints) {
 
     // ... here when different operators...
     if (constraint.operator === OPERATORS.eq) {
-        if (!compareTwoValues(addon.operator, constraint.rightOperand, addon.rightOperand)) {
+        if (!compareTwoConstraints(addon.operator, constraint, addon)) {
             consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.conflicted, constraint, addon);
             constraint.rightOperand = null;
         } else {
@@ -323,7 +445,7 @@ function mergeTwoConstraints(res, constraint, addon, consumedConstraints) {
         return true;
     }
     if (addon.operator === OPERATORS.eq) {
-        if (compareTwoValues(constraint.operator, addon.rightOperand, constraint.rightOperand)) {
+        if (compareTwoConstraints(constraint.operator, addon, constraint)) {
             consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.overridden, constraint);
             utils.deepCopyTo(constraint, addon);
         } else {
@@ -341,7 +463,7 @@ function mergeTwoConstraints(res, constraint, addon, consumedConstraints) {
     if (constraint.rightOperand == addon.rightOperand) {
         consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.merged, constraint, addon);
         constraint.operator = strongOperator;
-    } else if (compareTwoValues(strongOperator, addon.rightOperand, constraint.rightOperand)) {
+    } else if (compareTwoConstraints(strongOperator, addon, constraint)) {
         consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.overridden, constraint);
         utils.deepCopyTo(constraint, addon);
     }
@@ -387,7 +509,7 @@ function expandProhibitionConstraint(res, constraint, expansion, consumedConstra
             lumServer.logger.debug(res, 'ignored expansion for constraint', constraint);
             return;
         }
-        if (compareTwoValues(constraint.operator, constraint.rightOperand, expansion.rightOperand)) {
+        if (compareTwoConstraints(constraint.operator, constraint, expansion)) {
             consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.expanded, constraint);
             utils.deepCopyTo(constraint, expansion);
             constraint.expanded = true;
@@ -432,7 +554,7 @@ function expandProhibitionConstraint(res, constraint, expansion, consumedConstra
         return;
     }
 
-    if (compareTwoValues(weakOperator, constraint.rightOperand, expansion.rightOperand)) {
+    if (compareTwoConstraints(weakOperator, constraint, expansion)) {
         consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.expanded, constraint);
         utils.deepCopyTo(constraint, expansion);
         constraint.expanded = true;
@@ -448,7 +570,7 @@ function expandProhibitionConstraint(res, constraint, expansion, consumedConstra
  * @param  {} res
  * @param  {Object[]} constraints initial constraint
  * @param  {Object[]} baseConstraints constraints from agreement
- * @param  {} consumedConstraints collection of merged and conflicted constraints
+ * @param  {[]} consumedConstraints collection of merged and conflicted constraints
  *                                that got consumed by grooming
  * @returns {Object[]} new collection of merged constraints
  */
@@ -459,7 +581,7 @@ function groomConstraints(res, constraints, baseConstraints, consumedConstraints
 
     const mergedConstraints = [];
     for (let addon of baseConstraints.concat(constraints)) {
-        addon = groomConstraint(res, addon);
+        addon = groomConstraint(res, addon, consumedConstraints);
         lumServer.logger.debug(res, 'groomConstraints groomed addon', addon);
 
         let merged = false;
@@ -519,6 +641,7 @@ function groomRules(res, rules, assetUsageRuleType, agreement) {
             isPerpetual:         true,
             enableOn:            null,
             expireOn:            null,
+            goodFor:             null,
             targetRefinement:    {},
             assigneeRefinement:  {},
             assigneeMetrics:     {users: []},
@@ -526,94 +649,17 @@ function groomRules(res, rules, assetUsageRuleType, agreement) {
             consumedConstraints: {onTarget:[], onAssignee:[], onRule:[]}
         };
         const ruleInfo = `groom ${groomedRule.assetUsageRuleType}(${groomedRule.uid})`;
-        const targetRefinement = groomRefinement(res, rule.target, agreement.target,
-                                                 groomedRule.consumedConstraints.onTarget);
-        if (targetRefinement) {
-            lumServer.logger.debug(res, `${ruleInfo} targetRefinement`, targetRefinement);
-            targetRefinement.forEach(trfn => {
-                const prevConstraint = groomedRule.targetRefinement[trfn.leftOperand];
-                if (prevConstraint) {
-                    consumeConstraint(groomedRule.consumedConstraints.onTarget, CONSUMED_CONSTRAINTS.conflicted,
-                        prevConstraint, trfn);
-                    prevConstraint.rightOperand = null;
-                } else {
-                    groomedRule.targetRefinement[trfn.leftOperand] = trfn;
-                }
-            });
-        }
-        const assigneeRefinement = groomRefinement(res, rule.assignee, agreement.assignee,
-                                                   groomedRule.consumedConstraints.onAssignee);
-        if (assigneeRefinement) {
-            lumServer.logger.debug(res, `${ruleInfo} assigneeRefinement`, assigneeRefinement);
-            assigneeRefinement.forEach(arfn => {
-                if (!((LEFT_OPERANDS[arfn.leftOperand] || {}).assigneeConstraintOn || []).includes(assetUsageRuleType)) {
-                    lumServer.logger.debug(res, `groomRules unexpected assignee constraint`, arfn, 'on', assetUsageRuleType);
-                    consumeConstraint(groomedRule.consumedConstraints.onAssignee, CONSUMED_CONSTRAINTS.unexpected, arfn);
-                    return;
-                }
-                const prevConstraint = groomedRule.assigneeRefinement[arfn.leftOperand];
-                if (prevConstraint) {
-                    consumeConstraint(groomedRule.consumedConstraints.onAssignee, CONSUMED_CONSTRAINTS.conflicted,
-                        prevConstraint, arfn);
-                    prevConstraint.rightOperand = null;
-                } else {
-                    groomedRule.assigneeRefinement[arfn.leftOperand] = arfn;
-                }
-            });
-        }
-        const constraints = groomConstraints(res, rule.constraint, null, groomedRule.consumedConstraints.onRule);
-        if (constraints) {
-            lumServer.logger.debug(res, `${ruleInfo} constraints`, constraints);
-            constraints.forEach(constraint => {
-                if (((LEFT_OPERANDS[constraint.leftOperand] || {}).usageConstraintOn || []).includes(assetUsageRuleType)) {
-                    const prevConstraint = groomedRule.usageConstraints[constraint.leftOperand];
-                    if (prevConstraint) {
-                        consumeConstraint(groomedRule.consumedConstraints.onRule, CONSUMED_CONSTRAINTS.conflicted,
-                            prevConstraint, constraint);
-                        prevConstraint.rightOperand = null;
-                    } else {
-                        groomedRule.usageConstraints[constraint.leftOperand] = constraint;
-                    }
-                } else if (constraint.leftOperand === "date") {
-                    const rightOperand = new Date(constraint.rightOperand);
-                    if (isNaN(rightOperand.getTime())) {
-                        consumeConstraint(groomedRule.consumedConstraints.onRule, CONSUMED_CONSTRAINTS.errored, constraint);
-                    } else {
-                        if (constraint.operator === OPERATORS.gt) {
-                            rightOperand.setDate(rightOperand.getDate() + 1);
-                            groomedRule.enableOn = rightOperand.toISOString().substr(0,10);
-                            consumeConstraint(groomedRule.consumedConstraints.onRule, CONSUMED_CONSTRAINTS.consumed, constraint);
-                        } else if (constraint.operator === OPERATORS.gteq) {
-                            groomedRule.enableOn = rightOperand.toISOString().substr(0,10);
-                            consumeConstraint(groomedRule.consumedConstraints.onRule, CONSUMED_CONSTRAINTS.consumed, constraint);
-                        } else if (constraint.operator === OPERATORS.lt) {
-                            rightOperand.setDate(rightOperand.getDate() - 1);
-                            groomedRule.expireOn = rightOperand.toISOString().substr(0,10);
-                            consumeConstraint(groomedRule.consumedConstraints.onRule, CONSUMED_CONSTRAINTS.consumed, constraint);
-                        } else if (constraint.operator === OPERATORS.lteq) {
-                            groomedRule.expireOn = rightOperand.toISOString().substr(0,10);
-                            consumeConstraint(groomedRule.consumedConstraints.onRule, CONSUMED_CONSTRAINTS.consumed, constraint);
-                        } else if (constraint.operator === OPERATORS.eq) {
-                            groomedRule.expireOn = groomedRule.enableOn = rightOperand.toISOString().substr(0,10);
-                            consumeConstraint(groomedRule.consumedConstraints.onRule, CONSUMED_CONSTRAINTS.consumed, constraint);
-                        } else {
-                            consumeConstraint(groomedRule.consumedConstraints.onRule, CONSUMED_CONSTRAINTS.errored, constraint);
-                        }
-                    }
-                    setTimingFieldsOnRule(res, groomedRule);
-                } else {
-                    lumServer.logger.debug(res, `groomRules unexpected constraint`, constraint, 'on', assetUsageRuleType);
-                    consumeConstraint(groomedRule.consumedConstraints.onRule, CONSUMED_CONSTRAINTS.unexpected, constraint);
-                }
-            });
-        }
+        groomTarget(res, rule, agreement, groomedRule, ruleInfo);
+        groomAssignee(res, rule, agreement, groomedRule, ruleInfo, assetUsageRuleType);
+        groomUsage(res, rule, groomedRule, ruleInfo, assetUsageRuleType);
         return groomedRule;
-    }).reduce((target, grRule) => {
-        if (grRule.uid in target) {
-            lumErrors.addError(errors, `non-unique uid(${grRule.uid}) on ${assetUsageRuleType}`, assetUsageRuleType, grRule);
+    }).reduce((grmdRules, grmdRule) => {
+        if (grmdRule.uid in grmdRules) {
+            lumErrors.addError(errors, `non-unique uid(${grmdRule.uid}) on ${assetUsageRuleType}`,
+                assetUsageRuleType, grmdRule);
         }
-        target[grRule.uid] = grRule;
-        return target;
+        grmdRules[grmdRule.uid] = grmdRule;
+        return grmdRules;
     }, {});
     if (errors.length) {
         throw new lumErrors.InvalidDataError(errors);
@@ -621,15 +667,122 @@ function groomRules(res, rules, assetUsageRuleType, agreement) {
     return groomedRules;
 }
 /**
- * set timing related fields on the rule
+ * groom usage and timing constraints on the rule level
  * @param  {} res
+ * @param  {} rule
+ * @param  {} groomedRule
+ * @param  {string} ruleInfo
+ * @param  {string} assetUsageRuleType
+ */
+function groomUsage(res, rule, groomedRule, ruleInfo, assetUsageRuleType) {
+    const constraints = groomConstraints(res, rule.constraint, null, groomedRule.consumedConstraints.onRule);
+    if (constraints) {
+        lumServer.logger.debug(res, `${ruleInfo} constraints`, constraints);
+        for (const constraint of constraints) {
+            if (((LEFT_OPERANDS[constraint.leftOperand] || {}).usageConstraintOn || []).includes(assetUsageRuleType)) {
+                const prevConstraint = groomedRule.usageConstraints[constraint.leftOperand];
+                if (prevConstraint) {
+                    consumeConstraint(groomedRule.consumedConstraints.onRule, CONSUMED_CONSTRAINTS.conflicted, prevConstraint, constraint);
+                    prevConstraint.rightOperand = null;
+                } else {
+                    groomedRule.usageConstraints[constraint.leftOperand] = constraint;
+                }
+            } else if (constraint.leftOperand === "date") {
+                if (constraint.rightOperand == null) {continue;}
+                if (constraint.operator === OPERATORS.lteq) {
+                    groomedRule.expireOn = constraint.rightOperand;
+                } else if (constraint.operator === OPERATORS.gteq) {
+                    groomedRule.enableOn = constraint.rightOperand;
+                } else if (constraint.operator === OPERATORS.eq) {
+                    groomedRule.expireOn = groomedRule.enableOn = constraint.rightOperand;
+                } else {
+                    consumeConstraint(groomedRule.consumedConstraints.onRule, CONSUMED_CONSTRAINTS.errored, constraint);
+                    continue;
+                }
+                consumeConstraint(groomedRule.consumedConstraints.onRule, CONSUMED_CONSTRAINTS.consumed, constraint);
+                setTimingFieldsOnRule(groomedRule);
+            } else if (((LEFT_OPERANDS[constraint.leftOperand] || {}).goodForConstraintOn || []).includes(assetUsageRuleType)) {
+                if (constraint.rightOperand == null || constraint.dataType !== TYPES.duration) {continue;}
+                if ([OPERATORS.eq, OPERATORS.lteq].includes(constraint.operator)) {
+                    groomedRule.goodFor = constraint.rightOperand;
+                } else {
+                    consumeConstraint(groomedRule.consumedConstraints.onRule, CONSUMED_CONSTRAINTS.errored, constraint);
+                    continue;
+                }
+                consumeConstraint(groomedRule.consumedConstraints.onRule, CONSUMED_CONSTRAINTS.consumed, constraint);
+                lumServer.logger.debug(res, `set goodFor(${groomedRule.goodFor}) by constraint`, constraint);
+                setTimingFieldsOnRule(groomedRule);
+            } else {
+                lumServer.logger.debug(res, `groomRules unexpected constraint`, constraint, 'on', assetUsageRuleType);
+                consumeConstraint(groomedRule.consumedConstraints.onRule, CONSUMED_CONSTRAINTS.unexpected, constraint);
+            }
+        }
+    }
+}
+
+/**
+ * groom refinement constraints on the Target level
+ * @param  {} res
+ * @param  {} rule
+ * @param  {} agreement
+ * @param  {} groomedRule
+ * @param  {string} ruleInfo
+ */
+function groomTarget(res, rule, agreement, groomedRule, ruleInfo) {
+    const targetRefinement = groomRefinement(res, rule.target, agreement.target, groomedRule.consumedConstraints.onTarget);
+    if (!targetRefinement) {return;}
+
+    lumServer.logger.debug(res, `${ruleInfo} targetRefinement`, targetRefinement);
+    for (const trfn of targetRefinement) {
+        const prevConstraint = groomedRule.targetRefinement[trfn.leftOperand];
+        if (prevConstraint) {
+            consumeConstraint(groomedRule.consumedConstraints.onTarget, CONSUMED_CONSTRAINTS.conflicted, prevConstraint, trfn);
+            prevConstraint.rightOperand = null;
+        } else {
+            groomedRule.targetRefinement[trfn.leftOperand] = trfn;
+        }
+    }
+}
+
+/**
+ * groom refinement constraints on the Assignee level
+ * @param  {} res
+ * @param  {} rule
+ * @param  {} agreement
+ * @param  {} groomedRule
+ * @param  {string} ruleInfo
+ * @param  {string} assetUsageRuleType
+ */
+function groomAssignee(res, rule, agreement, groomedRule, ruleInfo, assetUsageRuleType) {
+    const assigneeRefinement = groomRefinement(res, rule.assignee, agreement.assignee, groomedRule.consumedConstraints.onAssignee);
+    if (!assigneeRefinement) {return;}
+
+    lumServer.logger.debug(res, `${ruleInfo} assigneeRefinement`, assigneeRefinement);
+    for (const arfn of assigneeRefinement) {
+        if (!((LEFT_OPERANDS[arfn.leftOperand] || {}).assigneeConstraintOn || []).includes(assetUsageRuleType)) {
+            lumServer.logger.debug(res, `groomRules unexpected assignee constraint`, arfn, 'on', assetUsageRuleType);
+            consumeConstraint(groomedRule.consumedConstraints.onAssignee, CONSUMED_CONSTRAINTS.unexpected, arfn);
+            continue;
+        }
+        const prevConstraint = groomedRule.assigneeRefinement[arfn.leftOperand];
+        if (prevConstraint) {
+            consumeConstraint(groomedRule.consumedConstraints.onAssignee, CONSUMED_CONSTRAINTS.conflicted, prevConstraint, arfn);
+            prevConstraint.rightOperand = null;
+        } else {
+            groomedRule.assigneeRefinement[arfn.leftOperand] = arfn;
+        }
+    }
+}
+
+/**
+ * set timing related fields on the rule
  * @param  {} groomedRule
  */
-function setTimingFieldsOnRule(res, groomedRule) {
+function setTimingFieldsOnRule(groomedRule) {
     if (groomedRule.expireOn && groomedRule.enableOn && groomedRule.enableOn > groomedRule.expireOn) {
         groomedRule.enableOn = groomedRule.expireOn;
     }
-    groomedRule.isPerpetual = !groomedRule.expireOn;
+    groomedRule.isPerpetual = (!groomedRule.expireOn && !groomedRule.goodFor);
 }
 
 /**
@@ -651,7 +804,7 @@ function restrictPermission(res, groomedAgreement, restriction) {
         permission.actions = permission.actions.filter(x => restriction.actions.includes(x));
     }
 
-    restrictTiming(res, permission, restriction);
+    restrictTiming(permission, restriction);
 
     if (restriction.targetRefinement) {
         if (!permission.targetRefinement) {permission.targetRefinement = {};}
@@ -700,18 +853,37 @@ function restrictPermission(res, groomedAgreement, restriction) {
 }
 /**
  * make permission to have narrower timing
- * @param  {} res
  * @param  {} permission
  * @param  {} restriction
  */
-function restrictTiming(res, permission, restriction) {
-    if (restriction.expireOn && (permission.expireOn == null || restriction.expireOn < permission.expireOn)) {
-        permission.expireOn = restriction.expireOn;
+function restrictTiming(permission, restriction) {
+    if (restriction.expireOn) {
+        if (permission.expireOn == null || restriction.expireOn < permission.expireOn) {
+            consumeConstraint(permission.consumedConstraints.onRule, CONSUMED_CONSTRAINTS.overridden, {expireOn: permission.expireOn});
+            permission.expireOn = restriction.expireOn;
+        } else {
+            consumeConstraint(permission.consumedConstraints.onRule, CONSUMED_CONSTRAINTS.ignored, {expireOn: restriction.expireOn});
+        }
     }
-    if (restriction.enableOn && (permission.enableOn == null || restriction.enableOn > permission.enableOn)) {
-        permission.enableOn = restriction.enableOn;
+    if (restriction.goodFor) {
+        if (permission.goodFor == null
+            || moment.duration(restriction.goodFor).asMilliseconds()
+             < moment.duration(permission.goodFor).asMilliseconds()) {
+            consumeConstraint(permission.consumedConstraints.onRule, CONSUMED_CONSTRAINTS.overridden, {goodFor: permission.goodFor});
+            permission.goodFor = restriction.goodFor;
+        } else {
+            consumeConstraint(permission.consumedConstraints.onRule, CONSUMED_CONSTRAINTS.ignored, {goodFor: restriction.goodFor});
+        }
     }
-    setTimingFieldsOnRule(res, permission);
+    if (restriction.enableOn) {
+        if (permission.enableOn == null || restriction.enableOn > permission.enableOn) {
+            consumeConstraint(permission.consumedConstraints.onRule, CONSUMED_CONSTRAINTS.overridden, {enableOn: permission.enableOn});
+            permission.enableOn = restriction.enableOn;
+        } else {
+            consumeConstraint(permission.consumedConstraints.onRule, CONSUMED_CONSTRAINTS.ignored, {enableOn: restriction.enableOn});
+        }
+    }
+    setTimingFieldsOnRule(permission);
 }
 /**
  * make prohibition to have wider timing
@@ -719,18 +891,25 @@ function restrictTiming(res, permission, restriction) {
  * @param  {} prohibition
  * @param  {} expansion
  */
-function expandTiming(res, prohibition, expansion) {
+function expandTiming(prohibition, expansion) {
     if (expansion.expireOn == null || (prohibition.expireOn && expansion.expireOn > prohibition.expireOn)) {
+        consumeConstraint(prohibition.consumedConstraints.onRule, CONSUMED_CONSTRAINTS.overridden, {expireOn: prohibition.expireOn});
         prohibition.expireOn = expansion.expireOn;
+    } else if (expansion.expireOn) {
+        consumeConstraint(prohibition.consumedConstraints.onRule, CONSUMED_CONSTRAINTS.ignored, {expireOn: expansion.expireOn});
     }
+
     if (expansion.enableOn == null || (prohibition.enableOn && expansion.enableOn < prohibition.enableOn)) {
+        consumeConstraint(prohibition.consumedConstraints.onRule, CONSUMED_CONSTRAINTS.overridden, {enableOn: prohibition.enableOn});
         prohibition.enableOn = expansion.enableOn;
+    } else if (expansion.enableOn) {
+        consumeConstraint(prohibition.consumedConstraints.onRule, CONSUMED_CONSTRAINTS.ignored, {enableOn: expansion.enableOn});
     }
-    setTimingFieldsOnRule(res, prohibition);
+setTimingFieldsOnRule(prohibition);
 }
 
 /**
- * init groomedAgreement.ignoredProhibitionnRestrictions
+ * init groomedAgreement.ignoredProhibitionRestrictions
  * @param  {} groomedAgreement
  * @param  {} uid of prohibition
  */
@@ -758,7 +937,7 @@ function expandProhibition(res, groomedAgreement, expansion) {
     }
     Array.prototype.push.apply(prohibition.actions, expansion.actions.filter(x => !prohibition.actions.includes(x)))
 
-    expandTiming(res, prohibition, expansion);
+    expandTiming(prohibition, expansion);
 
     if (expansion.targetRefinement) {
         if (!prohibition.targetRefinement) {
@@ -876,7 +1055,7 @@ module.exports = {
         const groomedAgreement = {
             uid: agreement.uid,
             initialAgreement: utils.deepCopyTo({}, agreement),
-            permission: groomRules(res, agreement.permission,   RULE_TYPES.permission,  agreement),
+            permission:  groomRules(res, agreement.permission,  RULE_TYPES.permission,  agreement),
             prohibition: groomRules(res, agreement.prohibition, RULE_TYPES.prohibition, agreement),
             restriction: null,
             ignoredPermissionRestrictions: {},

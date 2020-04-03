@@ -50,7 +50,6 @@ const rightToUseFields = {
     "isPerpetual"        : false,
     "enableOn"           : false,
     "expireOn"           : false,
-    "goodFor"            : false,
     "rightToUseActive"   : true,
     "closer"             : true,
     "closed"             : true,
@@ -86,7 +85,9 @@ async function storeRightToUse(res, rightToUse) {
     const putFields = new SqlParams(keys);
     putFields.addFieldsFromBody(rightToUseFields, rightToUse);
     putFields.addField("rightToUseRevision", res.locals.dbdata.assetUsageAgreement.assetUsageAgreementRevision);
-    const houseFields = new SqlParams(putFields);
+    const goodForField = new SqlParams(putFields);
+    goodForField.addField("goodFor", rightToUse.goodFor);
+    const houseFields = new SqlParams(goodForField);
     houseFields.addField("rightToUseActive", true);
     houseFields.addField("modifier", res.locals.params.userId);
     houseFields.addField("closer", null);
@@ -100,11 +101,13 @@ async function storeRightToUse(res, rightToUse) {
     insFields.addField("creator", res.locals.params.userId);
 
     const sqlCmd = `INSERT INTO "rightToUse" AS rtu
-        (${keys.fields} ${putFields.fields} ${houseFields.fields} ${insFields.fields}, "created", "modified")
-        VALUES (${keys.idxValues} ${putFields.idxValues} ${houseFields.idxValues} ${insFields.idxValues}, NOW(), NOW())
+        (${keys.fields} ${putFields.fields} ${goodForField.fields} ${houseFields.fields} ${insFields.fields}, "created", "modified")
+        VALUES (${keys.idxValues} ${putFields.idxValues} ${goodForField.idxValues} ${houseFields.idxValues} ${insFields.idxValues}, NOW(), NOW())
         ON CONFLICT (${keys.fields}) DO UPDATE
-        SET "modified" = NOW() ${putFields.updates} ${houseFields.updates}
-        WHERE rtu."rightToUseActive" = FALSE OR ${putFields.getWhereDistinct("rtu")}
+            SET "modified" = NOW(), "usageEnds" = rtu."usageStarted" + ${goodForField.idxKeyValues}::INTERVAL
+                ${putFields.updates} ${goodForField.updates} ${houseFields.updates}
+            WHERE rtu."rightToUseActive" = FALSE
+               OR ${putFields.getWhereDistinct("rtu")} OR ${goodForField.getWhereDistinct("rtu")}
         RETURNING *`;
     const result = await pgclient.sqlQuery(res, sqlCmd, keys.getAllValues());
     if (result.rows.length) {

@@ -54,6 +54,7 @@ module.exports = {
             requestUrl: `${req.protocol}://${req.get('Host')}${req.originalUrl}`,
             serverFQDN: req.hostname,
             path: `${req.baseUrl}${req.path}`,
+            originalUrl: req.originalUrl,
             query: req.query,
             'Content-Type': req.get('Content-Type'),
             'X-ACUMOS-RequestID': acumosRequestID,

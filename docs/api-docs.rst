@@ -1,7 +1,7 @@
 .. ===============LICENSE_START=======================================================
 .. Acumos CC-BY-4.0
 .. ===================================================================================
-.. Copyright (C) 2019 AT&T Intellectual Property. All rights reserved.
+.. Copyright (C) 2019-2020 AT&T Intellectual Property. All rights reserved.
 .. ===================================================================================
 .. This Acumos documentation file is distributed by AT&T
 .. under the Creative Commons Attribution 4.0 International License (the "License");
@@ -21,7 +21,7 @@ License Usage Manager - Application Programming Interface
 =========================================================
 
 License Usage Manager provides http based API under
-specification of `openapi 3.0.2 <https://swagger.io/specification/>`_.
+specification of `openapi 3.0.3 <https://swagger.io/specification/>`_.
 
     #. download :download:`lum-server-API.yaml <https://gerrit.acumos.org/r/gitweb?p=license-usage-manager.git;a=blob_plain;f=lum-server/lum-server-api/lum-server-API.yaml;hb=HEAD>`
     #. use https://editor.swagger.io/ on the downloaded

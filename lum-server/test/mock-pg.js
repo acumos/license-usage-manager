@@ -69,7 +69,7 @@ class PgClientMock {
      */
     verify() {
         assert.strictEqual(this.queryIdx + 1, this.expectations.length,
-            `Not all expected[${this.expectations.length}] queries executed[${this.queryIdx + 1}]`);
+            `not all queries executed[${this.queryIdx + 1}] - expected[${this.expectations.length}]`);
     }
     /**
      * fake query to database
@@ -79,12 +79,13 @@ class PgClientMock {
      */
     async query(sqlCmd, sqlVals) {
         ++this.queryIdx;
-        const logLine = `query[${this.queryIdx}]: (${sqlCmd}, ${JSON.stringify(sqlVals)})`;
-        lumServer.logger.info(`mock-pg ${logLine}`);
+        lumServer.logger.info(`mock-pg query[${this.queryIdx}]: (${sqlCmd}, ${JSON.stringify(sqlVals)})`);
 
-        assert.isBelow(this.queryIdx, this.expectations.length, `No query expected: ${logLine}`);
+        const logLine = `query[${this.queryIdx}]: (${mockUtils.shortenString(sqlCmd)}, ${
+            mockUtils.shortenString(JSON.stringify(sqlVals))})`;
+        assert.isBelow(this.queryIdx, this.expectations.length, `no query expected: ${logLine}`);
         const expected = this.expectations[this.queryIdx];
-        assert.isOk(expected, `No expected query: ${logLine}, expectations.length(${this.expectations.length})`);
+        assert.isOk(expected, `no expected query: ${logLine}, expectations.length(${this.expectations.length})`);
 
         if (sqlCmd === 'ROLLBACK' && expected.sqlCmd !== 'ROLLBACK') {
             --this.queryIdx;
@@ -92,19 +93,20 @@ class PgClientMock {
             return;
         }
 
-        assert.strictEqual(sqlCmd, expected.sqlCmd,
-            `Unexpected query: ${logLine}, expected(${expected.sqlCmd})`);
+        assert.isTrue(sqlCmd === expected.sqlCmd,
+            `unexpected query: ${logLine}, expected(${mockUtils.shortenString(expected.sqlCmd)})`);
 
         if (expected.sqlVals) {
             mockUtils.assertDeepEqual(sqlVals, expected.sqlVals,
-                `Unexpected query params: ${logLine}, expected(${JSON.stringify(expected)})`
+                `unexpected query params: ${logLine}, expected(${
+                    mockUtils.shortenString(JSON.stringify(expected.sqlVals))})`
             );
         }
 
         if (expected.exception) {
             throw expected.exception;
         }
-        // const result = {command: rslt.command, rowCount: rslt.rowCount, rows: rslt.rows};
+
         const convertedResult = JSON.parse(JSON.stringify(expected.result));
         convertFields(convertedResult);
         lumServer.logger.info(`mock-pg results:`, convertedResult);
