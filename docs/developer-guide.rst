@@ -40,7 +40,7 @@ LUM does the following steps to select the ODRL based **prohibition** or **permi
 #. matches **swidTag** to all the populated **refinements** on the **target** of the right-to-use
 
     .. list-table:: refinements on target
-        :widths: 20 40 15
+        :widths: 20 40 30
         :header-rows: 1
 
         * - match by
@@ -68,7 +68,7 @@ LUM does the following steps to select the ODRL based **prohibition** or **permi
 #. matches **user** to all the populated **refinements** on the **assignee** of the right-to-use
 
     .. list-table:: refinements on assignee
-        :widths: 20 40 15
+        :widths: 20 40 30
         :header-rows: 1
 
         * - match by
@@ -79,12 +79,12 @@ LUM does the following steps to select the ODRL based **prohibition** or **permi
           - for constraint by count of users
         * - **restrict users** by the subscriber company
           - ``{"leftOperand": "lum:users", "operator": "lum:in", "rightOperand": ["alex", "justin", "michelle"]}``
-          - set of unique userIds comes from agreement-restriction
+          - set of unique userIds comes from **agreement-restriction**
 
 #. verifies **timing** of the right-to-use.  Do not select the expired or not effective right-to-use - date in GMT timezone in ISO "CCYY-MM-DD" format
 
     .. list-table:: timing constraints on the right-to-use
-        :widths: 20 40 15
+        :widths: 20 40 30
         :header-rows: 1
 
         * - timing
@@ -96,6 +96,12 @@ LUM does the following steps to select the ODRL based **prohibition** or **permi
         * - **expire on** specific GMT date
           - ``{"leftOperand": "date", "operator": "lteq", "rightOperand": {"@value": "2019-12-31", "@type": "xsd:date"}}``
           - expires after "2019-12-31" in GMT timezone
+        * - **"lum:goodFor"** for ``30 days`` or ``1 year``
+          - ``{"leftOperand": "lum:goodFor", "operator": "lteq", "rightOperand": {"@value": "30"}}``
+            ``{"leftOperand": "lum:goodFor", "operator": "lteq", "rightOperand": "P1Y"}``
+          - asset usage is good for the duration of ``30 days`` after the first entitlement by the permission on any action.
+            ``"P1Y"`` - for ``1 year``. ``rightOperand`` formatted either as `ISO-8601 for duration <https://en.wikipedia.org/wiki/ISO_8601#Durations>`_
+            or just a number that is converted by LUM to days (``"30"`` -> ``"P30D"``)
 
 #. verifies usage **count** on the permission for the specific **action**
 
@@ -103,7 +109,7 @@ LUM does the following steps to select the ODRL based **prohibition** or **permi
               for the actual list of supported actions
 
     .. list-table:: usage constraints on permission
-        :widths: 20 40 15
+        :widths: 20 40 30
         :header-rows: 1
 
         * - count
@@ -133,7 +139,7 @@ Technology and Frameworks
     node.js, 12.16.1, https://nodejs.org
     express.js, 4.17.1, http://expressjs.com/
     node-postgres, 7.18.2, https://node-postgres.com/
-    openapi, 3.0.2, https://swagger.io/specification/
+    openapi, 3.0.3, https://swagger.io/specification/
     postgres database, 11.5, https://www.postgresql.org/
 
 Project Resources

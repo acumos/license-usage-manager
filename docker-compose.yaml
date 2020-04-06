@@ -20,7 +20,7 @@ services:
   lum-database:
     build: ./lum-db/
     # replace username/repo:tag with your name and image details
-    image: lum-database:1.2.0-SNAPSHOT
+    image: lum-database:1.3.0-SNAPSHOT
     restart: always
     ports:
       - "5432:5432"
@@ -32,7 +32,7 @@ services:
   lum-server:
     build: ./lum-server/
     # replace username/repo:tag with your name and image details
-    image: lum-server:1.2.0-SNAPSHOT
+    image: lum-server:1.3.0-SNAPSHOT
     depends_on:
       - lum-database
     ports:

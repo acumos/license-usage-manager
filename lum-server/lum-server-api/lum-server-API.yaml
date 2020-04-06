@@ -16,10 +16,10 @@
 # ============LICENSE_END=========================================================
 ---
 
-openapi: '3.0.2'
+openapi: '3.0.3'
 
 info:
-  version: "1.2.0"
+  version: "1.3.0"
   title: "License Usage Manager (LUM) API"
   contact:
     name: Acumos License Management
@@ -1036,12 +1036,12 @@ components:
               type: string
           example:
             serverName: "lum-server"
-            serverVersion: "1.2.0"
-            apiVersion: "1.2.0"
+            serverVersion: "1.3.0"
+            apiVersion: "1.3.0"
             nodeVersion: "12.16.1"
             databaseInfo:
               pgVersion: "PostgreSQL 11.5 on x86_64-pc-linux-musl, compiled by gcc (Alpine 8.3.0) 8.3.0, 64-bit"
-              databaseVersion: "1.2.0"
+              databaseVersion: "1.3.0"
               schemaCreated: "2020-01-09T17:12:31.791Z"
               schemaModified: "2020-01-09T17:12:31.791Z"
               databaseStarted: "2020-01-09T17:12:32.361Z"
@@ -2092,11 +2092,38 @@ components:
             description: single denial info
             type: object
             required:
+              - denialCode
               - denialType
               - denialReason
             properties:
+              denialCode:
+                description: unique code for the reason of denial.
+                  Use denialCode value to construct the denial message from other parts of denial
+                  beside the denialReason
+                type: string
+                enum:
+                  - denied_due_swidTagNotFound
+                  - denied_due_swidTagRevoked
+                  - denied_due_licenseProfileNotFound
+                  - denied_due_licenseProfileRevoked
+                  - denied_due_agreementNotFound
+                  - denied_due_rightToUseRevoked
+                  - denied_due_usageProhibited
+                  - denied_due_countUniqueUsersOnAssignee
+                  - denied_due_usersOnAssignee
+                  - denied_due_swPersistentIdOnTarget
+                  - denied_due_swTagIdOnTarget
+                  - denied_due_swProductNameOnTarget
+                  - denied_due_swCategoryOnTarget
+                  - denied_due_swCatalogIdOnTarget
+                  - denied_due_swCatalogTypeOnTarget
+                  - denied_due_expireOn
+                  - denied_due_goodFor
+                  - denied_due_enableOn
+                  - denied_due_usageCount
+
               denialType:
-                description: type of the reason for denial
+                description: type of the reason for denial.  It can contain one or many values of denialCode
                 type: string
                 enum:
                   - swidTagNotFound
@@ -2112,7 +2139,8 @@ components:
                   - usageConstraint
 
               denialReason:
-                description: human readable explanation why denied entitlement
+                description: human readable explanation why the entitlement was denied.
+                  It consumes all other parts of denial
                 type: string
 
               deniedAction:
@@ -2139,11 +2167,11 @@ components:
                 format: int64
 
               denialReqItemName:
-                description: name of the item that came from req or NOW() or +1 for asset-assignment
+                description: name of the item that came from req or NOW()
                 type: string
 
               denialReqItemValue:
-                description: value of the item that came from req or NOW() or +1 for asset-assignment.
+                description: value of the item that came from req or NOW()
                   It can be either string or number
 
               deniedConstraint:
@@ -2155,6 +2183,7 @@ components:
                 type: object
 
           example:
+            - denialCode: denied_due_usageProhibited
             - denialType: usageProhibited
               denialReason: "swid-tag(ee48b699-3b16-4391-884c-1bec557f32b9) has been found
                 but asset-usage is prohibited by
@@ -2265,6 +2294,7 @@ components:
       required:
         - title
         - softwareLicensorId
+        - stats
         - assetUsages
         - assetUsageEvents
       properties:
@@ -2356,6 +2386,19 @@ components:
       properties:
         leftOperand:
           description: value to compare versus the expected value
+
+            - ```count``` is only applicable to permission and not to prohibition.
+              Each action on the permission has its own usage ```count``` that does not depend
+              on the usage ```count``` of other actions.
+
+            - ```date``` is applicable to both permission and prohibition.
+              The ```operator``` on ```date``` defines whether it is the ```expireOn``` or ```enableOn```.
+              The ```date``` constraint is rule specific - it applies to all the actions on the rule.
+
+            - ```"lum:goodFor"``` is only applicable to permission and not to prohibition.
+              The ```"lum:goodFor"``` constraint is permission specific - it applies to all the actions
+              on the permission and is counted from the first entitled asset usage of any action.
+
           type: string
           enum:
             - count
@@ -2364,18 +2407,68 @@ components:
 
         operator:
           description: comparison operator between leftOperand and rightOperand
+
+            > count and "lum:goodFor" cannot be greater than or greater than or equal to
+
           type: string
           enum:
             - lt
             - lteq
             - eq
-            - gt
             - gteq
+            - gt
 
         rightOperand:
           description: 'string or stringified number like
-            "2019-08-01" "5" {"@value": "2019-08-01", "@type": "xsd:date"} {"@value": "5", "@type": "xsd:integer"}
-            when the value is date it is expected to be in GMT timezone in ISO "CCYY-MM-DD" format'
+
+            #### count ####
+
+            for usage ```count``` constraint: ```"5"``` or
+            ```{"@value": "5", "@type": "xsd:integer"}```
+
+            #### date ####
+
+            for ```date```: ```"2019-08-01"``` or
+            ```{"@value": "2019-08-01", "@type": "xsd:date"}```
+            to define the expireOn or enableOn timing constraints.
+
+            > the value of the date is expected to be in ```GMT``` timezone in ISO ```"CCYY-MM-DD"``` format
+
+            ---
+
+            #### "lum:goodFor" ####
+
+            - for ```"lum:goodFor"```:
+              ```"30"``` or ```{"@value": "30"}``` or ```"P30D"``` or ```{"@value": "P30D"}```
+              to define the time duration when the usage is permitted after the first
+              entitled asset usage of any action was recorded by LUM on the permission.
+
+            - LUM is using [ISO-8601 for duration](https://en.wikipedia.org/wiki/ISO_8601#Durations)
+
+            - in addition to ISO-8601 format when the value of the rightOperand is a stringified number,
+              LUM assumes that is the duration in days (default)
+
+              > For instance, ```"30"``` is converted by LUM to ```"P30D"``` and is ```30 days```
+
+              >> ```{ "leftOperand": "lum:goodFor", "operator": "lteq", "rightOperand": "30" }```
+                is the same as the following
+                ```{ "leftOperand": "lum:goodFor", "operator": "lteq", "rightOperand": "P30D" }```
+
+            - **ISO-8601 formats** - always start with ```P``` and put ```T``` to separate date from time -
+              at least one number part is required, but any combination is ok:
+              ```PnYnMnDTnHnMnS```, ```PnW```
+
+              >> ```"P30D" = 30 days,
+                "P3Y6M4DT12H30M5S" = 3 years 6 mons 4 days 12:30:05,
+                "P123.5DT23H" = 123 days 35:00:00,
+                "P4.7Y" = 4 years 8 mons,
+                "P1.3M" = 1 mon 9 days,
+                "P1.55W" = 10 days 20:24:00,
+                "P0.5Y" = 6 mons,
+                "PT36H" = 36:00:00,
+                "P1YT5S" = 1 year 00:00:05```
+              '
+
           type: object
 
     ODRLAssigneeRefinement:
@@ -2525,7 +2618,10 @@ components:
               rightOperand: "25"
             - leftOperand: "date"
               operator: "lteq"
-              rightOperand: "2019-12-31"
+              rightOperand: "2029-12-31"
+            - leftOperand: "goodFor"
+              operator: "lteq"
+              rightOperand: "30"
 
 
     ODRLAgreement:
@@ -2611,8 +2707,11 @@ components:
                     - debug
 
                 logTo:
-                  description: collection of file loggers to turn off or on on LUM server
+                  description: collection of loggers to turn off or on in LUM server
                   properties:
+                    console:
+                      description: logging to console
+                      type: boolean
                     devLog:
                       description: whether to log dev info into file in LUM's internal format
                       type: boolean
@@ -2678,10 +2777,10 @@ components:
               type: integer
 
             logging:
-              description: logging config on LUM server
+              description: logging config in LUM server
               properties:
                 logLevel:
-                  description: log level on LUM server
+                  description: log level in LUM server
                   type: string
                   enum:
                     - error
@@ -2690,10 +2789,10 @@ components:
                     - debug
 
                 logTo:
-                  description: collection of active loggers on LUM server
+                  description: collection of active loggers in LUM server
                   properties:
                     console:
-                      description: always logging to console
+                      description: logging to console
                       type: boolean
                       default: true
                     devLog:

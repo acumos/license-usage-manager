@@ -4,7 +4,7 @@
         "method": "PUT",
         "path": "/admin/config",
         "content-type": "application/json; charset=utf-8",
-        "send": {"config":{"logging":{"logLevel":"debug"}}}
+        "send": {"config":{"logging":{"logLevel":"debug","logTo":{"acumos":true}}}}
     },
     "res": {
         "statusCode": 200,

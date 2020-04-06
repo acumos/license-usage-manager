@@ -31,19 +31,34 @@ const pgTx = {
 };
 
 /**
+ * set the step info on res
+ * @param  {} res
+ * @param  {} runStep
+ */
+function setRunStepInfo(res, runStep) {
+    if (!res.locals.pg) {
+        res.locals.pg = {};
+    }
+    if (runStep) {
+        if ([pgTx.rollback, pgTx.release].includes(runStep)) {
+            res.locals.pg.runStep = `${runStep} <- ${res.locals.pg.runStep}`;
+        }
+        else {
+            res.locals.pg.runStep = utils.makeOneLine(runStep);
+        }
+    }
+}
+
+/**
  *  log the step info
  * @param  {} res
  * @param  {} runStep
  */
 function logRunStepInfo(res, runStep) {
-    if (!res.locals.pg) {res.locals.pg = {};}
-    if (runStep) {
-        if ([pgTx.rollback, pgTx.release].includes(runStep)) {
-            res.locals.pg.runStep = `${runStep} <- ${res.locals.pg.runStep}`;
-        } else {res.locals.pg.runStep = utils.makeOneLine(runStep);}
-    }
+    setRunStepInfo(res, runStep);
     utils.logInfo(res, utils.getPgStepInfo(res));
 }
+
 /**
  * prepare to run new transaction
  * @param  {} res
@@ -158,9 +173,9 @@ module.exports = {
     async sqlQuery(res, sqlCmd, sqlVals) {
         sqlCmd = utils.makeOneLine(sqlCmd);
         logRunStepInfo(res, `sqlQuery (${sqlCmd}) with (${JSON.stringify(sqlVals)})`);
+        setRunStepInfo(res, `await for response...`);
         const rslt = await res.locals.pg.client.query(sqlCmd, sqlVals);
         const result = {command: rslt.command, rowCount: rslt.rowCount, rows: rslt.rows};
-        if (sqlCmd.length > 100) {sqlCmd = `${sqlCmd.substr(0,100)}...`;}
         logRunStepInfo(res, `sqlQuery result: ${JSON.stringify(result)}`);
         delete res.locals.pg.runStep;
         return result;
@@ -174,6 +189,7 @@ module.exports = {
     async standaloneQuery(res, sqlCmd, sqlVals) {
         sqlCmd = utils.makeOneLine(sqlCmd);
         logRunStepInfo(res, `standaloneQuery (${sqlCmd}) with (${JSON.stringify(sqlVals)})`);
+        setRunStepInfo(res, `await for response...`);
         const rslt = await lumServer.pgPool.query(sqlCmd, sqlVals);
         const result = {command: rslt.command, rowCount: rslt.rowCount, rows: rslt.rows};
         logRunStepInfo(res, `standaloneQuery result: ${JSON.stringify(result)}`);

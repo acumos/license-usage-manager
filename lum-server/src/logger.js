@@ -83,8 +83,10 @@ const logWrapper = (original) => {
 };
 
 const setupMainLogger = () => {
-    const coutLogLevel = getLogLevel(process.env.COUT_LEVEL || lumServer.config.logging.logLevel) || logLevels.info;
-    transports.console = new (winston.transports.Console)({level: coutLogLevel});
+    transports.console = new (winston.transports.Console)({
+        level: lumServer.config.logging.logLevel,
+        silent: !!process.env.LOG_CONSOLE_OFF
+    });
 
     const logFile = path.join(logFolder, `dev_${lumServer.config.serverName}.log`);
     logFolders.devLog = logFolder;
@@ -232,6 +234,7 @@ module.exports = {
     /**
      * change the log level on all loggers and/or silence the file loggers
      * @param  {} logging new value for log level and silencing files
+     * @example logging = {logLevel: "debug", logTo: {healthcheck: false, acumos: true}}
      */
     setLogging(res, logging) {
         if (!logging) {return;}
@@ -242,16 +245,15 @@ module.exports = {
         }
         for (const trspKey in transports) {
             const transport = transports[trspKey];
+            transport.level = lumServer.config.logging.logLevel;
+            if (!logging.logTo || !(trspKey in logging.logTo)) {continue;}
+            transport.silent = (logging.logTo[trspKey] === false);
+
             if (trspKey === 'console') {
-                transport.level = getLogLevel(process.env.COUT_LEVEL
-                                           || lumServer.config.logging.logLevel) || logLevels.info;
+                lumServer.config.logging.logTo[trspKey] = !transport.silent;
             } else {
-                transport.level = lumServer.config.logging.logLevel;
-                if (logging.logTo) {
-                    transport.silent = (logging.logTo[trspKey] === false);
-                    lumServer.config.logging.logTo[trspKey] = (!transport.silent &&
-                        path.join(logFolders[trspKey], transport.filename)) || false;
-                }
+                lumServer.config.logging.logTo[trspKey] = (!transport.silent &&
+                    path.join(logFolders[trspKey], transport.filename)) || false;
             }
         }
         lumServer.logger.info('logging settings:', lumServer.config.logging);

@@ -2,18 +2,38 @@
     "db": [
         {
             "sqlCmd": "BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ",
-            "result": {"command": "BEGIN", "rowCount": 1, "rows": []}
+            "result": {
+                "command": "BEGIN",
+                "rowCount": 1,
+                "rows": []
+            }
         },
         {
             "sqlCmd": "SELECT TXID_CURRENT() AS txid, PG_BACKEND_PID() AS pid, NOW() AS tx_now",
-            "result": {"command": "SELECT", "rowCount": 1,
-                "rows": [{"txid": 123, "pid": 456, "tx_now": "__to_date__|2019-12-19T11:43:20.952Z"}]
+            "result": {
+                "command": "SELECT",
+                "rowCount": 1,
+                "rows": [
+                    {
+                        "txid": 123,
+                        "pid": 456,
+                        "tx_now": "__to_date__|2019-12-19T11:43:20.952Z"
+                    }
+                ]
             }
         },
         {
             "sqlCmd": "UPDATE \"assetUsageAgreement\" SET \"assetUsageAgreementRevision\" = \"assetUsageAgreementRevision\" + 1, \"closed\" = NOW() , \"assetUsageAgreementActive\" = ($3),\"closer\" = ($4),\"closureReason\" = ($5) WHERE \"softwareLicensorId\" = ($1) AND \"assetUsageAgreementId\" = ($2) RETURNING *",
-            "sqlVals": ["swlic","alex-agr",false,"alex-revoke-aggr","revoked"],
-            "result": {"command": "UPDATE", "rowCount": 1,
+            "sqlVals": [
+                "swlic",
+                "alex-agr",
+                false,
+                "alex-revoke-aggr",
+                "revoked"
+            ],
+            "result": {
+                "command": "UPDATE",
+                "rowCount": 1,
                 "rows": [
                     {
                         "softwareLicensorId": "swlic",
@@ -233,7 +253,7 @@
                                         {
                                             "operator": "lt",
                                             "leftOperand": "date",
-                                            "rightOperand": "2018-12-01"
+                                            "rightOperand": "2021-12-01"
                                         }
                                     ]
                                 }
@@ -242,7 +262,7 @@
                                 {
                                     "uid": "proh-3",
                                     "action": [
-                                        "acumos:deploy==",
+                                        "acumos:deploy",
                                         "acumos:download"
                                     ],
                                     "target": {
@@ -285,8 +305,9 @@
                                         "acumos:deploy",
                                         "acumos:download"
                                     ],
+                                    "goodFor": null,
                                     "enableOn": null,
-                                    "expireOn": "2018-11-30",
+                                    "expireOn": "2019-12-31",
                                     "isPerpetual": false,
                                     "actionProvided": true,
                                     "assigneeMetrics": {
@@ -360,11 +381,29 @@
                                     "consumedConstraints": {
                                         "onRule": [
                                             {
+                                                "dataType": "integer",
+                                                "operator": "lt",
+                                                "leftOperand": "count",
+                                                "rightOperand": "125",
+                                                "consumeStatus": "groomed"
+                                            },
+                                            {
                                                 "dataType": "date",
                                                 "operator": "lt",
                                                 "leftOperand": "date",
                                                 "rightOperand": "2020-01-01",
+                                                "consumeStatus": "groomed"
+                                            },
+                                            {
+                                                "dataType": "date",
+                                                "operator": "lteq",
+                                                "leftOperand": "date",
+                                                "rightOperand": "2019-12-31",
                                                 "consumeStatus": "consumed"
+                                            },
+                                            {
+                                                "expireOn": "2021-11-30",
+                                                "consumeStatus": "ignored"
                                             },
                                             {
                                                 "dataType": "integer",
@@ -423,6 +462,20 @@
                                                 "dataType": "integer",
                                                 "operator": "lteq",
                                                 "leftOperand": "lum:countUniqueUsers",
+                                                "rightOperand": "3",
+                                                "consumeStatus": "groomed"
+                                            },
+                                            {
+                                                "dataType": "integer",
+                                                "operator": "lteq",
+                                                "leftOperand": "lum:countUniqueUsers",
+                                                "rightOperand": "3",
+                                                "consumeStatus": "groomed"
+                                            },
+                                            {
+                                                "dataType": "integer",
+                                                "operator": "lteq",
+                                                "leftOperand": "lum:countUniqueUsers",
                                                 "rightOperand": 3,
                                                 "consumeStatus": "overridden"
                                             },
@@ -445,6 +498,7 @@
                                         "acumos:deploy",
                                         "acumos:download"
                                     ],
+                                    "goodFor": null,
                                     "enableOn": null,
                                     "expireOn": null,
                                     "isPerpetual": true,
@@ -497,6 +551,13 @@
                                                 "dataType": "integer",
                                                 "operator": "gteq",
                                                 "leftOperand": "count",
+                                                "rightOperand": "25",
+                                                "consumeStatus": "groomed"
+                                            },
+                                            {
+                                                "dataType": "integer",
+                                                "operator": "gteq",
+                                                "leftOperand": "count",
                                                 "rightOperand": 25,
                                                 "consumeStatus": "unexpected"
                                             }
@@ -528,6 +589,13 @@
                                                 "dataType": "integer",
                                                 "operator": "lteq",
                                                 "leftOperand": "lum:countUniqueUsers",
+                                                "rightOperand": "3",
+                                                "consumeStatus": "groomed"
+                                            },
+                                            {
+                                                "dataType": "integer",
+                                                "operator": "lteq",
+                                                "leftOperand": "lum:countUniqueUsers",
                                                 "rightOperand": 3,
                                                 "consumeStatus": "unexpected"
                                             }
@@ -537,9 +605,10 @@
                                 "proh-3": {
                                     "uid": "proh-3",
                                     "actions": [
-                                        "acumos:deploy==",
+                                        "acumos:deploy",
                                         "acumos:download"
                                     ],
+                                    "goodFor": null,
                                     "enableOn": null,
                                     "expireOn": null,
                                     "isPerpetual": true,
@@ -595,6 +664,13 @@
                                                 "dataType": "integer",
                                                 "operator": "gteq",
                                                 "leftOperand": "count",
+                                                "rightOperand": "25",
+                                                "consumeStatus": "groomed"
+                                            },
+                                            {
+                                                "dataType": "integer",
+                                                "operator": "gteq",
+                                                "leftOperand": "count",
                                                 "rightOperand": 25,
                                                 "consumeStatus": "unexpected"
                                             }
@@ -625,6 +701,13 @@
                                                 "dataType": "integer",
                                                 "operator": "lteq",
                                                 "leftOperand": "lum:countUniqueUsers",
+                                                "rightOperand": "50",
+                                                "consumeStatus": "groomed"
+                                            },
+                                            {
+                                                "dataType": "integer",
+                                                "operator": "lteq",
+                                                "leftOperand": "lum:countUniqueUsers",
                                                 "rightOperand": 50,
                                                 "consumeStatus": "unexpected"
                                             }
@@ -641,8 +724,9 @@
                                             "acumos:deploy",
                                             "acumos:download"
                                         ],
+                                        "goodFor": null,
                                         "enableOn": null,
-                                        "expireOn": "2018-11-30",
+                                        "expireOn": "2021-11-30",
                                         "isPerpetual": false,
                                         "actionProvided": true,
                                         "assigneeMetrics": {
@@ -712,15 +796,43 @@
                                         "consumedConstraints": {
                                             "onRule": [
                                                 {
+                                                    "dataType": "integer",
+                                                    "operator": "lt",
+                                                    "leftOperand": "count",
+                                                    "rightOperand": "125",
+                                                    "consumeStatus": "groomed"
+                                                },
+                                                {
                                                     "dataType": "date",
                                                     "operator": "lt",
                                                     "leftOperand": "date",
-                                                    "rightOperand": "2018-12-01",
+                                                    "rightOperand": "2021-12-01",
+                                                    "consumeStatus": "groomed"
+                                                },
+                                                {
+                                                    "dataType": "date",
+                                                    "operator": "lteq",
+                                                    "leftOperand": "date",
+                                                    "rightOperand": "2021-11-30",
                                                     "consumeStatus": "consumed"
                                                 }
                                             ],
                                             "onTarget": [],
                                             "onAssignee": [
+                                                {
+                                                    "dataType": "integer",
+                                                    "operator": "lteq",
+                                                    "leftOperand": "lum:countUniqueUsers",
+                                                    "rightOperand": "50",
+                                                    "consumeStatus": "groomed"
+                                                },
+                                                {
+                                                    "dataType": "integer",
+                                                    "operator": "lteq",
+                                                    "leftOperand": "lum:countUniqueUsers",
+                                                    "rightOperand": "30",
+                                                    "consumeStatus": "groomed"
+                                                },
                                                 {
                                                     "dataType": "integer",
                                                     "operator": "lteq",
@@ -736,9 +848,10 @@
                                     "proh-3": {
                                         "uid": "proh-3",
                                         "actions": [
-                                            "acumos:deploy==",
+                                            "acumos:deploy",
                                             "acumos:download"
                                         ],
+                                        "goodFor": null,
                                         "enableOn": null,
                                         "expireOn": null,
                                         "isPerpetual": true,
@@ -794,6 +907,13 @@
                                                     "dataType": "integer",
                                                     "operator": "gteq",
                                                     "leftOperand": "count",
+                                                    "rightOperand": "25",
+                                                    "consumeStatus": "groomed"
+                                                },
+                                                {
+                                                    "dataType": "integer",
+                                                    "operator": "gteq",
+                                                    "leftOperand": "count",
                                                     "rightOperand": 25,
                                                     "consumeStatus": "unexpected"
                                                 }
@@ -820,6 +940,13 @@
                                                 }
                                             ],
                                             "onAssignee": [
+                                                {
+                                                    "dataType": "integer",
+                                                    "operator": "lteq",
+                                                    "leftOperand": "lum:countUniqueUsers",
+                                                    "rightOperand": "50",
+                                                    "consumeStatus": "groomed"
+                                                },
                                                 {
                                                     "dataType": "integer",
                                                     "operator": "lteq",
@@ -965,14 +1092,14 @@
                             "ignoredPermissionRestrictions": {},
                             "ignoredProhibitionRestrictions": {}
                         },
-                        "assetUsageAgreementRevision": 28,
+                        "assetUsageAgreementRevision": 45,
                         "assetUsageAgreementActive": false,
                         "creator": "alex-agr-user",
-                        "created": "2019-10-23T15:15:45.941Z",
+                        "created": "2020-01-27T15:59:24.515Z",
                         "modifier": "alex-agr-user",
-                        "modified": "2019-12-20T17:31:13.002Z",
+                        "modified": "2020-04-03T14:32:26.464Z",
                         "closer": "alex-revoke-aggr",
-                        "closed": "2019-12-24T15:00:25.677Z",
+                        "closed": "2020-04-03T15:52:47.592Z",
                         "closureReason": "revoked"
                     }
                 ]
@@ -984,7 +1111,7 @@
                 "swlic",
                 "assetUsageAgreement",
                 "alex-agr",
-                28,
+                45,
                 {
                     "softwareLicensorId": "swlic",
                     "assetUsageAgreementId": "alex-agr",
@@ -1203,7 +1330,7 @@
                                     {
                                         "operator": "lt",
                                         "leftOperand": "date",
-                                        "rightOperand": "2018-12-01"
+                                        "rightOperand": "2021-12-01"
                                     }
                                 ]
                             }
@@ -1212,7 +1339,7 @@
                             {
                                 "uid": "proh-3",
                                 "action": [
-                                    "acumos:deploy==",
+                                    "acumos:deploy",
                                     "acumos:download"
                                 ],
                                 "target": {
@@ -1255,8 +1382,9 @@
                                     "acumos:deploy",
                                     "acumos:download"
                                 ],
+                                "goodFor": null,
                                 "enableOn": null,
-                                "expireOn": "2018-11-30",
+                                "expireOn": "2019-12-31",
                                 "isPerpetual": false,
                                 "actionProvided": true,
                                 "assigneeMetrics": {
@@ -1330,11 +1458,29 @@
                                 "consumedConstraints": {
                                     "onRule": [
                                         {
+                                            "dataType": "integer",
+                                            "operator": "lt",
+                                            "leftOperand": "count",
+                                            "rightOperand": "125",
+                                            "consumeStatus": "groomed"
+                                        },
+                                        {
                                             "dataType": "date",
                                             "operator": "lt",
                                             "leftOperand": "date",
                                             "rightOperand": "2020-01-01",
+                                            "consumeStatus": "groomed"
+                                        },
+                                        {
+                                            "dataType": "date",
+                                            "operator": "lteq",
+                                            "leftOperand": "date",
+                                            "rightOperand": "2019-12-31",
                                             "consumeStatus": "consumed"
+                                        },
+                                        {
+                                            "expireOn": "2021-11-30",
+                                            "consumeStatus": "ignored"
                                         },
                                         {
                                             "dataType": "integer",
@@ -1393,6 +1539,20 @@
                                             "dataType": "integer",
                                             "operator": "lteq",
                                             "leftOperand": "lum:countUniqueUsers",
+                                            "rightOperand": "3",
+                                            "consumeStatus": "groomed"
+                                        },
+                                        {
+                                            "dataType": "integer",
+                                            "operator": "lteq",
+                                            "leftOperand": "lum:countUniqueUsers",
+                                            "rightOperand": "3",
+                                            "consumeStatus": "groomed"
+                                        },
+                                        {
+                                            "dataType": "integer",
+                                            "operator": "lteq",
+                                            "leftOperand": "lum:countUniqueUsers",
                                             "rightOperand": 3,
                                             "consumeStatus": "overridden"
                                         },
@@ -1415,6 +1575,7 @@
                                     "acumos:deploy",
                                     "acumos:download"
                                 ],
+                                "goodFor": null,
                                 "enableOn": null,
                                 "expireOn": null,
                                 "isPerpetual": true,
@@ -1467,6 +1628,13 @@
                                             "dataType": "integer",
                                             "operator": "gteq",
                                             "leftOperand": "count",
+                                            "rightOperand": "25",
+                                            "consumeStatus": "groomed"
+                                        },
+                                        {
+                                            "dataType": "integer",
+                                            "operator": "gteq",
+                                            "leftOperand": "count",
                                             "rightOperand": 25,
                                             "consumeStatus": "unexpected"
                                         }
@@ -1498,6 +1666,13 @@
                                             "dataType": "integer",
                                             "operator": "lteq",
                                             "leftOperand": "lum:countUniqueUsers",
+                                            "rightOperand": "3",
+                                            "consumeStatus": "groomed"
+                                        },
+                                        {
+                                            "dataType": "integer",
+                                            "operator": "lteq",
+                                            "leftOperand": "lum:countUniqueUsers",
                                             "rightOperand": 3,
                                             "consumeStatus": "unexpected"
                                         }
@@ -1507,9 +1682,10 @@
                             "proh-3": {
                                 "uid": "proh-3",
                                 "actions": [
-                                    "acumos:deploy==",
+                                    "acumos:deploy",
                                     "acumos:download"
                                 ],
+                                "goodFor": null,
                                 "enableOn": null,
                                 "expireOn": null,
                                 "isPerpetual": true,
@@ -1565,6 +1741,13 @@
                                             "dataType": "integer",
                                             "operator": "gteq",
                                             "leftOperand": "count",
+                                            "rightOperand": "25",
+                                            "consumeStatus": "groomed"
+                                        },
+                                        {
+                                            "dataType": "integer",
+                                            "operator": "gteq",
+                                            "leftOperand": "count",
                                             "rightOperand": 25,
                                             "consumeStatus": "unexpected"
                                         }
@@ -1595,6 +1778,13 @@
                                             "dataType": "integer",
                                             "operator": "lteq",
                                             "leftOperand": "lum:countUniqueUsers",
+                                            "rightOperand": "50",
+                                            "consumeStatus": "groomed"
+                                        },
+                                        {
+                                            "dataType": "integer",
+                                            "operator": "lteq",
+                                            "leftOperand": "lum:countUniqueUsers",
                                             "rightOperand": 50,
                                             "consumeStatus": "unexpected"
                                         }
@@ -1611,8 +1801,9 @@
                                         "acumos:deploy",
                                         "acumos:download"
                                     ],
+                                    "goodFor": null,
                                     "enableOn": null,
-                                    "expireOn": "2018-11-30",
+                                    "expireOn": "2021-11-30",
                                     "isPerpetual": false,
                                     "actionProvided": true,
                                     "assigneeMetrics": {
@@ -1682,15 +1873,43 @@
                                     "consumedConstraints": {
                                         "onRule": [
                                             {
+                                                "dataType": "integer",
+                                                "operator": "lt",
+                                                "leftOperand": "count",
+                                                "rightOperand": "125",
+                                                "consumeStatus": "groomed"
+                                            },
+                                            {
                                                 "dataType": "date",
                                                 "operator": "lt",
                                                 "leftOperand": "date",
-                                                "rightOperand": "2018-12-01",
+                                                "rightOperand": "2021-12-01",
+                                                "consumeStatus": "groomed"
+                                            },
+                                            {
+                                                "dataType": "date",
+                                                "operator": "lteq",
+                                                "leftOperand": "date",
+                                                "rightOperand": "2021-11-30",
                                                 "consumeStatus": "consumed"
                                             }
                                         ],
                                         "onTarget": [],
                                         "onAssignee": [
+                                            {
+                                                "dataType": "integer",
+                                                "operator": "lteq",
+                                                "leftOperand": "lum:countUniqueUsers",
+                                                "rightOperand": "50",
+                                                "consumeStatus": "groomed"
+                                            },
+                                            {
+                                                "dataType": "integer",
+                                                "operator": "lteq",
+                                                "leftOperand": "lum:countUniqueUsers",
+                                                "rightOperand": "30",
+                                                "consumeStatus": "groomed"
+                                            },
                                             {
                                                 "dataType": "integer",
                                                 "operator": "lteq",
@@ -1706,9 +1925,10 @@
                                 "proh-3": {
                                     "uid": "proh-3",
                                     "actions": [
-                                        "acumos:deploy==",
+                                        "acumos:deploy",
                                         "acumos:download"
                                     ],
+                                    "goodFor": null,
                                     "enableOn": null,
                                     "expireOn": null,
                                     "isPerpetual": true,
@@ -1764,6 +1984,13 @@
                                                 "dataType": "integer",
                                                 "operator": "gteq",
                                                 "leftOperand": "count",
+                                                "rightOperand": "25",
+                                                "consumeStatus": "groomed"
+                                            },
+                                            {
+                                                "dataType": "integer",
+                                                "operator": "gteq",
+                                                "leftOperand": "count",
                                                 "rightOperand": 25,
                                                 "consumeStatus": "unexpected"
                                             }
@@ -1790,6 +2017,13 @@
                                             }
                                         ],
                                         "onAssignee": [
+                                            {
+                                                "dataType": "integer",
+                                                "operator": "lteq",
+                                                "leftOperand": "lum:countUniqueUsers",
+                                                "rightOperand": "50",
+                                                "consumeStatus": "groomed"
+                                            },
                                             {
                                                 "dataType": "integer",
                                                 "operator": "lteq",
@@ -1935,32 +2169,46 @@
                         "ignoredPermissionRestrictions": {},
                         "ignoredProhibitionRestrictions": {}
                     },
-                    "assetUsageAgreementRevision": 28,
+                    "assetUsageAgreementRevision": 45,
                     "assetUsageAgreementActive": false,
                     "creator": "alex-agr-user",
-                    "created": "2019-10-23T15:15:45.941Z",
+                    "created": "2020-01-27T15:59:24.515Z",
                     "modifier": "alex-agr-user",
-                    "modified": "2019-12-20T17:31:13.002Z",
+                    "modified": "2020-04-03T14:32:26.464Z",
                     "closer": "alex-revoke-aggr",
-                    "closed": "2019-12-24T15:00:25.677Z",
+                    "closed": "2020-04-03T15:52:47.592Z",
                     "closureReason": "revoked"
                 },
                 "alex-revoke-aggr",
                 "__type__uuid__",
                 "[01] revokeAssetUsageAgreement"
             ],
-            "result": {"command":"INSERT","rowCount":1,"rows":[]}
+            "result": {
+                "command": "INSERT",
+                "rowCount": 1,
+                "rows": []
+            }
         },
         {
             "sqlCmd": "UPDATE \"rightToUse\" SET \"rightToUseRevision\" = \"rightToUseRevision\" + 1, \"closed\" = NOW() , \"rightToUseActive\" = ($5),\"closer\" = ($6),\"closureReason\" = ($7) WHERE \"softwareLicensorId\" = ($1) AND \"assetUsageAgreementId\" = ($2) AND \"rightToUseActive\" = ($3) AND NOT (\"rightToUseRevision\" = ($4)) RETURNING *",
-            "sqlVals": ["swlic","alex-agr",true,28,false,"alex-revoke-aggr","revoked"],
-            "result": {"command": "UPDATE", "rowCount": 3,
+            "sqlVals": [
+                "swlic",
+                "alex-agr",
+                true,
+                45,
+                false,
+                "alex-revoke-aggr",
+                "revoked"
+            ],
+            "result": {
+                "command": "UPDATE",
+                "rowCount": 3,
                 "rows": [
                     {
-                        "assetUsageRuleId": "f6f490e9-de37-46c6-9c43-be1d379d4da8",
+                        "assetUsageRuleId": "6cf495a1-3be1-43c7-874e-a814d69097c9",
                         "softwareLicensorId": "swlic",
                         "assetUsageAgreementId": "alex-agr",
-                        "rightToUseId": "proh-2",
+                        "rightToUseId": "proh-3",
                         "assetUsageRuleType": "prohibition",
                         "actions": [
                             "acumos:deploy",
@@ -1983,14 +2231,6 @@
                                     "XYZ models"
                                 ]
                             },
-                            "lum:swCatalogType": {
-                                "dataType": "string",
-                                "operator": "lum:in",
-                                "leftOperand": "lum:swCatalogType",
-                                "rightOperand": [
-                                    "restricted"
-                                ]
-                            },
                             "lum:swPersistentId": {
                                 "dataType": "string",
                                 "operator": "lum:in",
@@ -2002,10 +2242,28 @@
                                 ]
                             }
                         },
-                        "assigneeRefinement": {},
+                        "assigneeRefinement": {
+                            "lum:users": {
+                                "dataType": "string",
+                                "operator": "lum:in",
+                                "leftOperand": "lum:users",
+                                "rightOperand": [
+                                    "alex",
+                                    "justin",
+                                    "michelle"
+                                ]
+                            }
+                        },
                         "usageConstraints": {},
                         "consumedConstraints": {
                             "onRule": [
+                                {
+                                    "dataType": "integer",
+                                    "operator": "gteq",
+                                    "leftOperand": "count",
+                                    "rightOperand": "25",
+                                    "consumeStatus": "groomed"
+                                },
                                 {
                                     "dataType": "integer",
                                     "operator": "gteq",
@@ -2020,7 +2278,6 @@
                                     "operator": "lum:in",
                                     "leftOperand": "lum:swCategory",
                                     "rightOperand": [
-                                        "face-detection",
                                         "image-processing"
                                     ],
                                     "consumeStatus": "merged"
@@ -2041,7 +2298,14 @@
                                     "dataType": "integer",
                                     "operator": "lteq",
                                     "leftOperand": "lum:countUniqueUsers",
-                                    "rightOperand": 3,
+                                    "rightOperand": "50",
+                                    "consumeStatus": "groomed"
+                                },
+                                {
+                                    "dataType": "integer",
+                                    "operator": "lteq",
+                                    "leftOperand": "lum:countUniqueUsers",
+                                    "rightOperand": 50,
                                     "consumeStatus": "unexpected"
                                 }
                             ]
@@ -2057,21 +2321,21 @@
                         "usageStartReqId": null,
                         "usageStarted": null,
                         "usageEnds": null,
-                        "rightToUseRevision": 28,
+                        "rightToUseRevision": 45,
                         "metricsRevision": 0,
                         "rightToUseActive": false,
                         "creator": "alex-agr-user",
-                        "created": "2019-10-23T15:15:45.941Z",
+                        "created": "2020-01-27T16:01:50.112Z",
                         "modifier": "alex-agr-user",
-                        "modified": "2019-12-20T17:31:13.002Z",
+                        "modified": "2020-04-03T14:32:26.464Z",
                         "closer": "alex-revoke-aggr",
-                        "closed": "2019-12-24T15:00:25.677Z",
+                        "closed": "2020-04-03T15:52:47.592Z",
                         "closureReason": "revoked",
                         "metricsModifierReqId": null,
                         "metricsModified": null
                     },
                     {
-                        "assetUsageRuleId": "9648eb43-8553-4382-8385-8556f735ba33",
+                        "assetUsageRuleId": "62c0c901-4880-4780-980d-5b2fa7ee85e7",
                         "softwareLicensorId": "swlic",
                         "assetUsageAgreementId": "alex-agr",
                         "rightToUseId": "perm-1",
@@ -2147,11 +2411,29 @@
                         "consumedConstraints": {
                             "onRule": [
                                 {
+                                    "dataType": "integer",
+                                    "operator": "lt",
+                                    "leftOperand": "count",
+                                    "rightOperand": "125",
+                                    "consumeStatus": "groomed"
+                                },
+                                {
                                     "dataType": "date",
                                     "operator": "lt",
                                     "leftOperand": "date",
                                     "rightOperand": "2020-01-01",
+                                    "consumeStatus": "groomed"
+                                },
+                                {
+                                    "dataType": "date",
+                                    "operator": "lteq",
+                                    "leftOperand": "date",
+                                    "rightOperand": "2019-12-31",
                                     "consumeStatus": "consumed"
+                                },
+                                {
+                                    "expireOn": "2021-11-30",
+                                    "consumeStatus": "ignored"
                                 },
                                 {
                                     "dataType": "integer",
@@ -2210,6 +2492,20 @@
                                     "dataType": "integer",
                                     "operator": "lteq",
                                     "leftOperand": "lum:countUniqueUsers",
+                                    "rightOperand": "3",
+                                    "consumeStatus": "groomed"
+                                },
+                                {
+                                    "dataType": "integer",
+                                    "operator": "lteq",
+                                    "leftOperand": "lum:countUniqueUsers",
+                                    "rightOperand": "3",
+                                    "consumeStatus": "groomed"
+                                },
+                                {
+                                    "dataType": "integer",
+                                    "operator": "lteq",
+                                    "leftOperand": "lum:countUniqueUsers",
                                     "rightOperand": 3,
                                     "consumeStatus": "overridden"
                                 },
@@ -2226,38 +2522,38 @@
                         "licenseKeys": null,
                         "isPerpetual": false,
                         "enableOn": null,
-                        "expireOn": "2018-11-30T00:00:00.000Z",
+                        "expireOn": "2019-12-31T00:00:00.000Z",
                         "goodFor": null,
                         "assigneeMetrics": {
                             "users": [
-                                "alex-usage",
-                                "alex"
+                                "alex",
+                                "alex-usage"
                             ]
                         },
-                        "usageStartReqId": "ec0b6850-4268-4a85-89db-8cbc3c4a69f4",
-                        "usageStarted": "2019-10-23T15:16:41.856Z",
+                        "usageStartReqId": "8fd38d62-b6a9-46a7-8913-d2cc9c694b0e",
+                        "usageStarted": "2020-01-27T16:13:20.279Z",
                         "usageEnds": null,
-                        "rightToUseRevision": 28,
+                        "rightToUseRevision": 45,
                         "metricsRevision": 2,
                         "rightToUseActive": false,
                         "creator": "alex-agr-user",
-                        "created": "2019-10-23T15:15:45.941Z",
+                        "created": "2020-01-27T15:59:24.515Z",
                         "modifier": "alex-agr-user",
-                        "modified": "2019-12-20T17:31:13.002Z",
+                        "modified": "2020-04-03T14:32:26.464Z",
                         "closer": "alex-revoke-aggr",
-                        "closed": "2019-12-24T15:00:25.677Z",
+                        "closed": "2020-04-03T15:52:47.592Z",
                         "closureReason": "revoked",
-                        "metricsModifierReqId": "eb0b761e-d94f-4a2f-8899-77b544447f1a",
-                        "metricsModified": "2019-10-24T18:59:31.550Z"
+                        "metricsModifierReqId": "f7eaff6a-9a9c-4fb8-8963-4e84b1fae98b",
+                        "metricsModified": "2020-01-30T20:07:52.950Z"
                     },
                     {
-                        "assetUsageRuleId": "cc5767df-0ed8-4cc8-8e14-2db2e74a1879",
+                        "assetUsageRuleId": "7aa519f3-30c6-45fc-8fd6-bb210f3ceb42",
                         "softwareLicensorId": "swlic",
                         "assetUsageAgreementId": "alex-agr",
-                        "rightToUseId": "proh-3",
+                        "rightToUseId": "proh-2",
                         "assetUsageRuleType": "prohibition",
                         "actions": [
-                            "acumos:deploy==",
+                            "acumos:deploy",
                             "acumos:download"
                         ],
                         "targetRefinement": {
@@ -2277,6 +2573,14 @@
                                     "XYZ models"
                                 ]
                             },
+                            "lum:swCatalogType": {
+                                "dataType": "string",
+                                "operator": "lum:in",
+                                "leftOperand": "lum:swCatalogType",
+                                "rightOperand": [
+                                    "restricted"
+                                ]
+                            },
                             "lum:swPersistentId": {
                                 "dataType": "string",
                                 "operator": "lum:in",
@@ -2288,21 +2592,17 @@
                                 ]
                             }
                         },
-                        "assigneeRefinement": {
-                            "lum:users": {
-                                "dataType": "string",
-                                "operator": "lum:in",
-                                "leftOperand": "lum:users",
-                                "rightOperand": [
-                                    "alex",
-                                    "justin",
-                                    "michelle"
-                                ]
-                            }
-                        },
+                        "assigneeRefinement": {},
                         "usageConstraints": {},
                         "consumedConstraints": {
                             "onRule": [
+                                {
+                                    "dataType": "integer",
+                                    "operator": "gteq",
+                                    "leftOperand": "count",
+                                    "rightOperand": "25",
+                                    "consumeStatus": "groomed"
+                                },
                                 {
                                     "dataType": "integer",
                                     "operator": "gteq",
@@ -2317,6 +2617,7 @@
                                     "operator": "lum:in",
                                     "leftOperand": "lum:swCategory",
                                     "rightOperand": [
+                                        "face-detection",
                                         "image-processing"
                                     ],
                                     "consumeStatus": "merged"
@@ -2337,7 +2638,14 @@
                                     "dataType": "integer",
                                     "operator": "lteq",
                                     "leftOperand": "lum:countUniqueUsers",
-                                    "rightOperand": 50,
+                                    "rightOperand": "3",
+                                    "consumeStatus": "groomed"
+                                },
+                                {
+                                    "dataType": "integer",
+                                    "operator": "lteq",
+                                    "leftOperand": "lum:countUniqueUsers",
+                                    "rightOperand": 3,
                                     "consumeStatus": "unexpected"
                                 }
                             ]
@@ -2353,15 +2661,15 @@
                         "usageStartReqId": null,
                         "usageStarted": null,
                         "usageEnds": null,
-                        "rightToUseRevision": 28,
+                        "rightToUseRevision": 45,
                         "metricsRevision": 0,
                         "rightToUseActive": false,
                         "creator": "alex-agr-user",
-                        "created": "2019-10-23T15:17:15.532Z",
+                        "created": "2020-01-27T15:59:24.515Z",
                         "modifier": "alex-agr-user",
-                        "modified": "2019-12-20T17:31:13.002Z",
+                        "modified": "2020-04-03T14:32:26.464Z",
                         "closer": "alex-revoke-aggr",
-                        "closed": "2019-12-24T15:00:25.677Z",
+                        "closed": "2020-04-03T15:52:47.592Z",
                         "closureReason": "revoked",
                         "metricsModifierReqId": null,
                         "metricsModified": null
@@ -2374,13 +2682,13 @@
             "sqlVals": [
                 "swlic",
                 "rightToUse",
-                "f6f490e9-de37-46c6-9c43-be1d379d4da8",
-                28,
+                "6cf495a1-3be1-43c7-874e-a814d69097c9",
+                45,
                 {
-                    "assetUsageRuleId": "f6f490e9-de37-46c6-9c43-be1d379d4da8",
+                    "assetUsageRuleId": "6cf495a1-3be1-43c7-874e-a814d69097c9",
                     "softwareLicensorId": "swlic",
                     "assetUsageAgreementId": "alex-agr",
-                    "rightToUseId": "proh-2",
+                    "rightToUseId": "proh-3",
                     "assetUsageRuleType": "prohibition",
                     "actions": [
                         "acumos:deploy",
@@ -2403,14 +2711,6 @@
                                 "XYZ models"
                             ]
                         },
-                        "lum:swCatalogType": {
-                            "dataType": "string",
-                            "operator": "lum:in",
-                            "leftOperand": "lum:swCatalogType",
-                            "rightOperand": [
-                                "restricted"
-                            ]
-                        },
                         "lum:swPersistentId": {
                             "dataType": "string",
                             "operator": "lum:in",
@@ -2422,10 +2722,28 @@
                             ]
                         }
                     },
-                    "assigneeRefinement": {},
+                    "assigneeRefinement": {
+                        "lum:users": {
+                            "dataType": "string",
+                            "operator": "lum:in",
+                            "leftOperand": "lum:users",
+                            "rightOperand": [
+                                "alex",
+                                "justin",
+                                "michelle"
+                            ]
+                        }
+                    },
                     "usageConstraints": {},
                     "consumedConstraints": {
                         "onRule": [
+                            {
+                                "dataType": "integer",
+                                "operator": "gteq",
+                                "leftOperand": "count",
+                                "rightOperand": "25",
+                                "consumeStatus": "groomed"
+                            },
                             {
                                 "dataType": "integer",
                                 "operator": "gteq",
@@ -2440,7 +2758,6 @@
                                 "operator": "lum:in",
                                 "leftOperand": "lum:swCategory",
                                 "rightOperand": [
-                                    "face-detection",
                                     "image-processing"
                                 ],
                                 "consumeStatus": "merged"
@@ -2461,7 +2778,14 @@
                                 "dataType": "integer",
                                 "operator": "lteq",
                                 "leftOperand": "lum:countUniqueUsers",
-                                "rightOperand": 3,
+                                "rightOperand": "50",
+                                "consumeStatus": "groomed"
+                            },
+                            {
+                                "dataType": "integer",
+                                "operator": "lteq",
+                                "leftOperand": "lum:countUniqueUsers",
+                                "rightOperand": 50,
                                 "consumeStatus": "unexpected"
                             }
                         ]
@@ -2477,15 +2801,15 @@
                     "usageStartReqId": null,
                     "usageStarted": null,
                     "usageEnds": null,
-                    "rightToUseRevision": 28,
+                    "rightToUseRevision": 45,
                     "metricsRevision": 0,
                     "rightToUseActive": false,
                     "creator": "alex-agr-user",
-                    "created": "2019-10-23T15:15:45.941Z",
+                    "created": "2020-01-27T16:01:50.112Z",
                     "modifier": "alex-agr-user",
-                    "modified": "2019-12-20T17:31:13.002Z",
+                    "modified": "2020-04-03T14:32:26.464Z",
                     "closer": "alex-revoke-aggr",
-                    "closed": "2019-12-24T15:00:25.677Z",
+                    "closed": "2020-04-03T15:52:47.592Z",
                     "closureReason": "revoked",
                     "metricsModifierReqId": null,
                     "metricsModified": null
@@ -2494,17 +2818,21 @@
                 "__type__uuid__",
                 "[02] revokeObsoleteRightToUse"
             ],
-            "result": {"command":"INSERT","rowCount":1,"rows":[]}
+            "result": {
+                "command": "INSERT",
+                "rowCount": 1,
+                "rows": []
+            }
         },
         {
             "sqlCmd": "INSERT INTO \"snapshot\" (\"softwareLicensorId\",\"snapshotType\",\"snapshotKey\",\"snapshotRevision\" , \"snapshotBody\",\"creator\",\"requestId\",\"txStep\") VALUES (($1),($2),($3),($4) , ($5),($6),($7),($8)) ON CONFLICT (\"softwareLicensorId\",\"snapshotType\",\"snapshotKey\",\"snapshotRevision\") DO NOTHING",
             "sqlVals": [
                 "swlic",
                 "rightToUse",
-                "9648eb43-8553-4382-8385-8556f735ba33",
-                28,
+                "62c0c901-4880-4780-980d-5b2fa7ee85e7",
+                45,
                 {
-                    "assetUsageRuleId": "9648eb43-8553-4382-8385-8556f735ba33",
+                    "assetUsageRuleId": "62c0c901-4880-4780-980d-5b2fa7ee85e7",
                     "softwareLicensorId": "swlic",
                     "assetUsageAgreementId": "alex-agr",
                     "rightToUseId": "perm-1",
@@ -2580,11 +2908,29 @@
                     "consumedConstraints": {
                         "onRule": [
                             {
+                                "dataType": "integer",
+                                "operator": "lt",
+                                "leftOperand": "count",
+                                "rightOperand": "125",
+                                "consumeStatus": "groomed"
+                            },
+                            {
                                 "dataType": "date",
                                 "operator": "lt",
                                 "leftOperand": "date",
                                 "rightOperand": "2020-01-01",
+                                "consumeStatus": "groomed"
+                            },
+                            {
+                                "dataType": "date",
+                                "operator": "lteq",
+                                "leftOperand": "date",
+                                "rightOperand": "2019-12-31",
                                 "consumeStatus": "consumed"
+                            },
+                            {
+                                "expireOn": "2021-11-30",
+                                "consumeStatus": "ignored"
                             },
                             {
                                 "dataType": "integer",
@@ -2643,6 +2989,20 @@
                                 "dataType": "integer",
                                 "operator": "lteq",
                                 "leftOperand": "lum:countUniqueUsers",
+                                "rightOperand": "3",
+                                "consumeStatus": "groomed"
+                            },
+                            {
+                                "dataType": "integer",
+                                "operator": "lteq",
+                                "leftOperand": "lum:countUniqueUsers",
+                                "rightOperand": "3",
+                                "consumeStatus": "groomed"
+                            },
+                            {
+                                "dataType": "integer",
+                                "operator": "lteq",
+                                "leftOperand": "lum:countUniqueUsers",
                                 "rightOperand": 3,
                                 "consumeStatus": "overridden"
                             },
@@ -2659,51 +3019,55 @@
                     "licenseKeys": null,
                     "isPerpetual": false,
                     "enableOn": null,
-                    "expireOn": "2018-11-30T00:00:00.000Z",
+                    "expireOn": "2019-12-31T00:00:00.000Z",
                     "goodFor": null,
                     "assigneeMetrics": {
                         "users": [
-                            "alex-usage",
-                            "alex"
+                            "alex",
+                            "alex-usage"
                         ]
                     },
-                    "usageStartReqId": "ec0b6850-4268-4a85-89db-8cbc3c4a69f4",
-                    "usageStarted": "2019-10-23T15:16:41.856Z",
+                    "usageStartReqId": "8fd38d62-b6a9-46a7-8913-d2cc9c694b0e",
+                    "usageStarted": "2020-01-27T16:13:20.279Z",
                     "usageEnds": null,
-                    "rightToUseRevision": 28,
+                    "rightToUseRevision": 45,
                     "metricsRevision": 2,
                     "rightToUseActive": false,
                     "creator": "alex-agr-user",
-                    "created": "2019-10-23T15:15:45.941Z",
+                    "created": "2020-01-27T15:59:24.515Z",
                     "modifier": "alex-agr-user",
-                    "modified": "2019-12-20T17:31:13.002Z",
+                    "modified": "2020-04-03T14:32:26.464Z",
                     "closer": "alex-revoke-aggr",
-                    "closed": "2019-12-24T15:00:25.677Z",
+                    "closed": "2020-04-03T15:52:47.592Z",
                     "closureReason": "revoked",
-                    "metricsModifierReqId": "eb0b761e-d94f-4a2f-8899-77b544447f1a",
-                    "metricsModified": "2019-10-24T18:59:31.550Z"
+                    "metricsModifierReqId": "f7eaff6a-9a9c-4fb8-8963-4e84b1fae98b",
+                    "metricsModified": "2020-01-30T20:07:52.950Z"
                 },
                 "alex-revoke-aggr",
                 "__type__uuid__",
                 "[02] revokeObsoleteRightToUse"
             ],
-            "result": {"command":"INSERT","rowCount":1,"rows":[]}
+            "result": {
+                "command": "INSERT",
+                "rowCount": 1,
+                "rows": []
+            }
         },
         {
             "sqlCmd": "INSERT INTO \"snapshot\" (\"softwareLicensorId\",\"snapshotType\",\"snapshotKey\",\"snapshotRevision\" , \"snapshotBody\",\"creator\",\"requestId\",\"txStep\") VALUES (($1),($2),($3),($4) , ($5),($6),($7),($8)) ON CONFLICT (\"softwareLicensorId\",\"snapshotType\",\"snapshotKey\",\"snapshotRevision\") DO NOTHING",
             "sqlVals": [
                 "swlic",
                 "rightToUse",
-                "cc5767df-0ed8-4cc8-8e14-2db2e74a1879",
-                28,
+                "7aa519f3-30c6-45fc-8fd6-bb210f3ceb42",
+                45,
                 {
-                    "assetUsageRuleId": "cc5767df-0ed8-4cc8-8e14-2db2e74a1879",
+                    "assetUsageRuleId": "7aa519f3-30c6-45fc-8fd6-bb210f3ceb42",
                     "softwareLicensorId": "swlic",
                     "assetUsageAgreementId": "alex-agr",
-                    "rightToUseId": "proh-3",
+                    "rightToUseId": "proh-2",
                     "assetUsageRuleType": "prohibition",
                     "actions": [
-                        "acumos:deploy==",
+                        "acumos:deploy",
                         "acumos:download"
                     ],
                     "targetRefinement": {
@@ -2723,6 +3087,14 @@
                                 "XYZ models"
                             ]
                         },
+                        "lum:swCatalogType": {
+                            "dataType": "string",
+                            "operator": "lum:in",
+                            "leftOperand": "lum:swCatalogType",
+                            "rightOperand": [
+                                "restricted"
+                            ]
+                        },
                         "lum:swPersistentId": {
                             "dataType": "string",
                             "operator": "lum:in",
@@ -2734,21 +3106,17 @@
                             ]
                         }
                     },
-                    "assigneeRefinement": {
-                        "lum:users": {
-                            "dataType": "string",
-                            "operator": "lum:in",
-                            "leftOperand": "lum:users",
-                            "rightOperand": [
-                                "alex",
-                                "justin",
-                                "michelle"
-                            ]
-                        }
-                    },
+                    "assigneeRefinement": {},
                     "usageConstraints": {},
                     "consumedConstraints": {
                         "onRule": [
+                            {
+                                "dataType": "integer",
+                                "operator": "gteq",
+                                "leftOperand": "count",
+                                "rightOperand": "25",
+                                "consumeStatus": "groomed"
+                            },
                             {
                                 "dataType": "integer",
                                 "operator": "gteq",
@@ -2763,6 +3131,7 @@
                                 "operator": "lum:in",
                                 "leftOperand": "lum:swCategory",
                                 "rightOperand": [
+                                    "face-detection",
                                     "image-processing"
                                 ],
                                 "consumeStatus": "merged"
@@ -2783,7 +3152,14 @@
                                 "dataType": "integer",
                                 "operator": "lteq",
                                 "leftOperand": "lum:countUniqueUsers",
-                                "rightOperand": 50,
+                                "rightOperand": "3",
+                                "consumeStatus": "groomed"
+                            },
+                            {
+                                "dataType": "integer",
+                                "operator": "lteq",
+                                "leftOperand": "lum:countUniqueUsers",
+                                "rightOperand": 3,
                                 "consumeStatus": "unexpected"
                             }
                         ]
@@ -2799,15 +3175,15 @@
                     "usageStartReqId": null,
                     "usageStarted": null,
                     "usageEnds": null,
-                    "rightToUseRevision": 28,
+                    "rightToUseRevision": 45,
                     "metricsRevision": 0,
                     "rightToUseActive": false,
                     "creator": "alex-agr-user",
-                    "created": "2019-10-23T15:17:15.532Z",
+                    "created": "2020-01-27T15:59:24.515Z",
                     "modifier": "alex-agr-user",
-                    "modified": "2019-12-20T17:31:13.002Z",
+                    "modified": "2020-04-03T14:32:26.464Z",
                     "closer": "alex-revoke-aggr",
-                    "closed": "2019-12-24T15:00:25.677Z",
+                    "closed": "2020-04-03T15:52:47.592Z",
                     "closureReason": "revoked",
                     "metricsModifierReqId": null,
                     "metricsModified": null
@@ -2816,26 +3192,51 @@
                 "__type__uuid__",
                 "[02] revokeObsoleteRightToUse"
             ],
-            "result": {"command":"INSERT","rowCount":1,"rows":[]}
+            "result": {
+                "command": "INSERT",
+                "rowCount": 1,
+                "rows": []
+            }
         },
         {
             "sqlCmd": "COMMIT",
-            "result": {"command": "COMMIT", "rowCount": 1, "rows": []}
+            "result": {
+                "command": "COMMIT",
+                "rowCount": 1,
+                "rows": []
+            }
         },
         {
             "sqlCmd": "BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ",
-            "result": {"command": "BEGIN", "rowCount": 1, "rows": []}
+            "result": {
+                "command": "BEGIN",
+                "rowCount": 1,
+                "rows": []
+            }
         },
         {
             "sqlCmd": "SELECT TXID_CURRENT() AS txid, PG_BACKEND_PID() AS pid, NOW() AS tx_now",
-            "result": {"command": "SELECT", "rowCount": 1,
-                "rows": [{"txid": 123, "pid": 456, "tx_now": "__to_date__|2019-12-19T11:43:20.952Z"}]
+            "result": {
+                "command": "SELECT",
+                "rowCount": 1,
+                "rows": [
+                    {
+                        "txid": 123,
+                        "pid": 456,
+                        "tx_now": "__to_date__|2019-12-19T11:43:20.952Z"
+                    }
+                ]
             }
         },
         {
             "sqlCmd": "SELECT \"softwareLicensorId\",\"assetUsageAgreementId\", \"agreement\",\"agreementRestriction\",\"groomedAgreement\",\"assetUsageAgreementRevision\",\"assetUsageAgreementActive\",\"creator\",\"created\",\"modifier\",\"modified\",\"closer\",\"closed\",\"closureReason\" FROM \"assetUsageAgreement\" WHERE \"softwareLicensorId\" = ($1) AND \"assetUsageAgreementId\" = ($2) FOR SHARE",
-            "sqlVals": ["swlic","alex-agr"],
-            "result": {"command": "SELECT", "rowCount": 1,
+            "sqlVals": [
+                "swlic",
+                "alex-agr"
+            ],
+            "result": {
+                "command": "SELECT",
+                "rowCount": 1,
                 "rows": [
                     {
                         "softwareLicensorId": "swlic",
@@ -3055,7 +3456,7 @@
                                         {
                                             "operator": "lt",
                                             "leftOperand": "date",
-                                            "rightOperand": "2018-12-01"
+                                            "rightOperand": "2021-12-01"
                                         }
                                     ]
                                 }
@@ -3064,7 +3465,7 @@
                                 {
                                     "uid": "proh-3",
                                     "action": [
-                                        "acumos:deploy==",
+                                        "acumos:deploy",
                                         "acumos:download"
                                     ],
                                     "target": {
@@ -3107,8 +3508,9 @@
                                         "acumos:deploy",
                                         "acumos:download"
                                     ],
+                                    "goodFor": null,
                                     "enableOn": null,
-                                    "expireOn": "2018-11-30",
+                                    "expireOn": "2019-12-31",
                                     "isPerpetual": false,
                                     "actionProvided": true,
                                     "assigneeMetrics": {
@@ -3182,11 +3584,29 @@
                                     "consumedConstraints": {
                                         "onRule": [
                                             {
+                                                "dataType": "integer",
+                                                "operator": "lt",
+                                                "leftOperand": "count",
+                                                "rightOperand": "125",
+                                                "consumeStatus": "groomed"
+                                            },
+                                            {
                                                 "dataType": "date",
                                                 "operator": "lt",
                                                 "leftOperand": "date",
                                                 "rightOperand": "2020-01-01",
+                                                "consumeStatus": "groomed"
+                                            },
+                                            {
+                                                "dataType": "date",
+                                                "operator": "lteq",
+                                                "leftOperand": "date",
+                                                "rightOperand": "2019-12-31",
                                                 "consumeStatus": "consumed"
+                                            },
+                                            {
+                                                "expireOn": "2021-11-30",
+                                                "consumeStatus": "ignored"
                                             },
                                             {
                                                 "dataType": "integer",
@@ -3245,6 +3665,20 @@
                                                 "dataType": "integer",
                                                 "operator": "lteq",
                                                 "leftOperand": "lum:countUniqueUsers",
+                                                "rightOperand": "3",
+                                                "consumeStatus": "groomed"
+                                            },
+                                            {
+                                                "dataType": "integer",
+                                                "operator": "lteq",
+                                                "leftOperand": "lum:countUniqueUsers",
+                                                "rightOperand": "3",
+                                                "consumeStatus": "groomed"
+                                            },
+                                            {
+                                                "dataType": "integer",
+                                                "operator": "lteq",
+                                                "leftOperand": "lum:countUniqueUsers",
                                                 "rightOperand": 3,
                                                 "consumeStatus": "overridden"
                                             },
@@ -3267,6 +3701,7 @@
                                         "acumos:deploy",
                                         "acumos:download"
                                     ],
+                                    "goodFor": null,
                                     "enableOn": null,
                                     "expireOn": null,
                                     "isPerpetual": true,
@@ -3319,6 +3754,13 @@
                                                 "dataType": "integer",
                                                 "operator": "gteq",
                                                 "leftOperand": "count",
+                                                "rightOperand": "25",
+                                                "consumeStatus": "groomed"
+                                            },
+                                            {
+                                                "dataType": "integer",
+                                                "operator": "gteq",
+                                                "leftOperand": "count",
                                                 "rightOperand": 25,
                                                 "consumeStatus": "unexpected"
                                             }
@@ -3350,6 +3792,13 @@
                                                 "dataType": "integer",
                                                 "operator": "lteq",
                                                 "leftOperand": "lum:countUniqueUsers",
+                                                "rightOperand": "3",
+                                                "consumeStatus": "groomed"
+                                            },
+                                            {
+                                                "dataType": "integer",
+                                                "operator": "lteq",
+                                                "leftOperand": "lum:countUniqueUsers",
                                                 "rightOperand": 3,
                                                 "consumeStatus": "unexpected"
                                             }
@@ -3359,9 +3808,10 @@
                                 "proh-3": {
                                     "uid": "proh-3",
                                     "actions": [
-                                        "acumos:deploy==",
+                                        "acumos:deploy",
                                         "acumos:download"
                                     ],
+                                    "goodFor": null,
                                     "enableOn": null,
                                     "expireOn": null,
                                     "isPerpetual": true,
@@ -3417,6 +3867,13 @@
                                                 "dataType": "integer",
                                                 "operator": "gteq",
                                                 "leftOperand": "count",
+                                                "rightOperand": "25",
+                                                "consumeStatus": "groomed"
+                                            },
+                                            {
+                                                "dataType": "integer",
+                                                "operator": "gteq",
+                                                "leftOperand": "count",
                                                 "rightOperand": 25,
                                                 "consumeStatus": "unexpected"
                                             }
@@ -3447,6 +3904,13 @@
                                                 "dataType": "integer",
                                                 "operator": "lteq",
                                                 "leftOperand": "lum:countUniqueUsers",
+                                                "rightOperand": "50",
+                                                "consumeStatus": "groomed"
+                                            },
+                                            {
+                                                "dataType": "integer",
+                                                "operator": "lteq",
+                                                "leftOperand": "lum:countUniqueUsers",
                                                 "rightOperand": 50,
                                                 "consumeStatus": "unexpected"
                                             }
@@ -3463,8 +3927,9 @@
                                             "acumos:deploy",
                                             "acumos:download"
                                         ],
+                                        "goodFor": null,
                                         "enableOn": null,
-                                        "expireOn": "2018-11-30",
+                                        "expireOn": "2021-11-30",
                                         "isPerpetual": false,
                                         "actionProvided": true,
                                         "assigneeMetrics": {
@@ -3534,15 +3999,43 @@
                                         "consumedConstraints": {
                                             "onRule": [
                                                 {
+                                                    "dataType": "integer",
+                                                    "operator": "lt",
+                                                    "leftOperand": "count",
+                                                    "rightOperand": "125",
+                                                    "consumeStatus": "groomed"
+                                                },
+                                                {
                                                     "dataType": "date",
                                                     "operator": "lt",
                                                     "leftOperand": "date",
-                                                    "rightOperand": "2018-12-01",
+                                                    "rightOperand": "2021-12-01",
+                                                    "consumeStatus": "groomed"
+                                                },
+                                                {
+                                                    "dataType": "date",
+                                                    "operator": "lteq",
+                                                    "leftOperand": "date",
+                                                    "rightOperand": "2021-11-30",
                                                     "consumeStatus": "consumed"
                                                 }
                                             ],
                                             "onTarget": [],
                                             "onAssignee": [
+                                                {
+                                                    "dataType": "integer",
+                                                    "operator": "lteq",
+                                                    "leftOperand": "lum:countUniqueUsers",
+                                                    "rightOperand": "50",
+                                                    "consumeStatus": "groomed"
+                                                },
+                                                {
+                                                    "dataType": "integer",
+                                                    "operator": "lteq",
+                                                    "leftOperand": "lum:countUniqueUsers",
+                                                    "rightOperand": "30",
+                                                    "consumeStatus": "groomed"
+                                                },
                                                 {
                                                     "dataType": "integer",
                                                     "operator": "lteq",
@@ -3558,9 +4051,10 @@
                                     "proh-3": {
                                         "uid": "proh-3",
                                         "actions": [
-                                            "acumos:deploy==",
+                                            "acumos:deploy",
                                             "acumos:download"
                                         ],
+                                        "goodFor": null,
                                         "enableOn": null,
                                         "expireOn": null,
                                         "isPerpetual": true,
@@ -3616,6 +4110,13 @@
                                                     "dataType": "integer",
                                                     "operator": "gteq",
                                                     "leftOperand": "count",
+                                                    "rightOperand": "25",
+                                                    "consumeStatus": "groomed"
+                                                },
+                                                {
+                                                    "dataType": "integer",
+                                                    "operator": "gteq",
+                                                    "leftOperand": "count",
                                                     "rightOperand": 25,
                                                     "consumeStatus": "unexpected"
                                                 }
@@ -3642,6 +4143,13 @@
                                                 }
                                             ],
                                             "onAssignee": [
+                                                {
+                                                    "dataType": "integer",
+                                                    "operator": "lteq",
+                                                    "leftOperand": "lum:countUniqueUsers",
+                                                    "rightOperand": "50",
+                                                    "consumeStatus": "groomed"
+                                                },
                                                 {
                                                     "dataType": "integer",
                                                     "operator": "lteq",
@@ -3787,14 +4295,14 @@
                             "ignoredPermissionRestrictions": {},
                             "ignoredProhibitionRestrictions": {}
                         },
-                        "assetUsageAgreementRevision": 28,
+                        "assetUsageAgreementRevision": 45,
                         "assetUsageAgreementActive": false,
                         "creator": "alex-agr-user",
-                        "created": "2019-10-23T15:15:45.941Z",
+                        "created": "2020-01-27T15:59:24.515Z",
                         "modifier": "alex-agr-user",
-                        "modified": "2019-12-20T17:31:13.002Z",
+                        "modified": "2020-04-03T14:32:26.464Z",
                         "closer": "alex-revoke-aggr",
-                        "closed": "2019-12-24T15:00:25.677Z",
+                        "closed": "2020-04-03T15:52:47.592Z",
                         "closureReason": "revoked"
                     }
                 ]
@@ -3802,7 +4310,11 @@
         },
         {
             "sqlCmd": "COMMIT",
-            "result": {"command": "COMMIT", "rowCount": 1, "rows": []}
+            "result": {
+                "command": "COMMIT",
+                "rowCount": 1,
+                "rows": []
+            }
         }
     ],
     "req": {
