@@ -58,7 +58,7 @@ module.exports = {
         lumServer.logForAcumos(logForAcumos);
     },
     /**
-     * start logging to log-acu/lum-server.log
+     * start logging to log-acu/lum-server/lum-server.log
      */
     startLogForAcumos(req, res, next) {
         module.exports.logForAcumos(res, module.exports.reqStatuses.entry,

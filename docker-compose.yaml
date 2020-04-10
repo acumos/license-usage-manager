@@ -20,7 +20,7 @@ services:
   lum-database:
     build: ./lum-db/
     # replace username/repo:tag with your name and image details
-    image: lum-database:1.3.0-SNAPSHOT
+    image: lum-database:1.3.1-SNAPSHOT
     restart: always
     ports:
       - "5432:5432"
@@ -32,7 +32,7 @@ services:
   lum-server:
     build: ./lum-server/
     # replace username/repo:tag with your name and image details
-    image: lum-server:1.3.0-SNAPSHOT
+    image: lum-server:1.3.1-SNAPSHOT
     depends_on:
       - lum-database
     ports:
@@ -41,7 +41,8 @@ services:
       # if you have the config.json for lum-server put it on next line and uncomment the next line
       # - ./lum/etc/config.json:/opt/app/lum/etc/config.json
 
-      # Acumos logging - replace ./lum/log-acu with /maven/logs/lum-server or the proper path
+      # Acumos logging - replace ./lum/log-acu with /maven/logs
+      #           or the proper path or the precreated volume like cognita-logs
       - ./lum/log-acu:/opt/app/lum/log-acu
 
       # lum-server dev logs - replace ./lum/logs with the proper path

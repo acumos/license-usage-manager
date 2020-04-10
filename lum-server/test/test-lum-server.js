@@ -31,7 +31,7 @@ const utils  = require('../src/utils')
 
 chai.use(chaiHttp);
 
-const acuLogPath = './log-acu/lum-server.log';
+const acuLogPath = './log-acu/lum-server/lum-server.log';
 
 /**
  * generate integer steps

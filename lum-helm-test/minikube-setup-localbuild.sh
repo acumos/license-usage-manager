@@ -26,4 +26,4 @@ helm init
 ## build in minikube docker instance
 eval $(minikube -p acumos-lum docker-env)
 cd ../lum-server
-docker build -t acumos/lum-server:1.3.0 .
+docker build -t acumos/lum-server:1.3.1 .

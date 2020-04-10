@@ -166,15 +166,16 @@ const setupLogForHealthcheck = () => {
  * {@link https://wiki.acumos.org/display/OAM/Acumos+Log+Standards}
  */
 const setupLogForAcumos = () => {
-    const logFolder   = path.join(__dirname, '../log-acu');
+    const logFolder   = path.join(__dirname, '../log-acu', lumServer.config.serverName);
     logFolders.acumos = logFolder;
     const logFile     = path.join(logFolder, `${lumServer.config.serverName}.log`);
     try {
-        if (!fs.existsSync(logFolder)) {fs.mkdirSync(logFolder);}
+        if (!fs.existsSync(logFolder)) {fs.mkdirSync(logFolder, {recursive: true});}
         transports.acumos = new (winston.transports.File)({
             level: lumServer.config.logging.logLevel,
             silent: !lumServer.config.logging.logTo.acumos,
-            filename: logFile
+            filename: logFile,
+            tailable: true, maxsize: fileRotateSize, maxFiles: 20, zippedArchive: true
         });
         const logForAcumos = winston.createLogger({format: logFormatLine, transports: [transports.acumos]});
         lumServer.logForAcumos = logWrapper(logForAcumos.info);

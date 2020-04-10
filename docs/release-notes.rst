@@ -21,6 +21,37 @@ License Usage Manager - Release Notes
 =====================================
 
 
+Version 1.3.1, 10 April 2020
+============================
+
+lum-server
+..........
+
+- Enhanced lum-server logging for Acumos logging platform to match logging behavior
+  on other components (`ACUMOS-4110 <https://jira.acumos.org/browse/ACUMOS-4110>`_)
+
+  - LUM now writes the Acumos log to ``log-acu/lum-server/lum-server.log`` and precreates
+    the folder ``log-acu/lum-server/``.  The docker-compose should be able to do the volume mount as
+
+    .. code:: yaml
+
+      volumes:
+        - cognita-logs:/opt/app/lum/log-acu
+
+    The logging platform should be able to find the log file ``lum-server.log`` in
+    the subfolder ``lum-server/`` on the ``cognita-logs`` volume
+
+  - implemented the **file rolling** for the log file to prevent it from growing forever.
+    Max file size is ``100MiB``, maxFiles: ``20``, zippedArchive: ``true``
+
+- unit test code coverage stats
+
+  * ``Statements 81.24% 1711/2106``
+  * ``Branches   60.08%  584/972``
+  * ``Functions  94.63%  194/205``
+  * ``Lines      82.85% 1657/2000``
+
+
 Version 1.3.0, 3 April 2020
 ============================
 
