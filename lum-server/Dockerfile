@@ -21,6 +21,8 @@
 FROM node:12.16.1-alpine as build-stage
 
 ARG BUILD_DEVELOPMENT
+ARG SVRVERSION
+
 # if --build-arg BUILD_DEVELOPMENT=1, set NODE_ENV to 'development' or set to null otherwise.
 ENV NODE_ENV=${BUILD_DEVELOPMENT:+development}
 # if NODE_ENV is null, set it to 'production' (or leave as is otherwise).
@@ -33,43 +35,14 @@ COPY ./lum-server.js     ./lum-server.js
 COPY ./src/              ./src/
 COPY ./lum-server-api/   ./lum-server-api/
 COPY ./etc/              ./etc/
-RUN ls -la && npm install --production --quiet \
+RUN sed -i package.json -e "/^  version:/s/:.*/: '${SVRVERSION%-*}'/" && \
+    sed -i package-lock.json -e "/^  version:/s/:.*/: '${SVRVERSION%-*}'/" && \
+    ls -la && npm install --production --quiet \
  && ls -la && npm ls --depth 0 && echo "$(ls -l node_modules | grep -c ^d) folders in node_modules"
 
 RUN if [ "$BUILD_DEVELOPMENT" == "1" ]; \
     then echo 'installing nodemon' && npm install nodemon ; \
     fi
-
-FROM node:12.16.1-alpine as lint-stage
-
-## ES lint
-WORKDIR /js-lint-work/
-COPY .eslintrc.js ./.eslintrc.js
-COPY --from=build-stage /work .
-RUN ls -la && npm ls --depth 0 && echo "$(ls -l node_modules | grep -c ^d) folders in node_modules" \
- && npm install eslint@^6.5.0 --no-save --production \
- && npm install eslint-config-recommended@^4.0.0 --no-save --production \
- && ls -la && npm ls --depth 0 && echo "$(ls -l node_modules | grep -c ^d) folders in node_modules" \
- && node_modules/.bin/eslint .
-
-## OpenAPI spec linting https://speccy.io/
-WORKDIR /oas-work/
-COPY --from=build-stage /work .
-RUN npm install speccy@0.11.0 --no-save --production \
- && npm ls --depth 0 && echo "$(ls -l node_modules | grep -c ^d) folders in node_modules" \
- && npm run lint-spec
-
-# unit testing with coverage
-FROM node:12.16.1-alpine as unit-test-stage
-
-WORKDIR /unit-test-stage/
-COPY --from=build-stage /work .
-COPY ./test/ ./test/
-COPY ./.nycrc.yaml .
-RUN ls -la && npm ls --depth 0 && echo "$(ls -l node_modules | grep -c ^d) folders in node_modules" \
- && npm install --only=dev && ls -la \
- && ls -la && npm ls --depth 0 && echo "$(ls -l node_modules | grep -c ^d) folders in node_modules" \
- && npm run coverage
 
 # The instructions for last runtime stage
 FROM node:12.16.1-alpine
