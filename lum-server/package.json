@@ -1,7 +1,7 @@
 {
   "name": "lum-server",
   "description": "License Usage Manager (LUM) for Acumos and ONAP",
-  "version": "1.3.1",
+  "version": "0.0.0",
   "main": "lum-server.js",
   "repository": {
     "type": "git",
@@ -13,7 +13,7 @@
     "lint": "./node_modules/.bin/eslint  .",
     "lint-spec": "./node_modules/.bin/speccy lint -s openapi-tags-alphabetical -s  server-trailing-slash -s path-keys-no-trailing-slash lum-server-api/lum-server-API.yaml",
     "test": "mocha --reporter spec --exit",
-    "coverage": "nyc --reporter html --reporter text npm test"
+    "coverage": "nyc --reporter lcov npm test"
   },
   "engines": {
     "node": ">=12.16.1"
