@@ -20,3 +20,7 @@
 FROM postgres:11.5-alpine
 
 COPY initdb/ /docker-entrypoint-initdb.d/
+
+ARG SVRVERSION
+
+RUN sed -i /docker-entrypoint-initdb.d/10_insert_data.sql -e "s/VeRsIoN/${SVRVERSION%-*}/g"

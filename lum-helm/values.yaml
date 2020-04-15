@@ -21,9 +21,10 @@ replicaCount: 1
 
 image:
   repository: nexus3.acumos.org:10002/acumos/lum-server
-  tag: 1.3.1
   pullPolicy: IfNotPresent
   pullSecrets:
+
+# image-tag: PUT-VERSION-HERE
 
 service:
   type: ClusterIP
