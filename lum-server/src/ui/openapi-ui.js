@@ -1,5 +1,5 @@
 // ================================================================================
-// Copyright (c) 2019 AT&T Intellectual Property. All rights reserved.
+// Copyright (c) 2019-2020 AT&T Intellectual Property. All rights reserved.
 // ================================================================================
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,7 +23,13 @@ const swaggerUi = require('swagger-ui-express');
 try {
     const swaggerSpec = require('yamljs').load('./lum-server-api/lum-server-API.yaml');
 
-    lumServer.healthcheck.apiVersion = swaggerSpec.info.version;
+    const version = require('../../package.json').version;
+    const ex = swaggerSpec.components.schemas.Healthcheck.properties.healthcheck.example;
+    swaggerSpec.info.version = version;
+    ex.serverVersion = version;
+    ex.apiVersion = version;
+    ex.databaseInfo.databaseVersion = version;
+    lumServer.healthcheck.apiVersion = version;
 
     router.use("/", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 } catch(e) {lumServer.logger.error("ERROR: failed to load openapi-ui", e.stack);}

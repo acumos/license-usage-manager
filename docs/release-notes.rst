@@ -21,6 +21,22 @@ License Usage Manager - Release Notes
 =====================================
 
 
+Version 1.3.2, 17 April 2020
+============================
+
+lum-db, lum-server, lum-java-rest-client
+........................................
+
+- Refactored versioning to reduce the number of places needing changes
+  when the version number changes.  The version number now appears only
+  in lum-java-rest-client/pom.xml (and in these release notes).  lum-server
+  and lum-db now derive their version number from the client pom.xml
+
+- Added support for Sonar scanning of lum-server
+
+- Made the version number configurable in the example helm and docker-compose
+  scripts.
+
 Version 1.3.1, 10 April 2020
 ============================
 
