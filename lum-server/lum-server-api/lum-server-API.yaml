@@ -19,7 +19,7 @@
 openapi: '3.0.3'
 
 info:
-  version: "1.3.1"
+  version: "0.0.0"
   title: "License Usage Manager (LUM) API"
   contact:
     name: Acumos License Management
@@ -1036,12 +1036,12 @@ components:
               type: string
           example:
             serverName: "lum-server"
-            serverVersion: "1.3.1"
-            apiVersion: "1.3.1"
+            serverVersion: "0.0.0"
+            apiVersion: "0.0.0"
             nodeVersion: "12.16.1"
             databaseInfo:
               pgVersion: "PostgreSQL 11.5 on x86_64-pc-linux-musl, compiled by gcc (Alpine 8.3.0) 8.3.0, 64-bit"
-              databaseVersion: "1.3.1"
+              databaseVersion: "0.0.0"
               schemaCreated: "2020-01-09T17:12:31.791Z"
               schemaModified: "2020-01-09T17:12:31.791Z"
               databaseStarted: "2020-01-09T17:12:32.361Z"

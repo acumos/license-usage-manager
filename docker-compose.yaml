@@ -18,9 +18,12 @@
 version: "3.4"
 services:
   lum-database:
-    build: ./lum-db/
+    build:
+      context: './lum-db/'
+      args:
+        SVRVERSION: '${SVRVERSION}'
     # replace username/repo:tag with your name and image details
-    image: lum-database:1.3.1-SNAPSHOT
+    image: 'acumos/lum-database:${SVRVERSION?SVRVERSION needs to be set with the version of the license usage manager server}'
     restart: always
     ports:
       - "5432:5432"
@@ -30,9 +33,12 @@ services:
       # replace ./lum/pgdata with the proper path to postgres data folder on next line and uncomment the next line
       # - ./lum/pgdata:/var/lib/postgresql/data
   lum-server:
-    build: ./lum-server/
+    build:
+      context: './lum-server/'
+      args:
+        SVRVERSION: '${SVRVERSION}'
     # replace username/repo:tag with your name and image details
-    image: lum-server:1.3.1-SNAPSHOT
+    image: 'acumos/lum-server:${SVRVERSION?SVRVERSION needs to be set with the version of the license usage manager server}'
     depends_on:
       - lum-database
     ports:
