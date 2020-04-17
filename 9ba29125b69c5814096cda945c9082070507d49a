@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a6023486_4872bf9b",
+        "filename": "lum-db/Dockerfile",
+        "patchSetId": 4
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2020-04-17T14:49:36Z",
+      "side": 1,
+      "message": "not sure whether the spelling intended - SVRVERSION ?\nwhat SVR stands for - SerVeR ?",
+      "range": {
+        "startLine": 24,
+        "startChar": 4,
+        "endLine": 24,
+        "endChar": 14
+      },
+      "revId": "9ba29125b69c5814096cda945c9082070507d49a",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    }
+  ]
+}
