@@ -22,6 +22,29 @@
       "revId": "9ba29125b69c5814096cda945c9082070507d49a",
       "serverId": "655300a2-7a56-4504-9153-881edd907bea",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ba8f67d2_d36ced88",
+        "filename": "lum-server/src/ui/openapi-ui.js",
+        "patchSetId": 4
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2020-04-17T14:55:53Z",
+      "side": 1,
+      "message": "this is not the API version, this is the server version.  Though after this change that will be the same all the time..",
+      "range": {
+        "startLine": 32,
+        "startChar": 4,
+        "endLine": 32,
+        "endChar": 47
+      },
+      "revId": "9ba29125b69c5814096cda945c9082070507d49a",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
     }
   ]
 }
