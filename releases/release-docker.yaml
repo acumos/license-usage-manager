@@ -1,12 +1,12 @@
 ---
 distribution_type: container
-container_release_tag: 1.3.1
+container_release_tag: 1.3.2
 container_pull_registry: nexus3.acumos.org:10004
 container_push_registry: nexus3.acumos.org:10002
 project: license-usage-manager
-ref: b574c0f5a8f2c930c35ada1e3083a16b708168ec
+ref: 154e90e653fb3c3120976f58ccd340358243083e
 containers:
     - name: lum-db
-      version: 1.3.1
+      version: 1.3.2
     - name: lum-server
-      version: 1.3.1
+      version: 1.3.2
