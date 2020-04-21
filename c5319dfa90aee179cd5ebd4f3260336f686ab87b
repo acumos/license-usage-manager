@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8ed4cf80_cf6a6786",
+        "filename": "lum-server/test/expectations/00_healthcheck.json",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 288
+      },
+      "writtenOn": "2020-04-21T18:05:16Z",
+      "side": 1,
+      "message": "Why?  The version is 0.0.0 when tox runs the tests and only gets changed when it\u0027s put in the container?",
+      "revId": "c5319dfa90aee179cd5ebd4f3260336f686ab87b",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
+    }
+  ]
+}
