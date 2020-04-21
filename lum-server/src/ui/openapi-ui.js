@@ -23,13 +23,9 @@ const swaggerUi = require('swagger-ui-express');
 try {
     const swaggerSpec = require('yamljs').load('./lum-server-api/lum-server-API.yaml');
 
-    const version = require('../../package.json').version;
     const ex = swaggerSpec.components.schemas.Healthcheck.properties.healthcheck.example;
-    swaggerSpec.info.version = version;
-    ex.serverVersion = version;
-    ex.apiVersion = version;
-    ex.databaseInfo.databaseVersion = version;
-    lumServer.healthcheck.apiVersion = version;
+    swaggerSpec.info.version = ex.serverVersion = ex.apiVersion = ex.databaseInfo.databaseVersion =
+    lumServer.healthcheck.serverVersion;
 
     router.use("/", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 } catch(e) {lumServer.logger.error("ERROR: failed to load openapi-ui", e.stack);}

@@ -24,8 +24,8 @@
             "requested": "__type__dateTime__",
             "healthcheck": {
                 "serverName":"lum-server",
-                "serverVersion":"0.0.0",
-                "apiVersion":"0.0.0",
+                "serverVersion":"__srvr__version__",
+                "apiVersion":"__srvr__version__",
                 "nodeVersion":"__env__NODE_VERSION",
                 "databaseInfo": {
                     "pgVersion": "mock-PostgreSQL",

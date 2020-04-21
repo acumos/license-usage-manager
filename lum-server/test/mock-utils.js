@@ -59,7 +59,8 @@ function assertEqual(value, expected, key, message, breadcrumbs) {
     if (expected === '__type__uuid__')      {return assertUuid(value, key, message);}
     if (expected === '__type__dateTime__')  {return assertDateTime(value, key, message);}
     if (expected === '__type__ignore__')    {return;}
-    if (expected === '__env__NODE_VERSION') {return process.env.NODE_VERSION;}
+    if (expected === '__env__NODE_VERSION') {expected = process.env.NODE_VERSION;}
+    if (expected === '__srvr__version__')   {expected = lumServer.healthcheck.serverVersion;}
     if (typeof expected === 'object')       {return module.exports.assertDeepEqual(value, expected, message, breadcrumbs);}
     assert.equal(value, expected, `unexpected value of ${key}(${value}): ${message}`);
 }

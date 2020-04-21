@@ -22,10 +22,11 @@ module.exports = {
      * initialize the healthcheck structure that is sent back to client on healthcheck requests
      */
     init() {
+        const serverVersion = require("../../package.json").version;
         lumServer.healthcheck = {
             serverName: lumServer.config.serverName,
-            serverVersion: require("../../package.json").version,
-            apiVersion: null,
+            serverVersion: serverVersion,
+            apiVersion: serverVersion,
             nodeVersion: process.env.NODE_VERSION,
             databaseInfo: null,
             serverRunInstanceId: utils.uuid(),

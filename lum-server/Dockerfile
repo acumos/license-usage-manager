@@ -35,9 +35,9 @@ COPY ./lum-server.js     ./lum-server.js
 COPY ./src/              ./src/
 COPY ./lum-server-api/   ./lum-server-api/
 COPY ./etc/              ./etc/
-RUN sed -i package.json -e "/^  version:/s/:.*/: '${SVRVERSION%-*}'/" && \
-    sed -i package-lock.json -e "/^  version:/s/:.*/: '${SVRVERSION%-*}'/" && \
-    ls -la && npm install --production --quiet \
+RUN sed -i package.json -e "/^  \"version\":/s/:.*/: \"${SVRVERSION%-*}\",/" \
+ && sed -i package-lock.json -e "/^  \"version\":/s/:.*/: \"${SVRVERSION%-*}\",/" \
+ && ls -la && npm install --production --quiet \
  && ls -la && npm ls --depth 0 && echo "$(ls -l node_modules | grep -c ^d) folders in node_modules"
 
 RUN if [ "$BUILD_DEVELOPMENT" == "1" ]; \
