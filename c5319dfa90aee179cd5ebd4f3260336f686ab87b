@@ -16,6 +16,24 @@
       "revId": "c5319dfa90aee179cd5ebd4f3260336f686ab87b",
       "serverId": "655300a2-7a56-4504-9153-881edd907bea",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "87e29647_536f9654",
+        "filename": "lum-server/test/expectations/00_healthcheck.json",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 278
+      },
+      "writtenOn": "2020-04-21T18:11:08Z",
+      "side": 1,
+      "message": "I also run the same tests in my dev development without tox and python and I have the real version instead of 0.0.0 - so it fails for that reason - I will probably enhance the unit tests later to have something like __type__version__ here to compare to what\u0027s in package.json",
+      "parentUuid": "8ed4cf80_cf6a6786",
+      "revId": "c5319dfa90aee179cd5ebd4f3260336f686ab87b",
+      "serverId": "655300a2-7a56-4504-9153-881edd907bea",
+      "unresolved": true
     }
   ]
 }
