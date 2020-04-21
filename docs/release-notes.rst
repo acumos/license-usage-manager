@@ -16,32 +16,44 @@
 .. limitations under the License.
 .. ===============LICENSE_END=========================================================
 
-=====================================
-License Usage Manager - Release Notes
-=====================================
+===================
+LUM - Release Notes
+===================
+
+****************************
+Version 1.3.3, 21 April 2020
+****************************
+
+**lum-server**
+
+- fixed replacing the server version in ``package.json`` and ``package-lock.json`` (`ACUMOS-4114`_)
 
 
+****************************
 Version 1.3.2, 17 April 2020
-============================
+****************************
 
-lum-db, lum-server, lum-java-rest-client
-........................................
+**lum-db**, **lum-server**, **lum-java-rest-client**
 
 - Refactored versioning to reduce the number of places needing changes
   when the version number changes.  The version number now appears only
-  in lum-java-rest-client/pom.xml (and in these release notes).  lum-server
-  and lum-db now derive their version number from the client pom.xml
+  in ``lum-java-rest-client/pom.xml`` (and in these release notes).
+  lum-server and lum-db now derive their version number from the client
+  ``pom.xml`` (`ACUMOS-4114`_)
 
 - Added support for Sonar scanning of lum-server
 
 - Made the version number configurable in the example helm and docker-compose
   scripts.
 
-Version 1.3.1, 10 April 2020
-============================
+.. _ACUMOS-4114: https://jira.acumos.org/browse/ACUMOS-4114
 
-lum-server
-..........
+
+****************************
+Version 1.3.1, 10 April 2020
+****************************
+
+**lum-server**
 
 - Enhanced lum-server logging for Acumos logging platform to match logging behavior
   on other components (`ACUMOS-4110 <https://jira.acumos.org/browse/ACUMOS-4110>`_)
@@ -49,7 +61,7 @@ lum-server
   - LUM now writes the Acumos log to ``log-acu/lum-server/lum-server.log`` and precreates
     the folder ``log-acu/lum-server/``.  The docker-compose should be able to do the volume mount as
 
-    .. code:: yaml
+    .. code-block:: yaml
 
       volumes:
         - cognita-logs:/opt/app/lum/log-acu
@@ -57,51 +69,60 @@ lum-server
     The logging platform should be able to find the log file ``lum-server.log`` in
     the subfolder ``lum-server/`` on the ``cognita-logs`` volume
 
-  - implemented the **file rolling** for the log file to prevent it from growing forever.
+  - implemented the *file rolling* for the log file to prevent it from growing forever.
     Max file size is ``100MiB``, maxFiles: ``20``, zippedArchive: ``true``
 
-- unit test code coverage stats
+- unit test code coverage stats ::
 
-  * ``Statements 81.24% 1711/2106``
-  * ``Branches   60.08%  584/972``
-  * ``Functions  94.63%  194/205``
-  * ``Lines      82.85% 1657/2000``
+    Statements 81.24% 1711/2106
+    Branches   60.08%  584/972
+    Functions  94.63%  194/205
+    Lines      82.85% 1657/2000
 
+-----
 
+****************************
 Version 1.3.0, 3 April 2020
-============================
+****************************
 
-lum-server
-..........
+**lum-server**
 
 - ``"lum:goodFor"`` constraint on ODRL permission
   (`ACUMOS-3734 <https://jira.acumos.org/browse/ACUMOS-3734>`_)
 
-  * ``"lum:goodFor"`` is using formats `ISO-8601 for duration <https://en.wikipedia.org/wiki/ISO_8601#Durations>`_
-  * in addition to ISO-8601 format, when the value of the rightOperand is a stringified number,
-    LUM assumes that is the duration in **days** (default)
+  * ``"lum:goodFor"`` is using formats `ISO-8601 formats for duration`_
+  * in addition to `ISO-8601 formats for duration`_, when the value of the rightOperand
+    is a stringified number, LUM assumes that is the duration in **days** (default)
 
     For instance, ``"30"`` is converted by LUM to ``"P30D"`` and is ``30 days``
 
-    ``{ "leftOperand": "lum:goodFor", "operator": "lteq", "rightOperand": "30" }``
+    .. code-block:: json
+      :emphasize-lines: 2
+
+      { "leftOperand": "lum:goodFor", "operator": "lteq",
+        "rightOperand": "30" }
 
     is the same as the following
 
-    ``{ "leftOperand": "lum:goodFor", "operator": "lteq", "rightOperand": "P30D" }``
+    .. code-block:: json
+      :emphasize-lines: 2
 
-  * **ISO-8601 formats** - always start with ``P`` and put ``T`` to separate date from time -
-    at least one number part is required, but any combination is ok:
-    ``PnYnMnDTnHnMnS``, ``PnW``
+      { "leftOperand": "lum:goodFor", "operator": "lteq",
+        "rightOperand": "P30D" }
 
-      ``"P30D"`` = 30 days,
-      ``"P3Y6M4DT12H30M5S"`` = 3 years 6 mons 4 days 12:30:05,
-      ``"P123.5DT23H"`` = 123 days 35:00:00,
-      ``"P4.7Y"`` = 4 years 8 mons,
-      ``"P1.3M"``= 1 mon 9 days,
-      ``"P1.55W"`` = 10 days 20:24:00,
-      ``"P0.5Y"`` = 6 mons,
-      ``"PT36H"`` = 36:00:00,
-      ``"P1YT5S"`` = 1 year 00:00:05
+  * `ISO-8601 formats for duration`_ always start with ``P`` and put ``T`` to separate
+    date from time - at least one number part is required, but any combination is ok:
+    ``PnYnMnDTnHnMnS``, ``PnW`` ::
+
+      "P30D" = 30 days,
+      "P3Y6M4DT12H30M5S" = 3 years 6 mons 4 days 12:30:05,
+      "P123.5DT23H" = 123 days 35:00:00,
+      "P4.7Y" = 4 years 8 mons,
+      "P1.3M" = 1 mon 9 days,
+      "P1.55W" = 10 days 20:24:00,
+      "P0.5Y" = 6 mons,
+      "PT36H" = 36:00:00,
+      "P1YT5S" = 1 year 00:00:05
 
 - added ``denialCode`` to denial that is a unique code for the reason of denial.
   UI can use the ``denialCode`` value to construct the denial message from other parts of the denial
@@ -112,19 +133,22 @@ lum-server
   * option to turn off logging to console ``$LOG_CONSOLE_OFF=yes``
   * removed ``$COUT_LEVEL``
 
-- unit test code coverage stats
+- unit test code coverage stats ::
 
-  * ``Statements 81.24% 1711/2106``
-  * ``Branches   60.08%  584/972``
-  * ``Functions  94.63%  194/205``
-  * ``Lines      82.85% 1657/2000``
+    Statements 81.24% 1711/2106
+    Branches   60.08%  584/972
+    Functions  94.63%  194/205
+    Lines      82.85% 1657/2000
 
+.. _ISO-8601 formats for duration: https://en.wikipedia.org/wiki/ISO_8601#Durations
 
+-----
+
+****************************
 Version 1.2.0, 23 March 2020
-============================
+****************************
 
-lum-server
-..........
+**lum-server**
 
 - added optional filtering by start and end date-time or date to
   ``GET /api/v1/asset-usage-tracking/software-licensor``
@@ -152,28 +176,27 @@ lum-server
 
   * ``docker-compose-dev.yaml`` for development with nodemon
 
-- added Acumos logging to ``PUT /swid-tag-creators`` requests
-  (`ACUMOS-3175 <https://jira.acumos.org/browse/ACUMOS-3175>`_,
-  `ACUMOS-3820 <https://jira.acumos.org/browse/ACUMOS-3820>`_)
+- added Acumos logging to ``PUT /swid-tag-creators`` requests (`ACUMOS-3175`_, `ACUMOS-3820`_)
 - enhanced the unit tests for the Acumos logging of release ``1.1.0``
-- unit test code coverage stats
+- unit test code coverage stats ::
 
-  * ``Statements 81.82% 1647/2013``
-  * ``Branches   59.78%  541/905``
-  * ``Functions  94.5%   189/200``
-  * ``Lines      83.28% 1594/1914``
+    Statements 81.82% 1647/2013
+    Branches   59.78%  541/905
+    Functions  94.5%   189/200
+    Lines      83.28% 1594/1914
 
 
+-----
+
+****************************
 Version 1.1.0, 16 March 2020
-============================
+****************************
 
-lum-server
-..........
+**lum-server**
 
 - logging ``PUT /asset-usage`` requests, ``PUT /asset-usage-event`` and ``PUT + DELETE /swid-tag``
   modifications into file ``/opt/app/lum/log-acu/lum-server.log`` for Acumos logging platform
-  to gather from (`ACUMOS-3175 <https://jira.acumos.org/browse/ACUMOS-3175>`_,
-  `ACUMOS-3820 <https://jira.acumos.org/browse/ACUMOS-3820>`_)
+  to gather from (`ACUMOS-3175`_, `ACUMOS-3820`_)
 - new API endpoint ``GET-PUT /admin/config`` to see the LUM-server config and allow the admin to
 
   * change the ``logLevel``
@@ -185,35 +208,40 @@ lum-server
 - logging refactored
 - moved some logging to debug level
 - added unit test cases for the new API
-- unit test code coverage stats
+- unit test code coverage stats ::
 
-  * ``Statements 81.6%  1601/1962``
-  * ``Branches   58.98%  509/863``
-  * ``Functions  94.5%  189/200``
-  * ``Lines      83.03% 1546/1862``
+    Statements 81.6%  1601/1962
+    Branches   58.98%  509/863
+    Functions  94.5%  189/200
+    Lines      83.03% 1546/1862
 
+.. _ACUMOS-3175: https://jira.acumos.org/browse/ACUMOS-3175
+.. _ACUMOS-3820: https://jira.acumos.org/browse/ACUMOS-3820
+
+-----
 
 Version 1.0.1, 4 March 2020
 ===========================
 
-lum-server
-..........
+**lum-server**
 
 - fixed bug on ``GET /api/v1/swid-tags/available-entitlement``
   that was returning the false positives - the swidTags that require RTU but not having the agreement
   (`ACUMOS-4051 <https://jira.acumos.org/browse/ACUMOS-4051>`_)
-- unit test code coverage stats
-  Stmts  81.74 %
-  Branch 58.51 %
-  Funcs  93.62 %
-  Lines  83.2  %
+- unit test code coverage stats ::
 
+    Stmts  81.74 %
+    Branch 58.51 %
+    Funcs  93.62 %
+    Lines  83.2  %
 
+-----
+
+******************************
 Version 1.0.0, 7 February 2020
-==============================
+******************************
 
-lum-server
-..........
+**lum-server**
 
 - new API endpoint ``GET /api/v1/swid-tags/available-entitlement`` that returns the collection of
   swidTag records with available-entitlement for the userId to perform the requested action at this moment.
@@ -235,20 +263,22 @@ lum-server
   Moved most of denial reason detection into SQL, reduced the number of lum-server to database calls.
 - API spec - cleanup and removed duplicates that are not used by LUM
 - minor code refactoring
-- unit test code coverage stats
-  Stmts  81.79 %
-  Branch 58.51 %
-  Funcs  93.62 %
-  Lines  83.2  %
+- unit test code coverage stats ::
+
+    Stmts  81.79 %
+    Branch 58.51 %
+    Funcs  93.62 %
+    Lines  83.2  %
 - docs - added overview.rst and lum-in-acumos.svg to show the high level view on integration
   of LUM-server with Acumos
 
+-----
 
+*******************************
 Version 0.28.2, 13 January 2020
-================================
+*******************************
 
-lum-server
-..........
+**lum-server**
 
 - LUM-server unit-tests with code coverage of 80% (`ACUMOS-3509 <https://jira.acumos.org/browse/ACUMOS-3509>`_)
 
@@ -263,18 +293,20 @@ lum-server
 - added debug level and the logger level to exclude debug
 - minor code cleanup
 - froze the versions in package.json
-- code coverage stats
-  Stmts  81.02 %
-  Branch 58.38 %
-  Funcs  92.31 %
-  Lines  82.5  %
+- code coverage stats ::
 
+    Stmts  81.02 %
+    Branch 58.38 %
+    Funcs  92.31 %
+    Lines  82.5  %
 
+-----
+
+*******************************
 Version 0.28.1, 24 October 2019
-===============================
+*******************************
 
-lum-server
-..........
+**lum-server**
 
 - LUM-server now returns a single denial reason for the expiration when the right-to-use expired instead
   of two denials - one for non-active RTU (removed) and another one for expired (stays)
@@ -282,12 +314,13 @@ lum-server
 - writing a single snapshot per asset-usage-agreement and/or asset-usage-agreement-restriction change
   instead of two
 
+-----
 
+*******************************
 Version 0.28.0, 23 October 2019
-===============================
+*******************************
 
-lum-server
-..........
+**lum-server**
 
 - changed API and asset-usage-denial data that LUM returns (`ACUMOS-3601 <https://jira.acumos.org/browse/ACUMOS-3601>`_)
 
@@ -299,34 +332,37 @@ lum-server
 
   * added ``assetUsageDenialSummary`` field to ``assetUsageHistory`` table in database
 
+-----
 
+*******************************
 Version 0.27.2, 21 October 2019
-===============================
+*******************************
 
-lum-server
-..........
+**lum-server**
 
 - LUM not to return denialType of the agreementNotFound when LUM returns other denials
   as an indication of agreements that do not match
   (`ACUMOS-3598 <https://jira.acumos.org/browse/ACUMOS-3598>`_)
 - specific indication of permission versus prohibition in denialReason instead of generic rightToUse
 
+-----
 
+*******************************
 Version 0.27.1, 17 October 2019
-===============================
+*******************************
 
-lum-server
-..........
+**lum-server**
 
 - LUM open API spec change (for LUM Java Client) to correctly generate
   types for AssetUsage (`ACUMOS-3082 <https://jira.acumos.org/browse/ACUMOS-3082>`_)
 
+-----
 
+*******************************
 Version 0.27.0, 11 October 2019
-===============================
+*******************************
 
-lum-server
-..........
+**lum-server**
 
 - API change - params are now passed in query instead of through path -- per discussion in 0.26.4
 - added ``softwareLicensorId`` as param in query on ``/api/v1/asset-usage-agreement``
@@ -344,9 +380,12 @@ lum-server
 - jsdoc
 - logging healthcheck requests into a separate log file when LOGDIR is provided to uncongest the main log file
 
+-----
 
+******************************
 Version 0.26.5, 9 October 2019
-==============================
+******************************
+
 * Open api changes to support fixes in LUM Java client - fixed typing of ``AssetUsageResponse`` and ``AssetUsageDenialAssetUsageDenial`` --
   Java code gen has a problem with the same property referenced by multiple schemas .. treats it as object
 * ``Object getAssetUsage() -> AssetUsageDenialOrEntitlement getAssetUsage()``
@@ -362,9 +401,12 @@ Version 0.26.5, 9 October 2019
 
   Fix caused some overlap between AssetUsageResponseBase and AssetUsageMixedResponse.
 
+-----
 
+******************************
 Version 0.26.4, 7 October 2019
-==============================
+******************************
+
 - LUM integration support (`ACUMOS-3534 <https://jira.acumos.org/browse/ACUMOS-3534>`_)
   - Added new helm chart for lum + postgresql
   - New environment variable DATABASE_PASSWORD to help seperate config from secret config
@@ -382,9 +424,11 @@ Version 0.26.4, 7 October 2019
   - Added support for base url to be under /lum/ and support servers dropdown in swagger ui
   - Bug in swagger lint - disabled rule server-trailing-slash -- caused error for server /
 
+-----
 
+******************************
 Version 0.26.3, 1 October 2019
-==============================
+******************************
 
 - Added support for nodemon support for faster reloads in docker container
 - adding examples to make dredd apiary happy easier to test
@@ -395,12 +439,13 @@ Version 0.26.3, 1 October 2019
 - Reserved variable name - package changed to pkg
 - Adding .dockerignore to ensure node_modules are installed in docker not locally
 
+-----
 
+*********************************
 Version 0.26.2, 30 September 2019
-=================================
+*********************************
 
-lum-server
-..........
+**lum-server**
 
 - bringing ODRL (`ACUMOS-3219 <https://jira.acumos.org/browse/ACUMOS-3219>`_)
   (`ACUMOS-3060 <https://jira.acumos.org/browse/ACUMOS-3060>`_)
@@ -426,9 +471,9 @@ lum-server
   That is not be controlled by the ODRL conflict clause.  No need for RTU editor to convert
   the prohibition into permission with count = 0 constraint.
 - new and changed values for denialType: swidTagNotFound, swidTagRevoked,
-     licenseProfileNotFound, licenseProfileRevoked, agreementNotFound,
-     rightToUseRevoked, usageProhibited, matchingConstraintOnAssignee,
-     matchingConstraintOnTarget, timingConstraint, usageConstraint
+  licenseProfileNotFound, licenseProfileRevoked, agreementNotFound,
+  rightToUseRevoked, usageProhibited, matchingConstraintOnAssignee,
+  matchingConstraintOnTarget, timingConstraint, usageConstraint
 - added deniedMetrics to denials to report the current stats that caused the denial
 - minimalistic validation of input data on agreement and permission/prohibition
   to make sure they have the uid values on them.  Otherwise, LUM-server returns
@@ -436,8 +481,7 @@ lum-server
 - reports show the latest denials based on ODRL agreement (`ACUMOS-3229 <https://jira.acumos.org/browse/ACUMOS-3229>`_)
 - jsdoc - work in progress
 
-lum-database
-............
+**lum-database**
 
 - including softwareLicensorId as partial PK on assetUsageAgreement, rightToUse,
   snapshot tables
@@ -449,19 +493,20 @@ lum-database
   matching right-to-use for the swidTag
 - removed the no longer needed tables swToRtu, matchingConstraint, usageConstraint
 
-    * that was possible due to the new concept of merging the constraints
-    * using SQL to find the matching rightToUse on the fly instead
-    * using JSON functionality of Postgres
+  * that was possible due to the new concept of merging the constraints
+  * using SQL to find the matching rightToUse on the fly instead
+  * using JSON functionality of Postgres
+
 - renamed table rtuUsage to usageMetrics
-- stroting LUM version into database table lumInfo
+- storing LUM version into database table lumInfo
 
+-----
 
-
+*********************************
 Version 0.25.2, 13 September 2019
-=================================
+*********************************
 
-lum-server
-..........
+**lum-server**
 
 - added first denials (`ACUMOS-3061 <https://jira.acumos.org/browse/ACUMOS-3061>`_)
 - return http status 402 for denied assetUsage
@@ -479,28 +524,31 @@ lum-server
 - minor changes to API
 - jsdoc - work in progress
 
-Version 0.23.1, 11 September 2019
-=================================
+-----
 
-lum-java-client
-...............
+*********************************
+Version 0.23.1, 11 September 2019
+*********************************
+
+**lum-java-client**
 
 - Fixed allOfWarnings - required changes to swagger
 - bumped version to 0.23.1 for all components
 - Removed user from lum-db setup
 - Add support for development without docker
 
-Version 0.23.0, 09 September 2019
-=================================
+-----
 
-local dev setup fixes
-.....................
+*********************************
+Version 0.23.0, 09 September 2019
+*********************************
+
+**local dev setup fixes**
 
 - Setup NodeJS server to work without docker for quicker debugging
 - adding .gitignore to not include local folders / files that are only for development
 
-first incarnation of the lum-server with basic functionality of API
-...................................................................
+**first incarnation of the lum-server with basic functionality of API**
 
 - API for lum-server (`ACUMOS-3342 <https://jira.acumos.org/browse/ACUMOS-3342>`_)
 
@@ -508,10 +556,10 @@ first incarnation of the lum-server with basic functionality of API
   * openapi-ui on lum-server
 
 - Posgres database initdb and setup (`ACUMOS-3006 <https://jira.acumos.org/browse/ACUMOS-3006>`_)
-- defined DDL for the database (`ACUMOS-3006 <https://jira.acumos.org/browse/ACUMOS-3006>`_)
 
-first iteration of APIs on lum-server
-.....................................
+  - defined DDL for the database
+
+**first iteration of APIs on lum-server**
 
 - basic CRUD on swid-tag combined with license-profile (`ACUMOS-3035 <https://jira.acumos.org/browse/ACUMOS-3035>`_)
 - basic CRUD on software-creators (`ACUMOS-3062 <https://jira.acumos.org/browse/ACUMOS-3062>`_)
@@ -524,17 +572,18 @@ first iteration of APIs on lum-server
 - eslint clean with disabled require-atomic-updates
 - run eslint in docker build
 
-What is not done yet
-....................
+**What is not done yet**
 
 - asset-usage-agreement and asset-usage-agreement-restriction are just objects
 - no RTUs, no matching, no usage constraints
 - no relation between the asset-usage-agreement and swid-tag
 - no denials - everything is entitled so far
 
+-----
 
+******************************
 Version 0.20.0, 29 August 2019
-==============================
+******************************
 
 defining LUM API in lum_server-API.yaml (`ACUMOS-3342. <https://jira.acumos.org/browse/ACUMOS-3342/>`_)
 
@@ -551,5 +600,7 @@ defining LUM API in lum_server-API.yaml (`ACUMOS-3342. <https://jira.acumos.org/
 - asset-usage-agreement-restriction - improvements
 - asset-usage-event data
 - having revision numbers on responses
+
+-----
 
 :doc:`back to LUM index <index>`
