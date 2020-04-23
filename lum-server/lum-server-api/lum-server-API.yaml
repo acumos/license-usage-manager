@@ -2710,13 +2710,13 @@ components:
                   description: collection of loggers to turn off or on in LUM server
                   properties:
                     console:
-                      description: logging to console
+                      description: logging the dev info to console
                       type: boolean
                     devLog:
-                      description: whether to log dev info into file in LUM's internal format
+                      description: whether to log the dev info into file in LUM's internal format
                       type: boolean
                     healthcheck:
-                      description: whether to log healthcheck into a separate file
+                      description: whether to log the healthcheck into a separate file
                       type: boolean
                     acumos:
                       description: whether to log info in Acumos specific format (json)
@@ -2727,6 +2727,7 @@ components:
           logging:
             logLevel: "debug"
             logTo:
+              devLog: true
               healthcheck: false
               acumos: true
 
@@ -2792,7 +2793,7 @@ components:
                   description: collection of active loggers in LUM server
                   properties:
                     console:
-                      description: logging to console
+                      description: logging the dev info to console
                       type: boolean
                       default: true
                     devLog:

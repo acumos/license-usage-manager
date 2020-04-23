@@ -26,7 +26,7 @@ module.exports = {
         lumServer.config.serverName        = lumServer.config.serverName || "lum-server";
         lumServer.config.port              = (!isNaN(process.env.APPPORT) && Number(process.env.APPPORT))
                                             || lumServer.config.port || 2080;
-        lumServer.config.maxTxRetryCount   = lumServer.config.maxTxRetryCount || 100;
+        lumServer.config.maxTxRetryCount   = lumServer.config.maxTxRetryCount || 20;
         lumServer.config.database          = lumServer.config.database || {};
         lumServer.config.database.password = process.env.DATABASE_PASSWORD || lumServer.config.database.password;
     },

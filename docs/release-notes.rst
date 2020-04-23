@@ -20,6 +20,27 @@
 LUM - Release Notes
 ===================
 
+
+****************************
+Version 1.3.4, 23 April 2020
+****************************
+
+**docs**
+
+- updated docs with features of Demeter and more instructions
+  (`ACUMOS-3939 <https://jira.acumos.org/browse/ACUMOS-3939>`_)
+
+  - added :doc:`install-guide`
+  - updated :doc:`developer-guide`
+  - updated :doc:`api-docs`
+  - updated :doc:`overview`
+
+**lum-server**
+
+- ``etc/config.json``: set ``logLevel`` to ``info`` and turned off logging to ``devLog`` and ``healthcheck``
+- ``tox.ini``: added ``skipsdist = true`` that allowed to remove the empty ``setup.py``
+- minor refactoring
+
 ****************************
 Version 1.3.3, 21 April 2020
 ****************************
