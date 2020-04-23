@@ -26,7 +26,17 @@ License Usage Manager (LUM)
     overview.rst
     api-docs.rst
     developer-guide.rst
+    install-guide.rst
     release-notes.rst
 
+-----
+
+***********
+LUM clients
+***********
+
+:doc:`LMCL <../../license-manager/docs/index>`
+
+----
 
 * :ref:`search`

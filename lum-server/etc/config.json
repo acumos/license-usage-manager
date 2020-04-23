@@ -12,11 +12,11 @@
         "serverName": "lum-server",
         "maxTxRetryCount": 10,
         "logging": {
-            "logLevel": "debug",
+            "logLevel": "info",
             "logTo": {
                 "console": true,
-                "devLog": true,
-                "healthcheck": true,
+                "devLog": false,
+                "healthcheck": false,
                 "acumos": true
             }
         }

@@ -115,6 +115,8 @@ describe('lum-server', function () {
         console.log(`${utils.milliSecsToString(utils.now())}: lumServer inited: ${lumServer.config.serverName}`, lumServer.healthcheck);
         lumServer.logger.info(`lumServer inited: ${lumServer.config.serverName}`, lumServer.healthcheck);
         console.log('-'.repeat(50));
+        const logger = require('../src/logger');
+        logger.setLogging(null, {logLevel: "debug"});
     });
 
     afterEach(async function() {

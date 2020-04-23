@@ -25,7 +25,7 @@ try {
 
     const ex = swaggerSpec.components.schemas.Healthcheck.properties.healthcheck.example;
     swaggerSpec.info.version = ex.serverVersion = ex.apiVersion = ex.databaseInfo.databaseVersion =
-    lumServer.healthcheck.serverVersion;
+        lumServer.healthcheck.serverVersion;
 
     router.use("/", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 } catch(e) {lumServer.logger.error("ERROR: failed to load openapi-ui", e.stack);}
