@@ -24,7 +24,7 @@ image:
   pullPolicy: IfNotPresent
   pullSecrets:
 
-# image-tag: PUT-VERSION-HERE
+#imagetag: PUT-VERSION-HERE
 
 service:
   type: ClusterIP

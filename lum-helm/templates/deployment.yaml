@@ -48,9 +48,19 @@ spec:
       imagePullSecrets:
       - name: {{ .Values.image.pullSecrets }}
       {{- end }}
+      initContainers:
+            - name: wait-for-db
+              image: busybox:1.28
+              command:
+              - 'sh'
+              - '-c'
+              - >
+                until nc -z -w 2 {{ .Release.Name }}-postgresql {{ .Values.postgresql.servicePort }} && echo postgresql ok;
+                  do sleep 2;
+                done
       containers:
         - name: {{ .Chart.Name }}
-          image: {{ .Values.image.repository }}:{{ .Values.image-tag }}
+          image: {{ .Values.image.repository }}:{{ .Values.imagetag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             - name: DATABASE_PASSWORD
@@ -59,16 +69,6 @@ spec:
                   name: {{ .Release.Name }}-postgresql
                   key: postgresql-password
             - name: NODE
-          initContainers:
-            - name: wait-for-db
-              image: "{{ .Values.initContainerImage }}"
-              command:
-              - 'sh'
-              - '-c'
-              - >
-                until nc -z -w 2 {{ .Release.Name }}-postgresql {{ .Values.postgresql.servicePort }} && echo postgresql ok;
-                  do sleep 2;
-                done
           volumeMounts:
           - name: config-volume
             mountPath: /opt/app/lum/etc/config.json
@@ -81,13 +81,16 @@ spec:
             httpGet:
               path: '/api/healthcheck'
               port: http
-          initialDelaySeconds: 60
-          periodSeconds: 10
-          failureThreshold: 10
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            failureThreshold: 10
           readinessProbe:
-          initialDelaySeconds: 60
-          periodSeconds: 10
-          failureThreshold: 10
+            httpGet:
+              path: '/api/healthcheck'
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            failureThreshold: 10
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}
