@@ -17,6 +17,8 @@
 const pgclient = require('./pgclient');
 const SqlParams = require('./sql-params');
 
+const DATE_FIELDS = ["enableOn", "expireOn"];
+
 module.exports = {
     /**
      * store the copy of table record into snapshot table
@@ -30,6 +32,18 @@ module.exports = {
     async storeSnapshot(res, softwareLicensorId, snapshotType, snapshotKey, snapshotRevision, snapshotBody) {
         const logSnapshot = `storeSnapshot[${softwareLicensorId},${snapshotType},${snapshotKey},${snapshotRevision}]`;
         lumServer.logger.debug(res, `in ${logSnapshot}`);
+
+        // convert date-time field to date string
+        DATE_FIELDS.forEach(dateField => {
+            const dateValue = snapshotBody[dateField];
+            if (dateValue) {
+                if (dateValue instanceof Date) {
+                    snapshotBody[dateField] = dateValue.toISOString().substr(0, 10);
+                } else if (typeof dateValue === 'string') {
+                    snapshotBody[dateField] = dateValue.substr(0, 10);
+                }
+            }
+        });
 
         const keys = new SqlParams();
         keys.addField("softwareLicensorId", softwareLicensorId || "");

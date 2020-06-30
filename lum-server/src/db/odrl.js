@@ -107,7 +107,7 @@ const CONSUMED_CONSTRAINTS = {
     unexpected:'unexpected', same:'same', groomed: "groomed"
 };
 
-const FIELDS = {value:'@value', type: '@type'};
+const FIELDS_VALUE = '@value';
 const TYPES = {string: "string", integer: "integer", date: "date", duration: "duration"};
 const LEFT_OPERANDS = {
     "count": {dataType: TYPES.integer, usageConstraintOn: [RULE_TYPES.permission]},
@@ -192,7 +192,7 @@ function groomAction(action) {
     if (!Array.isArray(action)) {action = [action];}
     return action.map(item => {
         if (typeof item === 'string')           {return item;}
-        if (item && typeof item === 'object')   {return item[FIELDS.value];}
+        if (item && typeof item === 'object')   {return item[FIELDS_VALUE];}
     }).filter(nonEmptyItem => !!nonEmptyItem);
 }
 /**
@@ -208,11 +208,14 @@ function consumeConstraint(consumedConstraints, status, ...constraints) {
 }
 /**
  * groom constraint for the integer data type
+ * @param  {} res
  * @param  {} constraint
  * @param  {[]} consumedConstraints
  */
-function groomConstraintInteger(constraint, consumedConstraints) {
+function groomConstraintInteger(res, constraint, consumedConstraints) {
     if (constraint.dataType !== TYPES.integer) {return;}
+
+    lumServer.logger.debug(res, 'groomConstraintInteger', constraint);
 
     if (isNaN(constraint.rightOperand)) {
         consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.errored, constraint);
@@ -237,14 +240,18 @@ function groomConstraintInteger(constraint, consumedConstraints) {
 }
 /**
  * groom constraint for the date data type
+ * @param  {} res
  * @param  {} constraint
  * @param  {[]} consumedConstraints
  */
-function groomConstraintDate(constraint, consumedConstraints) {
+function groomConstraintDate(res, constraint, consumedConstraints) {
     if (constraint.dataType !== TYPES.date) {return;}
 
+    lumServer.logger.debug(res, 'groomConstraintDate', constraint);
+
     let rightOperand = new Date(constraint.rightOperand);
-    if (isNaN(rightOperand.getTime())) {
+    if (!constraint.rightOperand || !isNaN(constraint.rightOperand)
+        || isNaN(rightOperand.getTime())) {
         consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.errored, constraint);
         constraint.rightOperand = null;
         return true;
@@ -268,11 +275,14 @@ function groomConstraintDate(constraint, consumedConstraints) {
 }
 /**
  * groom constraint for the date data type
+ * @param  {} res
  * @param  {} constraint
  * @param  {[]} consumedConstraints
  */
-function groomConstraintDuration(constraint, consumedConstraints) {
+function groomConstraintDuration(res, constraint, consumedConstraints) {
     if (constraint.dataType !== TYPES.duration) {return;}
+
+    lumServer.logger.debug(res, 'groomConstraintDuration', constraint);
 
     let rightOperand = constraint.rightOperand;
     if (rightOperand != null && !isNaN(rightOperand)) {
@@ -323,16 +333,16 @@ function groomConstraintDuration(constraint, consumedConstraints) {
  * ```operator: "lum:in", rightOperand: ["face-detection"]``` ->
  * ```rightOperand: ["face-detection"], dataType: "string"```
  *
- * ```rightOperand: {"@value": "20", "@type": "xsd:integer"}``` ->
+ * ```leftOperand: "count", rightOperand: {"@value": "20"}``` ->
  * ```rightOperand: 20, dataType: "integer"```
  *
- * ```rightOperand: {"@value": "2019-09-16", "@type": "xsd:date"}``` ->
+ * ```leftOperand: "date", rightOperand: {"@value": "2019-09-16"}``` ->
  * ```rightOperand: "2019-09-16", dataType: "date"```
  *
  * @param  {} res
  * @param  {} constraint
  * @param  {[]} consumedConstraints collection of merged and conflicted constraints
- *                                that got consumed by grooming
+ *                                  that got consumed by grooming
  * @returns {} groomed copy of constraint
  */
 function groomConstraint(res, constraint, consumedConstraints) {
@@ -352,9 +362,7 @@ function groomConstraint(res, constraint, consumedConstraints) {
         if (typeof rop === 'string') {return rop;}
         if (typeof rop !== 'object') {return rop;}
 
-        const ropDataType = (rop[FIELDS.type] || '').toLowerCase().replace('xsd:', '');
-        constraint.dataType = (ropDataType in TYPES && ropDataType) || constraint.dataType;
-        const ropValue = rop[FIELDS.value];
+        const ropValue = rop[FIELDS_VALUE];
         if (ropValue == null) {return;}
         if (typeof ropValue !== 'string') {return JSON.stringify(ropValue);}
         return ropValue;
@@ -368,9 +376,9 @@ function groomConstraint(res, constraint, consumedConstraints) {
     }
     constraint.rightOperand = constraint.rightOperand[0];
 
-    if (groomConstraintInteger(constraint, consumedConstraints)
-        || groomConstraintDate(constraint, consumedConstraints)
-        || groomConstraintDuration(constraint, consumedConstraints)) {
+    if (groomConstraintInteger(res, constraint, consumedConstraints)
+        || groomConstraintDate(res, constraint, consumedConstraints)
+        || groomConstraintDuration(res, constraint, consumedConstraints)) {
         return constraint;
     }
     return constraint;
@@ -414,7 +422,7 @@ function mergeTwoConstraints(res, constraint, addon, consumedConstraints) {
 
     if (constraint.operator === addon.operator) {
         if (constraint.operator === OPERATORS.eq) {
-            if (!(addon.rightOperand == constraint.rightOperand)) {
+            if (addon.rightOperand != constraint.rightOperand) {
                 consumeConstraint(consumedConstraints, CONSUMED_CONSTRAINTS.conflicted, constraint, addon);
                 constraint.rightOperand = null;
             } else {
@@ -571,7 +579,7 @@ function expandProhibitionConstraint(res, constraint, expansion, consumedConstra
  * @param  {Object[]} constraints initial constraint
  * @param  {Object[]} baseConstraints constraints from agreement
  * @param  {[]} consumedConstraints collection of merged and conflicted constraints
- *                                that got consumed by grooming
+ *                                  that got consumed by grooming
  * @returns {Object[]} new collection of merged constraints
  */
 function groomConstraints(res, constraints, baseConstraints, consumedConstraints) {
@@ -905,7 +913,7 @@ function expandTiming(prohibition, expansion) {
     } else if (expansion.enableOn) {
         consumeConstraint(prohibition.consumedConstraints.onRule, CONSUMED_CONSTRAINTS.ignored, {enableOn: expansion.enableOn});
     }
-setTimingFieldsOnRule(prohibition);
+    setTimingFieldsOnRule(prohibition);
 }
 
 /**

@@ -17,9 +17,33 @@
  * @file reusable functions that are either totally generic or LUM specific
  */
 
-const crypto = require("crypto");
-const uuid = require('uuid');
+const crypto = require("crypto")
+    , uuid = require('uuid');
 const {performance} = require('perf_hooks');
+
+const reMultiline = /(\r\n\s*|\n\s*|\r\s*)/gm;
+
+const hmac = {
+    salt: 'do not tell',
+    cache: {},
+    /**
+     * first 20 chars of hmac of the value of the field with cacheing
+     * @param  {string} key
+     * @param  {} value
+     * @returns {string} hmac digest of the value
+     */
+    getDigest: (key, value) => {
+        if (!value || typeof value !== 'string') {return value;}
+        let digest;
+        let cacheKey = hmac.cache[key];
+        if (cacheKey) {digest = cacheKey[value];}
+        if (digest) {return digest;}
+        digest = crypto.createHmac("sha512", hmac.salt).update(value).digest("hex").substr(0,20);
+        if (!cacheKey) {cacheKey = hmac.cache[key] = {};}
+        cacheKey[value] = digest;
+        return digest;
+    }
+};
 
 module.exports = {
     /**
@@ -38,14 +62,14 @@ module.exports = {
      */
     sleep(milliSecs) {return new Promise(resolve => setTimeout(resolve, milliSecs));},
     /**
-     * hide pass* and *password fields as sha256 hash in JSON.stringify
+     * hide passw* and *password fields as hmac in JSON.stringify
      * @param  {string} key
      * @param  {} value
+     * @returns {} either value or hmac of value based on the key
      */
     hidePass(key, value) {
-        return (key && key.toLowerCase().includes("passw") &&
-            `***-sha256(${crypto.createHash("sha256").update(value).digest("hex")})***`
-        ) || value;
+        return (key && key.toLowerCase().includes("passw") && `hmac(${hmac.getDigest(key,value)})`
+            ) || value;
     },
     /**
      * remove new line symbols from the text
@@ -54,7 +78,7 @@ module.exports = {
      */
     makeOneLine(text) {
         if (typeof(text) === 'string') {
-            return text.replace(/(\r\n\s*|\n\s*|\r\s*)/gm, " ").trimEnd();
+            return text.replace(reMultiline, " ").trimEnd();
         }
         return text;
     },
@@ -182,16 +206,19 @@ module.exports = {
      * @param  {string} denialReason human readable explanation why denied the entitlement
      * @param  {string} deniedAction either requested action on the asset like download, publish, execute, etc.
      *                  or special value of use
+     * @param  {} denialReqItemName name of the field that is the reason for denial
+     * @param  {} denialReqItemValue valye of the field that is the reason for denial
      */
-    addDenial(swidTag, denialCode, denialType, denialReason, deniedAction) {
+    addDenial(swidTag, denialCode, denialType,
+        denialReason, deniedAction, denialReqItemName, denialReqItemValue) {
 
         denialReason = module.exports.makeOneLine(denialReason);
         if (!swidTag.usageDenialSummary) {
             swidTag.usageDenialSummary = denialReason;
         }
 
-        swidTag.usageDenials.push({"denialCode": denialCode, "denialType": denialType,
-                                   "denialReason": denialReason, "deniedAction": deniedAction
+        swidTag.usageDenials.push({denialCode, denialType, denialReason, deniedAction,
+            denialReqItemName, denialReqItemValue
         });
     },
     /**

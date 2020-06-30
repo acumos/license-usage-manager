@@ -25,7 +25,7 @@
         {
             "sqlCmd": "INSERT INTO \"assetUsageReq\" (\"assetUsageReqId\" , \"action\",\"assetUsageType\",\"requestHttp\",\"request\",\"userId\",\"status\", \"requestStarted\") VALUES (($1) , ($2),($3),($4),($5),($6),($7), NOW())",
             "sqlVals": [
-                "beb41a9e-2813-426f-9a2d-212b2c29a729",
+                "639ea40d-0c29-47e7-9002-131a5e6ac0fd",
                 "acumos:deploy",
                 "assetUsage",
                 {
@@ -38,7 +38,7 @@
                         "assetUsageId": "unit-test-assetUsageId"
                     },
                     "Content-Type": "application/json; charset=utf-8",
-                    "X-ACUMOS-RequestID": "beb41a9e-2813-426f-9a2d-212b2c29a729",
+                    "X-ACUMOS-RequestID": "639ea40d-0c29-47e7-9002-131a5e6ac0fd",
                     "userAgent": "__type__ignore__",
                     "clientIPAddress": "__type__ignore__",
                     "ips": []
@@ -96,24 +96,31 @@
                         "isRtuRequired": true,
                         "assetUsageRuleId": "0437364d-54f8-4b0f-aaff-6da8c3ce8b13",
                         "assetUsageAgreementId": "unit-test-assetUsageAgreementId",
-                        "assetUsageAgreementRevision": 8,
+                        "assetUsageAgreementRevision": 12,
                         "rightToUseId": "unit-test-permission-1",
                         "assetUsageRuleType": "permission",
-                        "rightToUseRevision": 8,
-                        "metricsRevision": 0,
+                        "rightToUseRevision": 13,
+                        "metricsRevision": 1,
                         "licenseKeys": null,
                         "rtuAction": "acumos:deploy",
-                        "metrics": null,
-                        "assigneeMetrics": {
-                            "users": []
+                        "metrics": {
+                            "count": 2,
+                            "users": [
+                                "unit-test-userId"
+                            ]
                         },
-                        "isUserInAssigneeMetrics": false,
+                        "assigneeMetrics": {
+                            "users": [
+                                "unit-test-userId"
+                            ]
+                        },
+                        "isUserInAssigneeMetrics": true,
                         "denial": null,
                         "entitlement": {
                             "rightToUseId": "unit-test-permission-1",
-                            "rightToUseRevision": 8,
+                            "rightToUseRevision": 13,
                             "assetUsageAgreementId": "unit-test-assetUsageAgreementId",
-                            "assetUsageAgreementRevision": 8,
+                            "assetUsageAgreementRevision": 12,
                             "licenseKeys": null
                         }
                     }
@@ -129,7 +136,7 @@
                 "unit-test-userId",
                 2,
                 "unit-test-userId",
-                "beb41a9e-2813-426f-9a2d-212b2c29a729",
+                "639ea40d-0c29-47e7-9002-131a5e6ac0fd",
                 "unit-test-swTagId",
                 "0437364d-54f8-4b0f-aaff-6da8c3ce8b13",
                 {
@@ -140,7 +147,7 @@
                 },
                 1,
                 "unit-test-userId",
-                "beb41a9e-2813-426f-9a2d-212b2c29a729"
+                "639ea40d-0c29-47e7-9002-131a5e6ac0fd"
             ],
             "result": {
                 "command": "INSERT",
@@ -153,18 +160,18 @@
                         "swTagId": "unit-test-swTagId",
                         "assetUsageRuleId": "0437364d-54f8-4b0f-aaff-6da8c3ce8b13",
                         "metrics": {
-                            "count": 2,
+                            "count": 4,
                             "users": [
                                 "unit-test-userId"
                             ]
                         },
-                        "usageMetricsRevision": 1,
+                        "usageMetricsRevision": 2,
                         "creator": "unit-test-userId",
                         "created": "2020-06-25T17:44:12.809Z",
                         "creatorRequestId": "beb41a9e-2813-426f-9a2d-212b2c29a729",
                         "modifier": "unit-test-userId",
-                        "modified": "2020-06-25T17:44:12.809Z",
-                        "modifierRequestId": "beb41a9e-2813-426f-9a2d-212b2c29a729"
+                        "modified": "2020-06-25T17:44:14.030Z",
+                        "modifierRequestId": "639ea40d-0c29-47e7-9002-131a5e6ac0fd"
                     },
                     {
                         "usageMetricsId": "0437364d-54f8-4b0f-aaff-6da8c3ce8b13",
@@ -173,34 +180,20 @@
                         "swTagId": "unit-test-swTagId",
                         "assetUsageRuleId": "0437364d-54f8-4b0f-aaff-6da8c3ce8b13",
                         "metrics": {
-                            "count": 2,
+                            "count": 4,
                             "users": [
                                 "unit-test-userId"
                             ]
                         },
-                        "usageMetricsRevision": 1,
+                        "usageMetricsRevision": 2,
                         "creator": "unit-test-userId",
                         "created": "2020-06-25T17:44:12.809Z",
                         "creatorRequestId": "beb41a9e-2813-426f-9a2d-212b2c29a729",
                         "modifier": "unit-test-userId",
-                        "modified": "2020-06-25T17:44:12.809Z",
-                        "modifierRequestId": "beb41a9e-2813-426f-9a2d-212b2c29a729"
+                        "modified": "2020-06-25T17:44:14.030Z",
+                        "modifierRequestId": "639ea40d-0c29-47e7-9002-131a5e6ac0fd"
                     }
                 ]
-            }
-        },
-        {
-            "sqlCmd": "UPDATE \"rightToUse\" SET \"metricsModified\" = NOW(), \"metricsRevision\" = \"metricsRevision\" + 1, \"assigneeMetrics\" = \"assigneeMetrics\" || CASE WHEN (\"assigneeMetrics\"->'users')::JSONB ? ($2)::TEXT THEN '{}'::JSONB ELSE JSONB_BUILD_OBJECT('users', (\"assigneeMetrics\"->'users')::JSONB || ('[\"' || ($2)::TEXT || '\"]')::JSONB) END, \"usageStartReqId\" = COALESCE(\"usageStartReqId\", ($4)), \"usageStarted\"    = COALESCE(\"usageStarted\", NOW()), \"usageEnds\"       = COALESCE(\"usageEnds\", NOW() + \"goodFor\") , \"metricsModifierReqId\" = ($3) WHERE \"assetUsageRuleId\" = ($1)",
-            "sqlVals": [
-                "0437364d-54f8-4b0f-aaff-6da8c3ce8b13",
-                "unit-test-userId",
-                "beb41a9e-2813-426f-9a2d-212b2c29a729",
-                "beb41a9e-2813-426f-9a2d-212b2c29a729"
-            ],
-            "result": {
-                "command": "UPDATE",
-                "rowCount": 1,
-                "rows": []
             }
         },
         {
@@ -214,7 +207,7 @@
                 "unit-test-swMgtSystemInstanceId",
                 "unit-test-swMgtSystemComponent",
                 true,
-                "beb41a9e-2813-426f-9a2d-212b2c29a729",
+                "639ea40d-0c29-47e7-9002-131a5e6ac0fd",
                 "assetUsage",
                 "acumos:deploy",
                 "unit-test-swTagId",
@@ -225,13 +218,20 @@
                 true,
                 false,
                 "0437364d-54f8-4b0f-aaff-6da8c3ce8b13",
-                8,
+                13,
                 "unit-test-assetUsageAgreementId",
-                8,
-                null,
+                12,
                 null,
                 {
-                    "users": []
+                    "count": 2,
+                    "users": [
+                        "unit-test-userId"
+                    ]
+                },
+                {
+                    "users": [
+                        "unit-test-userId"
+                    ]
                 },
                 "0437364d-54f8-4b0f-aaff-6da8c3ce8b13",
                 null
@@ -241,7 +241,7 @@
                 "rowCount": 1,
                 "rows": [
                     {
-                        "assetUsageSeq": 3
+                        "assetUsageSeq": 9
                     }
                 ]
             }
@@ -257,7 +257,7 @@
                 "unit-test-swMgtSystemInstanceId",
                 "unit-test-swMgtSystemComponent",
                 true,
-                "beb41a9e-2813-426f-9a2d-212b2c29a729",
+                "639ea40d-0c29-47e7-9002-131a5e6ac0fd",
                 "assetUsage",
                 "acumos:deploy",
                 "unit-test-swTagId",
@@ -268,13 +268,20 @@
                 true,
                 false,
                 "0437364d-54f8-4b0f-aaff-6da8c3ce8b13",
-                8,
+                13,
                 "unit-test-assetUsageAgreementId",
-                8,
-                null,
+                12,
                 null,
                 {
-                    "users": []
+                    "count": 2,
+                    "users": [
+                        "unit-test-userId"
+                    ]
+                },
+                {
+                    "users": [
+                        "unit-test-userId"
+                    ]
                 },
                 "0437364d-54f8-4b0f-aaff-6da8c3ce8b13",
                 null
@@ -284,7 +291,7 @@
                 "rowCount": 1,
                 "rows": [
                     {
-                        "assetUsageSeq": 3
+                        "assetUsageSeq": 8
                     }
                 ]
             }
@@ -295,7 +302,7 @@
                 "unit-test-assetUsageId",
                 "unit-test-assetUsageId-2",
                 "unit-test-userId",
-                "beb41a9e-2813-426f-9a2d-212b2c29a729"
+                "639ea40d-0c29-47e7-9002-131a5e6ac0fd"
             ],
             "result": {
                 "command": "INSERT",
@@ -306,15 +313,15 @@
         {
             "sqlCmd": "UPDATE \"assetUsageReq\" AS aur SET \"requestDone\" = TRUE, \"responseSent\" = CLOCK_TIMESTAMP() , \"responseHttpCode\" = ($2),\"response\" = ($3),\"usageEntitled\" = ($4),\"status\" = ($5) WHERE aur.\"assetUsageReqId\" = ($1)",
             "sqlVals": [
-                "beb41a9e-2813-426f-9a2d-212b2c29a729",
+                "639ea40d-0c29-47e7-9002-131a5e6ac0fd",
                 200,
                 {
                     "userId": "unit-test-userId",
                     "swMgtSystemId": "unit-test-swMgtSystemId",
                     "swMgtSystemInstanceId": "unit-test-swMgtSystemInstanceId",
                     "swMgtSystemComponent": "unit-test-swMgtSystemComponent",
-                    "requestId": "beb41a9e-2813-426f-9a2d-212b2c29a729",
-                    "requested": "2020-06-25T17:44:12.807Z",
+                    "requestId": "639ea40d-0c29-47e7-9002-131a5e6ac0fd",
+                    "requested": "2020-06-25T17:44:14.027Z",
                     "usageEntitled": true,
                     "assetUsage": {
                         "swTagId": "unit-test-swTagId",
@@ -322,7 +329,7 @@
                         "action": "acumos:deploy",
                         "usageEntitled": true,
                         "isUsedBySwCreator": false,
-                        "assetUsageSeq": 3,
+                        "assetUsageSeq": 9,
                         "swidTagRevision": 5,
                         "licenseProfileId": "cec51e7d-d977-41d2-abc6-ef5f069491b8",
                         "licenseProfileRevision": 1,
@@ -330,9 +337,9 @@
                         "softwareLicensorId": "unit-test-softwareLicensorId",
                         "entitlement": {
                             "rightToUseId": "unit-test-permission-1",
-                            "rightToUseRevision": 8,
+                            "rightToUseRevision": 13,
                             "assetUsageAgreementId": "unit-test-assetUsageAgreementId",
-                            "assetUsageAgreementRevision": 8,
+                            "assetUsageAgreementRevision": 12,
                             "licenseKeys": null
                         },
                         "includedAssetUsage": [
@@ -341,7 +348,7 @@
                                 "includedAssetUsageId": "unit-test-assetUsageId-2",
                                 "usageEntitled": true,
                                 "isUsedBySwCreator": false,
-                                "assetUsageSeq": 3,
+                                "assetUsageSeq": 8,
                                 "swidTagRevision": 5,
                                 "licenseProfileId": "cec51e7d-d977-41d2-abc6-ef5f069491b8",
                                 "licenseProfileRevision": 1,
@@ -349,9 +356,9 @@
                                 "softwareLicensorId": "unit-test-softwareLicensorId",
                                 "entitlement": {
                                     "rightToUseId": "unit-test-permission-1",
-                                    "rightToUseRevision": 8,
+                                    "rightToUseRevision": 13,
                                     "assetUsageAgreementId": "unit-test-assetUsageAgreementId",
-                                    "assetUsageAgreementRevision": 8,
+                                    "assetUsageAgreementRevision": 12,
                                     "licenseKeys": null
                                 }
                             }
@@ -380,10 +387,10 @@
         "method": "PUT",
         "path": "/api/v1/asset-usage?assetUsageId=unit-test-assetUsageId",
         "content-type": "application/json; charset=utf-8",
-        "X-ACUMOS-RequestID": "beb41a9e-2813-426f-9a2d-212b2c29a729",
+        "X-ACUMOS-RequestID": "639ea40d-0c29-47e7-9002-131a5e6ac0fd",
         "send": {
-            "requestId": "beb41a9e-2813-426f-9a2d-212b2c29a729",
-            "requested": "2020-06-25T17:44:12.807Z",
+            "requestId": "639ea40d-0c29-47e7-9002-131a5e6ac0fd",
+            "requested": "2020-06-25T17:44:14.027Z",
             "userId": "unit-test-userId",
             "swMgtSystemId": "unit-test-swMgtSystemId",
             "swMgtSystemInstanceId": "unit-test-swMgtSystemInstanceId",
@@ -409,7 +416,7 @@
             "swMgtSystemId": "unit-test-swMgtSystemId",
             "swMgtSystemInstanceId": "unit-test-swMgtSystemInstanceId",
             "swMgtSystemComponent": "unit-test-swMgtSystemComponent",
-            "requestId": "beb41a9e-2813-426f-9a2d-212b2c29a729",
+            "requestId": "639ea40d-0c29-47e7-9002-131a5e6ac0fd",
             "requested": "__type__dateTime__",
             "usageEntitled": true,
             "assetUsage": {
@@ -418,7 +425,7 @@
                 "action": "acumos:deploy",
                 "usageEntitled": true,
                 "isUsedBySwCreator": false,
-                "assetUsageSeq": 3,
+                "assetUsageSeq": 9,
                 "swidTagRevision": 5,
                 "licenseProfileId": "cec51e7d-d977-41d2-abc6-ef5f069491b8",
                 "licenseProfileRevision": 1,
@@ -426,9 +433,9 @@
                 "softwareLicensorId": "unit-test-softwareLicensorId",
                 "entitlement": {
                     "rightToUseId": "unit-test-permission-1",
-                    "rightToUseRevision": 8,
+                    "rightToUseRevision": 13,
                     "assetUsageAgreementId": "unit-test-assetUsageAgreementId",
-                    "assetUsageAgreementRevision": 8,
+                    "assetUsageAgreementRevision": 12,
                     "licenseKeys": null
                 },
                 "includedAssetUsage": [
@@ -437,7 +444,7 @@
                         "includedAssetUsageId": "unit-test-assetUsageId-2",
                         "usageEntitled": true,
                         "isUsedBySwCreator": false,
-                        "assetUsageSeq": 3,
+                        "assetUsageSeq": 8,
                         "swidTagRevision": 5,
                         "licenseProfileId": "cec51e7d-d977-41d2-abc6-ef5f069491b8",
                         "licenseProfileRevision": 1,
@@ -445,9 +452,9 @@
                         "softwareLicensorId": "unit-test-softwareLicensorId",
                         "entitlement": {
                             "rightToUseId": "unit-test-permission-1",
-                            "rightToUseRevision": 8,
+                            "rightToUseRevision": 13,
                             "assetUsageAgreementId": "unit-test-assetUsageAgreementId",
-                            "assetUsageAgreementRevision": 8,
+                            "assetUsageAgreementRevision": 12,
                             "licenseKeys": null
                         }
                     }
@@ -458,7 +465,7 @@
     "acuLogs": [
         {
             "LogTimestamp": "__type__dateTime__",
-            "RequestID": "beb41a9e-2813-426f-9a2d-212b2c29a729",
+            "RequestID": "639ea40d-0c29-47e7-9002-131a5e6ac0fd",
             "InvocationID": "PUT /api/v1/asset-usage",
             "InstanceID": "__type__uuid__",
             "Thread": "main",
@@ -499,7 +506,7 @@
         },
         {
             "LogTimestamp": "__type__dateTime__",
-            "RequestID": "beb41a9e-2813-426f-9a2d-212b2c29a729",
+            "RequestID": "639ea40d-0c29-47e7-9002-131a5e6ac0fd",
             "InvocationID": "response",
             "InstanceID": "__type__uuid__",
             "Thread": "main",
@@ -518,8 +525,8 @@
             "Logger": "__type__ignore__",
             "Mdc": null,
             "Message": {
-                "requestId": "beb41a9e-2813-426f-9a2d-212b2c29a729",
-                "requested": "2020-06-25T17:44:12.807Z",
+                "requestId": "639ea40d-0c29-47e7-9002-131a5e6ac0fd",
+                "requested": "2020-06-25T17:44:14.027Z",
                 "userId": "unit-test-userId",
                 "swMgtSystemId": "unit-test-swMgtSystemId",
                 "swMgtSystemInstanceId": "unit-test-swMgtSystemInstanceId",
@@ -531,7 +538,7 @@
                     "action": "acumos:deploy",
                     "usageEntitled": true,
                     "isUsedBySwCreator": false,
-                    "assetUsageSeq": 3,
+                    "assetUsageSeq": 9,
                     "swidTagRevision": 5,
                     "licenseProfileId": "cec51e7d-d977-41d2-abc6-ef5f069491b8",
                     "licenseProfileRevision": 1,
@@ -539,9 +546,9 @@
                     "softwareLicensorId": "unit-test-softwareLicensorId",
                     "entitlement": {
                         "rightToUseId": "unit-test-permission-1",
-                        "rightToUseRevision": 8,
+                        "rightToUseRevision": 13,
                         "assetUsageAgreementId": "unit-test-assetUsageAgreementId",
-                        "assetUsageAgreementRevision": 8,
+                        "assetUsageAgreementRevision": 12,
                         "licenseKeys": null
                     },
                     "includedAssetUsage": [
@@ -550,7 +557,7 @@
                             "includedAssetUsageId": "unit-test-assetUsageId-2",
                             "usageEntitled": true,
                             "isUsedBySwCreator": false,
-                            "assetUsageSeq": 3,
+                            "assetUsageSeq": 8,
                             "swidTagRevision": 5,
                             "licenseProfileId": "cec51e7d-d977-41d2-abc6-ef5f069491b8",
                             "licenseProfileRevision": 1,
@@ -558,9 +565,9 @@
                             "softwareLicensorId": "unit-test-softwareLicensorId",
                             "entitlement": {
                                 "rightToUseId": "unit-test-permission-1",
-                                "rightToUseRevision": 8,
+                                "rightToUseRevision": 13,
                                 "assetUsageAgreementId": "unit-test-assetUsageAgreementId",
-                                "assetUsageAgreementRevision": 8,
+                                "assetUsageAgreementRevision": 12,
                                 "licenseKeys": null
                             }
                         }

@@ -19,6 +19,9 @@
 "use strict";
 const assert = require('chai').assert;
 
+const serverVersion = require("../package.json").version;
+const reUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+
 /**
  * assert the value is a proper uuid version 4
  * @param  {string} value
@@ -26,8 +29,7 @@ const assert = require('chai').assert;
  * @param  {string} message explanation of the value
  */
 function assertUuid(value, fieldName, message) {
-    assert.match(value, /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
-        `expected ${fieldName}(${value}) to be uuid: ${message}`);
+    assert.match(value, reUuid, `expected ${fieldName}(${value}) to be uuid: ${message}`);
 }
 
 /**
@@ -60,7 +62,7 @@ function assertEqual(value, expected, key, message, breadcrumbs) {
     if (expected === '__type__dateTime__')  {return assertDateTime(value, key, message);}
     if (expected === '__type__ignore__')    {return;}
     if (expected === '__env__NODE_VERSION') {expected = process.env.NODE_VERSION;}
-    if (expected === '__srvr__version__')   {expected = lumServer.healthcheck.serverVersion;}
+    if (expected === '__srvr__version__')   {expected = serverVersion;}
     if (typeof expected === 'object')       {return module.exports.assertDeepEqual(value, expected, message, breadcrumbs);}
     assert.equal(value, expected, `unexpected value of ${key}(${value}): ${message}`);
 }
@@ -104,7 +106,7 @@ module.exports = {
     /**
      * when the text is too long, returns the
      * @param  {string} txt
-     * @param  {number} [maxLength]=100
+     * @param  {number} [maxLength] defaults to 100
      * @returns {string} shorten txt if longer than maxLength
      */
     shortenString(txt, maxLength=100) {

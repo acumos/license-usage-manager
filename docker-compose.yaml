@@ -27,11 +27,10 @@ services:
     restart: always
     ports:
       - "5432:5432"
+    volumes:
+      # external persistent volume for database data
+      - lum-data:/var/lib/postgresql/data
 
-    # uncomment the next line to enable volumes mapping for postgres database
-    # volumes:
-      # replace ./lum/pgdata with the proper path to postgres data folder on next line and uncomment the next line
-      # - ./lum/pgdata:/var/lib/postgresql/data
   lum-server:
     build:
       context: './lum-server/'
@@ -49,7 +48,13 @@ services:
 
       # Acumos logging - replace ./lum/log-acu with /maven/logs
       #           or the proper path or the precreated volume like cognita-logs
-      - ./lum/log-acu:/opt/app/lum/log-acu
+      - cognita-logs:/opt/app/lum/log-acu
 
       # lum-server dev logs - replace ./lum/logs with the proper path
-      - ./lum/logs:/opt/app/lum/logs
+      # - ./lum/logs:/opt/app/lum/logs
+
+  volumes:
+    cognita-logs:
+      external: true
+    lum-data:
+      external: true

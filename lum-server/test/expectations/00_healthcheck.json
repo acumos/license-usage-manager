@@ -15,7 +15,8 @@
     }],
     "req": {
         "method": "GET",
-        "path": "/api/healthcheck"
+        "path": "/api/healthcheck",
+        "X-ACUMOS-RequestID": "20311376-07d5-40e6-bc50-607d407fb833"
     },
     "res": {
         "statusCode": 200,
