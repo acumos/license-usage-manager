@@ -19,6 +19,7 @@
 global.lumServer = {};
 
 const fs = require('fs')
+    , path = require('path')
     , readline = require('readline')
     , chai = require('chai')
     , chaiHttp = require('chai-http')
@@ -47,6 +48,14 @@ async function* asyncCountGenerator(maxCount = 5) {
  */
 function removeFile(path) {
     if (fs.existsSync(path)) {fs.unlinkSync(path);}
+}
+/**
+ * reads json file from fs
+ * @param  {string} path to the file
+ * @returns {} parsed content of the json file
+ */
+function readJson(path) {
+    if (fs.existsSync(path)) {return JSON.parse(fs.readFileSync(path, 'utf8'));}
 }
 
 /**
@@ -92,8 +101,8 @@ describe('lum-server', function () {
         this.timeout(0);
         console.log(`${utils.milliSecsToString(utils.now())}: before testing lum-server`);
 
-        console.log(`${utils.milliSecsToString(utils.now())}: require('./expectations/00_healthcheck.json')`);
-        const healthcheck = require('./expectations/00_healthcheck.json') || {};
+        console.log(`${utils.milliSecsToString(utils.now())}: readJson('./expectations/00_healthcheck.json')`);
+        const healthcheck = readJson(path.join('./test/expectations','00_healthcheck.json')) || {};
         mockPg.pgClientMock.reset(healthcheck.db);
 
         console.log(`${utils.milliSecsToString(utils.now())}: require('../lum-server.js')`);
@@ -127,9 +136,10 @@ describe('lum-server', function () {
     const expectationFiles = fs.readdirSync('./test/expectations');
     console.log(`${utils.milliSecsToString(utils.now())}: lumServer testing: ${JSON.stringify(expectationFiles)}`);
     expectationFiles.forEach(function(expectationFile, index) {
-        const expectation = require(`./expectations/${expectationFile}`);
-        const testLog = `api[${index.toString().padStart(2,'0')}]: ${expectationFile} ${expectation.req.method} ${expectation.res.statusCode}`;
-        it(testLog, function() {
+        const expectation = readJson(path.join('./test/expectations', expectationFile));
+        const requestId = expectation.req["X-ACUMOS-RequestID"] || utils.uuid();
+        const testLog = `api[${index.toString().padStart(2,'0')}]: ${expectationFile} ${expectation.req.method} ${expectation.res.statusCode} (${requestId})`;
+        it(testLog, async function() {
             console.log(`    -> ${utils.milliSecsToString(utils.now())}: ${testLog}`);
             lumServer.logger.info(`---->> start ${testLog}`);
             chai.assert.isOk(expectation, `unexpected expectation: ${JSON.stringify(expectation)}`);
@@ -140,41 +150,52 @@ describe('lum-server', function () {
             chai.assert.isString(expectation.req.path, `unexpected expectation.req.path: ${expectation.req.path}`);
 
             let testReq = chai.request(lumServer.app);
-            let requestId;
             if (expectation.req.method === "GET")           {testReq = testReq.get(expectation.req.path);
             } else if (expectation.req.method === "PUT")    {testReq = testReq.put(expectation.req.path);
             } else if (expectation.req.method === "DELETE") {testReq = testReq.delete(expectation.req.path);}
             if (expectation.req.send)                       {testReq = testReq.send(expectation.req.send);}
             if (expectation.req["content-type"])            {testReq = testReq.set("content-type", expectation.req["content-type"]);}
+            testReq.set("X-ACUMOS-RequestID", requestId);
 
-            return testReq
-                .then(function(res) {
-                    lumServer.logger.info(`<<---- res ${res.statusCode} for ${testLog}:`, res.text);
-                    expect(res).to.be.json;
-                    if (res.statusCode === 500 && res.body && res.body.error
-                        && expectation.res.statusCode !== res.statusCode) {
-                        lumServer.logger.error(`ERROR res ${res.statusCode} for ${testLog}:`, res.body.error);
-                        throw res.body.error;
-                    }
+            const res = await testReq;
+            lumServer.logger.info(`<<---- res ${res.statusCode} for ${testLog}:`, res.text);
+            expect(res).to.be.json;
+            if (res.statusCode === 500 && res.body && res.body.error
+                && expectation.res.statusCode !== res.statusCode) {
+                lumServer.logger.error(`ERROR res ${res.statusCode} for ${testLog}:`, res.body.error);
+                throw res.body.error;
+            }
 
-                    expect(res).to.have.status(expectation.res.statusCode);
-                    mockPg.pgClientMock.verify();
+            expect(res).to.have.status(expectation.res.statusCode);
+            mockPg.pgClientMock.verify();
 
-                    mockUtils.assertDeepEqual(res.body, expectation.res.body, `unexpected res for ${testLog}`);
-                    requestId = res.body.requestId;
-                    if (expectation.acuLogs) {
-                        lumServer.logger.info(`<<---- expecting ${
-                            expectation.acuLogs.length} acuLogs for ${requestId}`);
-                        return readAcuLog(requestId);
-                    }
-                })
-                .then(function(acuLogs) {
-                    if (expectation.acuLogs) {
-                        lumServer.logger.info(`<<---- got ${acuLogs.length} acuLogs:`, acuLogs);
-                        mockUtils.assertDeepEqual(acuLogs, expectation.acuLogs, `unexpected acuLogs for ${testLog}`);
-                        lumServer.logger.info(`<<---- done`);
-                    }
-                });
+            if (expectation.res.bodySubsetKeys) {
+                const bodySubset = {};
+                const notFound = [];
+                for (const expectedRec of expectation.res.bodySubsetKeys) {
+                    if (!bodySubset[expectedRec.field]) {bodySubset[expectedRec.field] = [];}
+                    const subsetData = res.body[expectedRec.field];
+                    chai.assert.isArray(subsetData, `unexpected value(${JSON.stringify(subsetData)}) for ${JSON.stringify(expectedRec)}`);
+                    const found = subsetData.some(subsetItem => {
+                        if (subsetItem[expectedRec.key] === expectedRec.value) {
+                            bodySubset[expectedRec.field].push(subsetItem);
+                            return true;
+                        }
+                    });
+                    if (!found) {notFound.push(subsetRec);}
+                }
+                chai.assert.isEmpty(notFound, `expected ${JSON.stringify(notFound)} in ${JSON.stringify(res.body)}`);
+                mockUtils.assertDeepEqual(bodySubset, expectation.res.bodySubset, `unexpected bodySubset (${bodySubset}) for ${JSON.stringify(expectation.res.bodySubset)}`);
+            }
+
+            mockUtils.assertDeepEqual(res.body, expectation.res.body, `unexpected res for ${testLog}`);
+            if (expectation.acuLogs) {
+                lumServer.logger.info(`<<---- expecting ${expectation.acuLogs.length} acuLogs for ${requestId}`);
+                const acuLogs = await readAcuLog(requestId);
+                lumServer.logger.info(`<<---- got ${acuLogs.length} acuLogs:`, acuLogs);
+                mockUtils.assertDeepEqual(acuLogs, expectation.acuLogs, `unexpected acuLogs for ${testLog}`);
+            }
+            lumServer.logger.info(`<<---- done`);
         });
     });
 }).timeout(10000);

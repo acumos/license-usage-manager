@@ -14,8 +14,9 @@
 // limitations under the License.
 // ============LICENSE_END=========================================================
 
-const config = require('../config');
-const logger = require('../logger');
+const config = require('../config')
+    , logger = require('../logger')
+    , response = require('../api/response');
 
 /**
  * api for GET the admin config of LUM server
@@ -45,13 +46,13 @@ const putAdminConfig = (req, res, next) => {
     next();
 };
 
-const router = require('express').Router();
-
-const response = require('../api/response');
+const Router = require('express-promise-router');
+const router = new Router();
 
 router.use(response.newReq);
 
 router.route('/config').get(getAdminConfig).put(putAdminConfig);
+router.route('/recent-errors').get(response.getRecentErrors);
 
 router.use(response.respond);
 router.use(response.responseError);

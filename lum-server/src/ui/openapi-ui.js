@@ -17,17 +17,50 @@
 "use strict";
 
 const router = require('express').Router();
-
 const swaggerUi = require('swagger-ui-express');
 
-try {
-    const swaggerSpec = require('yamljs').load('./lum-server-api/lum-server-API.yaml');
+const pathToOpenapiUi = lumServer.healthcheck.pathToOpenapiUi.replace(/(^\/|\/$)/, '');
+const openapiUiSuffix = new RegExp(`${pathToOpenapiUi}/?$`);
+const swaggerSet = {spec: null, opts: {}};
 
-    const ex = swaggerSpec.components.schemas.Healthcheck.properties.healthcheck.example;
-    swaggerSpec.info.version = ex.serverVersion = ex.apiVersion = ex.databaseInfo.databaseVersion =
+try {
+    swaggerSet.spec = require('yamljs').load('./lum-server-api/lum-server-API.yaml');
+
+    const ex = swaggerSet.spec.components.schemas.Healthcheck.properties.healthcheck.example;
+    swaggerSet.spec.info.version = ex.serverVersion = ex.apiVersion = ex.databaseInfo.databaseVersion =
         lumServer.healthcheck.serverVersion;
 
-    router.use("/", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+    swaggerSet.opts.customSiteTitle = `${swaggerSet.spec.info.title} version ${swaggerSet.spec.info.version}`;
 } catch(e) {lumServer.logger.error("ERROR: failed to load openapi-ui", e.stack);}
+
+/**
+ * set site title and server url on swagger spec based on the relative path
+ * @example http://localhost/ui/openapi/#/swid-tag -> server url = /
+ * @hint server record is removed when the serverPath is root /
+ * @example http://localhost/lum/ui/openapi/#/swid-tag -> server url = /lum/
+ * @example http://localhost/lumui/openapi/#/swid-tag -> server url = /lum
+ * @param  {} req
+ * @param  {} res
+ * @param  {} next
+ */
+function setSwaggerDoc(req, res, next) {
+    const swaggerURL = new URL(`${req.protocol}://${req.get('Host')}${req.originalUrl}`);
+    const serverPath = swaggerURL.pathname.replace(openapiUiSuffix, '');
+    if (serverPath !== swaggerURL.pathname) {
+        swaggerSet.opts.customSiteTitle = `${swaggerSet.spec.info.title} version ${
+            swaggerSet.spec.info.version} at ${swaggerURL.host}${serverPath.replace(/\/$/, '')}`;
+        lumServer.logger.info(`openapi-ui server at(${serverPath}) from path(${
+            swaggerURL.pathname}) for pathToOpenapiUi(${pathToOpenapiUi}): customSiteTitle(${
+                swaggerSet.opts.customSiteTitle})`);
+        if (serverPath === '/') {
+            if (swaggerSet.spec.servers) {delete swaggerSet.spec.servers;}
+        } else {swaggerSet.spec.servers = [{url: serverPath, description: 'path to lum-server'}];}
+
+        req.swaggerDoc = swaggerSet.spec;
+    }
+    next();
+}
+
+router.use("/", setSwaggerDoc, swaggerUi.serve, swaggerUi.setup(null, swaggerSet.opts));
 
 module.exports = router;

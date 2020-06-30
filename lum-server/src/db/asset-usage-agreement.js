@@ -204,7 +204,7 @@ module.exports = {
         lumServer.logger.debug(res, `in putAssetUsageAgreement(${res.locals.paramsStr})`);
 
         const keys = new SqlParams();
-        keys.addField("softwareLicensorId", res.locals.assetUsageAgreement.softwareLicensorId);
+        keys.addField("softwareLicensorId", res.locals.params.softwareLicensorId);
         keys.addField("assetUsageAgreementId", res.locals.params.assetUsageAgreementId);
         const putFields = new SqlParams(keys);
         putFields.addField("agreement", res.locals.assetUsageAgreement.agreement);

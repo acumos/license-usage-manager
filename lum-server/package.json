@@ -8,24 +8,23 @@
     "url": "https://gerrit.acumos.org/r/license-usage-manager.git"
   },
   "scripts": {
-    "start:prod": "node lum-server.js",
-    "start:dev": "./node_modules/.bin/nodemon --inspect=0.0.0.0:5858 -w lum-server.js -w src",
-    "lint": "./node_modules/.bin/eslint  .",
-    "lint-spec": "./node_modules/.bin/speccy lint -s openapi-tags-alphabetical -s  server-trailing-slash -s path-keys-no-trailing-slash lum-server-api/lum-server-API.yaml",
+    "start": "node lum-server.js",
+    "lint": "eslint .",
+    "lint-spec": "speccy lint -s openapi-tags-alphabetical -s  server-trailing-slash -s path-keys-no-trailing-slash lum-server-api/lum-server-API.yaml",
     "test": "mocha --reporter spec --exit",
     "coverage": "nyc --reporter lcov --reporter text-summary npm test"
   },
   "engines": {
-    "node": ">=12.16.1"
+    "node": ">=12.18.1"
   },
   "dependencies": {
     "express": "4.17.1",
-    "express-promise-router": "3.0.3",
-    "moment": "2.24.0",
-    "pg": "7.18.2",
+    "express-promise-router": "4.0.1",
+    "moment": "2.27.0",
+    "pg": "8.2.1",
     "swagger-ui-express": "4.1.4",
-    "uuid": "7.0.2",
-    "winston": "3.2.1",
+    "uuid": "8.2.0",
+    "winston": "3.3.3",
     "yamljs": "0.3.0"
   },
   "author": "Alex Shatov",
@@ -39,8 +38,8 @@
   "devDependencies": {
     "chai": "4.2.0",
     "chai-http": "4.3.0",
-    "mocha": "7.1.1",
+    "mocha": "8.0.1",
     "mock-require": "3.0.3",
-    "nyc": "15.0.0"
+    "nyc": "15.1.0"
   }
 }

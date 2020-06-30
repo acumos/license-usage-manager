@@ -17,54 +17,28 @@
 # ============LICENSE_END=================================================
 # Dockerfile for lum-server
 
-# The instructions for the first stage
-FROM node:12.16.1-alpine as build-stage
+FROM node:12.18.1-alpine
 
-ARG BUILD_DEVELOPMENT
 ARG SVRVERSION
-
-# if --build-arg BUILD_DEVELOPMENT=1, set NODE_ENV to 'development' or set to null otherwise.
-ENV NODE_ENV=${BUILD_DEVELOPMENT:+development}
-# if NODE_ENV is null, set it to 'production' (or leave as is otherwise).
-ENV NODE_ENV=${NODE_ENV:-production}
-
-WORKDIR /work/
-COPY package*.json       ./
-COPY ./*.txt             .
-COPY ./lum-server.js     ./lum-server.js
-COPY ./src/              ./src/
-COPY ./lum-server-api/   ./lum-server-api/
-COPY ./etc/              ./etc/
-RUN sed -i package.json -e "/^  \"version\":/s/:.*/: \"${SVRVERSION%-*}\",/" \
- && sed -i package-lock.json -e "/^  \"version\":/s/:.*/: \"${SVRVERSION%-*}\",/" \
- && ls -la && npm install --production --quiet \
- && ls -la && npm ls --depth 0 && echo "$(ls -l node_modules | grep -c ^d) folders in node_modules"
-
-RUN if [ "$BUILD_DEVELOPMENT" == "1" ]; \
-    then echo 'installing nodemon' && npm install nodemon ; \
-    fi
-
-# The instructions for last runtime stage
-FROM node:12.16.1-alpine
-
-ARG BUILD_DEVELOPMENT
-# if --build-arg BUILD_DEVELOPMENT=1, set NODE_ENV to 'development' or set to null otherwise.
-ENV NODE_ENV=${BUILD_DEVELOPMENT:+development}
-# if NODE_ENV is null, set it to 'production' (or leave as is otherwise).
-ENV NODE_ENV=${NODE_ENV:-production}
-
-ENV INSROOT /opt/app
+ENV NODE_ENV=production
 ENV APPPORT 2080
 ENV APPUSER lum
-ENV APPDIR ${INSROOT}/${APPUSER}
+ENV APPDIR /opt/app/${APPUSER}
 
 WORKDIR ${APPDIR}
-COPY --from=build-stage /work/ .
-
-RUN if [ "$NODE_ENV" == "production" ]; \
-    then ls -la && npm ls --depth 0 && echo "$(ls -l node_modules | grep -c ^d) folders in node_modules" \
-      && echo 'removing npm' && npm remove -g npm; \
-    fi
+COPY package*.json       ./
+COPY ./*.txt             ./
+COPY ./lum-server.js     ./lum-server.js
+COPY ./src/              ./src/
+COPY ./etc/              ./etc/
+COPY ./lum-server-api/   ./lum-server-api/
+RUN sed -i package.json -e "/^  \"version\":/s/:.*/: \"${SVRVERSION%-*}\",/" \
+ && sed -i package-lock.json -e "/^  \"version\":/s/:.*/: \"${SVRVERSION%-*}\",/" \
+ && mkdir -p logs \
+ && mkdir -p log-acu \
+ && ls -la && echo 'npm install --production' && npm install --production --quiet \
+ && ls -la && npm ls --depth 0 && echo "$(ls -l node_modules | grep -c ^d) folders in node_modules" \
+ && echo 'removing npm' && npm remove -g npm
 
 RUN addgroup ${APPUSER} \
  && adduser -S -h ${APPDIR} -G ${APPUSER} ${APPUSER} \
