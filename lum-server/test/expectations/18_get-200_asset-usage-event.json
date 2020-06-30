@@ -2,41 +2,57 @@
     "db": [
         {
             "sqlCmd": "BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ",
-            "result": {"command": "BEGIN", "rowCount": 1, "rows": []}
+            "result": {
+                "command": "BEGIN",
+                "rowCount": 1,
+                "rows": []
+            }
         },
         {
             "sqlCmd": "SELECT TXID_CURRENT() AS txid, PG_BACKEND_PID() AS pid, NOW() AS tx_now",
-            "result": {"command": "SELECT", "rowCount": 1,
-                "rows": [{"txid": 123, "pid": 456, "tx_now": "__to_date__|2019-12-19T11:43:20.952Z"}]
+            "result": {
+                "command": "SELECT",
+                "rowCount": 1,
+                "rows": [
+                    {
+                        "txid": 123,
+                        "pid": 456,
+                        "tx_now": "__to_date__|2019-12-19T11:43:20.952Z"
+                    }
+                ]
             }
         },
         {
             "sqlCmd": "SELECT aur.\"responseHttpCode\", aur.\"response\" FROM \"assetUsageReq\" AS aur, \"assetUsage\" AS au, \"assetUsageHistory\" AS auh WHERE au.\"assetUsageId\" = ($1) AND auh.\"assetUsageId\" = ($1) AND au.\"assetUsageSeqTailEvent\" = auh.\"assetUsageSeq\" AND auh.\"assetUsageReqId\" = aur.\"assetUsageReqId\" FOR SHARE",
-            "sqlVals": ["alex-usage-1"],
-            "result": {"command": "SELECT", "rowCount": 1,
+            "sqlVals": [
+                "unit-test-assetUsageId"
+            ],
+            "result": {
+                "command": "SELECT",
+                "rowCount": 1,
                 "rows": [
                     {
                         "responseHttpCode": 200,
                         "response": {
-                            "userId": "alex-event",
-                            "requestId": "06550414-d590-4fb3-8bbd-1ac3f99b906a",
-                            "requested": "2019-12-26T12:18:44.828Z",
-                            "swMgtSystemId": "alex-sys",
-                            "swMgtSystemInstanceId": "123",
-                            "swMgtSystemComponent": "dev",
+                            "userId": "unit-test-userId-event",
+                            "swMgtSystemId": "unit-test-swMgtSystemId",
+                            "swMgtSystemInstanceId": "unit-test-swMgtSystemInstanceId",
+                            "swMgtSystemComponent": "unit-test-swMgtSystemComponent",
+                            "requestId": "5bc27d60-da38-4afc-a34f-2d39e9c36f41",
+                            "requested": "2020-05-29T21:37:59.239Z",
                             "assetUsageEvent": {
-                                "swTagId": "alex-1",
-                                "assetUsageId": "alex-usage-1",
+                                "swTagId": "unit-test-swTagId",
+                                "assetUsageId": "unit-test-assetUsageId",
                                 "action": "add-event",
                                 "event": {
                                     "event-test": "got it"
                                 },
-                                "assetUsageSeq": 27,
-                                "softwareLicensorId": "swlic",
-                                "swidTagRevision": 4,
-                                "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                                "softwareLicensorId": "unit-test-softwareLicensorId",
+                                "swidTagRevision": 5,
+                                "licenseProfileId": "cec51e7d-d977-41d2-abc6-ef5f069491b8",
                                 "licenseProfileRevision": 1,
-                                "isRtuRequired": true
+                                "isRtuRequired": true,
+                                "assetUsageSeq": 6
                             }
                         }
                     }
@@ -45,35 +61,44 @@
         },
         {
             "sqlCmd": "COMMIT",
-            "result": {"command": "COMMIT", "rowCount": 1, "rows": []}
+            "result": {
+                "command": "COMMIT",
+                "rowCount": 1,
+                "rows": []
+            }
         }
     ],
     "req": {
         "method": "GET",
-        "path": "/api/v1/asset-usage-event?assetUsageId=alex-usage-1"
+        "path": "/api/v1/asset-usage-event?assetUsageId=unit-test-assetUsageId",
+        "X-ACUMOS-RequestID": "cbbe6a95-b85a-488d-9620-74c32b9518f4",
+        "send": {
+            "requestId": "cbbe6a95-b85a-488d-9620-74c32b9518f4",
+            "requested": "2020-05-29T21:37:59.239Z"
+        }
     },
     "res": {
         "statusCode": 200,
         "body": {
-            "userId": "alex-event",
-            "requestId": "06550414-d590-4fb3-8bbd-1ac3f99b906a",
-            "requested": "2019-12-26T12:18:44.828Z",
-            "swMgtSystemId": "alex-sys",
-            "swMgtSystemInstanceId": "123",
-            "swMgtSystemComponent": "dev",
+            "userId": "unit-test-userId-event",
+            "swMgtSystemId": "unit-test-swMgtSystemId",
+            "swMgtSystemInstanceId": "unit-test-swMgtSystemInstanceId",
+            "swMgtSystemComponent": "unit-test-swMgtSystemComponent",
+            "requestId": "5bc27d60-da38-4afc-a34f-2d39e9c36f41",
+            "requested": "__type__dateTime__",
             "assetUsageEvent": {
-                "swTagId": "alex-1",
-                "assetUsageId": "alex-usage-1",
+                "swTagId": "unit-test-swTagId",
+                "assetUsageId": "unit-test-assetUsageId",
                 "action": "add-event",
                 "event": {
                     "event-test": "got it"
                 },
-                "assetUsageSeq": 27,
-                "softwareLicensorId": "swlic",
-                "swidTagRevision": 4,
-                "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                "softwareLicensorId": "unit-test-softwareLicensorId",
+                "swidTagRevision": 5,
+                "licenseProfileId": "cec51e7d-d977-41d2-abc6-ef5f069491b8",
                 "licenseProfileRevision": 1,
-                "isRtuRequired": true
+                "isRtuRequired": true,
+                "assetUsageSeq": 6
             }
         }
     }

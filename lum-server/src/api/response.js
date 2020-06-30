@@ -33,6 +33,7 @@ const lumHttpStatuses = {
     [lumHttpCodes.invalidDataError]: "Invalid data error"
 };
 
+const recentErrors = [];
 
 module.exports = {
     /**
@@ -145,6 +146,16 @@ module.exports = {
         next();
     },
     /**
+     * send the recentErrors back to the admin
+     * @param  {} req
+     * @param  {} res
+     * @param  {} next
+     */
+    getRecentErrors(req, res, next) {
+        res.locals.response.recentErrors = recentErrors;
+        next();
+    },
+    /**
      * send an error back to the client on interrupted request processing
      * @param  {} error
      * @param  {} req
@@ -159,15 +170,12 @@ module.exports = {
         } else {
             module.exports.setHttpStatus(res, lumHttpCodes.serverError)
         }
-
-        utils.logInfo(res, `ERROR response ${utils.calcReqTime(res)}`, res.statusCode, res.statusMessage,
-            error.stack, 'to', res.locals.requestHttp, 'headers:', module.exports.getResHeader(res));
         healthcheck.calcUptime();
-        if (res.statusCode < lumHttpCodes.serverError && error.stack) {delete error.stack;}
 
-        const errorResponse = {
-            requestId: res.locals.response.requestId,
-            requested: res.locals.response.requested,
+        const lastError = {
+            reqTime: utils.calcReqTime(res),
+            statusCode: res.statusCode,
+            statusMessage: res.statusMessage,
             "error": {
                 name:     error.name,
                 severity: error.severity,
@@ -181,11 +189,28 @@ module.exports = {
                 position: error.position,
                 schema:   error.schema,
                 table:    error.table,
-                column:   error.column,
-                pgStep:   utils.getPgStepInfo(res)
+                column:   error.column
             },
+            pgStep: utils.getPgStepInfo(res),
+            headers: module.exports.getResHeader(res),
+            req: res.locals,
             healthcheck: lumServer.healthcheck
         };
+        recentErrors.push(utils.deepCopyTo(lastError));
+        if (recentErrors.length > 20) {recentErrors.shift();}
+
+        utils.logInfo(res, 'ERROR response', lastError);
+
+        if (res.statusCode < lumHttpCodes.serverError && lastError.error.stack) {delete lastError.error.stack;}
+
+        const errorResponse = {
+            requestId:   res.locals.response.requestId,
+            requested:   res.locals.response.requested,
+            "error":     lastError.error,
+            pgStep:      lastError.pgStep,
+            healthcheck: lastError.healthcheck
+        };
+
         res.json(errorResponse);
         acuLogger.logForAcumos(res, acuLogger.reqStatuses.exit, 'response', errorResponse, true);
         next();

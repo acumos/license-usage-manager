@@ -2,142 +2,163 @@
     "db": [
         {
             "sqlCmd": "BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ",
-            "result": {"command": "BEGIN", "rowCount": 1, "rows": []}
+            "result": {
+                "command": "BEGIN",
+                "rowCount": 1,
+                "rows": []
+            }
         },
         {
             "sqlCmd": "SELECT TXID_CURRENT() AS txid, PG_BACKEND_PID() AS pid, NOW() AS tx_now",
-            "result": {"command": "SELECT", "rowCount": 1,
-                "rows": [{"txid": 123, "pid": 456, "tx_now": "__to_date__|2019-12-19T11:43:20.952Z"}]
+            "result": {
+                "command": "SELECT",
+                "rowCount": 1,
+                "rows": [
+                    {
+                        "txid": 123,
+                        "pid": 456,
+                        "tx_now": "__to_date__|2019-12-19T11:43:20.952Z"
+                    }
+                ]
             }
         },
         {
             "sqlCmd": "INSERT INTO \"assetUsageReq\" (\"assetUsageReqId\" , \"action\",\"assetUsageType\",\"requestHttp\",\"request\",\"userId\",\"status\", \"requestStarted\") VALUES (($1) , ($2),($3),($4),($5),($6),($7), NOW())",
             "sqlVals": [
-                "974d44dd-0504-42cd-99ee-aa16804f898c",
+                "5bc27d60-da38-4afc-a34f-2d39e9c36f41",
                 "add-event",
                 "assetUsageEvent",
                 {
                     "method": "PUT",
                     "requestUrl": "__type__ignore__",
-                    "serverFQDN": "127.0.0.1",
+                    "serverFQDN": "__type__ignore__",
                     "path": "/api/v1/asset-usage-event",
+                    "originalUrl": "/api/v1/asset-usage-event?assetUsageId=unit-test-assetUsageId",
                     "query": {
-                        "assetUsageId": "alex-usage-1"
+                        "assetUsageId": "unit-test-assetUsageId"
                     },
-                    "userAgent": "__type__ignore__",
                     "Content-Type": "application/json; charset=utf-8",
+                    "X-ACUMOS-RequestID": "5bc27d60-da38-4afc-a34f-2d39e9c36f41",
+                    "userAgent": "__type__ignore__",
                     "clientIPAddress": "__type__ignore__",
                     "ips": []
                 },
                 {
-                    "userId": "alex-event",
-                    "swMgtSystemId": "alex-sys",
-                    "swMgtSystemInstanceId": "123",
-                    "swMgtSystemComponent": "dev",
+                    "userId": "unit-test-userId-event",
+                    "swMgtSystemId": "unit-test-swMgtSystemId",
+                    "swMgtSystemInstanceId": "unit-test-swMgtSystemInstanceId",
+                    "swMgtSystemComponent": "unit-test-swMgtSystemComponent",
                     "assetUsageEvent": {
-                        "swTagId": "alex-1",
-                        "assetUsageId": "alex-usage-1",
+                        "swTagId": "unit-test-swTagId",
+                        "assetUsageId": "unit-test-assetUsageId",
                         "action": "add-event",
                         "event": {
                             "event-test": "got it"
                         }
                     }
                 },
-                "alex-event",
+                "unit-test-userId-event",
                 "started"
             ],
-            "result": {"command":"INSERT","rowCount":1,"rows":[]}
+            "result": {
+                "command": "INSERT",
+                "rowCount": 1,
+                "rows": []
+            }
         },
         {
             "sqlCmd": "WITH sw_lp AS ( SELECT swt.\"swTagId\", swt.\"softwareLicensorId\",swt.\"swidTagRevision\", lp.\"licenseProfileId\",lp.\"licenseProfileRevision\",lp.\"isRtuRequired\" FROM \"swidTag\" AS swt LEFT OUTER JOIN \"licenseProfile\" AS lp ON (lp.\"licenseProfileId\" = swt.\"licenseProfileId\") WHERE swt.\"swTagId\" = ($2) ) , asset_usage AS ( INSERT INTO \"assetUsage\" AS au (\"assetUsageId\" , \"modifier\" , \"creator\", \"assetUsageSeqTail\", \"assetUsageSeqTailEvent\", \"created\", \"modified\") VALUES (($1) , ($3) , ($4), 1, 1, NOW(), NOW()) ON CONFLICT (\"assetUsageId\") DO UPDATE SET \"assetUsageSeqTail\" = au.\"assetUsageSeqTail\" + 1, \"assetUsageSeqTailEvent\" = au.\"assetUsageSeqTail\" + 1, \"modified\" = NOW() , \"modifier\" = ($3) RETURNING \"assetUsageSeqTail\") INSERT INTO \"assetUsageHistory\" AS auh (\"assetUsageId\" , \"swTagId\" , \"swMgtSystemId\",\"swMgtSystemInstanceId\",\"swMgtSystemComponent\",\"assetUsageReqId\",\"action\",\"assetUsageType\" , \"creator\", \"softwareLicensorId\",\"swidTagRevision\",\"licenseProfileId\",\"licenseProfileRevision\",\"isRtuRequired\", \"assetUsageSeq\", \"created\") SELECT ($1) , ($2) , ($5),($6),($7),($8),($9),($10) , ($4), \"softwareLicensorId\",\"swidTagRevision\",\"licenseProfileId\",\"licenseProfileRevision\",\"isRtuRequired\", \"assetUsageSeqTail\", NOW() FROM asset_usage LEFT JOIN sw_lp ON TRUE RETURNING auh.\"assetUsageSeq\", auh.\"softwareLicensorId\",auh.\"swidTagRevision\",auh.\"licenseProfileId\",auh.\"licenseProfileRevision\",auh.\"isRtuRequired\"",
             "sqlVals": [
-                "alex-usage-1",
-                "alex-1",
-                "alex-event",
-                "alex-event",
-                "alex-sys",
-                "123",
-                "dev",
-                "974d44dd-0504-42cd-99ee-aa16804f898c",
+                "unit-test-assetUsageId",
+                "unit-test-swTagId",
+                "unit-test-userId-event",
+                "unit-test-userId-event",
+                "unit-test-swMgtSystemId",
+                "unit-test-swMgtSystemInstanceId",
+                "unit-test-swMgtSystemComponent",
+                "5bc27d60-da38-4afc-a34f-2d39e9c36f41",
                 "add-event",
                 "assetUsageEvent"
             ],
-            "result": {"command": "INSERT", "rowCount": 1,
+            "result": {
+                "command": "INSERT",
+                "rowCount": 1,
                 "rows": [
                     {
-                        "assetUsageSeq": 34,
-                        "softwareLicensorId": "swlic",
-                        "swidTagRevision": 1,
-                        "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                        "assetUsageSeq": 6,
+                        "softwareLicensorId": "unit-test-softwareLicensorId",
+                        "swidTagRevision": 5,
+                        "licenseProfileId": "cec51e7d-d977-41d2-abc6-ef5f069491b8",
                         "licenseProfileRevision": 1,
                         "isRtuRequired": true
                     }
                 ]
             }
-
         },
         {
-            "sqlCmd": "INSERT INTO \"usageMetrics\" AS ums (\"usageMetricsId\",\"usageType\" , \"action\" , \"modifier\",\"modifierRequestId\" , \"swTagId\",\"metrics\",\"usageMetricsRevision\",\"creator\",\"creatorRequestId\", \"created\", \"modified\") VALUES (($1),($2) , ($3) , ($6),($7) , ($8),($9),($10),($11),($12), NOW(), NOW()) , (($1),($2), 'use' , ($6),($7) , ($8),($9),($10),($11),($12), NOW(), NOW()) ON CONFLICT (\"usageMetricsId\",\"usageType\" , \"action\") DO UPDATE SET \"usageMetricsRevision\" = ums.\"usageMetricsRevision\" + 1, \"modified\" = NOW(), \"metrics\" = ums.metrics || JSONB_BUILD_OBJECT('count', ((ums.metrics->'count')::INTEGER + ($5))) || CASE WHEN (ums.metrics->'users')::JSONB ? ($4) THEN '{}'::JSONB ELSE JSONB_BUILD_OBJECT('users', (ums.metrics->'users')::JSONB || ('[\"' || ($4) || '\"]')::JSONB) END , \"modifier\" = ($6),\"modifierRequestId\" = ($7) RETURNING *",
+            "sqlCmd": "INSERT INTO \"usageMetrics\" AS ums (\"usageMetricsId\",\"usageType\" , \"action\" , \"modifier\",\"modifierRequestId\" , \"swTagId\",\"metrics\",\"usageMetricsRevision\",\"creator\",\"creatorRequestId\", \"created\", \"modified\") VALUES (($1),($2) , ($3) , ($6),($7) , ($8),($9),($10),($11),($12), NOW(), NOW()) , (($1),($2), 'use' , ($6),($7) , ($8),($9),($10),($11),($12), NOW(), NOW()) ON CONFLICT (\"usageMetricsId\",\"usageType\" , \"action\") DO UPDATE SET \"usageMetricsRevision\" = ums.\"usageMetricsRevision\" + 1, \"modified\" = NOW(), \"metrics\" = ums.metrics || JSONB_BUILD_OBJECT('count', ((ums.metrics->'count')::INTEGER + ($5))) || CASE WHEN (ums.metrics->'users')::JSONB ? ($4)::TEXT THEN '{}'::JSONB ELSE JSONB_BUILD_OBJECT('users', (ums.metrics->'users')::JSONB || ('[\"' || ($4)::TEXT || '\"]')::JSONB) END , \"modifier\" = ($6),\"modifierRequestId\" = ($7) RETURNING *",
             "sqlVals": [
-                "alex-1",
+                "unit-test-swTagId",
                 "assetUsageEvent",
                 "add-event",
-                "alex-event",
+                "unit-test-userId-event",
                 1,
-                "alex-event",
-                "974d44dd-0504-42cd-99ee-aa16804f898c",
-                "alex-1",
+                "unit-test-userId-event",
+                "5bc27d60-da38-4afc-a34f-2d39e9c36f41",
+                "unit-test-swTagId",
                 {
                     "count": 1,
                     "users": [
-                        "alex-event"
+                        "unit-test-userId-event"
                     ]
                 },
                 1,
-                "alex-event",
-                "974d44dd-0504-42cd-99ee-aa16804f898c"
+                "unit-test-userId-event",
+                "5bc27d60-da38-4afc-a34f-2d39e9c36f41"
             ],
-            "result": {"command": "INSERT", "rowCount": 2,
+            "result": {
+                "command": "INSERT",
+                "rowCount": 2,
                 "rows": [
                     {
-                        "usageMetricsId": "alex-1",
+                        "usageMetricsId": "unit-test-swTagId",
                         "action": "add-event",
                         "usageType": "assetUsageEvent",
-                        "swTagId": "alex-1",
+                        "swTagId": "unit-test-swTagId",
                         "assetUsageRuleId": null,
                         "metrics": {
-                            "count": 4,
+                            "count": 1,
                             "users": [
-                                "alex-event"
+                                "unit-test-userId-event"
                             ]
                         },
-                        "usageMetricsRevision": 4,
-                        "creator": "alex-event",
-                        "created": "2020-01-31T17:11:45.660Z",
-                        "creatorRequestId": "40733064-1a86-4e93-9199-d0af035c75e1",
-                        "modifier": "alex-event",
-                        "modified": "2020-02-04T20:59:38.720Z",
-                        "modifierRequestId": "974d44dd-0504-42cd-99ee-aa16804f898c"
+                        "usageMetricsRevision": 1,
+                        "creator": "unit-test-userId-event",
+                        "created": "2020-05-29T21:37:59.240Z",
+                        "creatorRequestId": "5bc27d60-da38-4afc-a34f-2d39e9c36f41",
+                        "modifier": "unit-test-userId-event",
+                        "modified": "2020-05-29T21:37:59.240Z",
+                        "modifierRequestId": "5bc27d60-da38-4afc-a34f-2d39e9c36f41"
                     },
                     {
-                        "usageMetricsId": "alex-1",
+                        "usageMetricsId": "unit-test-swTagId",
                         "action": "use",
                         "usageType": "assetUsageEvent",
-                        "swTagId": "alex-1",
+                        "swTagId": "unit-test-swTagId",
                         "assetUsageRuleId": null,
                         "metrics": {
-                            "count": 4,
+                            "count": 1,
                             "users": [
-                                "alex-event"
+                                "unit-test-userId-event"
                             ]
                         },
-                        "usageMetricsRevision": 4,
-                        "creator": "alex-event",
-                        "created": "2020-01-31T17:11:45.660Z",
-                        "creatorRequestId": "40733064-1a86-4e93-9199-d0af035c75e1",
-                        "modifier": "alex-event",
-                        "modified": "2020-02-04T20:59:38.720Z",
-                        "modifierRequestId": "974d44dd-0504-42cd-99ee-aa16804f898c"
+                        "usageMetricsRevision": 1,
+                        "creator": "unit-test-userId-event",
+                        "created": "2020-05-29T21:37:59.240Z",
+                        "creatorRequestId": "5bc27d60-da38-4afc-a34f-2d39e9c36f41",
+                        "modifier": "unit-test-userId-event",
+                        "modified": "2020-05-29T21:37:59.240Z",
+                        "modifierRequestId": "5bc27d60-da38-4afc-a34f-2d39e9c36f41"
                     }
                 ]
             }
@@ -145,53 +166,62 @@
         {
             "sqlCmd": "UPDATE \"assetUsageReq\" AS aur SET \"requestDone\" = TRUE, \"responseSent\" = CLOCK_TIMESTAMP() , \"responseHttpCode\" = ($2),\"response\" = ($3),\"status\" = ($4) WHERE aur.\"assetUsageReqId\" = ($1)",
             "sqlVals": [
-                "974d44dd-0504-42cd-99ee-aa16804f898c",
+                "5bc27d60-da38-4afc-a34f-2d39e9c36f41",
                 200,
                 {
-                    "userId": "alex-event",
-                    "swMgtSystemId": "alex-sys",
-                    "swMgtSystemInstanceId": "123",
-                    "swMgtSystemComponent": "dev",
-                    "requestId": "974d44dd-0504-42cd-99ee-aa16804f898c",
-                    "requested": "2020-02-04T20:59:38.715Z",
+                    "userId": "unit-test-userId-event",
+                    "swMgtSystemId": "unit-test-swMgtSystemId",
+                    "swMgtSystemInstanceId": "unit-test-swMgtSystemInstanceId",
+                    "swMgtSystemComponent": "unit-test-swMgtSystemComponent",
+                    "requestId": "5bc27d60-da38-4afc-a34f-2d39e9c36f41",
+                    "requested": "2020-05-29T21:37:59.239Z",
                     "assetUsageEvent": {
-                        "swTagId": "alex-1",
-                        "assetUsageId": "alex-usage-1",
+                        "swTagId": "unit-test-swTagId",
+                        "assetUsageId": "unit-test-assetUsageId",
                         "action": "add-event",
                         "event": {
                             "event-test": "got it"
                         },
-                        "softwareLicensorId": "swlic",
-                        "swidTagRevision": 1,
-                        "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                        "softwareLicensorId": "unit-test-softwareLicensorId",
+                        "swidTagRevision": 5,
+                        "licenseProfileId": "cec51e7d-d977-41d2-abc6-ef5f069491b8",
                         "licenseProfileRevision": 1,
                         "isRtuRequired": true,
-                        "assetUsageSeq": 34
+                        "assetUsageSeq": 6
                     }
                 },
                 "responseSent"
             ],
-            "result": {"command":"UPDATE","rowCount":1,"rows":[]}
+            "result": {
+                "command": "UPDATE",
+                "rowCount": 1,
+                "rows": []
+            }
         },
         {
             "sqlCmd": "COMMIT",
-            "result": {"command": "COMMIT", "rowCount": 1, "rows": []}
+            "result": {
+                "command": "COMMIT",
+                "rowCount": 1,
+                "rows": []
+            }
         }
     ],
     "req": {
         "method": "PUT",
-        "path": "/api/v1/asset-usage-event?assetUsageId=alex-usage-1",
+        "path": "/api/v1/asset-usage-event?assetUsageId=unit-test-assetUsageId",
         "content-type": "application/json; charset=utf-8",
+        "X-ACUMOS-RequestID": "5bc27d60-da38-4afc-a34f-2d39e9c36f41",
         "send": {
-            "userId": "alex-event",
-            "requestId": "974d44dd-0504-42cd-99ee-aa16804f898c",
-            "requested": "2020-02-04T20:59:38.715Z",
-            "swMgtSystemId": "alex-sys",
-            "swMgtSystemInstanceId": "123",
-            "swMgtSystemComponent": "dev",
+            "requestId": "5bc27d60-da38-4afc-a34f-2d39e9c36f41",
+            "requested": "2020-05-29T21:37:59.239Z",
+            "userId": "unit-test-userId-event",
+            "swMgtSystemId": "unit-test-swMgtSystemId",
+            "swMgtSystemInstanceId": "unit-test-swMgtSystemInstanceId",
+            "swMgtSystemComponent": "unit-test-swMgtSystemComponent",
             "assetUsageEvent": {
-                "swTagId": "alex-1",
-                "assetUsageId": "alex-usage-1",
+                "swTagId": "unit-test-swTagId",
+                "assetUsageId": "unit-test-assetUsageId",
                 "action": "add-event",
                 "event": {
                     "event-test": "got it"
@@ -202,32 +232,32 @@
     "res": {
         "statusCode": 200,
         "body": {
-            "userId": "alex-event",
-            "swMgtSystemId": "alex-sys",
-            "swMgtSystemInstanceId": "123",
-            "swMgtSystemComponent": "dev",
-            "requestId": "974d44dd-0504-42cd-99ee-aa16804f898c",
-            "requested": "2020-02-04T20:59:38.715Z",
+            "userId": "unit-test-userId-event",
+            "swMgtSystemId": "unit-test-swMgtSystemId",
+            "swMgtSystemInstanceId": "unit-test-swMgtSystemInstanceId",
+            "swMgtSystemComponent": "unit-test-swMgtSystemComponent",
+            "requestId": "5bc27d60-da38-4afc-a34f-2d39e9c36f41",
+            "requested": "__type__dateTime__",
             "assetUsageEvent": {
-                "swTagId": "alex-1",
-                "assetUsageId": "alex-usage-1",
+                "swTagId": "unit-test-swTagId",
+                "assetUsageId": "unit-test-assetUsageId",
                 "action": "add-event",
                 "event": {
                     "event-test": "got it"
                 },
-                "softwareLicensorId": "swlic",
-                "swidTagRevision": 1,
-                "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                "softwareLicensorId": "unit-test-softwareLicensorId",
+                "swidTagRevision": 5,
+                "licenseProfileId": "cec51e7d-d977-41d2-abc6-ef5f069491b8",
                 "licenseProfileRevision": 1,
                 "isRtuRequired": true,
-                "assetUsageSeq": 34
+                "assetUsageSeq": 6
             }
         }
     },
     "acuLogs": [
         {
             "LogTimestamp": "__type__dateTime__",
-            "RequestID": "974d44dd-0504-42cd-99ee-aa16804f898c",
+            "RequestID": "5bc27d60-da38-4afc-a34f-2d39e9c36f41",
             "InvocationID": "PUT /api/v1/asset-usage-event",
             "InstanceID": "__type__uuid__",
             "Thread": "main",
@@ -242,30 +272,29 @@
             "ClientIPAddress": "__type__ignore__",
             "TargetEntity": null,
             "TargetServiceName": null,
-            "User": "alex-event",
+            "User": "unit-test-userId-event",
             "Logger": "__type__ignore__",
             "Mdc": null,
             "Message": {
-                "userId": "alex-event",
-                "requestId": "974d44dd-0504-42cd-99ee-aa16804f898c",
-                "requested": "2020-02-04T20:59:38.715Z",
-                "swMgtSystemId": "alex-sys",
-                "swMgtSystemInstanceId": "123",
-                "swMgtSystemComponent": "dev",
+                "userId": "unit-test-userId-event",
+                "swMgtSystemId": "unit-test-swMgtSystemId",
+                "swMgtSystemInstanceId": "unit-test-swMgtSystemInstanceId",
+                "swMgtSystemComponent": "unit-test-swMgtSystemComponent",
                 "assetUsageEvent": {
-                    "swTagId": "alex-1",
-                    "assetUsageId": "alex-usage-1",
+                    "swTagId": "unit-test-swTagId",
+                    "assetUsageId": "unit-test-assetUsageId",
                     "action": "add-event",
                     "event": {
                         "event-test": "got it"
                     }
-                }
+                },
+                "requested": "__type__dateTime__"
             },
             "Marker": "ENTRY"
         },
         {
             "LogTimestamp": "__type__dateTime__",
-            "RequestID": "974d44dd-0504-42cd-99ee-aa16804f898c",
+            "RequestID": "5bc27d60-da38-4afc-a34f-2d39e9c36f41",
             "InvocationID": "response",
             "InstanceID": "__type__uuid__",
             "Thread": "main",
@@ -280,29 +309,29 @@
             "ClientIPAddress": "__type__ignore__",
             "TargetEntity": null,
             "TargetServiceName": null,
-            "User": "alex-event",
+            "User": "unit-test-userId-event",
             "Logger": "__type__ignore__",
             "Mdc": null,
             "Message": {
-                "userId": "alex-event",
-                "requestId": "974d44dd-0504-42cd-99ee-aa16804f898c",
-                "requested": "2020-02-04T20:59:38.715Z",
-                "swMgtSystemId": "alex-sys",
-                "swMgtSystemInstanceId": "123",
-                "swMgtSystemComponent": "dev",
+                "requestId": "5bc27d60-da38-4afc-a34f-2d39e9c36f41",
+                "requested": "2020-05-29T21:37:59.239Z",
+                "userId": "unit-test-userId-event",
+                "swMgtSystemId": "unit-test-swMgtSystemId",
+                "swMgtSystemInstanceId": "unit-test-swMgtSystemInstanceId",
+                "swMgtSystemComponent": "unit-test-swMgtSystemComponent",
                 "assetUsageEvent": {
-                    "swTagId": "alex-1",
-                    "assetUsageId": "alex-usage-1",
+                    "swTagId": "unit-test-swTagId",
+                    "assetUsageId": "unit-test-assetUsageId",
                     "action": "add-event",
                     "event": {
                         "event-test": "got it"
                     },
-                    "softwareLicensorId": "swlic",
-                    "swidTagRevision": 1,
-                    "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                    "softwareLicensorId": "unit-test-softwareLicensorId",
+                    "swidTagRevision": 5,
+                    "licenseProfileId": "cec51e7d-d977-41d2-abc6-ef5f069491b8",
                     "licenseProfileRevision": 1,
                     "isRtuRequired": true,
-                    "assetUsageSeq": 34
+                    "assetUsageSeq": 6
                 }
             },
             "Marker": "EXIT"

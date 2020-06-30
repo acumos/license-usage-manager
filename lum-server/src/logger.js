@@ -85,7 +85,7 @@ const logWrapper = (original) => {
 const setupMainLogger = () => {
     transports.console = new (winston.transports.Console)({
         level: lumServer.config.logging.logLevel,
-        silent: !!process.env.LOG_CONSOLE_OFF
+        silent: !!process.env.LOG_CONSOLE_OFF || !lumServer.config.logging.logTo.console
     });
 
     const logFile = path.join(logFolder, `dev_${lumServer.config.serverName}.log`);
@@ -95,7 +95,8 @@ const setupMainLogger = () => {
             level: lumServer.config.logging.logLevel,
             silent: !lumServer.config.logging.logTo.devLog,
             filename: logFile,
-            tailable: true, maxsize: fileRotateSize, maxFiles: 20, zippedArchive: true
+            tailable: true, maxsize: fileRotateSize, maxFiles: 20, zippedArchive: true,
+            options: {flags: 'w'}
         });
         if (lumServer.config.logging.logTo.devLog) {
             lumServer.config.logging.logTo.devLog = logFile;
@@ -135,7 +136,9 @@ const setupLogForHealthcheck = () => {
             level: lumServer.config.logging.logLevel,
             silent: !lumServer.config.logging.logTo.healthcheck,
             filename: logFile,
-            tailable: true, maxsize: fileRotateSize, maxFiles: 20, zippedArchive: true});
+            tailable: true, maxsize: fileRotateSize, maxFiles: 20, zippedArchive: true,
+            options: {flags: 'w'}
+        });
         const logForHealthcheck = winston.createLogger({
             format: winston.format.combine(winston.format.timestamp(), logFormatText),
             transports: [transports.healthcheck]
@@ -166,16 +169,17 @@ const setupLogForHealthcheck = () => {
  * {@link https://wiki.acumos.org/display/OAM/Acumos+Log+Standards}
  */
 const setupLogForAcumos = () => {
-    const logFolder   = path.join(__dirname, '../log-acu', lumServer.config.serverName);
-    logFolders.acumos = logFolder;
-    const logFile     = path.join(logFolder, `${lumServer.config.serverName}.log`);
+    const logFolderForAcumos = path.join(__dirname, '../log-acu', lumServer.config.serverName);
+    logFolders.acumos = logFolderForAcumos;
+    const logFile = path.join(logFolderForAcumos, `${lumServer.config.serverName}.log`);
     try {
-        if (!fs.existsSync(logFolder)) {fs.mkdirSync(logFolder, {recursive: true});}
+        if (!fs.existsSync(logFolderForAcumos)) {fs.mkdirSync(logFolderForAcumos, {recursive: true});}
         transports.acumos = new (winston.transports.File)({
             level: lumServer.config.logging.logLevel,
             silent: !lumServer.config.logging.logTo.acumos,
             filename: logFile,
-            tailable: true, maxsize: fileRotateSize, maxFiles: 20, zippedArchive: true
+            tailable: true, maxsize: fileRotateSize, maxFiles: 20, zippedArchive: true,
+            options: {flags: 'w'}
         });
         const logForAcumos = winston.createLogger({format: logFormatLine, transports: [transports.acumos]});
         lumServer.logForAcumos = logWrapper(logForAcumos.info);

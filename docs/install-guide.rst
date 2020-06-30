@@ -481,7 +481,7 @@ The sample ``healthcheck`` response
       "serverName": "lum-server",
       "serverVersion": "1.3.3",
       "apiVersion": "1.3.3",
-      "nodeVersion": "12.16.1",
+      "nodeVersion": "12.18.0",
       "databaseInfo": {
         "pgVersion": "PostgreSQL 11.5 on x86_64-pc-linux-musl, compiled by gcc (Alpine 8.3.0) 8.3.0, 64-bit",
         "databaseVersion": "0.28.2",
@@ -527,7 +527,7 @@ The sample GET ``/admin/config`` response
     "config": {
       "database": {
         "user": "lumdb",
-        "password": "***-sha256(66c199d8a03e95599c1043bc484995d44619be2f2c0d82fe6b3d66fb838533a4)***",
+        "password": "hmac(8e97a9ac003fccfd332b)",
         "host": "lum-database",
         "database": "lumdb",
         "port": 5432,
@@ -575,7 +575,7 @@ The sample PUT ``/admin/config`` response
     "config": {
       "database": {
         "user": "lumdb",
-        "password": "***-sha256(66c199d8a03e95599c1043bc484995d44619be2f2c0d82fe6b3d66fb838533a4)***",
+        "password": "hmac(8e97a9ac003fccfd332b)",
         "host": "lum-database",
         "database": "lumdb",
         "port": 5432,

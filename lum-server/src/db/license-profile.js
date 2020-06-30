@@ -74,7 +74,7 @@ module.exports = {
         const licenseProfile = utils.getFromReqByPath(res, "licenseProfile");
 
         if (!res.locals.params.licenseProfileId && licenseProfile) {
-            res.locals.params.licenseProfileId = (licenseProfile || {}).licenseProfileId;
+            res.locals.params.licenseProfileId = licenseProfile.licenseProfileId;
             res.set(res.locals.params);
         }
 

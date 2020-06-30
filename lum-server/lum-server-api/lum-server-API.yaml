@@ -21,19 +21,23 @@ openapi: '3.0.3'
 info:
   version: "0.0.0"
   title: "License Usage Manager (LUM) API"
-  contact:
-    name: Acumos License Management
-    url: https://wiki.acumos.org/display/LM/
+  description: RESTfull-ish API for License Usage Manager - json based
   license:
     name: "Apache 2.0"
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
-  description: RESTfull-ish API for License Usage Manager - json based
+  contact:
+    name: Acumos License Management
+    url: https://wiki.acumos.org/display/LM/
+
+externalDocs:
+  description: LUM docs
+  url: https://docs.acumos.org/en/latest/submodules/license-usage-manager/docs/index.html
 
 servers:
   - url: /
-    description: Root
+    description: root
   - url: /lum
-    description: Helm Chart with ingress
+    description: reverse proxy access
 
 tags:
   - name: "swid-tag"
@@ -112,6 +116,20 @@ paths:
             'application/json; charset=utf-8':
               schema:
                 $ref: '#/components/schemas/AdminConfigResponse'
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+  /admin/recent-errors:
+    get:
+      tags: ["admin"]
+      description: returns the last 20 exceptions on LUM server
+      operationId: getRecentErrors
+      responses:
+        200:
+          description: success
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: '#/components/schemas/BaseRequestTop'
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
   /api/v1/swid-tag:
@@ -1038,7 +1056,7 @@ components:
             serverName: "lum-server"
             serverVersion: "0.0.0"
             apiVersion: "0.0.0"
-            nodeVersion: "12.16.1"
+            nodeVersion: "12.18.1"
             databaseInfo:
               pgVersion: "PostgreSQL 11.5 on x86_64-pc-linux-musl, compiled by gcc (Alpine 8.3.0) 8.3.0, 64-bit"
               databaseVersion: "0.0.0"
@@ -2178,13 +2196,19 @@ components:
                 description: data from usageConstraint or assignee refinement record that caused the denial
                 type: object
 
+              deniedConstraintInvalid:
+                description: whether the denied constraint is invalid (true) or valid (false).
+                  It is invalid when rightOperand == null.
+                  When this is true, the asset-usage-agreement contains error on this constraint
+                type: boolean
+
               deniedMetrics:
                 description: current statistical data that caused the denial. It is optional and its structure can very
                 type: object
 
           example:
-            - denialCode: denied_due_usageProhibited
-            - denialType: usageProhibited
+              denialCode: denied_due_usageProhibited
+              denialType: usageProhibited
               denialReason: "swid-tag(ee48b699-3b16-4391-884c-1bec557f32b9) has been found
                 but asset-usage is prohibited by
                 prohibition(acumos://software-licensor/Company A/permission/98378924-84ff-41f5-87ac-02fd2012c727)
@@ -2811,7 +2835,7 @@ components:
           example:
             database:
               user: lumdb
-              password: "***-sha256(66c199d8a03e95599c1043bc484995d44619be2f2c0d82fe6b3d66fb838533a4)***"
+              password: "hmac(8e97a9ac003fccfd332b)"
               host: "lum-database"
               database: lumdb
               port: 5432

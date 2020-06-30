@@ -25,7 +25,7 @@
         {
             "sqlCmd": "INSERT INTO \"assetUsageReq\" (\"assetUsageReqId\" , \"action\",\"assetUsageType\",\"requestHttp\",\"request\",\"userId\",\"status\", \"requestStarted\") VALUES (($1) , ($2),($3),($4),($5),($6),($7), NOW())",
             "sqlVals": [
-                "9b63340a-58e2-4b5c-8909-25fe25f98222",
+                "7ea47d63-4ad9-4e35-be4f-b76546013742",
                 "acumos:deploy",
                 "assetUsage",
                 {
@@ -38,13 +38,13 @@
                         "assetUsageId": "unit-test-assetUsageId"
                     },
                     "Content-Type": "application/json; charset=utf-8",
-                    "X-ACUMOS-RequestID": "9b63340a-58e2-4b5c-8909-25fe25f98222",
+                    "X-ACUMOS-RequestID": "7ea47d63-4ad9-4e35-be4f-b76546013742",
                     "userAgent": "__type__ignore__",
                     "clientIPAddress": "__type__ignore__",
                     "ips": []
                 },
                 {
-                    "userId": "unit-test-userId",
+                    "userId": "unit-test-userId-2",
                     "swMgtSystemId": "unit-test-swMgtSystemId",
                     "swMgtSystemInstanceId": "unit-test-swMgtSystemInstanceId",
                     "swMgtSystemComponent": "unit-test-swMgtSystemComponent",
@@ -52,16 +52,10 @@
                         "swTagId": "unit-test-swTagId",
                         "assetUsageId": "unit-test-assetUsageId",
                         "action": "acumos:deploy",
-                        "isIncludedAsset": false,
-                        "includedAssetUsage": [
-                            {
-                                "includedSwTagId": "unit-test-swTagId",
-                                "includedAssetUsageId": "unit-test-assetUsageId-2"
-                            }
-                        ]
+                        "isIncludedAsset": false
                     }
                 },
-                "unit-test-userId",
+                "unit-test-userId-2",
                 "started"
             ],
             "result": {
@@ -76,8 +70,8 @@
                 "unit-test-swTagId",
                 "acumos:deploy",
                 "use",
-                "unit-test-userId",
-                2
+                "unit-test-userId-2",
+                1
             ],
             "result": {
                 "command": "SELECT",
@@ -86,12 +80,12 @@
                     {
                         "softwareLicensorId": "unit-test-softwareLicensorId",
                         "swTagId": "unit-test-swTagId",
-                        "swidTagRevision": 5,
+                        "swidTagRevision": 7,
                         "swPersistentId": "a218c795-ae2c-4ff9-894d-462baa768dfc",
-                        "swVersion": "4",
+                        "swVersion": "5",
                         "swProductName": "unit-test-product253",
                         "licenseProfileId": "cec51e7d-d977-41d2-abc6-ef5f069491b8",
-                        "licenseProfileRevision": 1,
+                        "licenseProfileRevision": 3,
                         "isUsedBySwCreator": false,
                         "isRtuRequired": true,
                         "assetUsageRuleId": null,
@@ -118,8 +112,8 @@
                 "unit-test-swTagId",
                 "acumos:deploy",
                 "use",
-                "unit-test-userId",
-                2
+                "unit-test-userId-2",
+                1
             ],
             "result": {
                 "command": "SELECT",
@@ -127,21 +121,7 @@
                 "rows": [
                     {
                         "denied_due_rightToUseRevoked": null,
-                        "denied_due_expireOn": {
-                            "denialCode": "denied_due_expireOn",
-                            "denialType": "timingConstraint",
-                            "denialReason": "rightToUse expired: (today(2020-06-26) > expireOn(1999-12-31)) on permission(unit-test-permission-1) under agreement(unit-test-assetUsageAgreementId) for action(acumos:deploy)",
-                            "deniedAction": "acumos:deploy",
-                            "deniedAssetUsageAgreementId": "unit-test-assetUsageAgreementId",
-                            "deniedAssetUsageAgreementRevision": 7,
-                            "deniedRightToUseId": "unit-test-permission-1",
-                            "deniedRightToUseRevision": 7,
-                            "denialReqItemName": "date",
-                            "denialReqItemValue": "2020-06-26",
-                            "deniedConstraint": {
-                                "expireOn": "1999-12-31"
-                            }
-                        },
+                        "denied_due_expireOn": null,
                         "denied_due_goodFor": null,
                         "denied_due_enableOn": null,
                         "denied_due_swPersistentIdOnTarget": null,
@@ -150,9 +130,80 @@
                         "denied_due_swCategoryOnTarget": null,
                         "denied_due_swCatalogIdOnTarget": null,
                         "denied_due_swCatalogTypeOnTarget": null,
-                        "denied_due_countUniqueUsersOnAssignee": null,
-                        "denied_due_usersOnAssignee": null,
-                        "denied_due_usageCount": null
+                        "denied_due_countUniqueUsersOnAssignee": {
+                            "denialCode": "denied_due_countUniqueUsersOnAssignee",
+                            "denialType": "matchingConstraintOnAssignee",
+                            "denialReason": "too many users: (unit-test-userId-2 not in {\"users\": [\"unit-test-userId\"]}) on permission(unit-test-permission-1) under agreement(unit-test-assetUsageAgreementId) for action(acumos:deploy)",
+                            "deniedAction": "acumos:deploy",
+                            "deniedAssetUsageAgreementId": "unit-test-assetUsageAgreementId",
+                            "deniedAssetUsageAgreementRevision": 16,
+                            "deniedRightToUseId": "unit-test-permission-1",
+                            "deniedRightToUseRevision": 16,
+                            "denialReqItemName": "userId",
+                            "denialReqItemValue": "unit-test-userId-2",
+                            "deniedConstraint": {
+                                "dataType": "integer",
+                                "operator": "lteq",
+                                "leftOperand": "lum:countUniqueUsers",
+                                "rightOperand": 1
+                            },
+                            "deniedConstraintInvalid": false,
+                            "deniedMetrics": {
+                                "users": [
+                                    "unit-test-userId"
+                                ]
+                            }
+                        },
+                        "denied_due_usersOnAssignee": {
+                            "denialCode": "denied_due_usersOnAssignee",
+                            "denialType": "matchingConstraintOnAssignee",
+                            "denialReason": "user not in assignee lum:users: (unit-test-userId-2 not lum:in [\"alex\", \"justin\", \"michelle\", \"unit-test-userId\"]) on permission(unit-test-permission-1) under agreement(unit-test-assetUsageAgreementId) for action(acumos:deploy)",
+                            "deniedAction": "acumos:deploy",
+                            "deniedAssetUsageAgreementId": "unit-test-assetUsageAgreementId",
+                            "deniedAssetUsageAgreementRevision": 16,
+                            "deniedRightToUseId": "unit-test-permission-1",
+                            "deniedRightToUseRevision": 16,
+                            "denialReqItemName": "userId",
+                            "denialReqItemValue": "unit-test-userId-2",
+                            "deniedConstraint": {
+                                "origin": "fromRestriction",
+                                "dataType": "string",
+                                "operator": "lum:in",
+                                "leftOperand": "lum:users",
+                                "rightOperand": [
+                                    "alex",
+                                    "justin",
+                                    "michelle",
+                                    "unit-test-userId"
+                                ]
+                            },
+                            "deniedConstraintInvalid": false
+                        },
+                        "denied_due_usageCount": {
+                            "denialCode": "denied_due_usageCount",
+                            "denialType": "usageConstraint",
+                            "denialReason": "exceeding the usage count: (5 not lteq 4) on permission(unit-test-permission-1) under agreement(unit-test-assetUsageAgreementId) for action(acumos:deploy)",
+                            "deniedAction": "acumos:deploy",
+                            "deniedAssetUsageAgreementId": "unit-test-assetUsageAgreementId",
+                            "deniedAssetUsageAgreementRevision": 16,
+                            "deniedRightToUseId": "unit-test-permission-1",
+                            "deniedRightToUseRevision": 16,
+                            "denialReqItemName": "usageCount",
+                            "denialReqItemValue": 1,
+                            "deniedConstraint": {
+                                "dataType": "integer",
+                                "operator": "lteq",
+                                "leftOperand": "count",
+                                "rightOperand": 4
+                            },
+                            "deniedConstraintInvalid": false,
+                            "deniedMetrics": {
+                                "count": 4,
+                                "users": [
+                                    "unit-test-userId"
+                                ]
+                            }
+                        }
                     }
                 ]
             }
@@ -162,20 +213,20 @@
             "sqlVals": [
                 "unit-test-assetUsageId",
                 false,
-                "unit-test-userId",
-                "unit-test-userId",
+                "unit-test-userId-2",
+                "unit-test-userId-2",
                 "unit-test-swMgtSystemId",
                 "unit-test-swMgtSystemInstanceId",
                 "unit-test-swMgtSystemComponent",
                 false,
-                "9b63340a-58e2-4b5c-8909-25fe25f98222",
+                "7ea47d63-4ad9-4e35-be4f-b76546013742",
                 "assetUsage",
                 "acumos:deploy",
                 "unit-test-swTagId",
                 "unit-test-softwareLicensorId",
-                5,
+                7,
                 "cec51e7d-d977-41d2-abc6-ef5f069491b8",
-                1,
+                3,
                 true,
                 false,
                 null,
@@ -186,87 +237,31 @@
                 null,
                 null,
                 null,
-                "swid-tag(unit-test-swTagId) has been found and an asset-usage-agreement from unit-test-softwareLicensorId has been found but 1 constraint on the agreement(unit-test-assetUsageAgreementId) denies the usage of this asset",
-                "[{\"denialCode\":\"denied_due_expireOn\",\"denialType\":\"timingConstraint\",\"denialReason\":\"rightToUse expired: (today(2020-06-26) > expireOn(1999-12-31)) on permission(unit-test-permission-1) under agreement(unit-test-assetUsageAgreementId) for action(acumos:deploy)\",\"deniedAction\":\"acumos:deploy\",\"deniedAssetUsageAgreementId\":\"unit-test-assetUsageAgreementId\",\"deniedAssetUsageAgreementRevision\":7,\"deniedRightToUseId\":\"unit-test-permission-1\",\"deniedRightToUseRevision\":7,\"denialReqItemName\":\"date\",\"denialReqItemValue\":\"2020-06-26\",\"deniedConstraint\":{\"expireOn\":\"1999-12-31\"}}]"
+                "swid-tag(unit-test-swTagId) has been found and an asset-usage-agreement from unit-test-softwareLicensorId has been found but 3 constraints on the agreement(unit-test-assetUsageAgreementId) deny the usage of this asset",
+                "[{\"denialCode\":\"denied_due_countUniqueUsersOnAssignee\",\"denialType\":\"matchingConstraintOnAssignee\",\"denialReason\":\"too many users: (unit-test-userId-2 not in {\\\"users\\\": [\\\"unit-test-userId\\\"]}) on permission(unit-test-permission-1) under agreement(unit-test-assetUsageAgreementId) for action(acumos:deploy)\",\"deniedAction\":\"acumos:deploy\",\"deniedAssetUsageAgreementId\":\"unit-test-assetUsageAgreementId\",\"deniedAssetUsageAgreementRevision\":16,\"deniedRightToUseId\":\"unit-test-permission-1\",\"deniedRightToUseRevision\":16,\"denialReqItemName\":\"userId\",\"denialReqItemValue\":\"unit-test-userId-2\",\"deniedConstraint\":{\"dataType\":\"integer\",\"operator\":\"lteq\",\"leftOperand\":\"lum:countUniqueUsers\",\"rightOperand\":1},\"deniedConstraintInvalid\":false,\"deniedMetrics\":{\"users\":[\"unit-test-userId\"]}},{\"denialCode\":\"denied_due_usersOnAssignee\",\"denialType\":\"matchingConstraintOnAssignee\",\"denialReason\":\"user not in assignee lum:users: (unit-test-userId-2 not lum:in [\\\"alex\\\", \\\"justin\\\", \\\"michelle\\\", \\\"unit-test-userId\\\"]) on permission(unit-test-permission-1) under agreement(unit-test-assetUsageAgreementId) for action(acumos:deploy)\",\"deniedAction\":\"acumos:deploy\",\"deniedAssetUsageAgreementId\":\"unit-test-assetUsageAgreementId\",\"deniedAssetUsageAgreementRevision\":16,\"deniedRightToUseId\":\"unit-test-permission-1\",\"deniedRightToUseRevision\":16,\"denialReqItemName\":\"userId\",\"denialReqItemValue\":\"unit-test-userId-2\",\"deniedConstraint\":{\"origin\":\"fromRestriction\",\"dataType\":\"string\",\"operator\":\"lum:in\",\"leftOperand\":\"lum:users\",\"rightOperand\":[\"alex\",\"justin\",\"michelle\",\"unit-test-userId\"]},\"deniedConstraintInvalid\":false},{\"denialCode\":\"denied_due_usageCount\",\"denialType\":\"usageConstraint\",\"denialReason\":\"exceeding the usage count: (5 not lteq 4) on permission(unit-test-permission-1) under agreement(unit-test-assetUsageAgreementId) for action(acumos:deploy)\",\"deniedAction\":\"acumos:deploy\",\"deniedAssetUsageAgreementId\":\"unit-test-assetUsageAgreementId\",\"deniedAssetUsageAgreementRevision\":16,\"deniedRightToUseId\":\"unit-test-permission-1\",\"deniedRightToUseRevision\":16,\"denialReqItemName\":\"usageCount\",\"denialReqItemValue\":1,\"deniedConstraint\":{\"dataType\":\"integer\",\"operator\":\"lteq\",\"leftOperand\":\"count\",\"rightOperand\":4},\"deniedConstraintInvalid\":false,\"deniedMetrics\":{\"count\":4,\"users\":[\"unit-test-userId\"]}}]"
             ],
             "result": {
                 "command": "INSERT",
                 "rowCount": 1,
                 "rows": [
                     {
-                        "assetUsageSeq": 2
+                        "assetUsageSeq": 15
                     }
                 ]
-            }
-        },
-        {
-            "sqlCmd": "WITH asset_usage AS ( INSERT INTO \"assetUsage\" AS au (\"assetUsageId\" , \"isIncludedAsset\",\"modifier\" , \"creator\", \"assetUsageSeqTail\", \"assetUsageSeqTailEntitlement\", \"created\", \"modified\") VALUES (($1) , ($2),($3) , ($4), 1, 1, NOW(), NOW()) ON CONFLICT (\"assetUsageId\") DO UPDATE SET \"assetUsageSeqTail\" = au.\"assetUsageSeqTail\" + 1, \"assetUsageSeqTailEntitlement\" = au.\"assetUsageSeqTail\" + 1, \"modified\" = NOW() , \"isIncludedAsset\" = ($2),\"modifier\" = ($3) RETURNING \"assetUsageSeqTail\") INSERT INTO \"assetUsageHistory\" AS auh (\"assetUsageId\" , \"swMgtSystemId\",\"swMgtSystemInstanceId\",\"swMgtSystemComponent\",\"usageEntitled\",\"assetUsageReqId\",\"assetUsageType\",\"action\",\"swTagId\",\"softwareLicensorId\",\"swidTagRevision\",\"licenseProfileId\",\"licenseProfileRevision\",\"isRtuRequired\",\"isUsedBySwCreator\",\"assetUsageRuleId\",\"rightToUseRevision\",\"assetUsageAgreementId\",\"assetUsageAgreementRevision\",\"licenseKeys\",\"metrics\",\"assigneeMetrics\",\"usageMetricsId\",\"assetUsageDenialSummary\",\"assetUsageDenial\" , \"creator\", \"assetUsageSeq\", \"created\") SELECT ($1) , ($5),($6),($7),($8),($9),($10),($11),($12),($13),($14),($15),($16),($17),($18),($19),($20),($21),($22),($23),($24),($25),($26),($27),($28) , ($4), \"assetUsageSeqTail\", NOW() FROM asset_usage RETURNING auh.\"assetUsageSeq\"",
-            "sqlVals": [
-                "unit-test-assetUsageId-2",
-                true,
-                "unit-test-userId",
-                "unit-test-userId",
-                "unit-test-swMgtSystemId",
-                "unit-test-swMgtSystemInstanceId",
-                "unit-test-swMgtSystemComponent",
-                false,
-                "9b63340a-58e2-4b5c-8909-25fe25f98222",
-                "assetUsage",
-                "acumos:deploy",
-                "unit-test-swTagId",
-                "unit-test-softwareLicensorId",
-                5,
-                "cec51e7d-d977-41d2-abc6-ef5f069491b8",
-                1,
-                true,
-                false,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                "swid-tag(unit-test-swTagId) has been found and an asset-usage-agreement from unit-test-softwareLicensorId has been found but 1 constraint on the agreement(unit-test-assetUsageAgreementId) denies the usage of this asset",
-                "[{\"denialCode\":\"denied_due_expireOn\",\"denialType\":\"timingConstraint\",\"denialReason\":\"rightToUse expired: (today(2020-06-26) > expireOn(1999-12-31)) on permission(unit-test-permission-1) under agreement(unit-test-assetUsageAgreementId) for action(acumos:deploy)\",\"deniedAction\":\"acumos:deploy\",\"deniedAssetUsageAgreementId\":\"unit-test-assetUsageAgreementId\",\"deniedAssetUsageAgreementRevision\":7,\"deniedRightToUseId\":\"unit-test-permission-1\",\"deniedRightToUseRevision\":7,\"denialReqItemName\":\"date\",\"denialReqItemValue\":\"2020-06-26\",\"deniedConstraint\":{\"expireOn\":\"1999-12-31\"}}]"
-            ],
-            "result": {
-                "command": "INSERT",
-                "rowCount": 1,
-                "rows": [
-                    {
-                        "assetUsageSeq": 2
-                    }
-                ]
-            }
-        },
-        {
-            "sqlCmd": "INSERT INTO \"includedAssetUsage\" (\"assetUsageId\", \"includedAssetUsageId\" , \"creator\",\"creatorRequestId\") SELECT ($1), UNNEST(ARRAY[($2)]) , ($3),($4) ON CONFLICT (\"assetUsageId\", \"includedAssetUsageId\") DO NOTHING",
-            "sqlVals": [
-                "unit-test-assetUsageId",
-                "unit-test-assetUsageId-2",
-                "unit-test-userId",
-                "9b63340a-58e2-4b5c-8909-25fe25f98222"
-            ],
-            "result": {
-                "command": "INSERT",
-                "rowCount": 0,
-                "rows": []
             }
         },
         {
             "sqlCmd": "UPDATE \"assetUsageReq\" AS aur SET \"requestDone\" = TRUE, \"responseSent\" = CLOCK_TIMESTAMP() , \"responseHttpCode\" = ($2),\"response\" = ($3),\"usageEntitled\" = ($4),\"status\" = ($5) WHERE aur.\"assetUsageReqId\" = ($1)",
             "sqlVals": [
-                "9b63340a-58e2-4b5c-8909-25fe25f98222",
+                "7ea47d63-4ad9-4e35-be4f-b76546013742",
                 402,
                 {
-                    "userId": "unit-test-userId",
+                    "userId": "unit-test-userId-2",
                     "swMgtSystemId": "unit-test-swMgtSystemId",
                     "swMgtSystemInstanceId": "unit-test-swMgtSystemInstanceId",
                     "swMgtSystemComponent": "unit-test-swMgtSystemComponent",
-                    "requestId": "9b63340a-58e2-4b5c-8909-25fe25f98222",
-                    "requested": "2020-06-26T16:15:26.059Z",
+                    "requestId": "7ea47d63-4ad9-4e35-be4f-b76546013742",
+                    "requested": "2020-06-26T16:19:29.227Z",
                     "usageEntitled": false,
                     "assetUsage": {
                         "swTagId": "unit-test-swTagId",
@@ -274,60 +269,87 @@
                         "action": "acumos:deploy",
                         "usageEntitled": false,
                         "isUsedBySwCreator": false,
-                        "assetUsageSeq": 2,
-                        "swidTagRevision": 5,
+                        "assetUsageSeq": 15,
+                        "swidTagRevision": 7,
                         "licenseProfileId": "cec51e7d-d977-41d2-abc6-ef5f069491b8",
-                        "licenseProfileRevision": 1,
+                        "licenseProfileRevision": 3,
                         "isRtuRequired": true,
                         "softwareLicensorId": "unit-test-softwareLicensorId",
-                        "assetUsageDenialSummary": "swid-tag(unit-test-swTagId) has been found and an asset-usage-agreement from unit-test-softwareLicensorId has been found but 1 constraint on the agreement(unit-test-assetUsageAgreementId) denies the usage of this asset",
+                        "assetUsageDenialSummary": "swid-tag(unit-test-swTagId) has been found and an asset-usage-agreement from unit-test-softwareLicensorId has been found but 3 constraints on the agreement(unit-test-assetUsageAgreementId) deny the usage of this asset",
                         "assetUsageDenial": [
                             {
-                                "denialCode": "denied_due_expireOn",
-                                "denialType": "timingConstraint",
-                                "denialReason": "rightToUse expired: (today(2020-06-26) > expireOn(1999-12-31)) on permission(unit-test-permission-1) under agreement(unit-test-assetUsageAgreementId) for action(acumos:deploy)",
+                                "denialCode": "denied_due_countUniqueUsersOnAssignee",
+                                "denialType": "matchingConstraintOnAssignee",
+                                "denialReason": "too many users: (unit-test-userId-2 not in {\"users\": [\"unit-test-userId\"]}) on permission(unit-test-permission-1) under agreement(unit-test-assetUsageAgreementId) for action(acumos:deploy)",
                                 "deniedAction": "acumos:deploy",
                                 "deniedAssetUsageAgreementId": "unit-test-assetUsageAgreementId",
-                                "deniedAssetUsageAgreementRevision": 7,
+                                "deniedAssetUsageAgreementRevision": 16,
                                 "deniedRightToUseId": "unit-test-permission-1",
-                                "deniedRightToUseRevision": 7,
-                                "denialReqItemName": "date",
-                                "denialReqItemValue": "2020-06-26",
+                                "deniedRightToUseRevision": 16,
+                                "denialReqItemName": "userId",
+                                "denialReqItemValue": "unit-test-userId-2",
                                 "deniedConstraint": {
-                                    "expireOn": "1999-12-31"
+                                    "dataType": "integer",
+                                    "operator": "lteq",
+                                    "leftOperand": "lum:countUniqueUsers",
+                                    "rightOperand": 1
+                                },
+                                "deniedConstraintInvalid": false,
+                                "deniedMetrics": {
+                                    "users": [
+                                        "unit-test-userId"
+                                    ]
                                 }
-                            }
-                        ],
-                        "includedAssetUsage": [
+                            },
                             {
-                                "includedSwTagId": "unit-test-swTagId",
-                                "includedAssetUsageId": "unit-test-assetUsageId-2",
-                                "usageEntitled": false,
-                                "isUsedBySwCreator": false,
-                                "assetUsageSeq": 2,
-                                "swidTagRevision": 5,
-                                "licenseProfileId": "cec51e7d-d977-41d2-abc6-ef5f069491b8",
-                                "licenseProfileRevision": 1,
-                                "isRtuRequired": true,
-                                "softwareLicensorId": "unit-test-softwareLicensorId",
-                                "assetUsageDenialSummary": "swid-tag(unit-test-swTagId) has been found and an asset-usage-agreement from unit-test-softwareLicensorId has been found but 1 constraint on the agreement(unit-test-assetUsageAgreementId) denies the usage of this asset",
-                                "assetUsageDenial": [
-                                    {
-                                        "denialCode": "denied_due_expireOn",
-                                        "denialType": "timingConstraint",
-                                        "denialReason": "rightToUse expired: (today(2020-06-26) > expireOn(1999-12-31)) on permission(unit-test-permission-1) under agreement(unit-test-assetUsageAgreementId) for action(acumos:deploy)",
-                                        "deniedAction": "acumos:deploy",
-                                        "deniedAssetUsageAgreementId": "unit-test-assetUsageAgreementId",
-                                        "deniedAssetUsageAgreementRevision": 7,
-                                        "deniedRightToUseId": "unit-test-permission-1",
-                                        "deniedRightToUseRevision": 7,
-                                        "denialReqItemName": "date",
-                                        "denialReqItemValue": "2020-06-26",
-                                        "deniedConstraint": {
-                                            "expireOn": "1999-12-31"
-                                        }
-                                    }
-                                ]
+                                "denialCode": "denied_due_usersOnAssignee",
+                                "denialType": "matchingConstraintOnAssignee",
+                                "denialReason": "user not in assignee lum:users: (unit-test-userId-2 not lum:in [\"alex\", \"justin\", \"michelle\", \"unit-test-userId\"]) on permission(unit-test-permission-1) under agreement(unit-test-assetUsageAgreementId) for action(acumos:deploy)",
+                                "deniedAction": "acumos:deploy",
+                                "deniedAssetUsageAgreementId": "unit-test-assetUsageAgreementId",
+                                "deniedAssetUsageAgreementRevision": 16,
+                                "deniedRightToUseId": "unit-test-permission-1",
+                                "deniedRightToUseRevision": 16,
+                                "denialReqItemName": "userId",
+                                "denialReqItemValue": "unit-test-userId-2",
+                                "deniedConstraint": {
+                                    "origin": "fromRestriction",
+                                    "dataType": "string",
+                                    "operator": "lum:in",
+                                    "leftOperand": "lum:users",
+                                    "rightOperand": [
+                                        "alex",
+                                        "justin",
+                                        "michelle",
+                                        "unit-test-userId"
+                                    ]
+                                },
+                                "deniedConstraintInvalid": false
+                            },
+                            {
+                                "denialCode": "denied_due_usageCount",
+                                "denialType": "usageConstraint",
+                                "denialReason": "exceeding the usage count: (5 not lteq 4) on permission(unit-test-permission-1) under agreement(unit-test-assetUsageAgreementId) for action(acumos:deploy)",
+                                "deniedAction": "acumos:deploy",
+                                "deniedAssetUsageAgreementId": "unit-test-assetUsageAgreementId",
+                                "deniedAssetUsageAgreementRevision": 16,
+                                "deniedRightToUseId": "unit-test-permission-1",
+                                "deniedRightToUseRevision": 16,
+                                "denialReqItemName": "usageCount",
+                                "denialReqItemValue": 1,
+                                "deniedConstraint": {
+                                    "dataType": "integer",
+                                    "operator": "lteq",
+                                    "leftOperand": "count",
+                                    "rightOperand": 4
+                                },
+                                "deniedConstraintInvalid": false,
+                                "deniedMetrics": {
+                                    "count": 4,
+                                    "users": [
+                                        "unit-test-userId"
+                                    ]
+                                }
                             }
                         ]
                     }
@@ -354,11 +376,11 @@
         "method": "PUT",
         "path": "/api/v1/asset-usage?assetUsageId=unit-test-assetUsageId",
         "content-type": "application/json; charset=utf-8",
-        "X-ACUMOS-RequestID": "9b63340a-58e2-4b5c-8909-25fe25f98222",
+        "X-ACUMOS-RequestID": "7ea47d63-4ad9-4e35-be4f-b76546013742",
         "send": {
-            "requestId": "9b63340a-58e2-4b5c-8909-25fe25f98222",
-            "requested": "2020-06-26T16:15:26.059Z",
-            "userId": "unit-test-userId",
+            "requestId": "7ea47d63-4ad9-4e35-be4f-b76546013742",
+            "requested": "2020-06-26T16:19:29.227Z",
+            "userId": "unit-test-userId-2",
             "swMgtSystemId": "unit-test-swMgtSystemId",
             "swMgtSystemInstanceId": "unit-test-swMgtSystemInstanceId",
             "swMgtSystemComponent": "unit-test-swMgtSystemComponent",
@@ -366,24 +388,18 @@
                 "swTagId": "unit-test-swTagId",
                 "assetUsageId": "unit-test-assetUsageId",
                 "action": "acumos:deploy",
-                "isIncludedAsset": false,
-                "includedAssetUsage": [
-                    {
-                        "includedSwTagId": "unit-test-swTagId",
-                        "includedAssetUsageId": "unit-test-assetUsageId-2"
-                    }
-                ]
+                "isIncludedAsset": false
             }
         }
     },
     "res": {
         "statusCode": 402,
         "body": {
-            "userId": "unit-test-userId",
+            "userId": "unit-test-userId-2",
             "swMgtSystemId": "unit-test-swMgtSystemId",
             "swMgtSystemInstanceId": "unit-test-swMgtSystemInstanceId",
             "swMgtSystemComponent": "unit-test-swMgtSystemComponent",
-            "requestId": "9b63340a-58e2-4b5c-8909-25fe25f98222",
+            "requestId": "7ea47d63-4ad9-4e35-be4f-b76546013742",
             "requested": "__type__dateTime__",
             "usageEntitled": false,
             "assetUsage": {
@@ -392,60 +408,87 @@
                 "action": "acumos:deploy",
                 "usageEntitled": false,
                 "isUsedBySwCreator": false,
-                "assetUsageSeq": 2,
-                "swidTagRevision": 5,
+                "assetUsageSeq": 15,
+                "swidTagRevision": 7,
                 "licenseProfileId": "cec51e7d-d977-41d2-abc6-ef5f069491b8",
-                "licenseProfileRevision": 1,
+                "licenseProfileRevision": 3,
                 "isRtuRequired": true,
                 "softwareLicensorId": "unit-test-softwareLicensorId",
-                "assetUsageDenialSummary": "swid-tag(unit-test-swTagId) has been found and an asset-usage-agreement from unit-test-softwareLicensorId has been found but 1 constraint on the agreement(unit-test-assetUsageAgreementId) denies the usage of this asset",
+                "assetUsageDenialSummary": "swid-tag(unit-test-swTagId) has been found and an asset-usage-agreement from unit-test-softwareLicensorId has been found but 3 constraints on the agreement(unit-test-assetUsageAgreementId) deny the usage of this asset",
                 "assetUsageDenial": [
                     {
-                        "denialCode": "denied_due_expireOn",
-                        "denialType": "timingConstraint",
-                        "denialReason": "__type__ignore__",
+                        "denialCode": "denied_due_countUniqueUsersOnAssignee",
+                        "denialType": "matchingConstraintOnAssignee",
+                        "denialReason": "too many users: (unit-test-userId-2 not in {\"users\": [\"unit-test-userId\"]}) on permission(unit-test-permission-1) under agreement(unit-test-assetUsageAgreementId) for action(acumos:deploy)",
                         "deniedAction": "acumos:deploy",
                         "deniedAssetUsageAgreementId": "unit-test-assetUsageAgreementId",
-                        "deniedAssetUsageAgreementRevision": 7,
+                        "deniedAssetUsageAgreementRevision": 16,
                         "deniedRightToUseId": "unit-test-permission-1",
-                        "deniedRightToUseRevision": 7,
-                        "denialReqItemName": "date",
-                        "denialReqItemValue": "__type__dateTime__",
+                        "deniedRightToUseRevision": 16,
+                        "denialReqItemName": "userId",
+                        "denialReqItemValue": "unit-test-userId-2",
                         "deniedConstraint": {
-                            "expireOn": "1999-12-31"
+                            "dataType": "integer",
+                            "operator": "lteq",
+                            "leftOperand": "lum:countUniqueUsers",
+                            "rightOperand": 1
+                        },
+                        "deniedConstraintInvalid": false,
+                        "deniedMetrics": {
+                            "users": [
+                                "unit-test-userId"
+                            ]
                         }
-                    }
-                ],
-                "includedAssetUsage": [
+                    },
                     {
-                        "includedSwTagId": "unit-test-swTagId",
-                        "includedAssetUsageId": "unit-test-assetUsageId-2",
-                        "usageEntitled": false,
-                        "isUsedBySwCreator": false,
-                        "assetUsageSeq": 2,
-                        "swidTagRevision": 5,
-                        "licenseProfileId": "cec51e7d-d977-41d2-abc6-ef5f069491b8",
-                        "licenseProfileRevision": 1,
-                        "isRtuRequired": true,
-                        "softwareLicensorId": "unit-test-softwareLicensorId",
-                        "assetUsageDenialSummary": "swid-tag(unit-test-swTagId) has been found and an asset-usage-agreement from unit-test-softwareLicensorId has been found but 1 constraint on the agreement(unit-test-assetUsageAgreementId) denies the usage of this asset",
-                        "assetUsageDenial": [
-                            {
-                                "denialCode": "denied_due_expireOn",
-                                "denialType": "timingConstraint",
-                                "denialReason": "__type__ignore__",
-                                "deniedAction": "acumos:deploy",
-                                "deniedAssetUsageAgreementId": "unit-test-assetUsageAgreementId",
-                                "deniedAssetUsageAgreementRevision": 7,
-                                "deniedRightToUseId": "unit-test-permission-1",
-                                "deniedRightToUseRevision": 7,
-                                "denialReqItemName": "date",
-                                "denialReqItemValue": "__type__dateTime__",
-                                "deniedConstraint": {
-                                    "expireOn": "1999-12-31"
-                                }
-                            }
-                        ]
+                        "denialCode": "denied_due_usersOnAssignee",
+                        "denialType": "matchingConstraintOnAssignee",
+                        "denialReason": "user not in assignee lum:users: (unit-test-userId-2 not lum:in [\"alex\", \"justin\", \"michelle\", \"unit-test-userId\"]) on permission(unit-test-permission-1) under agreement(unit-test-assetUsageAgreementId) for action(acumos:deploy)",
+                        "deniedAction": "acumos:deploy",
+                        "deniedAssetUsageAgreementId": "unit-test-assetUsageAgreementId",
+                        "deniedAssetUsageAgreementRevision": 16,
+                        "deniedRightToUseId": "unit-test-permission-1",
+                        "deniedRightToUseRevision": 16,
+                        "denialReqItemName": "userId",
+                        "denialReqItemValue": "unit-test-userId-2",
+                        "deniedConstraint": {
+                            "origin": "fromRestriction",
+                            "dataType": "string",
+                            "operator": "lum:in",
+                            "leftOperand": "lum:users",
+                            "rightOperand": [
+                                "alex",
+                                "justin",
+                                "michelle",
+                                "unit-test-userId"
+                            ]
+                        },
+                        "deniedConstraintInvalid": false
+                    },
+                    {
+                        "denialCode": "denied_due_usageCount",
+                        "denialType": "usageConstraint",
+                        "denialReason": "exceeding the usage count: (5 not lteq 4) on permission(unit-test-permission-1) under agreement(unit-test-assetUsageAgreementId) for action(acumos:deploy)",
+                        "deniedAction": "acumos:deploy",
+                        "deniedAssetUsageAgreementId": "unit-test-assetUsageAgreementId",
+                        "deniedAssetUsageAgreementRevision": 16,
+                        "deniedRightToUseId": "unit-test-permission-1",
+                        "deniedRightToUseRevision": 16,
+                        "denialReqItemName": "usageCount",
+                        "denialReqItemValue": 1,
+                        "deniedConstraint": {
+                            "dataType": "integer",
+                            "operator": "lteq",
+                            "leftOperand": "count",
+                            "rightOperand": 4
+                        },
+                        "deniedConstraintInvalid": false,
+                        "deniedMetrics": {
+                            "count": 4,
+                            "users": [
+                                "unit-test-userId"
+                            ]
+                        }
                     }
                 ]
             }
@@ -454,7 +497,7 @@
     "acuLogs": [
         {
             "LogTimestamp": "__type__dateTime__",
-            "RequestID": "9b63340a-58e2-4b5c-8909-25fe25f98222",
+            "RequestID": "7ea47d63-4ad9-4e35-be4f-b76546013742",
             "InvocationID": "PUT /api/v1/asset-usage",
             "InstanceID": "__type__uuid__",
             "Thread": "main",
@@ -469,11 +512,11 @@
             "ClientIPAddress": "__type__ignore__",
             "TargetEntity": null,
             "TargetServiceName": null,
-            "User": "unit-test-userId",
+            "User": "unit-test-userId-2",
             "Logger": "__type__ignore__",
             "Mdc": null,
             "Message": {
-                "userId": "unit-test-userId",
+                "userId": "unit-test-userId-2",
                 "swMgtSystemId": "unit-test-swMgtSystemId",
                 "swMgtSystemInstanceId": "unit-test-swMgtSystemInstanceId",
                 "swMgtSystemComponent": "unit-test-swMgtSystemComponent",
@@ -481,13 +524,7 @@
                     "swTagId": "unit-test-swTagId",
                     "assetUsageId": "unit-test-assetUsageId",
                     "action": "acumos:deploy",
-                    "isIncludedAsset": false,
-                    "includedAssetUsage": [
-                        {
-                            "includedSwTagId": "unit-test-swTagId",
-                            "includedAssetUsageId": "unit-test-assetUsageId-2"
-                        }
-                    ]
+                    "isIncludedAsset": false
                 },
                 "requested": "__type__dateTime__"
             },
@@ -495,7 +532,7 @@
         },
         {
             "LogTimestamp": "__type__dateTime__",
-            "RequestID": "9b63340a-58e2-4b5c-8909-25fe25f98222",
+            "RequestID": "7ea47d63-4ad9-4e35-be4f-b76546013742",
             "InvocationID": "response",
             "InstanceID": "__type__uuid__",
             "Thread": "main",
@@ -510,13 +547,13 @@
             "ClientIPAddress": "__type__ignore__",
             "TargetEntity": null,
             "TargetServiceName": null,
-            "User": "unit-test-userId",
+            "User": "unit-test-userId-2",
             "Logger": "__type__ignore__",
             "Mdc": null,
             "Message": {
-                "requestId": "9b63340a-58e2-4b5c-8909-25fe25f98222",
-                "requested": "2020-06-26T16:15:26.059Z",
-                "userId": "unit-test-userId",
+                "requestId": "7ea47d63-4ad9-4e35-be4f-b76546013742",
+                "requested": "2020-06-26T16:19:29.227Z",
+                "userId": "unit-test-userId-2",
                 "swMgtSystemId": "unit-test-swMgtSystemId",
                 "swMgtSystemInstanceId": "unit-test-swMgtSystemInstanceId",
                 "swMgtSystemComponent": "unit-test-swMgtSystemComponent",
@@ -527,60 +564,87 @@
                     "action": "acumos:deploy",
                     "usageEntitled": false,
                     "isUsedBySwCreator": false,
-                    "assetUsageSeq": 2,
-                    "swidTagRevision": 5,
+                    "assetUsageSeq": 15,
+                    "swidTagRevision": 7,
                     "licenseProfileId": "cec51e7d-d977-41d2-abc6-ef5f069491b8",
-                    "licenseProfileRevision": 1,
+                    "licenseProfileRevision": 3,
                     "isRtuRequired": true,
                     "softwareLicensorId": "unit-test-softwareLicensorId",
-                    "assetUsageDenialSummary": "swid-tag(unit-test-swTagId) has been found and an asset-usage-agreement from unit-test-softwareLicensorId has been found but 1 constraint on the agreement(unit-test-assetUsageAgreementId) denies the usage of this asset",
+                    "assetUsageDenialSummary": "swid-tag(unit-test-swTagId) has been found and an asset-usage-agreement from unit-test-softwareLicensorId has been found but 3 constraints on the agreement(unit-test-assetUsageAgreementId) deny the usage of this asset",
                     "assetUsageDenial": [
                         {
-                            "denialCode": "denied_due_expireOn",
-                            "denialType": "timingConstraint",
-                            "denialReason": "rightToUse expired: (today(2020-06-26) > expireOn(1999-12-31)) on permission(unit-test-permission-1) under agreement(unit-test-assetUsageAgreementId) for action(acumos:deploy)",
+                            "denialCode": "denied_due_countUniqueUsersOnAssignee",
+                            "denialType": "matchingConstraintOnAssignee",
+                            "denialReason": "too many users: (unit-test-userId-2 not in {\"users\": [\"unit-test-userId\"]}) on permission(unit-test-permission-1) under agreement(unit-test-assetUsageAgreementId) for action(acumos:deploy)",
                             "deniedAction": "acumos:deploy",
                             "deniedAssetUsageAgreementId": "unit-test-assetUsageAgreementId",
-                            "deniedAssetUsageAgreementRevision": 7,
+                            "deniedAssetUsageAgreementRevision": 16,
                             "deniedRightToUseId": "unit-test-permission-1",
-                            "deniedRightToUseRevision": 7,
-                            "denialReqItemName": "date",
-                            "denialReqItemValue": "2020-06-26",
+                            "deniedRightToUseRevision": 16,
+                            "denialReqItemName": "userId",
+                            "denialReqItemValue": "unit-test-userId-2",
                             "deniedConstraint": {
-                                "expireOn": "1999-12-31"
+                                "dataType": "integer",
+                                "operator": "lteq",
+                                "leftOperand": "lum:countUniqueUsers",
+                                "rightOperand": 1
+                            },
+                            "deniedConstraintInvalid": false,
+                            "deniedMetrics": {
+                                "users": [
+                                    "unit-test-userId"
+                                ]
                             }
-                        }
-                    ],
-                    "includedAssetUsage": [
+                        },
                         {
-                            "includedSwTagId": "unit-test-swTagId",
-                            "includedAssetUsageId": "unit-test-assetUsageId-2",
-                            "usageEntitled": false,
-                            "isUsedBySwCreator": false,
-                            "assetUsageSeq": 2,
-                            "swidTagRevision": 5,
-                            "licenseProfileId": "cec51e7d-d977-41d2-abc6-ef5f069491b8",
-                            "licenseProfileRevision": 1,
-                            "isRtuRequired": true,
-                            "softwareLicensorId": "unit-test-softwareLicensorId",
-                            "assetUsageDenialSummary": "swid-tag(unit-test-swTagId) has been found and an asset-usage-agreement from unit-test-softwareLicensorId has been found but 1 constraint on the agreement(unit-test-assetUsageAgreementId) denies the usage of this asset",
-                            "assetUsageDenial": [
-                                {
-                                    "denialCode": "denied_due_expireOn",
-                                    "denialType": "timingConstraint",
-                                    "denialReason": "rightToUse expired: (today(2020-06-26) > expireOn(1999-12-31)) on permission(unit-test-permission-1) under agreement(unit-test-assetUsageAgreementId) for action(acumos:deploy)",
-                                    "deniedAction": "acumos:deploy",
-                                    "deniedAssetUsageAgreementId": "unit-test-assetUsageAgreementId",
-                                    "deniedAssetUsageAgreementRevision": 7,
-                                    "deniedRightToUseId": "unit-test-permission-1",
-                                    "deniedRightToUseRevision": 7,
-                                    "denialReqItemName": "date",
-                                    "denialReqItemValue": "2020-06-26",
-                                    "deniedConstraint": {
-                                        "expireOn": "1999-12-31"
-                                    }
-                                }
-                            ]
+                            "denialCode": "denied_due_usersOnAssignee",
+                            "denialType": "matchingConstraintOnAssignee",
+                            "denialReason": "user not in assignee lum:users: (unit-test-userId-2 not lum:in [\"alex\", \"justin\", \"michelle\", \"unit-test-userId\"]) on permission(unit-test-permission-1) under agreement(unit-test-assetUsageAgreementId) for action(acumos:deploy)",
+                            "deniedAction": "acumos:deploy",
+                            "deniedAssetUsageAgreementId": "unit-test-assetUsageAgreementId",
+                            "deniedAssetUsageAgreementRevision": 16,
+                            "deniedRightToUseId": "unit-test-permission-1",
+                            "deniedRightToUseRevision": 16,
+                            "denialReqItemName": "userId",
+                            "denialReqItemValue": "unit-test-userId-2",
+                            "deniedConstraint": {
+                                "origin": "fromRestriction",
+                                "dataType": "string",
+                                "operator": "lum:in",
+                                "leftOperand": "lum:users",
+                                "rightOperand": [
+                                    "alex",
+                                    "justin",
+                                    "michelle",
+                                    "unit-test-userId"
+                                ]
+                            },
+                            "deniedConstraintInvalid": false
+                        },
+                        {
+                            "denialCode": "denied_due_usageCount",
+                            "denialType": "usageConstraint",
+                            "denialReason": "exceeding the usage count: (5 not lteq 4) on permission(unit-test-permission-1) under agreement(unit-test-assetUsageAgreementId) for action(acumos:deploy)",
+                            "deniedAction": "acumos:deploy",
+                            "deniedAssetUsageAgreementId": "unit-test-assetUsageAgreementId",
+                            "deniedAssetUsageAgreementRevision": 16,
+                            "deniedRightToUseId": "unit-test-permission-1",
+                            "deniedRightToUseRevision": 16,
+                            "denialReqItemName": "usageCount",
+                            "denialReqItemValue": 1,
+                            "deniedConstraint": {
+                                "dataType": "integer",
+                                "operator": "lteq",
+                                "leftOperand": "count",
+                                "rightOperand": 4
+                            },
+                            "deniedConstraintInvalid": false,
+                            "deniedMetrics": {
+                                "count": 4,
+                                "users": [
+                                    "unit-test-userId"
+                                ]
+                            }
                         }
                     ]
                 }
