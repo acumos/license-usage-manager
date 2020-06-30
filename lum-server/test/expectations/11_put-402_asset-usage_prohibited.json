@@ -25,7 +25,7 @@
         {
             "sqlCmd": "INSERT INTO \"assetUsageReq\" (\"assetUsageReqId\" , \"action\",\"assetUsageType\",\"requestHttp\",\"request\",\"userId\",\"status\", \"requestStarted\") VALUES (($1) , ($2),($3),($4),($5),($6),($7), NOW())",
             "sqlVals": [
-                "8b750af9-ebe6-4d5d-bad6-a9d502e53eff",
+                "a2488085-30a9-488b-b774-4ad0ba602f3b",
                 "acumos:deploy",
                 "assetUsage",
                 {
@@ -33,34 +33,35 @@
                     "requestUrl": "__type__ignore__",
                     "serverFQDN": "__type__ignore__",
                     "path": "/api/v1/asset-usage",
-                    "originalUrl": "/api/v1/asset-usage?assetUsageId=alex-usage-1",
+                    "originalUrl": "/api/v1/asset-usage?assetUsageId=unit-test-assetUsageId",
                     "query": {
-                        "assetUsageId": "alex-usage-1"
+                        "assetUsageId": "unit-test-assetUsageId"
                     },
                     "Content-Type": "application/json; charset=utf-8",
+                    "X-ACUMOS-RequestID": "a2488085-30a9-488b-b774-4ad0ba602f3b",
                     "userAgent": "__type__ignore__",
                     "clientIPAddress": "__type__ignore__",
                     "ips": []
                 },
                 {
-                    "userId": "alex-usage",
-                    "swMgtSystemId": "alex-sys",
-                    "swMgtSystemInstanceId": "123",
-                    "swMgtSystemComponent": "dev",
+                    "userId": "unit-test-userId",
+                    "swMgtSystemId": "unit-test-swMgtSystemId",
+                    "swMgtSystemInstanceId": "unit-test-swMgtSystemInstanceId",
+                    "swMgtSystemComponent": "unit-test-swMgtSystemComponent",
                     "assetUsageReq": {
-                        "swTagId": "alex-1",
-                        "assetUsageId": "alex-usage-1",
+                        "swTagId": "unit-test-swTagId",
+                        "assetUsageId": "unit-test-assetUsageId",
                         "action": "acumos:deploy",
                         "isIncludedAsset": false,
                         "includedAssetUsage": [
                             {
-                                "includedSwTagId": "alex-1",
-                                "includedAssetUsageId": "alex-usage-2"
+                                "includedSwTagId": "unit-test-swTagId",
+                                "includedAssetUsageId": "unit-test-assetUsageId-2"
                             }
                         ]
                     }
                 },
-                "alex-usage",
+                "unit-test-userId",
                 "started"
             ],
             "result": {
@@ -70,12 +71,12 @@
             }
         },
         {
-            "sqlCmd": "WITH sw_lp AS ( SELECT swt.*, COALESCE(($4) = ANY (swt.\"swCreators\"), FALSE) AS \"isUsedBySwCreator\", lp.\"licenseProfileRevision\", lp.\"licenseProfileActive\", lp.\"closureReason\" AS lp_closure_reason, lp.\"isRtuRequired\", COALESCE(swt.\"swidTagActive\" = TRUE AND lp.\"licenseProfileActive\" = TRUE AND lp.\"isRtuRequired\" = TRUE AND COALESCE(($4) = ANY (swt.\"swCreators\"), FALSE) = FALSE, FALSE) AS need_rtu FROM \"swidTag\" AS swt LEFT OUTER JOIN LATERAL (SELECT l_p.* FROM \"licenseProfile\" AS l_p WHERE l_p.\"licenseProfileId\" = swt.\"licenseProfileId\" FOR SHARE) AS lp ON TRUE WHERE swt.\"swTagId\" = ($1) FOR SHARE OF swt ) , swid_tag AS ( SELECT sw_lp.*, CASE WHEN sw_lp.\"isUsedBySwCreator\" = TRUE  THEN 'bySwCreator' WHEN sw_lp.\"isRtuRequired\"     = FALSE THEN 'freeToUse' WHEN sw_lp.need_rtu            = TRUE  THEN 'rightToUse' ELSE NULL END AS \"usageType\", CASE WHEN sw_lp.\"swidTagActive\" = FALSE THEN JSON_BUILD_OBJECT( 'denialCode', 'denied_due_swidTagRevoked', 'denialType', 'swidTagRevoked', 'denialReason', FORMAT('swid-tag(%s) %s', sw_lp.\"swTagId\", COALESCE(sw_lp.\"closureReason\", 'revoked')), 'deniedAction', ($2)::TEXT ) WHEN sw_lp.\"licenseProfileRevision\" IS NULL THEN JSON_BUILD_OBJECT( 'denialCode', 'denied_due_licenseProfileNotFound', 'denialType', 'licenseProfileNotFound', 'denialReason', FORMAT('license-profile(%s) not found for swid-tag(%s)', sw_lp.\"licenseProfileId\", sw_lp.\"swTagId\"), 'deniedAction', ($2)::TEXT ) WHEN sw_lp.\"licenseProfileActive\" = FALSE THEN JSON_BUILD_OBJECT( 'denialCode', 'denied_due_licenseProfileRevoked', 'denialType', 'licenseProfileRevoked', 'denialReason', FORMAT('license-profile(%s) %s for swid-tag(%s)', sw_lp.\"licenseProfileId\", COALESCE(sw_lp.lp_closure_reason, 'revoked'), sw_lp.\"swTagId\"), 'deniedAction', ($2)::TEXT ) ELSE NULL END AS \"denial\" FROM sw_lp ) , swt_ctlg AS ( SELECT stag.\"swTagId\", ARRAY_AGG(DISTINCT ctlg.\"swCatalogId\")   AS \"swCatalogIds\", ARRAY_AGG(DISTINCT ctlg.\"swCatalogType\") AS \"swCatalogTypes\" FROM (SELECT \"swTagId\", \"swCatalogs\" FROM swid_tag WHERE swid_tag.need_rtu = TRUE) AS stag CROSS JOIN LATERAL JSONB_TO_RECORDSET(stag.\"swCatalogs\") AS ctlg(\"swCatalogId\" TEXT, \"swCatalogType\" TEXT) GROUP BY stag.\"swTagId\") , rtu_rule AS ( SELECT  swid_tag.\"swTagId\" AS rtu_sw_id, rtu.\"assetUsageRuleId\", rtu.\"assetUsageAgreementId\", agr.\"assetUsageAgreementRevision\", rtu.\"rightToUseId\", rtu.\"assetUsageRuleType\", rtu.\"rightToUseRevision\", rtu.\"metricsRevision\", rtu.\"licenseKeys\", \"rtuAction\", usmcs.\"metrics\", rtu.\"assigneeMetrics\", (rtu.\"assigneeMetrics\"->'users')::JSONB ? ($4) AS \"isUserInAssigneeMetrics\" FROM swid_tag JOIN \"rightToUse\" AS rtu ON (rtu.\"softwareLicensorId\" = swid_tag.\"softwareLicensorId\") JOIN \"assetUsageAgreement\" AS agr ON (rtu.\"softwareLicensorId\" = agr.\"softwareLicensorId\" AND rtu.\"assetUsageAgreementId\" = agr.\"assetUsageAgreementId\") CROSS JOIN LATERAL JSON_ARRAY_ELEMENTS_TEXT(ARRAY_TO_JSON(rtu.\"actions\")) AS \"rtuAction\" LEFT OUTER JOIN LATERAL (SELECT ums.* FROM \"usageMetrics\" AS ums WHERE ums.\"usageMetricsId\" = rtu.\"assetUsageRuleId\" AND ums.\"action\" = \"rtuAction\" AND ums.\"usageType\" = 'rightToUse' FOR UPDATE) AS usmcs ON TRUE LEFT OUTER JOIN LATERAL (SELECT swt_ctlg.\"swCatalogIds\", swt_ctlg.\"swCatalogTypes\" FROM swt_ctlg WHERE swt_ctlg.\"swTagId\" = swid_tag.\"swTagId\") AS ctlgs ON TRUE WHERE \"rtuAction\" IN (($2),($3)) AND rtu.\"rightToUseActive\" = TRUE AND COALESCE(NOW()::DATE >= rtu.\"enableOn\", TRUE) AND COALESCE(NOW()::DATE <= rtu.\"expireOn\", TRUE) AND COALESCE(NOW() <= rtu.\"usageEnds\", TRUE) AND (rtu.\"targetRefinement\"#>'{lum:swPersistentId}' IS NULL OR COALESCE(CASE rtu.\"targetRefinement\"#>>'{lum:swPersistentId,operator}' WHEN 'lum:in' THEN (rtu.\"targetRefinement\"#>'{lum:swPersistentId,rightOperand}')::JSONB ? (swid_tag.\"swPersistentId\")::TEXT WHEN 'lt' THEN (swid_tag.\"swPersistentId\")::TEXT < (rtu.\"targetRefinement\"#>'{lum:swPersistentId,rightOperand}')::TEXT WHEN 'lteq' THEN (swid_tag.\"swPersistentId\")::TEXT <= (rtu.\"targetRefinement\"#>'{lum:swPersistentId,rightOperand}')::TEXT WHEN 'eq' THEN (swid_tag.\"swPersistentId\")::TEXT = (rtu.\"targetRefinement\"#>'{lum:swPersistentId,rightOperand}')::TEXT WHEN 'gteq' THEN (swid_tag.\"swPersistentId\")::TEXT >= (rtu.\"targetRefinement\"#>'{lum:swPersistentId,rightOperand}')::TEXT WHEN 'gt' THEN (swid_tag.\"swPersistentId\")::TEXT > (rtu.\"targetRefinement\"#>'{lum:swPersistentId,rightOperand}')::TEXT ELSE FALSE END, FALSE)) AND (rtu.\"targetRefinement\"#>'{lum:swTagId}' IS NULL OR COALESCE(CASE rtu.\"targetRefinement\"#>>'{lum:swTagId,operator}' WHEN 'lum:in' THEN (rtu.\"targetRefinement\"#>'{lum:swTagId,rightOperand}')::JSONB ? (swid_tag.\"swTagId\")::TEXT WHEN 'lt' THEN (swid_tag.\"swTagId\")::TEXT < (rtu.\"targetRefinement\"#>'{lum:swTagId,rightOperand}')::TEXT WHEN 'lteq' THEN (swid_tag.\"swTagId\")::TEXT <= (rtu.\"targetRefinement\"#>'{lum:swTagId,rightOperand}')::TEXT WHEN 'eq' THEN (swid_tag.\"swTagId\")::TEXT = (rtu.\"targetRefinement\"#>'{lum:swTagId,rightOperand}')::TEXT WHEN 'gteq' THEN (swid_tag.\"swTagId\")::TEXT >= (rtu.\"targetRefinement\"#>'{lum:swTagId,rightOperand}')::TEXT WHEN 'gt' THEN (swid_tag.\"swTagId\")::TEXT > (rtu.\"targetRefinement\"#>'{lum:swTagId,rightOperand}')::TEXT ELSE FALSE END, FALSE)) AND (rtu.\"targetRefinement\"#>'{lum:swProductName}' IS NULL OR COALESCE(CASE rtu.\"targetRefinement\"#>>'{lum:swProductName,operator}' WHEN 'lum:in' THEN (rtu.\"targetRefinement\"#>'{lum:swProductName,rightOperand}')::JSONB ? (swid_tag.\"swProductName\")::TEXT WHEN 'lt' THEN (swid_tag.\"swProductName\")::TEXT < (rtu.\"targetRefinement\"#>'{lum:swProductName,rightOperand}')::TEXT WHEN 'lteq' THEN (swid_tag.\"swProductName\")::TEXT <= (rtu.\"targetRefinement\"#>'{lum:swProductName,rightOperand}')::TEXT WHEN 'eq' THEN (swid_tag.\"swProductName\")::TEXT = (rtu.\"targetRefinement\"#>'{lum:swProductName,rightOperand}')::TEXT WHEN 'gteq' THEN (swid_tag.\"swProductName\")::TEXT >= (rtu.\"targetRefinement\"#>'{lum:swProductName,rightOperand}')::TEXT WHEN 'gt' THEN (swid_tag.\"swProductName\")::TEXT > (rtu.\"targetRefinement\"#>'{lum:swProductName,rightOperand}')::TEXT ELSE FALSE END, FALSE)) AND (rtu.\"targetRefinement\"#>'{lum:swCategory}' IS NULL OR COALESCE(CASE rtu.\"targetRefinement\"#>>'{lum:swCategory,operator}' WHEN 'lum:in' THEN (rtu.\"targetRefinement\"#>'{lum:swCategory,rightOperand}')::JSONB ? (swid_tag.\"swCategory\")::TEXT WHEN 'lt' THEN (swid_tag.\"swCategory\")::TEXT < (rtu.\"targetRefinement\"#>'{lum:swCategory,rightOperand}')::TEXT WHEN 'lteq' THEN (swid_tag.\"swCategory\")::TEXT <= (rtu.\"targetRefinement\"#>'{lum:swCategory,rightOperand}')::TEXT WHEN 'eq' THEN (swid_tag.\"swCategory\")::TEXT = (rtu.\"targetRefinement\"#>'{lum:swCategory,rightOperand}')::TEXT WHEN 'gteq' THEN (swid_tag.\"swCategory\")::TEXT >= (rtu.\"targetRefinement\"#>'{lum:swCategory,rightOperand}')::TEXT WHEN 'gt' THEN (swid_tag.\"swCategory\")::TEXT > (rtu.\"targetRefinement\"#>'{lum:swCategory,rightOperand}')::TEXT ELSE FALSE END, FALSE)) AND (rtu.\"targetRefinement\"#>'{lum:swCatalogId}' IS NULL OR COALESCE(rtu.\"targetRefinement\"#>'{lum:swCatalogId,rightOperand}' ?| ctlgs.\"swCatalogIds\", FALSE)) AND (rtu.\"targetRefinement\"#>'{lum:swCatalogType}' IS NULL OR COALESCE(rtu.\"targetRefinement\"#>'{lum:swCatalogType,rightOperand}' ?| ctlgs.\"swCatalogTypes\", FALSE)) AND (rtu.\"assigneeRefinement\"#>'{lum:countUniqueUsers}' IS NULL OR (rtu.\"assigneeMetrics\"->'users')::JSONB ? ($4) OR COALESCE(CASE rtu.\"assigneeRefinement\"#>>'{lum:countUniqueUsers,operator}' WHEN 'lum:in' THEN (rtu.\"assigneeRefinement\"#>'{lum:countUniqueUsers,rightOperand}')::JSONB ? (COALESCE(JSONB_ARRAY_LENGTH((rtu.\"assigneeMetrics\"->'users')::JSONB), 0) + 1)::TEXT WHEN 'lt' THEN (COALESCE(JSONB_ARRAY_LENGTH((rtu.\"assigneeMetrics\"->'users')::JSONB), 0) + 1)::INTEGER < (rtu.\"assigneeRefinement\"#>'{lum:countUniqueUsers,rightOperand}')::INTEGER WHEN 'lteq' THEN (COALESCE(JSONB_ARRAY_LENGTH((rtu.\"assigneeMetrics\"->'users')::JSONB), 0) + 1)::INTEGER <= (rtu.\"assigneeRefinement\"#>'{lum:countUniqueUsers,rightOperand}')::INTEGER WHEN 'eq' THEN (COALESCE(JSONB_ARRAY_LENGTH((rtu.\"assigneeMetrics\"->'users')::JSONB), 0) + 1)::INTEGER = (rtu.\"assigneeRefinement\"#>'{lum:countUniqueUsers,rightOperand}')::INTEGER WHEN 'gteq' THEN (COALESCE(JSONB_ARRAY_LENGTH((rtu.\"assigneeMetrics\"->'users')::JSONB), 0) + 1)::INTEGER >= (rtu.\"assigneeRefinement\"#>'{lum:countUniqueUsers,rightOperand}')::INTEGER WHEN 'gt' THEN (COALESCE(JSONB_ARRAY_LENGTH((rtu.\"assigneeMetrics\"->'users')::JSONB), 0) + 1)::INTEGER > (rtu.\"assigneeRefinement\"#>'{lum:countUniqueUsers,rightOperand}')::INTEGER ELSE FALSE END, FALSE)) AND ((rtu.\"assigneeRefinement\"#>'{lum:users}') IS NULL OR COALESCE(CASE rtu.\"assigneeRefinement\"#>>'{lum:users,operator}' WHEN 'lum:in' THEN (rtu.\"assigneeRefinement\"#>'{lum:users,rightOperand}')::JSONB ? (($4))::TEXT WHEN 'lt' THEN (($4))::TEXT < (rtu.\"assigneeRefinement\"#>'{lum:users,rightOperand}')::TEXT WHEN 'lteq' THEN (($4))::TEXT <= (rtu.\"assigneeRefinement\"#>'{lum:users,rightOperand}')::TEXT WHEN 'eq' THEN (($4))::TEXT = (rtu.\"assigneeRefinement\"#>'{lum:users,rightOperand}')::TEXT WHEN 'gteq' THEN (($4))::TEXT >= (rtu.\"assigneeRefinement\"#>'{lum:users,rightOperand}')::TEXT WHEN 'gt' THEN (($4))::TEXT > (rtu.\"assigneeRefinement\"#>'{lum:users,rightOperand}')::TEXT ELSE FALSE END, FALSE)) AND (rtu.\"usageConstraints\"#>'{count}' IS NULL OR COALESCE(CASE rtu.\"usageConstraints\"#>>'{count,operator}' WHEN 'lum:in' THEN (rtu.\"usageConstraints\"#>'{count,rightOperand}')::JSONB ? (COALESCE((usmcs.\"metrics\"#>'{count}')::INTEGER, 0) + ($5))::TEXT WHEN 'lt' THEN (COALESCE((usmcs.\"metrics\"#>'{count}')::INTEGER, 0) + ($5))::INTEGER < (rtu.\"usageConstraints\"#>'{count,rightOperand}')::INTEGER WHEN 'lteq' THEN (COALESCE((usmcs.\"metrics\"#>'{count}')::INTEGER, 0) + ($5))::INTEGER <= (rtu.\"usageConstraints\"#>'{count,rightOperand}')::INTEGER WHEN 'eq' THEN (COALESCE((usmcs.\"metrics\"#>'{count}')::INTEGER, 0) + ($5))::INTEGER = (rtu.\"usageConstraints\"#>'{count,rightOperand}')::INTEGER WHEN 'gteq' THEN (COALESCE((usmcs.\"metrics\"#>'{count}')::INTEGER, 0) + ($5))::INTEGER >= (rtu.\"usageConstraints\"#>'{count,rightOperand}')::INTEGER WHEN 'gt' THEN (COALESCE((usmcs.\"metrics\"#>'{count}')::INTEGER, 0) + ($5))::INTEGER > (rtu.\"usageConstraints\"#>'{count,rightOperand}')::INTEGER ELSE FALSE END, FALSE)) ORDER BY swid_tag.\"swTagId\", NULLIF(rtu.\"assetUsageRuleType\", 'prohibition') NULLS FIRST, NULLIF(\"rtuAction\", 'use') NULLS LAST, rtu.\"created\", rtu.\"assetUsageRuleId\" LIMIT 1 FOR UPDATE OF rtu) , swid_tag_entitlement AS ( SELECT swid_tag.\"softwareLicensorId\", swid_tag.\"swTagId\", swid_tag.\"swidTagRevision\", swid_tag.\"swPersistentId\", swid_tag.\"swVersion\", swid_tag.\"swProductName\", swid_tag.\"licenseProfileId\", swid_tag.\"licenseProfileRevision\", swid_tag.\"isUsedBySwCreator\", swid_tag.\"isRtuRequired\", swid_tag.\"usageType\", swid_tag.need_rtu, CASE WHEN swid_tag.\"denial\" IS NOT NULL THEN swid_tag.\"denial\" WHEN swid_tag.need_rtu = FALSE THEN NULL WHEN rtu_rule.\"assetUsageRuleType\" = 'prohibition' THEN JSON_BUILD_OBJECT( 'denialCode', 'denied_due_usageProhibited', 'denialType', 'usageProhibited', 'denialReason', FORMAT('swid-tag(%s) has been found but asset-usage is prohibited by prohibition(%s) under asset-usage-agreement(%s) for action(%s)', swid_tag.\"swTagId\", rtu_rule.\"rightToUseId\", rtu_rule.\"assetUsageAgreementId\", rtu_rule.\"rtuAction\"), 'deniedAction', rtu_rule.\"rtuAction\", 'deniedAssetUsageAgreementId', rtu_rule.\"assetUsageAgreementId\", 'deniedAssetUsageAgreementRevision', rtu_rule.\"assetUsageAgreementRevision\", 'deniedRightToUseId', rtu_rule.\"rightToUseId\", 'deniedRightToUseRevision', rtu_rule.\"rightToUseRevision\", 'denialReqItemName', 'action', 'denialReqItemValue', ($2)::TEXT, 'deniedConstraint', JSON_BUILD_OBJECT('action', rtu_rule.\"rtuAction\") ) ELSE NULL END AS \"denial\", rtu_rule.* FROM swid_tag LEFT OUTER JOIN rtu_rule ON (swid_tag.\"swTagId\" = rtu_rule.rtu_sw_id) ) SELECT \"softwareLicensorId\", \"swTagId\", \"swidTagRevision\", \"swPersistentId\", \"swVersion\", \"swProductName\", \"licenseProfileId\", \"licenseProfileRevision\", \"isUsedBySwCreator\", \"isRtuRequired\", \"assetUsageRuleId\", \"assetUsageAgreementId\", \"assetUsageAgreementRevision\", \"rightToUseId\", \"assetUsageRuleType\", \"rightToUseRevision\", \"metricsRevision\", \"licenseKeys\", \"rtuAction\", \"metrics\", \"assigneeMetrics\", \"isUserInAssigneeMetrics\", \"denial\", CASE WHEN \"denial\" IS NULL AND swtags_ent.need_rtu = TRUE AND swtags_ent.rtu_sw_id IS NOT NULL THEN JSON_BUILD_OBJECT( 'rightToUseId', swtags_ent.\"rightToUseId\", 'rightToUseRevision', swtags_ent.\"rightToUseRevision\", 'assetUsageAgreementId', swtags_ent.\"assetUsageAgreementId\", 'assetUsageAgreementRevision', swtags_ent.\"assetUsageAgreementRevision\", 'licenseKeys', swtags_ent.\"licenseKeys\" ) ELSE NULL END AS \"entitlement\" FROM swid_tag_entitlement AS swtags_ent",
+            "sqlCmd": "WITH sw_lp AS ( SELECT swt.*, COALESCE(($4)::TEXT = ANY (swt.\"swCreators\"), FALSE) AS \"isUsedBySwCreator\", lp.\"licenseProfileRevision\", lp.\"licenseProfileActive\", lp.\"closureReason\" AS lp_closure_reason, lp.\"isRtuRequired\", COALESCE(swt.\"swidTagActive\" = TRUE AND lp.\"licenseProfileActive\" = TRUE AND lp.\"isRtuRequired\" = TRUE AND COALESCE(($4)::TEXT = ANY (swt.\"swCreators\"), FALSE) = FALSE, FALSE) AS need_rtu FROM \"swidTag\" AS swt LEFT OUTER JOIN LATERAL (SELECT l_p.* FROM \"licenseProfile\" AS l_p WHERE l_p.\"licenseProfileId\" = swt.\"licenseProfileId\" FOR SHARE) AS lp ON TRUE WHERE swt.\"swTagId\" = ($1) FOR SHARE OF swt ) , swid_tag AS ( SELECT sw_lp.*, CASE WHEN sw_lp.\"isUsedBySwCreator\" = TRUE  THEN 'bySwCreator' WHEN sw_lp.\"isRtuRequired\"     = FALSE THEN 'freeToUse' WHEN sw_lp.need_rtu            = TRUE  THEN 'rightToUse' ELSE NULL END AS \"usageType\", CASE WHEN sw_lp.\"swidTagActive\" = FALSE THEN JSON_BUILD_OBJECT( 'denialCode', 'denied_due_swidTagRevoked', 'denialType', 'swidTagRevoked', 'denialReason', FORMAT('swid-tag(%s) %s', sw_lp.\"swTagId\", COALESCE(sw_lp.\"closureReason\", 'revoked')), 'deniedAction', ($2)::TEXT, 'denialReqItemName', 'swTagId', 'denialReqItemValue', sw_lp.\"swTagId\" ) WHEN sw_lp.\"licenseProfileRevision\" IS NULL THEN JSON_BUILD_OBJECT( 'denialCode', 'denied_due_licenseProfileNotFound', 'denialType', 'licenseProfileNotFound', 'denialReason', FORMAT('license-profile(%s) not found for swid-tag(%s)', sw_lp.\"licenseProfileId\", sw_lp.\"swTagId\"), 'deniedAction', ($2)::TEXT, 'denialReqItemName', 'licenseProfileId', 'denialReqItemValue', sw_lp.\"licenseProfileId\" ) WHEN sw_lp.\"licenseProfileActive\" = FALSE THEN JSON_BUILD_OBJECT( 'denialCode', 'denied_due_licenseProfileRevoked', 'denialType', 'licenseProfileRevoked', 'denialReason', FORMAT('license-profile(%s) %s for swid-tag(%s)', sw_lp.\"licenseProfileId\", COALESCE(sw_lp.lp_closure_reason, 'revoked'), sw_lp.\"swTagId\"), 'deniedAction', ($2)::TEXT, 'denialReqItemName', 'licenseProfileId', 'denialReqItemValue', sw_lp.\"licenseProfileId\" ) ELSE NULL END AS \"denial\" FROM sw_lp ) , swt_ctlg AS ( SELECT stag.\"swTagId\", ARRAY_AGG(DISTINCT ctlg.\"swCatalogId\")   AS \"swCatalogIds\", ARRAY_AGG(DISTINCT ctlg.\"swCatalogType\") AS \"swCatalogTypes\" FROM (SELECT \"swTagId\", \"swCatalogs\" FROM swid_tag WHERE swid_tag.need_rtu = TRUE) AS stag CROSS JOIN LATERAL JSONB_TO_RECORDSET(stag.\"swCatalogs\") AS ctlg(\"swCatalogId\" TEXT, \"swCatalogType\" TEXT) GROUP BY stag.\"swTagId\") , rtu_rule AS ( SELECT  swid_tag.\"swTagId\" AS rtu_sw_id, rtu.\"assetUsageRuleId\", rtu.\"assetUsageAgreementId\", agr.\"assetUsageAgreementRevision\", rtu.\"rightToUseId\", rtu.\"assetUsageRuleType\", rtu.\"rightToUseRevision\", rtu.\"metricsRevision\", rtu.\"licenseKeys\", \"rtuAction\", usmcs.\"metrics\", rtu.\"assigneeMetrics\", (rtu.\"assigneeMetrics\"->'users')::JSONB ? ($4)::TEXT AS \"isUserInAssigneeMetrics\" FROM swid_tag JOIN \"rightToUse\" AS rtu ON (rtu.\"softwareLicensorId\" = swid_tag.\"softwareLicensorId\") JOIN \"assetUsageAgreement\" AS agr ON (rtu.\"softwareLicensorId\" = agr.\"softwareLicensorId\" AND rtu.\"assetUsageAgreementId\" = agr.\"assetUsageAgreementId\") CROSS JOIN LATERAL JSON_ARRAY_ELEMENTS_TEXT(ARRAY_TO_JSON(rtu.\"actions\")) AS \"rtuAction\" LEFT OUTER JOIN LATERAL (SELECT ums.* FROM \"usageMetrics\" AS ums WHERE ums.\"usageMetricsId\" = rtu.\"assetUsageRuleId\" AND ums.\"action\" = \"rtuAction\" AND ums.\"usageType\" = 'rightToUse' FOR UPDATE) AS usmcs ON TRUE LEFT OUTER JOIN LATERAL (SELECT swt_ctlg.\"swCatalogIds\", swt_ctlg.\"swCatalogTypes\" FROM swt_ctlg WHERE swt_ctlg.\"swTagId\" = swid_tag.\"swTagId\") AS ctlgs ON TRUE WHERE \"rtuAction\" IN (($2),($3)) AND rtu.\"rightToUseActive\" = TRUE AND COALESCE(NOW()::DATE >= rtu.\"enableOn\", TRUE) AND COALESCE(NOW()::DATE <= rtu.\"expireOn\", TRUE) AND COALESCE(NOW() <= rtu.\"usageEnds\", TRUE) AND (CASE WHEN (rtu.\"targetRefinement\"#>'{lum:swPersistentId,rightOperand}') IS NULL OR (rtu.\"targetRefinement\"#>'{lum:swPersistentId,operator}') IS NULL THEN TRUE WHEN (swid_tag.\"swPersistentId\") IS NULL OR JSONB_TYPEOF(rtu.\"targetRefinement\"#>'{lum:swPersistentId,rightOperand}') = 'null' OR JSONB_TYPEOF(rtu.\"targetRefinement\"#>'{lum:swPersistentId,operator}') <> 'string' THEN FALSE WHEN (rtu.\"targetRefinement\"#>'{lum:swPersistentId,operator}')->>0 = 'lum:in' THEN JSONB_TYPEOF(rtu.\"targetRefinement\"#>'{lum:swPersistentId,rightOperand}') = 'array' AND (rtu.\"targetRefinement\"#>'{lum:swPersistentId,rightOperand}') ? (swid_tag.\"swPersistentId\")::TEXT WHEN JSONB_TYPEOF(rtu.\"targetRefinement\"#>'{lum:swPersistentId,rightOperand}') <> 'string' THEN FALSE WHEN (rtu.\"targetRefinement\"#>'{lum:swPersistentId,operator}')->>0 = 'lt' THEN (swid_tag.\"swPersistentId\")::TEXT < (rtu.\"targetRefinement\"#>'{lum:swPersistentId,rightOperand}')::TEXT WHEN (rtu.\"targetRefinement\"#>'{lum:swPersistentId,operator}')->>0 = 'lteq' THEN (swid_tag.\"swPersistentId\")::TEXT <= (rtu.\"targetRefinement\"#>'{lum:swPersistentId,rightOperand}')::TEXT WHEN (rtu.\"targetRefinement\"#>'{lum:swPersistentId,operator}')->>0 = 'eq' THEN (swid_tag.\"swPersistentId\")::TEXT = (rtu.\"targetRefinement\"#>'{lum:swPersistentId,rightOperand}')::TEXT WHEN (rtu.\"targetRefinement\"#>'{lum:swPersistentId,operator}')->>0 = 'gteq' THEN (swid_tag.\"swPersistentId\")::TEXT >= (rtu.\"targetRefinement\"#>'{lum:swPersistentId,rightOperand}')::TEXT WHEN (rtu.\"targetRefinement\"#>'{lum:swPersistentId,operator}')->>0 = 'gt' THEN (swid_tag.\"swPersistentId\")::TEXT > (rtu.\"targetRefinement\"#>'{lum:swPersistentId,rightOperand}')::TEXT ELSE FALSE END) AND (CASE WHEN (rtu.\"targetRefinement\"#>'{lum:swTagId,rightOperand}') IS NULL OR (rtu.\"targetRefinement\"#>'{lum:swTagId,operator}') IS NULL THEN TRUE WHEN (swid_tag.\"swTagId\") IS NULL OR JSONB_TYPEOF(rtu.\"targetRefinement\"#>'{lum:swTagId,rightOperand}') = 'null' OR JSONB_TYPEOF(rtu.\"targetRefinement\"#>'{lum:swTagId,operator}') <> 'string' THEN FALSE WHEN (rtu.\"targetRefinement\"#>'{lum:swTagId,operator}')->>0 = 'lum:in' THEN JSONB_TYPEOF(rtu.\"targetRefinement\"#>'{lum:swTagId,rightOperand}') = 'array' AND (rtu.\"targetRefinement\"#>'{lum:swTagId,rightOperand}') ? (swid_tag.\"swTagId\")::TEXT WHEN JSONB_TYPEOF(rtu.\"targetRefinement\"#>'{lum:swTagId,rightOperand}') <> 'string' THEN FALSE WHEN (rtu.\"targetRefinement\"#>'{lum:swTagId,operator}')->>0 = 'lt' THEN (swid_tag.\"swTagId\")::TEXT < (rtu.\"targetRefinement\"#>'{lum:swTagId,rightOperand}')::TEXT WHEN (rtu.\"targetRefinement\"#>'{lum:swTagId,operator}')->>0 = 'lteq' THEN (swid_tag.\"swTagId\")::TEXT <= (rtu.\"targetRefinement\"#>'{lum:swTagId,rightOperand}')::TEXT WHEN (rtu.\"targetRefinement\"#>'{lum:swTagId,operator}')->>0 = 'eq' THEN (swid_tag.\"swTagId\")::TEXT = (rtu.\"targetRefinement\"#>'{lum:swTagId,rightOperand}')::TEXT WHEN (rtu.\"targetRefinement\"#>'{lum:swTagId,operator}')->>0 = 'gteq' THEN (swid_tag.\"swTagId\")::TEXT >= (rtu.\"targetRefinement\"#>'{lum:swTagId,rightOperand}')::TEXT WHEN (rtu.\"targetRefinement\"#>'{lum:swTagId,operator}')->>0 = 'gt' THEN (swid_tag.\"swTagId\")::TEXT > (rtu.\"targetRefinement\"#>'{lum:swTagId,rightOperand}')::TEXT ELSE FALSE END) AND (CASE WHEN (rtu.\"targetRefinement\"#>'{lum:swProductName,rightOperand}') IS NULL OR (rtu.\"targetRefinement\"#>'{lum:swProductName,operator}') IS NULL THEN TRUE WHEN (swid_tag.\"swProductName\") IS NULL OR JSONB_TYPEOF(rtu.\"targetRefinement\"#>'{lum:swProductName,rightOperand}') = 'null' OR JSONB_TYPEOF(rtu.\"targetRefinement\"#>'{lum:swProductName,operator}') <> 'string' THEN FALSE WHEN (rtu.\"targetRefinement\"#>'{lum:swProductName,operator}')->>0 = 'lum:in' THEN JSONB_TYPEOF(rtu.\"targetRefinement\"#>'{lum:swProductName,rightOperand}') = 'array' AND (rtu.\"targetRefinement\"#>'{lum:swProductName,rightOperand}') ? (swid_tag.\"swProductName\")::TEXT WHEN JSONB_TYPEOF(rtu.\"targetRefinement\"#>'{lum:swProductName,rightOperand}') <> 'string' THEN FALSE WHEN (rtu.\"targetRefinement\"#>'{lum:swProductName,operator}')->>0 = 'lt' THEN (swid_tag.\"swProductName\")::TEXT < (rtu.\"targetRefinement\"#>'{lum:swProductName,rightOperand}')::TEXT WHEN (rtu.\"targetRefinement\"#>'{lum:swProductName,operator}')->>0 = 'lteq' THEN (swid_tag.\"swProductName\")::TEXT <= (rtu.\"targetRefinement\"#>'{lum:swProductName,rightOperand}')::TEXT WHEN (rtu.\"targetRefinement\"#>'{lum:swProductName,operator}')->>0 = 'eq' THEN (swid_tag.\"swProductName\")::TEXT = (rtu.\"targetRefinement\"#>'{lum:swProductName,rightOperand}')::TEXT WHEN (rtu.\"targetRefinement\"#>'{lum:swProductName,operator}')->>0 = 'gteq' THEN (swid_tag.\"swProductName\")::TEXT >= (rtu.\"targetRefinement\"#>'{lum:swProductName,rightOperand}')::TEXT WHEN (rtu.\"targetRefinement\"#>'{lum:swProductName,operator}')->>0 = 'gt' THEN (swid_tag.\"swProductName\")::TEXT > (rtu.\"targetRefinement\"#>'{lum:swProductName,rightOperand}')::TEXT ELSE FALSE END) AND (CASE WHEN (rtu.\"targetRefinement\"#>'{lum:swCategory,rightOperand}') IS NULL OR (rtu.\"targetRefinement\"#>'{lum:swCategory,operator}') IS NULL THEN TRUE WHEN (swid_tag.\"swCategory\") IS NULL OR JSONB_TYPEOF(rtu.\"targetRefinement\"#>'{lum:swCategory,rightOperand}') = 'null' OR JSONB_TYPEOF(rtu.\"targetRefinement\"#>'{lum:swCategory,operator}') <> 'string' THEN FALSE WHEN (rtu.\"targetRefinement\"#>'{lum:swCategory,operator}')->>0 = 'lum:in' THEN JSONB_TYPEOF(rtu.\"targetRefinement\"#>'{lum:swCategory,rightOperand}') = 'array' AND (rtu.\"targetRefinement\"#>'{lum:swCategory,rightOperand}') ? (swid_tag.\"swCategory\")::TEXT WHEN JSONB_TYPEOF(rtu.\"targetRefinement\"#>'{lum:swCategory,rightOperand}') <> 'string' THEN FALSE WHEN (rtu.\"targetRefinement\"#>'{lum:swCategory,operator}')->>0 = 'lt' THEN (swid_tag.\"swCategory\")::TEXT < (rtu.\"targetRefinement\"#>'{lum:swCategory,rightOperand}')::TEXT WHEN (rtu.\"targetRefinement\"#>'{lum:swCategory,operator}')->>0 = 'lteq' THEN (swid_tag.\"swCategory\")::TEXT <= (rtu.\"targetRefinement\"#>'{lum:swCategory,rightOperand}')::TEXT WHEN (rtu.\"targetRefinement\"#>'{lum:swCategory,operator}')->>0 = 'eq' THEN (swid_tag.\"swCategory\")::TEXT = (rtu.\"targetRefinement\"#>'{lum:swCategory,rightOperand}')::TEXT WHEN (rtu.\"targetRefinement\"#>'{lum:swCategory,operator}')->>0 = 'gteq' THEN (swid_tag.\"swCategory\")::TEXT >= (rtu.\"targetRefinement\"#>'{lum:swCategory,rightOperand}')::TEXT WHEN (rtu.\"targetRefinement\"#>'{lum:swCategory,operator}')->>0 = 'gt' THEN (swid_tag.\"swCategory\")::TEXT > (rtu.\"targetRefinement\"#>'{lum:swCategory,rightOperand}')::TEXT ELSE FALSE END) AND (rtu.\"targetRefinement\"#>'{lum:swCatalogId,rightOperand}' IS NULL OR (JSONB_TYPEOF(rtu.\"targetRefinement\"#>'{lum:swCatalogId,rightOperand}') = 'array' AND rtu.\"targetRefinement\"#>'{lum:swCatalogId,rightOperand}' ?| ctlgs.\"swCatalogIds\")) AND (rtu.\"targetRefinement\"#>'{lum:swCatalogType,rightOperand}' IS NULL OR (JSONB_TYPEOF(rtu.\"targetRefinement\"#>'{lum:swCatalogType,rightOperand}') = 'array' AND rtu.\"targetRefinement\"#>'{lum:swCatalogType,rightOperand}' ?| ctlgs.\"swCatalogTypes\")) AND ((rtu.\"assigneeMetrics\"->'users')::JSONB ? ($4)::TEXT OR (CASE WHEN (rtu.\"assigneeRefinement\"#>'{lum:countUniqueUsers,rightOperand}') IS NULL OR (rtu.\"assigneeRefinement\"#>'{lum:countUniqueUsers,operator}') IS NULL THEN TRUE WHEN (COALESCE(JSONB_ARRAY_LENGTH((rtu.\"assigneeMetrics\"->'users')::JSONB), 0) + 1) IS NULL OR JSONB_TYPEOF(rtu.\"assigneeRefinement\"#>'{lum:countUniqueUsers,rightOperand}') = 'null' OR JSONB_TYPEOF(rtu.\"assigneeRefinement\"#>'{lum:countUniqueUsers,operator}') <> 'string' THEN FALSE WHEN (rtu.\"assigneeRefinement\"#>'{lum:countUniqueUsers,operator}')->>0 = 'lum:in' THEN JSONB_TYPEOF(rtu.\"assigneeRefinement\"#>'{lum:countUniqueUsers,rightOperand}') = 'array' AND (rtu.\"assigneeRefinement\"#>'{lum:countUniqueUsers,rightOperand}') ? (COALESCE(JSONB_ARRAY_LENGTH((rtu.\"assigneeMetrics\"->'users')::JSONB), 0) + 1)::TEXT WHEN JSONB_TYPEOF(rtu.\"assigneeRefinement\"#>'{lum:countUniqueUsers,rightOperand}') <> 'number' THEN FALSE WHEN (rtu.\"assigneeRefinement\"#>'{lum:countUniqueUsers,operator}')->>0 = 'lt' THEN (COALESCE(JSONB_ARRAY_LENGTH((rtu.\"assigneeMetrics\"->'users')::JSONB), 0) + 1)::INTEGER < (rtu.\"assigneeRefinement\"#>'{lum:countUniqueUsers,rightOperand}')::INTEGER WHEN (rtu.\"assigneeRefinement\"#>'{lum:countUniqueUsers,operator}')->>0 = 'lteq' THEN (COALESCE(JSONB_ARRAY_LENGTH((rtu.\"assigneeMetrics\"->'users')::JSONB), 0) + 1)::INTEGER <= (rtu.\"assigneeRefinement\"#>'{lum:countUniqueUsers,rightOperand}')::INTEGER WHEN (rtu.\"assigneeRefinement\"#>'{lum:countUniqueUsers,operator}')->>0 = 'eq' THEN (COALESCE(JSONB_ARRAY_LENGTH((rtu.\"assigneeMetrics\"->'users')::JSONB), 0) + 1)::INTEGER = (rtu.\"assigneeRefinement\"#>'{lum:countUniqueUsers,rightOperand}')::INTEGER WHEN (rtu.\"assigneeRefinement\"#>'{lum:countUniqueUsers,operator}')->>0 = 'gteq' THEN (COALESCE(JSONB_ARRAY_LENGTH((rtu.\"assigneeMetrics\"->'users')::JSONB), 0) + 1)::INTEGER >= (rtu.\"assigneeRefinement\"#>'{lum:countUniqueUsers,rightOperand}')::INTEGER WHEN (rtu.\"assigneeRefinement\"#>'{lum:countUniqueUsers,operator}')->>0 = 'gt' THEN (COALESCE(JSONB_ARRAY_LENGTH((rtu.\"assigneeMetrics\"->'users')::JSONB), 0) + 1)::INTEGER > (rtu.\"assigneeRefinement\"#>'{lum:countUniqueUsers,rightOperand}')::INTEGER ELSE FALSE END)) AND (CASE WHEN (rtu.\"assigneeRefinement\"#>'{lum:users,rightOperand}') IS NULL OR (rtu.\"assigneeRefinement\"#>'{lum:users,operator}') IS NULL THEN TRUE WHEN (($4)::TEXT) IS NULL OR JSONB_TYPEOF(rtu.\"assigneeRefinement\"#>'{lum:users,rightOperand}') = 'null' OR JSONB_TYPEOF(rtu.\"assigneeRefinement\"#>'{lum:users,operator}') <> 'string' THEN FALSE WHEN (rtu.\"assigneeRefinement\"#>'{lum:users,operator}')->>0 = 'lum:in' THEN JSONB_TYPEOF(rtu.\"assigneeRefinement\"#>'{lum:users,rightOperand}') = 'array' AND (rtu.\"assigneeRefinement\"#>'{lum:users,rightOperand}') ? (($4)::TEXT)::TEXT WHEN JSONB_TYPEOF(rtu.\"assigneeRefinement\"#>'{lum:users,rightOperand}') <> 'string' THEN FALSE WHEN (rtu.\"assigneeRefinement\"#>'{lum:users,operator}')->>0 = 'lt' THEN (($4)::TEXT)::TEXT < (rtu.\"assigneeRefinement\"#>'{lum:users,rightOperand}')::TEXT WHEN (rtu.\"assigneeRefinement\"#>'{lum:users,operator}')->>0 = 'lteq' THEN (($4)::TEXT)::TEXT <= (rtu.\"assigneeRefinement\"#>'{lum:users,rightOperand}')::TEXT WHEN (rtu.\"assigneeRefinement\"#>'{lum:users,operator}')->>0 = 'eq' THEN (($4)::TEXT)::TEXT = (rtu.\"assigneeRefinement\"#>'{lum:users,rightOperand}')::TEXT WHEN (rtu.\"assigneeRefinement\"#>'{lum:users,operator}')->>0 = 'gteq' THEN (($4)::TEXT)::TEXT >= (rtu.\"assigneeRefinement\"#>'{lum:users,rightOperand}')::TEXT WHEN (rtu.\"assigneeRefinement\"#>'{lum:users,operator}')->>0 = 'gt' THEN (($4)::TEXT)::TEXT > (rtu.\"assigneeRefinement\"#>'{lum:users,rightOperand}')::TEXT ELSE FALSE END) AND (CASE WHEN (rtu.\"usageConstraints\"#>'{count,rightOperand}') IS NULL OR (rtu.\"usageConstraints\"#>'{count,operator}') IS NULL THEN TRUE WHEN (COALESCE((usmcs.\"metrics\"#>'{count}')::INTEGER, 0) + ($5)) IS NULL OR JSONB_TYPEOF(rtu.\"usageConstraints\"#>'{count,rightOperand}') = 'null' OR JSONB_TYPEOF(rtu.\"usageConstraints\"#>'{count,operator}') <> 'string' THEN FALSE WHEN (rtu.\"usageConstraints\"#>'{count,operator}')->>0 = 'lum:in' THEN JSONB_TYPEOF(rtu.\"usageConstraints\"#>'{count,rightOperand}') = 'array' AND (rtu.\"usageConstraints\"#>'{count,rightOperand}') ? (COALESCE((usmcs.\"metrics\"#>'{count}')::INTEGER, 0) + ($5))::TEXT WHEN JSONB_TYPEOF(rtu.\"usageConstraints\"#>'{count,rightOperand}') <> 'number' THEN FALSE WHEN (rtu.\"usageConstraints\"#>'{count,operator}')->>0 = 'lt' THEN (COALESCE((usmcs.\"metrics\"#>'{count}')::INTEGER, 0) + ($5))::INTEGER < (rtu.\"usageConstraints\"#>'{count,rightOperand}')::INTEGER WHEN (rtu.\"usageConstraints\"#>'{count,operator}')->>0 = 'lteq' THEN (COALESCE((usmcs.\"metrics\"#>'{count}')::INTEGER, 0) + ($5))::INTEGER <= (rtu.\"usageConstraints\"#>'{count,rightOperand}')::INTEGER WHEN (rtu.\"usageConstraints\"#>'{count,operator}')->>0 = 'eq' THEN (COALESCE((usmcs.\"metrics\"#>'{count}')::INTEGER, 0) + ($5))::INTEGER = (rtu.\"usageConstraints\"#>'{count,rightOperand}')::INTEGER WHEN (rtu.\"usageConstraints\"#>'{count,operator}')->>0 = 'gteq' THEN (COALESCE((usmcs.\"metrics\"#>'{count}')::INTEGER, 0) + ($5))::INTEGER >= (rtu.\"usageConstraints\"#>'{count,rightOperand}')::INTEGER WHEN (rtu.\"usageConstraints\"#>'{count,operator}')->>0 = 'gt' THEN (COALESCE((usmcs.\"metrics\"#>'{count}')::INTEGER, 0) + ($5))::INTEGER > (rtu.\"usageConstraints\"#>'{count,rightOperand}')::INTEGER ELSE FALSE END) ORDER BY swid_tag.\"swTagId\", NULLIF(rtu.\"assetUsageRuleType\", 'prohibition') NULLS FIRST, NULLIF(\"rtuAction\", 'use') NULLS LAST, rtu.\"created\", rtu.\"assetUsageRuleId\" LIMIT 1 FOR UPDATE OF rtu) , swid_tag_entitlement AS ( SELECT swid_tag.\"softwareLicensorId\", swid_tag.\"swTagId\", swid_tag.\"swidTagRevision\", swid_tag.\"swPersistentId\", swid_tag.\"swVersion\", swid_tag.\"swProductName\", swid_tag.\"licenseProfileId\", swid_tag.\"licenseProfileRevision\", swid_tag.\"isUsedBySwCreator\", swid_tag.\"isRtuRequired\", swid_tag.\"usageType\", swid_tag.need_rtu, CASE WHEN swid_tag.\"denial\" IS NOT NULL THEN swid_tag.\"denial\" WHEN swid_tag.need_rtu = FALSE THEN NULL WHEN rtu_rule.\"assetUsageRuleType\" = 'prohibition' THEN JSON_BUILD_OBJECT( 'denialCode', 'denied_due_usageProhibited', 'denialType', 'usageProhibited', 'denialReason', FORMAT('swid-tag(%s) has been found but asset-usage is prohibited by prohibition(%s) under asset-usage-agreement(%s) for action(%s)', swid_tag.\"swTagId\", rtu_rule.\"rightToUseId\", rtu_rule.\"assetUsageAgreementId\", rtu_rule.\"rtuAction\"), 'deniedAction', rtu_rule.\"rtuAction\", 'deniedAssetUsageAgreementId', rtu_rule.\"assetUsageAgreementId\", 'deniedAssetUsageAgreementRevision', rtu_rule.\"assetUsageAgreementRevision\", 'deniedRightToUseId', rtu_rule.\"rightToUseId\", 'deniedRightToUseRevision', rtu_rule.\"rightToUseRevision\", 'denialReqItemName', 'action', 'denialReqItemValue', ($2)::TEXT, 'deniedConstraint', JSON_BUILD_OBJECT('action', rtu_rule.\"rtuAction\") ) ELSE NULL END AS \"denial\", rtu_rule.* FROM swid_tag LEFT OUTER JOIN rtu_rule ON (swid_tag.\"swTagId\" = rtu_rule.rtu_sw_id) ) SELECT \"softwareLicensorId\", \"swTagId\", \"swidTagRevision\", \"swPersistentId\", \"swVersion\", \"swProductName\", \"licenseProfileId\", \"licenseProfileRevision\", \"isUsedBySwCreator\", \"isRtuRequired\", \"assetUsageRuleId\", \"assetUsageAgreementId\", \"assetUsageAgreementRevision\", \"rightToUseId\", \"assetUsageRuleType\", \"rightToUseRevision\", \"metricsRevision\", \"licenseKeys\", \"rtuAction\", \"metrics\", \"assigneeMetrics\", \"isUserInAssigneeMetrics\", \"denial\", CASE WHEN \"denial\" IS NULL AND swtags_ent.need_rtu = TRUE AND swtags_ent.rtu_sw_id IS NOT NULL THEN JSON_BUILD_OBJECT( 'rightToUseId', swtags_ent.\"rightToUseId\", 'rightToUseRevision', swtags_ent.\"rightToUseRevision\", 'assetUsageAgreementId', swtags_ent.\"assetUsageAgreementId\", 'assetUsageAgreementRevision', swtags_ent.\"assetUsageAgreementRevision\", 'licenseKeys', swtags_ent.\"licenseKeys\" ) ELSE NULL END AS \"entitlement\" FROM swid_tag_entitlement AS swtags_ent",
             "sqlVals": [
-                "alex-1",
+                "unit-test-swTagId",
                 "acumos:deploy",
                 "use",
-                "alex-usage",
+                "unit-test-userId",
                 2
             ],
             "result": {
@@ -83,22 +84,22 @@
                 "rowCount": 1,
                 "rows": [
                     {
-                        "softwareLicensorId": "swlic",
-                        "swTagId": "alex-1",
-                        "swidTagRevision": 1,
-                        "swPersistentId": "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                        "swVersion": "1",
-                        "swProductName": "alex-product2",
-                        "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                        "softwareLicensorId": "unit-test-softwareLicensorId",
+                        "swTagId": "unit-test-swTagId",
+                        "swidTagRevision": 5,
+                        "swPersistentId": "a218c795-ae2c-4ff9-894d-462baa768dfc",
+                        "swVersion": "4",
+                        "swProductName": "unit-test-product253",
+                        "licenseProfileId": "cec51e7d-d977-41d2-abc6-ef5f069491b8",
                         "licenseProfileRevision": 1,
                         "isUsedBySwCreator": false,
                         "isRtuRequired": true,
-                        "assetUsageRuleId": "7aa519f3-30c6-45fc-8fd6-bb210f3ceb42",
-                        "assetUsageAgreementId": "alex-agr",
-                        "assetUsageAgreementRevision": 47,
-                        "rightToUseId": "proh-2",
+                        "assetUsageRuleId": "14063a29-77b5-41b8-a544-6059502ee032",
+                        "assetUsageAgreementId": "unit-test-assetUsageAgreementId",
+                        "assetUsageAgreementRevision": 6,
+                        "rightToUseId": "unit-test-prohibition-2",
                         "assetUsageRuleType": "prohibition",
-                        "rightToUseRevision": 47,
+                        "rightToUseRevision": 6,
                         "metricsRevision": 0,
                         "licenseKeys": null,
                         "rtuAction": "acumos:deploy",
@@ -110,12 +111,12 @@
                         "denial": {
                             "denialCode": "denied_due_usageProhibited",
                             "denialType": "usageProhibited",
-                            "denialReason": "swid-tag(alex-1) has been found but asset-usage is prohibited by prohibition(proh-2) under asset-usage-agreement(alex-agr) for action(acumos:deploy)",
+                            "denialReason": "swid-tag(unit-test-swTagId) has been found but asset-usage is prohibited by prohibition(unit-test-prohibition-2) under asset-usage-agreement(unit-test-assetUsageAgreementId) for action(acumos:deploy)",
                             "deniedAction": "acumos:deploy",
-                            "deniedAssetUsageAgreementId": "alex-agr",
-                            "deniedAssetUsageAgreementRevision": 47,
-                            "deniedRightToUseId": "proh-2",
-                            "deniedRightToUseRevision": 47,
+                            "deniedAssetUsageAgreementId": "unit-test-assetUsageAgreementId",
+                            "deniedAssetUsageAgreementRevision": 6,
+                            "deniedRightToUseId": "unit-test-prohibition-2",
+                            "deniedRightToUseRevision": 6,
                             "denialReqItemName": "action",
                             "denialReqItemValue": "acumos:deploy",
                             "deniedConstraint": {
@@ -130,43 +131,43 @@
         {
             "sqlCmd": "WITH asset_usage AS ( INSERT INTO \"assetUsage\" AS au (\"assetUsageId\" , \"isIncludedAsset\",\"modifier\" , \"creator\", \"assetUsageSeqTail\", \"assetUsageSeqTailEntitlement\", \"created\", \"modified\") VALUES (($1) , ($2),($3) , ($4), 1, 1, NOW(), NOW()) ON CONFLICT (\"assetUsageId\") DO UPDATE SET \"assetUsageSeqTail\" = au.\"assetUsageSeqTail\" + 1, \"assetUsageSeqTailEntitlement\" = au.\"assetUsageSeqTail\" + 1, \"modified\" = NOW() , \"isIncludedAsset\" = ($2),\"modifier\" = ($3) RETURNING \"assetUsageSeqTail\") INSERT INTO \"assetUsageHistory\" AS auh (\"assetUsageId\" , \"swMgtSystemId\",\"swMgtSystemInstanceId\",\"swMgtSystemComponent\",\"usageEntitled\",\"assetUsageReqId\",\"assetUsageType\",\"action\",\"swTagId\",\"softwareLicensorId\",\"swidTagRevision\",\"licenseProfileId\",\"licenseProfileRevision\",\"isRtuRequired\",\"isUsedBySwCreator\",\"assetUsageRuleId\",\"rightToUseRevision\",\"assetUsageAgreementId\",\"assetUsageAgreementRevision\",\"licenseKeys\",\"metrics\",\"assigneeMetrics\",\"usageMetricsId\",\"assetUsageDenialSummary\",\"assetUsageDenial\" , \"creator\", \"assetUsageSeq\", \"created\") SELECT ($1) , ($5),($6),($7),($8),($9),($10),($11),($12),($13),($14),($15),($16),($17),($18),($19),($20),($21),($22),($23),($24),($25),($26),($27),($28) , ($4), \"assetUsageSeqTail\", NOW() FROM asset_usage RETURNING auh.\"assetUsageSeq\"",
             "sqlVals": [
-                "alex-usage-1",
+                "unit-test-assetUsageId",
                 false,
-                "alex-usage",
-                "alex-usage",
-                "alex-sys",
-                "123",
-                "dev",
+                "unit-test-userId",
+                "unit-test-userId",
+                "unit-test-swMgtSystemId",
+                "unit-test-swMgtSystemInstanceId",
+                "unit-test-swMgtSystemComponent",
                 false,
-                "8b750af9-ebe6-4d5d-bad6-a9d502e53eff",
+                "a2488085-30a9-488b-b774-4ad0ba602f3b",
                 "assetUsage",
                 "acumos:deploy",
-                "alex-1",
-                "swlic",
-                1,
-                "d817cbd1-d799-44af-8a5e-693163812e98",
+                "unit-test-swTagId",
+                "unit-test-softwareLicensorId",
+                5,
+                "cec51e7d-d977-41d2-abc6-ef5f069491b8",
                 1,
                 true,
                 false,
-                "7aa519f3-30c6-45fc-8fd6-bb210f3ceb42",
-                47,
-                "alex-agr",
-                47,
+                "14063a29-77b5-41b8-a544-6059502ee032",
+                6,
+                "unit-test-assetUsageAgreementId",
+                6,
                 null,
                 null,
                 {
                     "users": []
                 },
                 null,
-                "swid-tag(alex-1) has been found but asset-usage is prohibited by prohibition(proh-2) under asset-usage-agreement(alex-agr) for action(acumos:deploy)",
-                "[{\"denialCode\":\"denied_due_usageProhibited\",\"denialType\":\"usageProhibited\",\"denialReason\":\"swid-tag(alex-1) has been found but asset-usage is prohibited by prohibition(proh-2) under asset-usage-agreement(alex-agr) for action(acumos:deploy)\",\"deniedAction\":\"acumos:deploy\",\"deniedAssetUsageAgreementId\":\"alex-agr\",\"deniedAssetUsageAgreementRevision\":47,\"deniedRightToUseId\":\"proh-2\",\"deniedRightToUseRevision\":47,\"denialReqItemName\":\"action\",\"denialReqItemValue\":\"acumos:deploy\",\"deniedConstraint\":{\"action\":\"acumos:deploy\"}}]"
+                "swid-tag(unit-test-swTagId) has been found but asset-usage is prohibited by prohibition(unit-test-prohibition-2) under asset-usage-agreement(unit-test-assetUsageAgreementId) for action(acumos:deploy)",
+                "[{\"denialCode\":\"denied_due_usageProhibited\",\"denialType\":\"usageProhibited\",\"denialReason\":\"swid-tag(unit-test-swTagId) has been found but asset-usage is prohibited by prohibition(unit-test-prohibition-2) under asset-usage-agreement(unit-test-assetUsageAgreementId) for action(acumos:deploy)\",\"deniedAction\":\"acumos:deploy\",\"deniedAssetUsageAgreementId\":\"unit-test-assetUsageAgreementId\",\"deniedAssetUsageAgreementRevision\":6,\"deniedRightToUseId\":\"unit-test-prohibition-2\",\"deniedRightToUseRevision\":6,\"denialReqItemName\":\"action\",\"denialReqItemValue\":\"acumos:deploy\",\"deniedConstraint\":{\"action\":\"acumos:deploy\"}}]"
             ],
             "result": {
                 "command": "INSERT",
                 "rowCount": 1,
                 "rows": [
                     {
-                        "assetUsageSeq": 77
+                        "assetUsageSeq": 1
                     }
                 ]
             }
@@ -174,43 +175,43 @@
         {
             "sqlCmd": "WITH asset_usage AS ( INSERT INTO \"assetUsage\" AS au (\"assetUsageId\" , \"isIncludedAsset\",\"modifier\" , \"creator\", \"assetUsageSeqTail\", \"assetUsageSeqTailEntitlement\", \"created\", \"modified\") VALUES (($1) , ($2),($3) , ($4), 1, 1, NOW(), NOW()) ON CONFLICT (\"assetUsageId\") DO UPDATE SET \"assetUsageSeqTail\" = au.\"assetUsageSeqTail\" + 1, \"assetUsageSeqTailEntitlement\" = au.\"assetUsageSeqTail\" + 1, \"modified\" = NOW() , \"isIncludedAsset\" = ($2),\"modifier\" = ($3) RETURNING \"assetUsageSeqTail\") INSERT INTO \"assetUsageHistory\" AS auh (\"assetUsageId\" , \"swMgtSystemId\",\"swMgtSystemInstanceId\",\"swMgtSystemComponent\",\"usageEntitled\",\"assetUsageReqId\",\"assetUsageType\",\"action\",\"swTagId\",\"softwareLicensorId\",\"swidTagRevision\",\"licenseProfileId\",\"licenseProfileRevision\",\"isRtuRequired\",\"isUsedBySwCreator\",\"assetUsageRuleId\",\"rightToUseRevision\",\"assetUsageAgreementId\",\"assetUsageAgreementRevision\",\"licenseKeys\",\"metrics\",\"assigneeMetrics\",\"usageMetricsId\",\"assetUsageDenialSummary\",\"assetUsageDenial\" , \"creator\", \"assetUsageSeq\", \"created\") SELECT ($1) , ($5),($6),($7),($8),($9),($10),($11),($12),($13),($14),($15),($16),($17),($18),($19),($20),($21),($22),($23),($24),($25),($26),($27),($28) , ($4), \"assetUsageSeqTail\", NOW() FROM asset_usage RETURNING auh.\"assetUsageSeq\"",
             "sqlVals": [
-                "alex-usage-2",
+                "unit-test-assetUsageId-2",
                 true,
-                "alex-usage",
-                "alex-usage",
-                "alex-sys",
-                "123",
-                "dev",
+                "unit-test-userId",
+                "unit-test-userId",
+                "unit-test-swMgtSystemId",
+                "unit-test-swMgtSystemInstanceId",
+                "unit-test-swMgtSystemComponent",
                 false,
-                "8b750af9-ebe6-4d5d-bad6-a9d502e53eff",
+                "a2488085-30a9-488b-b774-4ad0ba602f3b",
                 "assetUsage",
                 "acumos:deploy",
-                "alex-1",
-                "swlic",
-                1,
-                "d817cbd1-d799-44af-8a5e-693163812e98",
+                "unit-test-swTagId",
+                "unit-test-softwareLicensorId",
+                5,
+                "cec51e7d-d977-41d2-abc6-ef5f069491b8",
                 1,
                 true,
                 false,
-                "7aa519f3-30c6-45fc-8fd6-bb210f3ceb42",
-                47,
-                "alex-agr",
-                47,
+                "14063a29-77b5-41b8-a544-6059502ee032",
+                6,
+                "unit-test-assetUsageAgreementId",
+                6,
                 null,
                 null,
                 {
                     "users": []
                 },
                 null,
-                "swid-tag(alex-1) has been found but asset-usage is prohibited by prohibition(proh-2) under asset-usage-agreement(alex-agr) for action(acumos:deploy)",
-                "[{\"denialCode\":\"denied_due_usageProhibited\",\"denialType\":\"usageProhibited\",\"denialReason\":\"swid-tag(alex-1) has been found but asset-usage is prohibited by prohibition(proh-2) under asset-usage-agreement(alex-agr) for action(acumos:deploy)\",\"deniedAction\":\"acumos:deploy\",\"deniedAssetUsageAgreementId\":\"alex-agr\",\"deniedAssetUsageAgreementRevision\":47,\"deniedRightToUseId\":\"proh-2\",\"deniedRightToUseRevision\":47,\"denialReqItemName\":\"action\",\"denialReqItemValue\":\"acumos:deploy\",\"deniedConstraint\":{\"action\":\"acumos:deploy\"}}]"
+                "swid-tag(unit-test-swTagId) has been found but asset-usage is prohibited by prohibition(unit-test-prohibition-2) under asset-usage-agreement(unit-test-assetUsageAgreementId) for action(acumos:deploy)",
+                "[{\"denialCode\":\"denied_due_usageProhibited\",\"denialType\":\"usageProhibited\",\"denialReason\":\"swid-tag(unit-test-swTagId) has been found but asset-usage is prohibited by prohibition(unit-test-prohibition-2) under asset-usage-agreement(unit-test-assetUsageAgreementId) for action(acumos:deploy)\",\"deniedAction\":\"acumos:deploy\",\"deniedAssetUsageAgreementId\":\"unit-test-assetUsageAgreementId\",\"deniedAssetUsageAgreementRevision\":6,\"deniedRightToUseId\":\"unit-test-prohibition-2\",\"deniedRightToUseRevision\":6,\"denialReqItemName\":\"action\",\"denialReqItemValue\":\"acumos:deploy\",\"deniedConstraint\":{\"action\":\"acumos:deploy\"}}]"
             ],
             "result": {
                 "command": "INSERT",
                 "rowCount": 1,
                 "rows": [
                     {
-                        "assetUsageSeq": 68
+                        "assetUsageSeq": 1
                     }
                 ]
             }
@@ -218,53 +219,53 @@
         {
             "sqlCmd": "INSERT INTO \"includedAssetUsage\" (\"assetUsageId\", \"includedAssetUsageId\" , \"creator\",\"creatorRequestId\") SELECT ($1), UNNEST(ARRAY[($2)]) , ($3),($4) ON CONFLICT (\"assetUsageId\", \"includedAssetUsageId\") DO NOTHING",
             "sqlVals": [
-                "alex-usage-1",
-                "alex-usage-2",
-                "alex-usage",
-                "8b750af9-ebe6-4d5d-bad6-a9d502e53eff"
+                "unit-test-assetUsageId",
+                "unit-test-assetUsageId-2",
+                "unit-test-userId",
+                "a2488085-30a9-488b-b774-4ad0ba602f3b"
             ],
             "result": {
                 "command": "INSERT",
-                "rowCount": 0,
+                "rowCount": 1,
                 "rows": []
             }
         },
         {
             "sqlCmd": "UPDATE \"assetUsageReq\" AS aur SET \"requestDone\" = TRUE, \"responseSent\" = CLOCK_TIMESTAMP() , \"responseHttpCode\" = ($2),\"response\" = ($3),\"usageEntitled\" = ($4),\"status\" = ($5) WHERE aur.\"assetUsageReqId\" = ($1)",
             "sqlVals": [
-                "8b750af9-ebe6-4d5d-bad6-a9d502e53eff",
+                "a2488085-30a9-488b-b774-4ad0ba602f3b",
                 402,
                 {
-                    "userId": "alex-usage",
-                    "swMgtSystemId": "alex-sys",
-                    "swMgtSystemInstanceId": "123",
-                    "swMgtSystemComponent": "dev",
-                    "requestId": "8b750af9-ebe6-4d5d-bad6-a9d502e53eff",
-                    "requested": "2020-04-03T16:45:21.870Z",
+                    "userId": "unit-test-userId",
+                    "swMgtSystemId": "unit-test-swMgtSystemId",
+                    "swMgtSystemInstanceId": "unit-test-swMgtSystemInstanceId",
+                    "swMgtSystemComponent": "unit-test-swMgtSystemComponent",
+                    "requestId": "a2488085-30a9-488b-b774-4ad0ba602f3b",
+                    "requested": "2020-06-25T17:44:12.496Z",
                     "usageEntitled": false,
                     "assetUsage": {
-                        "swTagId": "alex-1",
-                        "assetUsageId": "alex-usage-1",
+                        "swTagId": "unit-test-swTagId",
+                        "assetUsageId": "unit-test-assetUsageId",
                         "action": "acumos:deploy",
                         "usageEntitled": false,
                         "isUsedBySwCreator": false,
-                        "assetUsageSeq": 77,
-                        "swidTagRevision": 1,
-                        "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                        "assetUsageSeq": 1,
+                        "swidTagRevision": 5,
+                        "licenseProfileId": "cec51e7d-d977-41d2-abc6-ef5f069491b8",
                         "licenseProfileRevision": 1,
                         "isRtuRequired": true,
-                        "softwareLicensorId": "swlic",
-                        "assetUsageDenialSummary": "swid-tag(alex-1) has been found but asset-usage is prohibited by prohibition(proh-2) under asset-usage-agreement(alex-agr) for action(acumos:deploy)",
+                        "softwareLicensorId": "unit-test-softwareLicensorId",
+                        "assetUsageDenialSummary": "swid-tag(unit-test-swTagId) has been found but asset-usage is prohibited by prohibition(unit-test-prohibition-2) under asset-usage-agreement(unit-test-assetUsageAgreementId) for action(acumos:deploy)",
                         "assetUsageDenial": [
                             {
                                 "denialCode": "denied_due_usageProhibited",
                                 "denialType": "usageProhibited",
-                                "denialReason": "swid-tag(alex-1) has been found but asset-usage is prohibited by prohibition(proh-2) under asset-usage-agreement(alex-agr) for action(acumos:deploy)",
+                                "denialReason": "swid-tag(unit-test-swTagId) has been found but asset-usage is prohibited by prohibition(unit-test-prohibition-2) under asset-usage-agreement(unit-test-assetUsageAgreementId) for action(acumos:deploy)",
                                 "deniedAction": "acumos:deploy",
-                                "deniedAssetUsageAgreementId": "alex-agr",
-                                "deniedAssetUsageAgreementRevision": 47,
-                                "deniedRightToUseId": "proh-2",
-                                "deniedRightToUseRevision": 47,
+                                "deniedAssetUsageAgreementId": "unit-test-assetUsageAgreementId",
+                                "deniedAssetUsageAgreementRevision": 6,
+                                "deniedRightToUseId": "unit-test-prohibition-2",
+                                "deniedRightToUseRevision": 6,
                                 "denialReqItemName": "action",
                                 "denialReqItemValue": "acumos:deploy",
                                 "deniedConstraint": {
@@ -274,27 +275,27 @@
                         ],
                         "includedAssetUsage": [
                             {
-                                "includedSwTagId": "alex-1",
-                                "includedAssetUsageId": "alex-usage-2",
+                                "includedSwTagId": "unit-test-swTagId",
+                                "includedAssetUsageId": "unit-test-assetUsageId-2",
                                 "usageEntitled": false,
                                 "isUsedBySwCreator": false,
-                                "assetUsageSeq": 68,
-                                "swidTagRevision": 1,
-                                "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                                "assetUsageSeq": 1,
+                                "swidTagRevision": 5,
+                                "licenseProfileId": "cec51e7d-d977-41d2-abc6-ef5f069491b8",
                                 "licenseProfileRevision": 1,
                                 "isRtuRequired": true,
-                                "softwareLicensorId": "swlic",
-                                "assetUsageDenialSummary": "swid-tag(alex-1) has been found but asset-usage is prohibited by prohibition(proh-2) under asset-usage-agreement(alex-agr) for action(acumos:deploy)",
+                                "softwareLicensorId": "unit-test-softwareLicensorId",
+                                "assetUsageDenialSummary": "swid-tag(unit-test-swTagId) has been found but asset-usage is prohibited by prohibition(unit-test-prohibition-2) under asset-usage-agreement(unit-test-assetUsageAgreementId) for action(acumos:deploy)",
                                 "assetUsageDenial": [
                                     {
                                         "denialCode": "denied_due_usageProhibited",
                                         "denialType": "usageProhibited",
-                                        "denialReason": "swid-tag(alex-1) has been found but asset-usage is prohibited by prohibition(proh-2) under asset-usage-agreement(alex-agr) for action(acumos:deploy)",
+                                        "denialReason": "swid-tag(unit-test-swTagId) has been found but asset-usage is prohibited by prohibition(unit-test-prohibition-2) under asset-usage-agreement(unit-test-assetUsageAgreementId) for action(acumos:deploy)",
                                         "deniedAction": "acumos:deploy",
-                                        "deniedAssetUsageAgreementId": "alex-agr",
-                                        "deniedAssetUsageAgreementRevision": 47,
-                                        "deniedRightToUseId": "proh-2",
-                                        "deniedRightToUseRevision": 47,
+                                        "deniedAssetUsageAgreementId": "unit-test-assetUsageAgreementId",
+                                        "deniedAssetUsageAgreementRevision": 6,
+                                        "deniedRightToUseId": "unit-test-prohibition-2",
+                                        "deniedRightToUseRevision": 6,
                                         "denialReqItemName": "action",
                                         "denialReqItemValue": "acumos:deploy",
                                         "deniedConstraint": {
@@ -326,24 +327,25 @@
     ],
     "req": {
         "method": "PUT",
-        "path": "/api/v1/asset-usage?assetUsageId=alex-usage-1",
+        "path": "/api/v1/asset-usage?assetUsageId=unit-test-assetUsageId",
         "content-type": "application/json; charset=utf-8",
+        "X-ACUMOS-RequestID": "a2488085-30a9-488b-b774-4ad0ba602f3b",
         "send": {
-            "requestId": "8b750af9-ebe6-4d5d-bad6-a9d502e53eff",
-            "requested": "2020-04-03T16:45:21.870Z",
-            "userId": "alex-usage",
-            "swMgtSystemId": "alex-sys",
-            "swMgtSystemInstanceId": "123",
-            "swMgtSystemComponent": "dev",
+            "requestId": "a2488085-30a9-488b-b774-4ad0ba602f3b",
+            "requested": "2020-06-25T17:44:12.496Z",
+            "userId": "unit-test-userId",
+            "swMgtSystemId": "unit-test-swMgtSystemId",
+            "swMgtSystemInstanceId": "unit-test-swMgtSystemInstanceId",
+            "swMgtSystemComponent": "unit-test-swMgtSystemComponent",
             "assetUsageReq": {
-                "swTagId": "alex-1",
-                "assetUsageId": "alex-usage-1",
+                "swTagId": "unit-test-swTagId",
+                "assetUsageId": "unit-test-assetUsageId",
                 "action": "acumos:deploy",
                 "isIncludedAsset": false,
                 "includedAssetUsage": [
                     {
-                        "includedSwTagId": "alex-1",
-                        "includedAssetUsageId": "alex-usage-2"
+                        "includedSwTagId": "unit-test-swTagId",
+                        "includedAssetUsageId": "unit-test-assetUsageId-2"
                     }
                 ]
             }
@@ -352,36 +354,36 @@
     "res": {
         "statusCode": 402,
         "body": {
-            "userId": "alex-usage",
-            "swMgtSystemId": "alex-sys",
-            "swMgtSystemInstanceId": "123",
-            "swMgtSystemComponent": "dev",
-            "requestId": "8b750af9-ebe6-4d5d-bad6-a9d502e53eff",
-            "requested": "2020-04-03T16:45:21.870Z",
+            "userId": "unit-test-userId",
+            "swMgtSystemId": "unit-test-swMgtSystemId",
+            "swMgtSystemInstanceId": "unit-test-swMgtSystemInstanceId",
+            "swMgtSystemComponent": "unit-test-swMgtSystemComponent",
+            "requestId": "a2488085-30a9-488b-b774-4ad0ba602f3b",
+            "requested": "__type__dateTime__",
             "usageEntitled": false,
             "assetUsage": {
-                "swTagId": "alex-1",
-                "assetUsageId": "alex-usage-1",
+                "swTagId": "unit-test-swTagId",
+                "assetUsageId": "unit-test-assetUsageId",
                 "action": "acumos:deploy",
                 "usageEntitled": false,
                 "isUsedBySwCreator": false,
-                "assetUsageSeq": 77,
-                "swidTagRevision": 1,
-                "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                "assetUsageSeq": 1,
+                "swidTagRevision": 5,
+                "licenseProfileId": "cec51e7d-d977-41d2-abc6-ef5f069491b8",
                 "licenseProfileRevision": 1,
                 "isRtuRequired": true,
-                "softwareLicensorId": "swlic",
-                "assetUsageDenialSummary": "swid-tag(alex-1) has been found but asset-usage is prohibited by prohibition(proh-2) under asset-usage-agreement(alex-agr) for action(acumos:deploy)",
+                "softwareLicensorId": "unit-test-softwareLicensorId",
+                "assetUsageDenialSummary": "swid-tag(unit-test-swTagId) has been found but asset-usage is prohibited by prohibition(unit-test-prohibition-2) under asset-usage-agreement(unit-test-assetUsageAgreementId) for action(acumos:deploy)",
                 "assetUsageDenial": [
                     {
                         "denialCode": "denied_due_usageProhibited",
                         "denialType": "usageProhibited",
-                        "denialReason": "swid-tag(alex-1) has been found but asset-usage is prohibited by prohibition(proh-2) under asset-usage-agreement(alex-agr) for action(acumos:deploy)",
+                        "denialReason": "swid-tag(unit-test-swTagId) has been found but asset-usage is prohibited by prohibition(unit-test-prohibition-2) under asset-usage-agreement(unit-test-assetUsageAgreementId) for action(acumos:deploy)",
                         "deniedAction": "acumos:deploy",
-                        "deniedAssetUsageAgreementId": "alex-agr",
-                        "deniedAssetUsageAgreementRevision": 47,
-                        "deniedRightToUseId": "proh-2",
-                        "deniedRightToUseRevision": 47,
+                        "deniedAssetUsageAgreementId": "unit-test-assetUsageAgreementId",
+                        "deniedAssetUsageAgreementRevision": 6,
+                        "deniedRightToUseId": "unit-test-prohibition-2",
+                        "deniedRightToUseRevision": 6,
                         "denialReqItemName": "action",
                         "denialReqItemValue": "acumos:deploy",
                         "deniedConstraint": {
@@ -391,27 +393,27 @@
                 ],
                 "includedAssetUsage": [
                     {
-                        "includedSwTagId": "alex-1",
-                        "includedAssetUsageId": "alex-usage-2",
+                        "includedSwTagId": "unit-test-swTagId",
+                        "includedAssetUsageId": "unit-test-assetUsageId-2",
                         "usageEntitled": false,
                         "isUsedBySwCreator": false,
-                        "assetUsageSeq": 68,
-                        "swidTagRevision": 1,
-                        "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                        "assetUsageSeq": 1,
+                        "swidTagRevision": 5,
+                        "licenseProfileId": "cec51e7d-d977-41d2-abc6-ef5f069491b8",
                         "licenseProfileRevision": 1,
                         "isRtuRequired": true,
-                        "softwareLicensorId": "swlic",
-                        "assetUsageDenialSummary": "swid-tag(alex-1) has been found but asset-usage is prohibited by prohibition(proh-2) under asset-usage-agreement(alex-agr) for action(acumos:deploy)",
+                        "softwareLicensorId": "unit-test-softwareLicensorId",
+                        "assetUsageDenialSummary": "swid-tag(unit-test-swTagId) has been found but asset-usage is prohibited by prohibition(unit-test-prohibition-2) under asset-usage-agreement(unit-test-assetUsageAgreementId) for action(acumos:deploy)",
                         "assetUsageDenial": [
                             {
                                 "denialCode": "denied_due_usageProhibited",
                                 "denialType": "usageProhibited",
-                                "denialReason": "swid-tag(alex-1) has been found but asset-usage is prohibited by prohibition(proh-2) under asset-usage-agreement(alex-agr) for action(acumos:deploy)",
+                                "denialReason": "swid-tag(unit-test-swTagId) has been found but asset-usage is prohibited by prohibition(unit-test-prohibition-2) under asset-usage-agreement(unit-test-assetUsageAgreementId) for action(acumos:deploy)",
                                 "deniedAction": "acumos:deploy",
-                                "deniedAssetUsageAgreementId": "alex-agr",
-                                "deniedAssetUsageAgreementRevision": 47,
-                                "deniedRightToUseId": "proh-2",
-                                "deniedRightToUseRevision": 47,
+                                "deniedAssetUsageAgreementId": "unit-test-assetUsageAgreementId",
+                                "deniedAssetUsageAgreementRevision": 6,
+                                "deniedRightToUseId": "unit-test-prohibition-2",
+                                "deniedRightToUseRevision": 6,
                                 "denialReqItemName": "action",
                                 "denialReqItemValue": "acumos:deploy",
                                 "deniedConstraint": {
@@ -427,7 +429,7 @@
     "acuLogs": [
         {
             "LogTimestamp": "__type__dateTime__",
-            "RequestID": "8b750af9-ebe6-4d5d-bad6-a9d502e53eff",
+            "RequestID": "a2488085-30a9-488b-b774-4ad0ba602f3b",
             "InvocationID": "PUT /api/v1/asset-usage",
             "InstanceID": "__type__uuid__",
             "Thread": "main",
@@ -442,32 +444,33 @@
             "ClientIPAddress": "__type__ignore__",
             "TargetEntity": null,
             "TargetServiceName": null,
-            "User": "alex-usage",
+            "User": "unit-test-userId",
             "Logger": "__type__ignore__",
             "Mdc": null,
             "Message": {
-                "userId": "alex-usage",
-                "swMgtSystemId": "alex-sys",
-                "swMgtSystemInstanceId": "123",
-                "swMgtSystemComponent": "dev",
+                "userId": "unit-test-userId",
+                "swMgtSystemId": "unit-test-swMgtSystemId",
+                "swMgtSystemInstanceId": "unit-test-swMgtSystemInstanceId",
+                "swMgtSystemComponent": "unit-test-swMgtSystemComponent",
                 "assetUsageReq": {
-                    "swTagId": "alex-1",
-                    "assetUsageId": "alex-usage-1",
+                    "swTagId": "unit-test-swTagId",
+                    "assetUsageId": "unit-test-assetUsageId",
                     "action": "acumos:deploy",
                     "isIncludedAsset": false,
                     "includedAssetUsage": [
                         {
-                            "includedSwTagId": "alex-1",
-                            "includedAssetUsageId": "alex-usage-2"
+                            "includedSwTagId": "unit-test-swTagId",
+                            "includedAssetUsageId": "unit-test-assetUsageId-2"
                         }
                     ]
-                }
+                },
+                "requested": "__type__dateTime__"
             },
             "Marker": "ENTRY"
         },
         {
             "LogTimestamp": "__type__dateTime__",
-            "RequestID": "8b750af9-ebe6-4d5d-bad6-a9d502e53eff",
+            "RequestID": "a2488085-30a9-488b-b774-4ad0ba602f3b",
             "InvocationID": "response",
             "InstanceID": "__type__uuid__",
             "Thread": "main",
@@ -482,40 +485,40 @@
             "ClientIPAddress": "__type__ignore__",
             "TargetEntity": null,
             "TargetServiceName": null,
-            "User": "alex-usage",
+            "User": "unit-test-userId",
             "Logger": "__type__ignore__",
             "Mdc": null,
             "Message": {
-                "userId": "alex-usage",
-                "swMgtSystemId": "alex-sys",
-                "swMgtSystemInstanceId": "123",
-                "swMgtSystemComponent": "dev",
-                "requestId": "8b750af9-ebe6-4d5d-bad6-a9d502e53eff",
-                "requested": "2020-04-03T16:45:21.870Z",
+                "requestId": "a2488085-30a9-488b-b774-4ad0ba602f3b",
+                "requested": "2020-06-25T17:44:12.496Z",
+                "userId": "unit-test-userId",
+                "swMgtSystemId": "unit-test-swMgtSystemId",
+                "swMgtSystemInstanceId": "unit-test-swMgtSystemInstanceId",
+                "swMgtSystemComponent": "unit-test-swMgtSystemComponent",
                 "usageEntitled": false,
                 "assetUsage": {
-                    "swTagId": "alex-1",
-                    "assetUsageId": "alex-usage-1",
+                    "swTagId": "unit-test-swTagId",
+                    "assetUsageId": "unit-test-assetUsageId",
                     "action": "acumos:deploy",
                     "usageEntitled": false,
                     "isUsedBySwCreator": false,
-                    "assetUsageSeq": 77,
-                    "swidTagRevision": 1,
-                    "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                    "assetUsageSeq": 1,
+                    "swidTagRevision": 5,
+                    "licenseProfileId": "cec51e7d-d977-41d2-abc6-ef5f069491b8",
                     "licenseProfileRevision": 1,
                     "isRtuRequired": true,
-                    "softwareLicensorId": "swlic",
-                    "assetUsageDenialSummary": "swid-tag(alex-1) has been found but asset-usage is prohibited by prohibition(proh-2) under asset-usage-agreement(alex-agr) for action(acumos:deploy)",
+                    "softwareLicensorId": "unit-test-softwareLicensorId",
+                    "assetUsageDenialSummary": "swid-tag(unit-test-swTagId) has been found but asset-usage is prohibited by prohibition(unit-test-prohibition-2) under asset-usage-agreement(unit-test-assetUsageAgreementId) for action(acumos:deploy)",
                     "assetUsageDenial": [
                         {
                             "denialCode": "denied_due_usageProhibited",
                             "denialType": "usageProhibited",
-                            "denialReason": "swid-tag(alex-1) has been found but asset-usage is prohibited by prohibition(proh-2) under asset-usage-agreement(alex-agr) for action(acumos:deploy)",
+                            "denialReason": "swid-tag(unit-test-swTagId) has been found but asset-usage is prohibited by prohibition(unit-test-prohibition-2) under asset-usage-agreement(unit-test-assetUsageAgreementId) for action(acumos:deploy)",
                             "deniedAction": "acumos:deploy",
-                            "deniedAssetUsageAgreementId": "alex-agr",
-                            "deniedAssetUsageAgreementRevision": 47,
-                            "deniedRightToUseId": "proh-2",
-                            "deniedRightToUseRevision": 47,
+                            "deniedAssetUsageAgreementId": "unit-test-assetUsageAgreementId",
+                            "deniedAssetUsageAgreementRevision": 6,
+                            "deniedRightToUseId": "unit-test-prohibition-2",
+                            "deniedRightToUseRevision": 6,
                             "denialReqItemName": "action",
                             "denialReqItemValue": "acumos:deploy",
                             "deniedConstraint": {
@@ -525,27 +528,27 @@
                     ],
                     "includedAssetUsage": [
                         {
-                            "includedSwTagId": "alex-1",
-                            "includedAssetUsageId": "alex-usage-2",
+                            "includedSwTagId": "unit-test-swTagId",
+                            "includedAssetUsageId": "unit-test-assetUsageId-2",
                             "usageEntitled": false,
                             "isUsedBySwCreator": false,
-                            "assetUsageSeq": 68,
-                            "swidTagRevision": 1,
-                            "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                            "assetUsageSeq": 1,
+                            "swidTagRevision": 5,
+                            "licenseProfileId": "cec51e7d-d977-41d2-abc6-ef5f069491b8",
                             "licenseProfileRevision": 1,
                             "isRtuRequired": true,
-                            "softwareLicensorId": "swlic",
-                            "assetUsageDenialSummary": "swid-tag(alex-1) has been found but asset-usage is prohibited by prohibition(proh-2) under asset-usage-agreement(alex-agr) for action(acumos:deploy)",
+                            "softwareLicensorId": "unit-test-softwareLicensorId",
+                            "assetUsageDenialSummary": "swid-tag(unit-test-swTagId) has been found but asset-usage is prohibited by prohibition(unit-test-prohibition-2) under asset-usage-agreement(unit-test-assetUsageAgreementId) for action(acumos:deploy)",
                             "assetUsageDenial": [
                                 {
                                     "denialCode": "denied_due_usageProhibited",
                                     "denialType": "usageProhibited",
-                                    "denialReason": "swid-tag(alex-1) has been found but asset-usage is prohibited by prohibition(proh-2) under asset-usage-agreement(alex-agr) for action(acumos:deploy)",
+                                    "denialReason": "swid-tag(unit-test-swTagId) has been found but asset-usage is prohibited by prohibition(unit-test-prohibition-2) under asset-usage-agreement(unit-test-assetUsageAgreementId) for action(acumos:deploy)",
                                     "deniedAction": "acumos:deploy",
-                                    "deniedAssetUsageAgreementId": "alex-agr",
-                                    "deniedAssetUsageAgreementRevision": 47,
-                                    "deniedRightToUseId": "proh-2",
-                                    "deniedRightToUseRevision": 47,
+                                    "deniedAssetUsageAgreementId": "unit-test-assetUsageAgreementId",
+                                    "deniedAssetUsageAgreementRevision": 6,
+                                    "deniedRightToUseId": "unit-test-prohibition-2",
+                                    "deniedRightToUseRevision": 6,
                                     "denialReqItemName": "action",
                                     "denialReqItemValue": "acumos:deploy",
                                     "deniedConstraint": {

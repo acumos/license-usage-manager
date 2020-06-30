@@ -44,6 +44,7 @@ function setRunStepInfo(res, runStep) {
             res.locals.pg.runStep = `${runStep} <- ${res.locals.pg.runStep}`;
         }
         else {
+            if (res.locals.pg.runStep) {res.locals.pg.lastQuery = res.locals.pg.runStep;}
             res.locals.pg.runStep = utils.makeOneLine(runStep);
         }
     }
@@ -64,11 +65,13 @@ function logRunStepInfo(res, runStep) {
  * @param  {} res
  */
 function startTx(res, startTxTxt) {
-    if (!res.locals.pg) {res.locals.pg = {};}
+    if (!res.locals.pg)             {res.locals.pg = {};}
     if (res.locals.pg.txid)         {delete res.locals.pg.txid;}
     if (res.locals.pg.txNow)        {delete res.locals.pg.txNow;}
     if (res.locals.pg.txNowDate)    {delete res.locals.pg.txNowDate;}
     if (res.locals.pg.txStep)       {delete res.locals.pg.txStep;}
+    if (res.locals.pg.runStep)      {delete res.locals.pg.runStep;}
+    if (res.locals.pg.lastQuery)    {delete res.locals.pg.lastQuery;}
     logRunStepInfo(res, startTxTxt);
 }
 /**
@@ -77,7 +80,7 @@ function startTx(res, startTxTxt) {
  */
 async function connect(res) {
     if (!res.locals.pg.client) {
-        startTx(res, "pg.pool.connect");
+        logRunStepInfo(res, "pg.pool.connect");
         res.locals.pg.client = await lumServer.pgPool.connect();
     }
 }
@@ -177,7 +180,8 @@ module.exports = {
         const rslt = await res.locals.pg.client.query(sqlCmd, sqlVals);
         const result = {command: rslt.command, rowCount: rslt.rowCount, rows: rslt.rows};
         logRunStepInfo(res, `sqlQuery result: ${JSON.stringify(result)}`);
-        delete res.locals.pg.runStep;
+        if (res.locals.pg.runStep)   {delete res.locals.pg.runStep;}
+        if (res.locals.pg.lastQuery) {delete res.locals.pg.lastQuery;}
         return result;
     },
     /**
@@ -193,7 +197,8 @@ module.exports = {
         const rslt = await lumServer.pgPool.query(sqlCmd, sqlVals);
         const result = {command: rslt.command, rowCount: rslt.rowCount, rows: rslt.rows};
         logRunStepInfo(res, `standaloneQuery result: ${JSON.stringify(result)}`);
-        if (res.locals.pg.runStep) {delete res.locals.pg.runStep;}
+        if (res.locals.pg.runStep)   {delete res.locals.pg.runStep;}
+        if (res.locals.pg.lastQuery) {delete res.locals.pg.lastQuery;}
         return result;
     },
     /**
@@ -226,7 +231,7 @@ module.exports = {
                             logRunStepInfo(res, `[${iStepTxt}] - runTx step skipped: non-function(${typeof txStep})`);
                         }
                     }
-                    iStepTxt = (++iStep).toString().padStart(2,'0');
+                    iStepTxt = (iStep + 1).toString().padStart(2,'0');
                     res.locals.pg.txStep = ` [${iStepTxt}] commit`;
                     await commit(res);
                     res.locals.pg.txStep = ` [${iStepTxt}] release`;

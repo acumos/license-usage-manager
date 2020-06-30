@@ -25,15 +25,15 @@
         {
             "sqlCmd": "UPDATE \"assetUsageAgreement\" AS aua SET \"assetUsageAgreementRevision\" = aua.\"assetUsageAgreementRevision\" + 1, \"groomedAgreement\" = NULL , \"agreementRestriction\" = ($3) , \"modifier\" = ($4), \"modified\" = NOW() WHERE aua.\"softwareLicensorId\" = ($1) AND aua.\"assetUsageAgreementId\" = ($2) AND aua.\"agreementRestriction\" IS DISTINCT FROM ($3) RETURNING *",
             "sqlVals": [
-                "swlic",
-                "alex-agr",
+                "unit-test-softwareLicensorId",
+                "unit-test-assetUsageAgreementId",
                 {
-                    "uid": "agr-123",
+                    "uid": "unit-test-assetUsageAgreementId-uid",
                     "@context": {},
                     "@type": "Agreement",
                     "profile": "prof-restr",
                     "assigner": {
-                        "uid": "ass-restrictioner"
+                        "uid": "unit-test-assigner-uid-restr"
                     },
                     "assignee": {
                         "refinement": [
@@ -49,7 +49,7 @@
                                     "alex",
                                     "justin",
                                     "michelle",
-                                    "unit-test"
+                                    "unit-test-userId"
                                 ]
                             }
                         ]
@@ -75,7 +75,7 @@
                     },
                     "permission": [
                         {
-                            "uid": "perm-1",
+                            "uid": "unit-test-permission-1",
                             "action": [
                                 "acumos:deploy",
                                 "acumos:download"
@@ -99,7 +99,7 @@
                                         "operator": "lum:in",
                                         "rightOperand": [
                                             "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                            "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                                            "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                             "cbf31f26-4590-4323-8991-000d9f290901"
                                         ]
                                     }
@@ -114,7 +114,7 @@
                                 {
                                     "leftOperand": "date",
                                     "operator": "lt",
-                                    "rightOperand": "2020-12-01"
+                                    "rightOperand": "2099-12-01"
                                 },
                                 {
                                     "leftOperand": "lum:goodFor",
@@ -126,7 +126,7 @@
                     ],
                     "prohibition": [
                         {
-                            "uid": "proh-2",
+                            "uid": "unit-test-prohibition-2",
                             "action": [
                                 "acumos:deploy--",
                                 "acumos:download"
@@ -138,7 +138,7 @@
                                         "operator": "lum:in",
                                         "rightOperand": [
                                             "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                            "123456",
+                                            "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                             "789456123",
                                             "654789321"
                                         ]
@@ -162,7 +162,7 @@
                             ]
                         },
                         {
-                            "uid": "proh-3",
+                            "uid": "unit-test-prohibition-3",
                             "action": [
                                 "acumos:deploy==",
                                 "acumos:download"
@@ -174,7 +174,7 @@
                                         "operator": "lum:in",
                                         "rightOperand": [
                                             "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                            "123456",
+                                            "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                             "789456123"
                                         ]
                                     },
@@ -198,17 +198,17 @@
                         }
                     ]
                 },
-                "alex-agr-user"
+                "unit-test-assetUsageAgreementId-user"
             ],
             "result": {
                 "command": "UPDATE",
                 "rowCount": 1,
                 "rows": [
                     {
-                        "softwareLicensorId": "swlic",
-                        "assetUsageAgreementId": "alex-agr",
+                        "softwareLicensorId": "unit-test-softwareLicensorId",
+                        "assetUsageAgreementId": "unit-test-assetUsageAgreementId",
                         "agreement": {
-                            "uid": "agr-123",
+                            "uid": "unit-test-assetUsageAgreementId-uid",
                             "@type": "Agreement",
                             "target": {
                                 "refinement": [
@@ -251,11 +251,11 @@
                                 ]
                             },
                             "assigner": {
-                                "uid": "ass"
+                                "uid": "unit-test-assigner-uid"
                             },
                             "permission": [
                                 {
-                                    "uid": "perm-1",
+                                    "uid": "unit-test-permission-1",
                                     "action": [
                                         "acumos:deploy",
                                         "acumos:download"
@@ -267,7 +267,7 @@
                                                 "leftOperand": "lum:swPersistentId",
                                                 "rightOperand": [
                                                     "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                                    "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                                                    "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                     "cbf31f26-4590-4323-8991-000d9f290901"
                                                 ]
                                             }
@@ -294,7 +294,7 @@
                                         {
                                             "operator": "lt",
                                             "leftOperand": "date",
-                                            "rightOperand": "2021-01-01"
+                                            "rightOperand": "2099-01-01"
                                         },
                                         {
                                             "operator": "lteq",
@@ -306,7 +306,7 @@
                             ],
                             "prohibition": [
                                 {
-                                    "uid": "proh-2",
+                                    "uid": "unit-test-prohibition-2",
                                     "action": [
                                         "acumos:deploy--",
                                         "acumos:download--"
@@ -318,7 +318,7 @@
                                                 "leftOperand": "lum:swPersistentId",
                                                 "rightOperand": [
                                                     "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                                    "123456",
+                                                    "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                     "789456123"
                                                 ]
                                             },
@@ -343,7 +343,7 @@
                             ]
                         },
                         "agreementRestriction": {
-                            "uid": "agr-123",
+                            "uid": "unit-test-assetUsageAgreementId-uid",
                             "@type": "Agreement",
                             "target": {
                                 "refinement": [
@@ -380,17 +380,17 @@
                                             "alex",
                                             "justin",
                                             "michelle",
-                                            "unit-test"
+                                            "unit-test-userId"
                                         ]
                                     }
                                 ]
                             },
                             "assigner": {
-                                "uid": "ass-restrictioner"
+                                "uid": "unit-test-assigner-uid-restr"
                             },
                             "permission": [
                                 {
-                                    "uid": "perm-1",
+                                    "uid": "unit-test-permission-1",
                                     "action": [
                                         "acumos:deploy",
                                         "acumos:download"
@@ -402,7 +402,7 @@
                                                 "leftOperand": "lum:swPersistentId",
                                                 "rightOperand": [
                                                     "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                                    "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                                                    "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                     "cbf31f26-4590-4323-8991-000d9f290901"
                                                 ]
                                             }
@@ -429,7 +429,7 @@
                                         {
                                             "operator": "lt",
                                             "leftOperand": "date",
-                                            "rightOperand": "2020-12-01"
+                                            "rightOperand": "2099-12-01"
                                         },
                                         {
                                             "operator": "lteq",
@@ -441,7 +441,7 @@
                             ],
                             "prohibition": [
                                 {
-                                    "uid": "proh-2",
+                                    "uid": "unit-test-prohibition-2",
                                     "action": [
                                         "acumos:deploy--",
                                         "acumos:download"
@@ -453,7 +453,7 @@
                                                 "leftOperand": "lum:swPersistentId",
                                                 "rightOperand": [
                                                     "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                                    "123456",
+                                                    "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                     "789456123",
                                                     "654789321"
                                                 ]
@@ -477,7 +477,7 @@
                                     ]
                                 },
                                 {
-                                    "uid": "proh-3",
+                                    "uid": "unit-test-prohibition-3",
                                     "action": [
                                         "acumos:deploy==",
                                         "acumos:download"
@@ -489,7 +489,7 @@
                                                 "leftOperand": "lum:swPersistentId",
                                                 "rightOperand": [
                                                     "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                                    "123456",
+                                                    "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                     "789456123"
                                                 ]
                                             },
@@ -514,12 +514,12 @@
                             ]
                         },
                         "groomedAgreement": null,
-                        "assetUsageAgreementRevision": 57,
+                        "assetUsageAgreementRevision": 12,
                         "assetUsageAgreementActive": true,
-                        "creator": "alex-agr-user",
-                        "created": "2020-01-27T15:59:24.515Z",
-                        "modifier": "alex-agr-user",
-                        "modified": "2020-04-03T18:58:49.060Z",
+                        "creator": "unit-test-userId",
+                        "created": "2020-05-29T21:37:57.377Z",
+                        "modifier": "unit-test-assetUsageAgreementId-user",
+                        "modified": "2020-05-29T21:37:59.957Z",
                         "closer": null,
                         "closed": null,
                         "closureReason": null
@@ -530,12 +530,12 @@
         {
             "sqlCmd": "UPDATE \"assetUsageAgreement\" AS aua SET \"modified\" = NOW() , \"groomedAgreement\" = ($3) , \"modifier\" = ($4) WHERE aua.\"softwareLicensorId\" = ($1) AND aua.\"assetUsageAgreementId\" = ($2) AND aua.\"groomedAgreement\" IS DISTINCT FROM ($3) RETURNING *",
             "sqlVals": [
-                "swlic",
-                "alex-agr",
+                "unit-test-softwareLicensorId",
+                "unit-test-assetUsageAgreementId",
                 {
-                    "uid": "agr-123",
+                    "uid": "unit-test-assetUsageAgreementId-uid",
                     "initialAgreement": {
-                        "uid": "agr-123",
+                        "uid": "unit-test-assetUsageAgreementId-uid",
                         "@type": "Agreement",
                         "target": {
                             "refinement": [
@@ -578,11 +578,11 @@
                             ]
                         },
                         "assigner": {
-                            "uid": "ass"
+                            "uid": "unit-test-assigner-uid"
                         },
                         "permission": [
                             {
-                                "uid": "perm-1",
+                                "uid": "unit-test-permission-1",
                                 "action": [
                                     "acumos:deploy",
                                     "acumos:download"
@@ -594,7 +594,7 @@
                                             "leftOperand": "lum:swPersistentId",
                                             "rightOperand": [
                                                 "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                                "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                                                "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                 "cbf31f26-4590-4323-8991-000d9f290901"
                                             ]
                                         }
@@ -621,7 +621,7 @@
                                     {
                                         "operator": "lt",
                                         "leftOperand": "date",
-                                        "rightOperand": "2021-01-01"
+                                        "rightOperand": "2099-01-01"
                                     },
                                     {
                                         "operator": "lteq",
@@ -633,7 +633,7 @@
                         ],
                         "prohibition": [
                             {
-                                "uid": "proh-2",
+                                "uid": "unit-test-prohibition-2",
                                 "action": [
                                     "acumos:deploy--",
                                     "acumos:download--"
@@ -645,7 +645,7 @@
                                             "leftOperand": "lum:swPersistentId",
                                             "rightOperand": [
                                                 "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                                "123456",
+                                                "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                 "789456123"
                                             ]
                                         },
@@ -670,8 +670,8 @@
                         ]
                     },
                     "permission": {
-                        "perm-1": {
-                            "uid": "perm-1",
+                        "unit-test-permission-1": {
+                            "uid": "unit-test-permission-1",
                             "assetUsageRuleType": "permission",
                             "actionProvided": true,
                             "actions": [
@@ -680,7 +680,7 @@
                             ],
                             "isPerpetual": false,
                             "enableOn": null,
-                            "expireOn": "2020-11-30",
+                            "expireOn": "2098-12-31",
                             "goodFor": "P10DT25H",
                             "targetRefinement": {
                                 "lum:swCategory": {
@@ -711,7 +711,7 @@
                                     "operator": "lum:in",
                                     "leftOperand": "lum:swPersistentId",
                                     "rightOperand": [
-                                        "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                                        "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                         "cbf31f26-4590-4323-8991-000d9f290901",
                                         "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                     ],
@@ -732,7 +732,7 @@
                                         "alex",
                                         "justin",
                                         "michelle",
-                                        "unit-test"
+                                        "unit-test-userId"
                                     ],
                                     "dataType": "string",
                                     "origin": "fromRestriction"
@@ -797,7 +797,7 @@
                                         "operator": "lum:in",
                                         "leftOperand": "lum:swPersistentId",
                                         "rightOperand": [
-                                            "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                                            "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                             "cbf31f26-4590-4323-8991-000d9f290901",
                                             "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                         ],
@@ -848,7 +848,7 @@
                                         "consumeStatus": "groomed",
                                         "operator": "lt",
                                         "leftOperand": "date",
-                                        "rightOperand": "2021-01-01",
+                                        "rightOperand": "2099-01-01",
                                         "dataType": "date"
                                     },
                                     {
@@ -862,7 +862,7 @@
                                         "consumeStatus": "consumed",
                                         "operator": "lteq",
                                         "leftOperand": "date",
-                                        "rightOperand": "2020-12-31",
+                                        "rightOperand": "2098-12-31",
                                         "dataType": "date"
                                     },
                                     {
@@ -874,8 +874,8 @@
                                         "rightOperandComparable": 2592000000
                                     },
                                     {
-                                        "consumeStatus": "overridden",
-                                        "expireOn": "2020-12-31"
+                                        "consumeStatus": "ignored",
+                                        "expireOn": "2099-11-30"
                                     },
                                     {
                                         "consumeStatus": "overridden",
@@ -893,8 +893,8 @@
                         }
                     },
                     "prohibition": {
-                        "proh-2": {
-                            "uid": "proh-2",
+                        "unit-test-prohibition-2": {
+                            "uid": "unit-test-prohibition-2",
                             "assetUsageRuleType": "prohibition",
                             "actionProvided": true,
                             "actions": [
@@ -937,9 +937,9 @@
                                     "operator": "lum:in",
                                     "leftOperand": "lum:swPersistentId",
                                     "rightOperand": [
-                                        "123456",
                                         "654789321",
                                         "789456123",
+                                        "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                         "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                     ],
                                     "dataType": "string",
@@ -1006,8 +1006,8 @@
                                         "operator": "lum:in",
                                         "leftOperand": "lum:swPersistentId",
                                         "rightOperand": [
-                                            "123456",
                                             "789456123",
+                                            "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                             "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                         ],
                                         "dataType": "string"
@@ -1017,9 +1017,9 @@
                                         "operator": "lum:in",
                                         "leftOperand": "lum:swPersistentId",
                                         "rightOperand": [
-                                            "123456",
                                             "654789321",
                                             "789456123",
+                                            "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                             "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                         ],
                                         "dataType": "string",
@@ -1068,8 +1068,8 @@
                                 ]
                             }
                         },
-                        "proh-3": {
-                            "uid": "proh-3",
+                        "unit-test-prohibition-3": {
+                            "uid": "unit-test-prohibition-3",
                             "assetUsageRuleType": "prohibition",
                             "actionProvided": true,
                             "actions": [
@@ -1102,8 +1102,8 @@
                                     "operator": "lum:in",
                                     "leftOperand": "lum:swPersistentId",
                                     "rightOperand": [
-                                        "123456",
                                         "789456123",
+                                        "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                         "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                     ],
                                     "dataType": "string"
@@ -1117,7 +1117,7 @@
                                         "alex",
                                         "justin",
                                         "michelle",
-                                        "unit-test"
+                                        "unit-test-userId"
                                     ],
                                     "dataType": "string"
                                 }
@@ -1184,10 +1184,10 @@
                         }
                     },
                     "restriction": {
-                        "uid": "agr-123",
+                        "uid": "unit-test-assetUsageAgreementId-uid",
                         "permission": {
-                            "perm-1": {
-                                "uid": "perm-1",
+                            "unit-test-permission-1": {
+                                "uid": "unit-test-permission-1",
                                 "assetUsageRuleType": "permission",
                                 "actionProvided": true,
                                 "actions": [
@@ -1196,7 +1196,7 @@
                                 ],
                                 "isPerpetual": false,
                                 "enableOn": null,
-                                "expireOn": "2020-11-30",
+                                "expireOn": "2099-11-30",
                                 "goodFor": "P10DT25H",
                                 "targetRefinement": {
                                     "lum:swCategory": {
@@ -1222,7 +1222,7 @@
                                         "operator": "lum:in",
                                         "leftOperand": "lum:swPersistentId",
                                         "rightOperand": [
-                                            "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                                            "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                             "cbf31f26-4590-4323-8991-000d9f290901",
                                             "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                         ],
@@ -1245,7 +1245,7 @@
                                             "alex",
                                             "justin",
                                             "michelle",
-                                            "unit-test"
+                                            "unit-test-userId"
                                         ],
                                         "dataType": "string",
                                         "origin": "fromRestriction"
@@ -1300,7 +1300,7 @@
                                             "consumeStatus": "groomed",
                                             "operator": "lt",
                                             "leftOperand": "date",
-                                            "rightOperand": "2020-12-01",
+                                            "rightOperand": "2099-12-01",
                                             "dataType": "date"
                                         },
                                         {
@@ -1314,7 +1314,7 @@
                                             "consumeStatus": "consumed",
                                             "operator": "lteq",
                                             "leftOperand": "date",
-                                            "rightOperand": "2020-11-30",
+                                            "rightOperand": "2099-11-30",
                                             "dataType": "date"
                                         },
                                         {
@@ -1330,8 +1330,8 @@
                             }
                         },
                         "prohibition": {
-                            "proh-2": {
-                                "uid": "proh-2",
+                            "unit-test-prohibition-2": {
+                                "uid": "unit-test-prohibition-2",
                                 "assetUsageRuleType": "prohibition",
                                 "actionProvided": true,
                                 "actions": [
@@ -1364,9 +1364,9 @@
                                         "operator": "lum:in",
                                         "leftOperand": "lum:swPersistentId",
                                         "rightOperand": [
-                                            "123456",
                                             "654789321",
                                             "789456123",
+                                            "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                             "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                         ],
                                         "dataType": "string",
@@ -1381,7 +1381,7 @@
                                             "alex",
                                             "justin",
                                             "michelle",
-                                            "unit-test"
+                                            "unit-test-userId"
                                         ],
                                         "dataType": "string",
                                         "origin": "fromExpansion"
@@ -1447,8 +1447,8 @@
                                     ]
                                 }
                             },
-                            "proh-3": {
-                                "uid": "proh-3",
+                            "unit-test-prohibition-3": {
+                                "uid": "unit-test-prohibition-3",
                                 "assetUsageRuleType": "prohibition",
                                 "actionProvided": true,
                                 "actions": [
@@ -1481,8 +1481,8 @@
                                         "operator": "lum:in",
                                         "leftOperand": "lum:swPersistentId",
                                         "rightOperand": [
-                                            "123456",
                                             "789456123",
+                                            "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                             "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                         ],
                                         "dataType": "string"
@@ -1496,7 +1496,7 @@
                                             "alex",
                                             "justin",
                                             "michelle",
-                                            "unit-test"
+                                            "unit-test-userId"
                                         ],
                                         "dataType": "string"
                                     }
@@ -1565,8 +1565,8 @@
                     },
                     "ignoredPermissionRestrictions": {},
                     "ignoredProhibitionRestrictions": {
-                        "proh-2": {
-                            "uid": "proh-2",
+                        "unit-test-prohibition-2": {
+                            "uid": "unit-test-prohibition-2",
                             "targetRefinement": {},
                             "assigneeRefinement": {
                                 "lum:users": {
@@ -1576,7 +1576,7 @@
                                         "alex",
                                         "justin",
                                         "michelle",
-                                        "unit-test"
+                                        "unit-test-userId"
                                     ],
                                     "dataType": "string",
                                     "origin": "fromExpansion"
@@ -1586,17 +1586,17 @@
                         }
                     }
                 },
-                "alex-agr-user"
+                "unit-test-assetUsageAgreementId-user"
             ],
             "result": {
                 "command": "UPDATE",
                 "rowCount": 1,
                 "rows": [
                     {
-                        "softwareLicensorId": "swlic",
-                        "assetUsageAgreementId": "alex-agr",
+                        "softwareLicensorId": "unit-test-softwareLicensorId",
+                        "assetUsageAgreementId": "unit-test-assetUsageAgreementId",
                         "agreement": {
-                            "uid": "agr-123",
+                            "uid": "unit-test-assetUsageAgreementId-uid",
                             "@type": "Agreement",
                             "target": {
                                 "refinement": [
@@ -1639,11 +1639,11 @@
                                 ]
                             },
                             "assigner": {
-                                "uid": "ass"
+                                "uid": "unit-test-assigner-uid"
                             },
                             "permission": [
                                 {
-                                    "uid": "perm-1",
+                                    "uid": "unit-test-permission-1",
                                     "action": [
                                         "acumos:deploy",
                                         "acumos:download"
@@ -1655,7 +1655,7 @@
                                                 "leftOperand": "lum:swPersistentId",
                                                 "rightOperand": [
                                                     "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                                    "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                                                    "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                     "cbf31f26-4590-4323-8991-000d9f290901"
                                                 ]
                                             }
@@ -1682,7 +1682,7 @@
                                         {
                                             "operator": "lt",
                                             "leftOperand": "date",
-                                            "rightOperand": "2021-01-01"
+                                            "rightOperand": "2099-01-01"
                                         },
                                         {
                                             "operator": "lteq",
@@ -1694,7 +1694,7 @@
                             ],
                             "prohibition": [
                                 {
-                                    "uid": "proh-2",
+                                    "uid": "unit-test-prohibition-2",
                                     "action": [
                                         "acumos:deploy--",
                                         "acumos:download--"
@@ -1706,7 +1706,7 @@
                                                 "leftOperand": "lum:swPersistentId",
                                                 "rightOperand": [
                                                     "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                                    "123456",
+                                                    "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                     "789456123"
                                                 ]
                                             },
@@ -1731,7 +1731,7 @@
                             ]
                         },
                         "agreementRestriction": {
-                            "uid": "agr-123",
+                            "uid": "unit-test-assetUsageAgreementId-uid",
                             "@type": "Agreement",
                             "target": {
                                 "refinement": [
@@ -1768,17 +1768,17 @@
                                             "alex",
                                             "justin",
                                             "michelle",
-                                            "unit-test"
+                                            "unit-test-userId"
                                         ]
                                     }
                                 ]
                             },
                             "assigner": {
-                                "uid": "ass-restrictioner"
+                                "uid": "unit-test-assigner-uid-restr"
                             },
                             "permission": [
                                 {
-                                    "uid": "perm-1",
+                                    "uid": "unit-test-permission-1",
                                     "action": [
                                         "acumos:deploy",
                                         "acumos:download"
@@ -1790,7 +1790,7 @@
                                                 "leftOperand": "lum:swPersistentId",
                                                 "rightOperand": [
                                                     "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                                    "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                                                    "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                     "cbf31f26-4590-4323-8991-000d9f290901"
                                                 ]
                                             }
@@ -1817,7 +1817,7 @@
                                         {
                                             "operator": "lt",
                                             "leftOperand": "date",
-                                            "rightOperand": "2020-12-01"
+                                            "rightOperand": "2099-12-01"
                                         },
                                         {
                                             "operator": "lteq",
@@ -1829,7 +1829,7 @@
                             ],
                             "prohibition": [
                                 {
-                                    "uid": "proh-2",
+                                    "uid": "unit-test-prohibition-2",
                                     "action": [
                                         "acumos:deploy--",
                                         "acumos:download"
@@ -1841,7 +1841,7 @@
                                                 "leftOperand": "lum:swPersistentId",
                                                 "rightOperand": [
                                                     "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                                    "123456",
+                                                    "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                     "789456123",
                                                     "654789321"
                                                 ]
@@ -1865,7 +1865,7 @@
                                     ]
                                 },
                                 {
-                                    "uid": "proh-3",
+                                    "uid": "unit-test-prohibition-3",
                                     "action": [
                                         "acumos:deploy==",
                                         "acumos:download"
@@ -1877,7 +1877,7 @@
                                                 "leftOperand": "lum:swPersistentId",
                                                 "rightOperand": [
                                                     "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                                    "123456",
+                                                    "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                     "789456123"
                                                 ]
                                             },
@@ -1902,17 +1902,17 @@
                             ]
                         },
                         "groomedAgreement": {
-                            "uid": "agr-123",
+                            "uid": "unit-test-assetUsageAgreementId-uid",
                             "permission": {
-                                "perm-1": {
-                                    "uid": "perm-1",
+                                "unit-test-permission-1": {
+                                    "uid": "unit-test-permission-1",
                                     "actions": [
                                         "acumos:deploy",
                                         "acumos:download"
                                     ],
                                     "goodFor": "P10DT25H",
                                     "enableOn": null,
-                                    "expireOn": "2020-11-30",
+                                    "expireOn": "2098-12-31",
                                     "isPerpetual": false,
                                     "actionProvided": true,
                                     "assigneeMetrics": {
@@ -1948,7 +1948,7 @@
                                             "operator": "lum:in",
                                             "leftOperand": "lum:swPersistentId",
                                             "rightOperand": [
-                                                "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                                                "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                 "cbf31f26-4590-4323-8991-000d9f290901",
                                                 "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                             ]
@@ -1974,7 +1974,7 @@
                                                 "alex",
                                                 "justin",
                                                 "michelle",
-                                                "unit-test"
+                                                "unit-test-userId"
                                             ]
                                         },
                                         "lum:countUniqueUsers": {
@@ -1997,7 +1997,7 @@
                                                 "dataType": "date",
                                                 "operator": "lt",
                                                 "leftOperand": "date",
-                                                "rightOperand": "2021-01-01",
+                                                "rightOperand": "2099-01-01",
                                                 "consumeStatus": "groomed"
                                             },
                                             {
@@ -2011,7 +2011,7 @@
                                                 "dataType": "date",
                                                 "operator": "lteq",
                                                 "leftOperand": "date",
-                                                "rightOperand": "2020-12-31",
+                                                "rightOperand": "2098-12-31",
                                                 "consumeStatus": "consumed"
                                             },
                                             {
@@ -2023,8 +2023,8 @@
                                                 "rightOperandComparable": 2592000000
                                             },
                                             {
-                                                "expireOn": "2020-12-31",
-                                                "consumeStatus": "overridden"
+                                                "expireOn": "2099-11-30",
+                                                "consumeStatus": "ignored"
                                             },
                                             {
                                                 "goodFor": "P30D",
@@ -2085,7 +2085,7 @@
                                                 "operator": "lum:in",
                                                 "leftOperand": "lum:swPersistentId",
                                                 "rightOperand": [
-                                                    "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                                                    "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                     "cbf31f26-4590-4323-8991-000d9f290901",
                                                     "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                                 ],
@@ -2127,8 +2127,8 @@
                                 }
                             },
                             "prohibition": {
-                                "proh-2": {
-                                    "uid": "proh-2",
+                                "unit-test-prohibition-2": {
+                                    "uid": "unit-test-prohibition-2",
                                     "actions": [
                                         "acumos:deploy--",
                                         "acumos:download--",
@@ -2175,9 +2175,9 @@
                                             "operator": "lum:in",
                                             "leftOperand": "lum:swPersistentId",
                                             "rightOperand": [
-                                                "123456",
                                                 "654789321",
                                                 "789456123",
+                                                "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                 "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                             ]
                                         }
@@ -2264,8 +2264,8 @@
                                                 "operator": "lum:in",
                                                 "leftOperand": "lum:swPersistentId",
                                                 "rightOperand": [
-                                                    "123456",
                                                     "789456123",
+                                                    "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                     "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                                 ],
                                                 "consumeStatus": "expanded"
@@ -2276,9 +2276,9 @@
                                                 "operator": "lum:in",
                                                 "leftOperand": "lum:swPersistentId",
                                                 "rightOperand": [
-                                                    "123456",
                                                     "654789321",
                                                     "789456123",
+                                                    "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                     "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                                 ],
                                                 "consumeStatus": "expanded"
@@ -2302,8 +2302,8 @@
                                         ]
                                     }
                                 },
-                                "proh-3": {
-                                    "uid": "proh-3",
+                                "unit-test-prohibition-3": {
+                                    "uid": "unit-test-prohibition-3",
                                     "actions": [
                                         "acumos:deploy==",
                                         "acumos:download"
@@ -2339,8 +2339,8 @@
                                             "operator": "lum:in",
                                             "leftOperand": "lum:swPersistentId",
                                             "rightOperand": [
-                                                "123456",
                                                 "789456123",
+                                                "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                 "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                             ]
                                         }
@@ -2356,7 +2356,7 @@
                                                 "alex",
                                                 "justin",
                                                 "michelle",
-                                                "unit-test"
+                                                "unit-test-userId"
                                             ]
                                         }
                                     },
@@ -2418,17 +2418,17 @@
                                 }
                             },
                             "restriction": {
-                                "uid": "agr-123",
+                                "uid": "unit-test-assetUsageAgreementId-uid",
                                 "permission": {
-                                    "perm-1": {
-                                        "uid": "perm-1",
+                                    "unit-test-permission-1": {
+                                        "uid": "unit-test-permission-1",
                                         "actions": [
                                             "acumos:deploy",
                                             "acumos:download"
                                         ],
                                         "goodFor": "P10DT25H",
                                         "enableOn": null,
-                                        "expireOn": "2020-11-30",
+                                        "expireOn": "2099-11-30",
                                         "isPerpetual": false,
                                         "actionProvided": true,
                                         "assigneeMetrics": {
@@ -2460,7 +2460,7 @@
                                                 "operator": "lum:in",
                                                 "leftOperand": "lum:swPersistentId",
                                                 "rightOperand": [
-                                                    "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                                                    "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                     "cbf31f26-4590-4323-8991-000d9f290901",
                                                     "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                                 ]
@@ -2486,7 +2486,7 @@
                                                     "alex",
                                                     "justin",
                                                     "michelle",
-                                                    "unit-test"
+                                                    "unit-test-userId"
                                                 ]
                                             },
                                             "lum:countUniqueUsers": {
@@ -2510,7 +2510,7 @@
                                                     "dataType": "date",
                                                     "operator": "lt",
                                                     "leftOperand": "date",
-                                                    "rightOperand": "2020-12-01",
+                                                    "rightOperand": "2099-12-01",
                                                     "consumeStatus": "groomed"
                                                 },
                                                 {
@@ -2524,7 +2524,7 @@
                                                     "dataType": "date",
                                                     "operator": "lteq",
                                                     "leftOperand": "date",
-                                                    "rightOperand": "2020-11-30",
+                                                    "rightOperand": "2099-11-30",
                                                     "consumeStatus": "consumed"
                                                 },
                                                 {
@@ -2564,8 +2564,8 @@
                                     }
                                 },
                                 "prohibition": {
-                                    "proh-2": {
-                                        "uid": "proh-2",
+                                    "unit-test-prohibition-2": {
+                                        "uid": "unit-test-prohibition-2",
                                         "actions": [
                                             "acumos:deploy--",
                                             "acumos:download"
@@ -2602,9 +2602,9 @@
                                                 "operator": "lum:in",
                                                 "leftOperand": "lum:swPersistentId",
                                                 "rightOperand": [
-                                                    "123456",
                                                     "654789321",
                                                     "789456123",
+                                                    "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                     "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                                 ]
                                             }
@@ -2621,7 +2621,7 @@
                                                     "alex",
                                                     "justin",
                                                     "michelle",
-                                                    "unit-test"
+                                                    "unit-test-userId"
                                                 ]
                                             }
                                         },
@@ -2681,8 +2681,8 @@
                                             ]
                                         }
                                     },
-                                    "proh-3": {
-                                        "uid": "proh-3",
+                                    "unit-test-prohibition-3": {
+                                        "uid": "unit-test-prohibition-3",
                                         "actions": [
                                             "acumos:deploy==",
                                             "acumos:download"
@@ -2718,8 +2718,8 @@
                                                 "operator": "lum:in",
                                                 "leftOperand": "lum:swPersistentId",
                                                 "rightOperand": [
-                                                    "123456",
                                                     "789456123",
+                                                    "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                     "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                                 ]
                                             }
@@ -2735,7 +2735,7 @@
                                                     "alex",
                                                     "justin",
                                                     "michelle",
-                                                    "unit-test"
+                                                    "unit-test-userId"
                                                 ]
                                             }
                                         },
@@ -2798,7 +2798,7 @@
                                 }
                             },
                             "initialAgreement": {
-                                "uid": "agr-123",
+                                "uid": "unit-test-assetUsageAgreementId-uid",
                                 "@type": "Agreement",
                                 "target": {
                                     "refinement": [
@@ -2841,11 +2841,11 @@
                                     ]
                                 },
                                 "assigner": {
-                                    "uid": "ass"
+                                    "uid": "unit-test-assigner-uid"
                                 },
                                 "permission": [
                                     {
-                                        "uid": "perm-1",
+                                        "uid": "unit-test-permission-1",
                                         "action": [
                                             "acumos:deploy",
                                             "acumos:download"
@@ -2857,7 +2857,7 @@
                                                     "leftOperand": "lum:swPersistentId",
                                                     "rightOperand": [
                                                         "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                                        "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                                                        "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                         "cbf31f26-4590-4323-8991-000d9f290901"
                                                     ]
                                                 }
@@ -2884,7 +2884,7 @@
                                             {
                                                 "operator": "lt",
                                                 "leftOperand": "date",
-                                                "rightOperand": "2021-01-01"
+                                                "rightOperand": "2099-01-01"
                                             },
                                             {
                                                 "operator": "lteq",
@@ -2896,7 +2896,7 @@
                                 ],
                                 "prohibition": [
                                     {
-                                        "uid": "proh-2",
+                                        "uid": "unit-test-prohibition-2",
                                         "action": [
                                             "acumos:deploy--",
                                             "acumos:download--"
@@ -2908,7 +2908,7 @@
                                                     "leftOperand": "lum:swPersistentId",
                                                     "rightOperand": [
                                                         "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                                        "123456",
+                                                        "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                         "789456123"
                                                     ]
                                                 },
@@ -2934,8 +2934,8 @@
                             },
                             "ignoredPermissionRestrictions": {},
                             "ignoredProhibitionRestrictions": {
-                                "proh-2": {
-                                    "uid": "proh-2",
+                                "unit-test-prohibition-2": {
+                                    "uid": "unit-test-prohibition-2",
                                     "targetRefinement": {},
                                     "usageConstraints": {},
                                     "assigneeRefinement": {
@@ -2948,19 +2948,19 @@
                                                 "alex",
                                                 "justin",
                                                 "michelle",
-                                                "unit-test"
+                                                "unit-test-userId"
                                             ]
                                         }
                                     }
                                 }
                             }
                         },
-                        "assetUsageAgreementRevision": 57,
+                        "assetUsageAgreementRevision": 12,
                         "assetUsageAgreementActive": true,
-                        "creator": "alex-agr-user",
-                        "created": "2020-01-27T15:59:24.515Z",
-                        "modifier": "alex-agr-user",
-                        "modified": "2020-04-03T18:58:49.060Z",
+                        "creator": "unit-test-userId",
+                        "created": "2020-05-29T21:37:57.377Z",
+                        "modifier": "unit-test-assetUsageAgreementId-user",
+                        "modified": "2020-05-29T21:37:59.957Z",
                         "closer": null,
                         "closed": null,
                         "closureReason": null
@@ -2971,15 +2971,15 @@
         {
             "sqlCmd": "INSERT INTO \"snapshot\" (\"softwareLicensorId\",\"snapshotType\",\"snapshotKey\",\"snapshotRevision\" , \"snapshotBody\",\"creator\",\"requestId\",\"txStep\") VALUES (($1),($2),($3),($4) , ($5),($6),($7),($8)) ON CONFLICT (\"softwareLicensorId\",\"snapshotType\",\"snapshotKey\",\"snapshotRevision\") DO NOTHING",
             "sqlVals": [
-                "swlic",
+                "unit-test-softwareLicensorId",
                 "assetUsageAgreement",
-                "alex-agr",
-                57,
+                "unit-test-assetUsageAgreementId",
+                12,
                 {
-                    "softwareLicensorId": "swlic",
-                    "assetUsageAgreementId": "alex-agr",
+                    "softwareLicensorId": "unit-test-softwareLicensorId",
+                    "assetUsageAgreementId": "unit-test-assetUsageAgreementId",
                     "agreement": {
-                        "uid": "agr-123",
+                        "uid": "unit-test-assetUsageAgreementId-uid",
                         "@type": "Agreement",
                         "target": {
                             "refinement": [
@@ -3022,11 +3022,11 @@
                             ]
                         },
                         "assigner": {
-                            "uid": "ass"
+                            "uid": "unit-test-assigner-uid"
                         },
                         "permission": [
                             {
-                                "uid": "perm-1",
+                                "uid": "unit-test-permission-1",
                                 "action": [
                                     "acumos:deploy",
                                     "acumos:download"
@@ -3038,7 +3038,7 @@
                                             "leftOperand": "lum:swPersistentId",
                                             "rightOperand": [
                                                 "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                                "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                                                "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                 "cbf31f26-4590-4323-8991-000d9f290901"
                                             ]
                                         }
@@ -3065,7 +3065,7 @@
                                     {
                                         "operator": "lt",
                                         "leftOperand": "date",
-                                        "rightOperand": "2021-01-01"
+                                        "rightOperand": "2099-01-01"
                                     },
                                     {
                                         "operator": "lteq",
@@ -3077,7 +3077,7 @@
                         ],
                         "prohibition": [
                             {
-                                "uid": "proh-2",
+                                "uid": "unit-test-prohibition-2",
                                 "action": [
                                     "acumos:deploy--",
                                     "acumos:download--"
@@ -3089,7 +3089,7 @@
                                             "leftOperand": "lum:swPersistentId",
                                             "rightOperand": [
                                                 "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                                "123456",
+                                                "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                 "789456123"
                                             ]
                                         },
@@ -3114,7 +3114,7 @@
                         ]
                     },
                     "agreementRestriction": {
-                        "uid": "agr-123",
+                        "uid": "unit-test-assetUsageAgreementId-uid",
                         "@type": "Agreement",
                         "target": {
                             "refinement": [
@@ -3151,17 +3151,17 @@
                                         "alex",
                                         "justin",
                                         "michelle",
-                                        "unit-test"
+                                        "unit-test-userId"
                                     ]
                                 }
                             ]
                         },
                         "assigner": {
-                            "uid": "ass-restrictioner"
+                            "uid": "unit-test-assigner-uid-restr"
                         },
                         "permission": [
                             {
-                                "uid": "perm-1",
+                                "uid": "unit-test-permission-1",
                                 "action": [
                                     "acumos:deploy",
                                     "acumos:download"
@@ -3173,7 +3173,7 @@
                                             "leftOperand": "lum:swPersistentId",
                                             "rightOperand": [
                                                 "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                                "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                                                "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                 "cbf31f26-4590-4323-8991-000d9f290901"
                                             ]
                                         }
@@ -3200,7 +3200,7 @@
                                     {
                                         "operator": "lt",
                                         "leftOperand": "date",
-                                        "rightOperand": "2020-12-01"
+                                        "rightOperand": "2099-12-01"
                                     },
                                     {
                                         "operator": "lteq",
@@ -3212,7 +3212,7 @@
                         ],
                         "prohibition": [
                             {
-                                "uid": "proh-2",
+                                "uid": "unit-test-prohibition-2",
                                 "action": [
                                     "acumos:deploy--",
                                     "acumos:download"
@@ -3224,7 +3224,7 @@
                                             "leftOperand": "lum:swPersistentId",
                                             "rightOperand": [
                                                 "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                                "123456",
+                                                "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                 "789456123",
                                                 "654789321"
                                             ]
@@ -3248,7 +3248,7 @@
                                 ]
                             },
                             {
-                                "uid": "proh-3",
+                                "uid": "unit-test-prohibition-3",
                                 "action": [
                                     "acumos:deploy==",
                                     "acumos:download"
@@ -3260,7 +3260,7 @@
                                             "leftOperand": "lum:swPersistentId",
                                             "rightOperand": [
                                                 "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                                "123456",
+                                                "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                 "789456123"
                                             ]
                                         },
@@ -3285,17 +3285,17 @@
                         ]
                     },
                     "groomedAgreement": {
-                        "uid": "agr-123",
+                        "uid": "unit-test-assetUsageAgreementId-uid",
                         "permission": {
-                            "perm-1": {
-                                "uid": "perm-1",
+                            "unit-test-permission-1": {
+                                "uid": "unit-test-permission-1",
                                 "actions": [
                                     "acumos:deploy",
                                     "acumos:download"
                                 ],
                                 "goodFor": "P10DT25H",
                                 "enableOn": null,
-                                "expireOn": "2020-11-30",
+                                "expireOn": "2098-12-31",
                                 "isPerpetual": false,
                                 "actionProvided": true,
                                 "assigneeMetrics": {
@@ -3331,7 +3331,7 @@
                                         "operator": "lum:in",
                                         "leftOperand": "lum:swPersistentId",
                                         "rightOperand": [
-                                            "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                                            "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                             "cbf31f26-4590-4323-8991-000d9f290901",
                                             "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                         ]
@@ -3357,7 +3357,7 @@
                                             "alex",
                                             "justin",
                                             "michelle",
-                                            "unit-test"
+                                            "unit-test-userId"
                                         ]
                                     },
                                     "lum:countUniqueUsers": {
@@ -3380,7 +3380,7 @@
                                             "dataType": "date",
                                             "operator": "lt",
                                             "leftOperand": "date",
-                                            "rightOperand": "2021-01-01",
+                                            "rightOperand": "2099-01-01",
                                             "consumeStatus": "groomed"
                                         },
                                         {
@@ -3394,7 +3394,7 @@
                                             "dataType": "date",
                                             "operator": "lteq",
                                             "leftOperand": "date",
-                                            "rightOperand": "2020-12-31",
+                                            "rightOperand": "2098-12-31",
                                             "consumeStatus": "consumed"
                                         },
                                         {
@@ -3406,8 +3406,8 @@
                                             "rightOperandComparable": 2592000000
                                         },
                                         {
-                                            "expireOn": "2020-12-31",
-                                            "consumeStatus": "overridden"
+                                            "expireOn": "2099-11-30",
+                                            "consumeStatus": "ignored"
                                         },
                                         {
                                             "goodFor": "P30D",
@@ -3468,7 +3468,7 @@
                                             "operator": "lum:in",
                                             "leftOperand": "lum:swPersistentId",
                                             "rightOperand": [
-                                                "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                                                "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                 "cbf31f26-4590-4323-8991-000d9f290901",
                                                 "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                             ],
@@ -3510,8 +3510,8 @@
                             }
                         },
                         "prohibition": {
-                            "proh-2": {
-                                "uid": "proh-2",
+                            "unit-test-prohibition-2": {
+                                "uid": "unit-test-prohibition-2",
                                 "actions": [
                                     "acumos:deploy--",
                                     "acumos:download--",
@@ -3558,9 +3558,9 @@
                                         "operator": "lum:in",
                                         "leftOperand": "lum:swPersistentId",
                                         "rightOperand": [
-                                            "123456",
                                             "654789321",
                                             "789456123",
+                                            "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                             "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                         ]
                                     }
@@ -3647,8 +3647,8 @@
                                             "operator": "lum:in",
                                             "leftOperand": "lum:swPersistentId",
                                             "rightOperand": [
-                                                "123456",
                                                 "789456123",
+                                                "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                 "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                             ],
                                             "consumeStatus": "expanded"
@@ -3659,9 +3659,9 @@
                                             "operator": "lum:in",
                                             "leftOperand": "lum:swPersistentId",
                                             "rightOperand": [
-                                                "123456",
                                                 "654789321",
                                                 "789456123",
+                                                "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                 "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                             ],
                                             "consumeStatus": "expanded"
@@ -3685,8 +3685,8 @@
                                     ]
                                 }
                             },
-                            "proh-3": {
-                                "uid": "proh-3",
+                            "unit-test-prohibition-3": {
+                                "uid": "unit-test-prohibition-3",
                                 "actions": [
                                     "acumos:deploy==",
                                     "acumos:download"
@@ -3722,8 +3722,8 @@
                                         "operator": "lum:in",
                                         "leftOperand": "lum:swPersistentId",
                                         "rightOperand": [
-                                            "123456",
                                             "789456123",
+                                            "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                             "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                         ]
                                     }
@@ -3739,7 +3739,7 @@
                                             "alex",
                                             "justin",
                                             "michelle",
-                                            "unit-test"
+                                            "unit-test-userId"
                                         ]
                                     }
                                 },
@@ -3801,17 +3801,17 @@
                             }
                         },
                         "restriction": {
-                            "uid": "agr-123",
+                            "uid": "unit-test-assetUsageAgreementId-uid",
                             "permission": {
-                                "perm-1": {
-                                    "uid": "perm-1",
+                                "unit-test-permission-1": {
+                                    "uid": "unit-test-permission-1",
                                     "actions": [
                                         "acumos:deploy",
                                         "acumos:download"
                                     ],
                                     "goodFor": "P10DT25H",
                                     "enableOn": null,
-                                    "expireOn": "2020-11-30",
+                                    "expireOn": "2099-11-30",
                                     "isPerpetual": false,
                                     "actionProvided": true,
                                     "assigneeMetrics": {
@@ -3843,7 +3843,7 @@
                                             "operator": "lum:in",
                                             "leftOperand": "lum:swPersistentId",
                                             "rightOperand": [
-                                                "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                                                "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                 "cbf31f26-4590-4323-8991-000d9f290901",
                                                 "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                             ]
@@ -3869,7 +3869,7 @@
                                                 "alex",
                                                 "justin",
                                                 "michelle",
-                                                "unit-test"
+                                                "unit-test-userId"
                                             ]
                                         },
                                         "lum:countUniqueUsers": {
@@ -3893,7 +3893,7 @@
                                                 "dataType": "date",
                                                 "operator": "lt",
                                                 "leftOperand": "date",
-                                                "rightOperand": "2020-12-01",
+                                                "rightOperand": "2099-12-01",
                                                 "consumeStatus": "groomed"
                                             },
                                             {
@@ -3907,7 +3907,7 @@
                                                 "dataType": "date",
                                                 "operator": "lteq",
                                                 "leftOperand": "date",
-                                                "rightOperand": "2020-11-30",
+                                                "rightOperand": "2099-11-30",
                                                 "consumeStatus": "consumed"
                                             },
                                             {
@@ -3947,8 +3947,8 @@
                                 }
                             },
                             "prohibition": {
-                                "proh-2": {
-                                    "uid": "proh-2",
+                                "unit-test-prohibition-2": {
+                                    "uid": "unit-test-prohibition-2",
                                     "actions": [
                                         "acumos:deploy--",
                                         "acumos:download"
@@ -3985,9 +3985,9 @@
                                             "operator": "lum:in",
                                             "leftOperand": "lum:swPersistentId",
                                             "rightOperand": [
-                                                "123456",
                                                 "654789321",
                                                 "789456123",
+                                                "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                 "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                             ]
                                         }
@@ -4004,7 +4004,7 @@
                                                 "alex",
                                                 "justin",
                                                 "michelle",
-                                                "unit-test"
+                                                "unit-test-userId"
                                             ]
                                         }
                                     },
@@ -4064,8 +4064,8 @@
                                         ]
                                     }
                                 },
-                                "proh-3": {
-                                    "uid": "proh-3",
+                                "unit-test-prohibition-3": {
+                                    "uid": "unit-test-prohibition-3",
                                     "actions": [
                                         "acumos:deploy==",
                                         "acumos:download"
@@ -4101,8 +4101,8 @@
                                             "operator": "lum:in",
                                             "leftOperand": "lum:swPersistentId",
                                             "rightOperand": [
-                                                "123456",
                                                 "789456123",
+                                                "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                 "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                             ]
                                         }
@@ -4118,7 +4118,7 @@
                                                 "alex",
                                                 "justin",
                                                 "michelle",
-                                                "unit-test"
+                                                "unit-test-userId"
                                             ]
                                         }
                                     },
@@ -4181,7 +4181,7 @@
                             }
                         },
                         "initialAgreement": {
-                            "uid": "agr-123",
+                            "uid": "unit-test-assetUsageAgreementId-uid",
                             "@type": "Agreement",
                             "target": {
                                 "refinement": [
@@ -4224,11 +4224,11 @@
                                 ]
                             },
                             "assigner": {
-                                "uid": "ass"
+                                "uid": "unit-test-assigner-uid"
                             },
                             "permission": [
                                 {
-                                    "uid": "perm-1",
+                                    "uid": "unit-test-permission-1",
                                     "action": [
                                         "acumos:deploy",
                                         "acumos:download"
@@ -4240,7 +4240,7 @@
                                                 "leftOperand": "lum:swPersistentId",
                                                 "rightOperand": [
                                                     "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                                    "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                                                    "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                     "cbf31f26-4590-4323-8991-000d9f290901"
                                                 ]
                                             }
@@ -4267,7 +4267,7 @@
                                         {
                                             "operator": "lt",
                                             "leftOperand": "date",
-                                            "rightOperand": "2021-01-01"
+                                            "rightOperand": "2099-01-01"
                                         },
                                         {
                                             "operator": "lteq",
@@ -4279,7 +4279,7 @@
                             ],
                             "prohibition": [
                                 {
-                                    "uid": "proh-2",
+                                    "uid": "unit-test-prohibition-2",
                                     "action": [
                                         "acumos:deploy--",
                                         "acumos:download--"
@@ -4291,7 +4291,7 @@
                                                 "leftOperand": "lum:swPersistentId",
                                                 "rightOperand": [
                                                     "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                                    "123456",
+                                                    "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                     "789456123"
                                                 ]
                                             },
@@ -4317,8 +4317,8 @@
                         },
                         "ignoredPermissionRestrictions": {},
                         "ignoredProhibitionRestrictions": {
-                            "proh-2": {
-                                "uid": "proh-2",
+                            "unit-test-prohibition-2": {
+                                "uid": "unit-test-prohibition-2",
                                 "targetRefinement": {},
                                 "usageConstraints": {},
                                 "assigneeRefinement": {
@@ -4331,25 +4331,25 @@
                                             "alex",
                                             "justin",
                                             "michelle",
-                                            "unit-test"
+                                            "unit-test-userId"
                                         ]
                                     }
                                 }
                             }
                         }
                     },
-                    "assetUsageAgreementRevision": 57,
+                    "assetUsageAgreementRevision": 12,
                     "assetUsageAgreementActive": true,
-                    "creator": "alex-agr-user",
-                    "created": "2020-01-27T15:59:24.515Z",
-                    "modifier": "alex-agr-user",
-                    "modified": "2020-04-03T18:58:49.060Z",
+                    "creator": "unit-test-userId",
+                    "created": "2020-05-29T21:37:57.377Z",
+                    "modifier": "unit-test-assetUsageAgreementId-user",
+                    "modified": "2020-05-29T21:37:59.957Z",
                     "closer": null,
                     "closed": null,
                     "closureReason": null
                 },
-                "alex-agr-user",
-                "a51d9d30-cc49-4f21-992a-cec32f352d08",
+                "unit-test-assetUsageAgreementId-user",
+                "5383f3fa-b69d-45b9-a9e3-5dc0e23156d9",
                 "[03] groomAssetUsageAgreement"
             ],
             "result": {
@@ -4361,9 +4361,9 @@
         {
             "sqlCmd": "INSERT INTO \"rightToUse\" AS rtu (\"softwareLicensorId\",\"assetUsageAgreementId\",\"rightToUseId\" , \"assetUsageRuleType\",\"actions\",\"targetRefinement\",\"assigneeRefinement\",\"usageConstraints\",\"consumedConstraints\",\"isPerpetual\",\"enableOn\",\"expireOn\",\"rightToUseRevision\" , \"goodFor\" , \"rightToUseActive\",\"modifier\",\"closer\",\"closed\",\"closureReason\" , \"assetUsageRuleId\",\"assigneeMetrics\",\"metricsRevision\",\"creator\", \"created\", \"modified\") VALUES (($1),($2),($3) , ($4),($5),($6),($7),($8),($9),($10),($11),($12),($13) , ($14) , ($15),($16),($17),($18),($19) , ($20),($21),($22),($23), NOW(), NOW()) ON CONFLICT (\"softwareLicensorId\",\"assetUsageAgreementId\",\"rightToUseId\") DO UPDATE SET \"modified\" = NOW(), \"usageEnds\" = rtu.\"usageStarted\" + ($14)::INTERVAL , \"assetUsageRuleType\" = ($4),\"actions\" = ($5),\"targetRefinement\" = ($6),\"assigneeRefinement\" = ($7),\"usageConstraints\" = ($8),\"consumedConstraints\" = ($9),\"isPerpetual\" = ($10),\"enableOn\" = ($11),\"expireOn\" = ($12),\"rightToUseRevision\" = ($13) , \"goodFor\" = ($14) , \"rightToUseActive\" = ($15),\"modifier\" = ($16),\"closer\" = ($17),\"closed\" = ($18),\"closureReason\" = ($19) WHERE rtu.\"rightToUseActive\" = FALSE OR rtu.\"assetUsageRuleType\" IS DISTINCT FROM ($4) OR rtu.\"actions\" IS DISTINCT FROM ($5) OR rtu.\"targetRefinement\" IS DISTINCT FROM ($6) OR rtu.\"assigneeRefinement\" IS DISTINCT FROM ($7) OR rtu.\"usageConstraints\" IS DISTINCT FROM ($8) OR rtu.\"consumedConstraints\" IS DISTINCT FROM ($9) OR rtu.\"isPerpetual\" IS DISTINCT FROM ($10) OR rtu.\"enableOn\" IS DISTINCT FROM ($11) OR rtu.\"expireOn\" IS DISTINCT FROM ($12) OR rtu.\"rightToUseRevision\" IS DISTINCT FROM ($13) OR rtu.\"goodFor\" IS DISTINCT FROM ($14) RETURNING *",
             "sqlVals": [
-                "swlic",
-                "alex-agr",
-                "perm-1",
+                "unit-test-softwareLicensorId",
+                "unit-test-assetUsageAgreementId",
+                "unit-test-permission-1",
                 "permission",
                 [
                     "acumos:deploy",
@@ -4398,7 +4398,7 @@
                         "operator": "lum:in",
                         "leftOperand": "lum:swPersistentId",
                         "rightOperand": [
-                            "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                            "a218c795-ae2c-4ff9-894d-462baa768dfc",
                             "cbf31f26-4590-4323-8991-000d9f290901",
                             "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                         ],
@@ -4419,7 +4419,7 @@
                             "alex",
                             "justin",
                             "michelle",
-                            "unit-test"
+                            "unit-test-userId"
                         ],
                         "dataType": "string",
                         "origin": "fromRestriction"
@@ -4481,7 +4481,7 @@
                             "operator": "lum:in",
                             "leftOperand": "lum:swPersistentId",
                             "rightOperand": [
-                                "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                                "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                 "cbf31f26-4590-4323-8991-000d9f290901",
                                 "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                             ],
@@ -4532,7 +4532,7 @@
                             "consumeStatus": "groomed",
                             "operator": "lt",
                             "leftOperand": "date",
-                            "rightOperand": "2021-01-01",
+                            "rightOperand": "2099-01-01",
                             "dataType": "date"
                         },
                         {
@@ -4546,7 +4546,7 @@
                             "consumeStatus": "consumed",
                             "operator": "lteq",
                             "leftOperand": "date",
-                            "rightOperand": "2020-12-31",
+                            "rightOperand": "2098-12-31",
                             "dataType": "date"
                         },
                         {
@@ -4558,8 +4558,8 @@
                             "rightOperandComparable": 2592000000
                         },
                         {
-                            "consumeStatus": "overridden",
-                            "expireOn": "2020-12-31"
+                            "consumeStatus": "ignored",
+                            "expireOn": "2099-11-30"
                         },
                         {
                             "consumeStatus": "overridden",
@@ -4576,11 +4576,11 @@
                 },
                 false,
                 null,
-                "2020-11-30",
-                57,
+                "2098-12-31",
+                12,
                 "P10DT25H",
                 true,
-                "alex-agr-user",
+                "unit-test-assetUsageAgreementId-user",
                 null,
                 null,
                 null,
@@ -4589,17 +4589,17 @@
                     "users": []
                 },
                 0,
-                "alex-agr-user"
+                "unit-test-assetUsageAgreementId-user"
             ],
             "result": {
                 "command": "INSERT",
                 "rowCount": 1,
                 "rows": [
                     {
-                        "assetUsageRuleId": "62c0c901-4880-4780-980d-5b2fa7ee85e7",
-                        "softwareLicensorId": "swlic",
-                        "assetUsageAgreementId": "alex-agr",
-                        "rightToUseId": "perm-1",
+                        "assetUsageRuleId": "b1f498ee-7f50-4187-83e6-a9c7a11143c3",
+                        "softwareLicensorId": "unit-test-softwareLicensorId",
+                        "assetUsageAgreementId": "unit-test-assetUsageAgreementId",
+                        "rightToUseId": "unit-test-permission-1",
                         "assetUsageRuleType": "permission",
                         "actions": [
                             "acumos:deploy",
@@ -4635,7 +4635,7 @@
                                 "operator": "lum:in",
                                 "leftOperand": "lum:swPersistentId",
                                 "rightOperand": [
-                                    "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                                    "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                     "cbf31f26-4590-4323-8991-000d9f290901",
                                     "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                 ]
@@ -4651,7 +4651,7 @@
                                     "alex",
                                     "justin",
                                     "michelle",
-                                    "unit-test"
+                                    "unit-test-userId"
                                 ]
                             },
                             "lum:countUniqueUsers": {
@@ -4683,7 +4683,7 @@
                                     "dataType": "date",
                                     "operator": "lt",
                                     "leftOperand": "date",
-                                    "rightOperand": "2021-01-01",
+                                    "rightOperand": "2099-01-01",
                                     "consumeStatus": "groomed"
                                 },
                                 {
@@ -4697,7 +4697,7 @@
                                     "dataType": "date",
                                     "operator": "lteq",
                                     "leftOperand": "date",
-                                    "rightOperand": "2020-12-31",
+                                    "rightOperand": "2098-12-31",
                                     "consumeStatus": "consumed"
                                 },
                                 {
@@ -4709,8 +4709,8 @@
                                     "rightOperandComparable": 2592000000
                                 },
                                 {
-                                    "expireOn": "2020-12-31",
-                                    "consumeStatus": "overridden"
+                                    "expireOn": "2099-11-30",
+                                    "consumeStatus": "ignored"
                                 },
                                 {
                                     "goodFor": "P30D",
@@ -4771,7 +4771,7 @@
                                     "operator": "lum:in",
                                     "leftOperand": "lum:swPersistentId",
                                     "rightOperand": [
-                                        "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                                        "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                         "cbf31f26-4590-4323-8991-000d9f290901",
                                         "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                     ],
@@ -4813,32 +4813,31 @@
                         "licenseKeys": null,
                         "isPerpetual": false,
                         "enableOn": null,
-                        "expireOn": "2020-11-30T00:00:00.000Z",
+                        "expireOn": "2098-12-31T00:00:00.000Z",
                         "goodFor": {
                             "days": 10,
                             "hours": 25
                         },
                         "assigneeMetrics": {
                             "users": [
-                                "alex",
-                                "alex-usage"
+                                "unit-test-userId"
                             ]
                         },
-                        "usageStartReqId": "8fd38d62-b6a9-46a7-8913-d2cc9c694b0e",
-                        "usageStarted": "2020-01-27T16:13:20.279Z",
-                        "usageEnds": "2020-02-07T17:13:20.279Z",
-                        "rightToUseRevision": 57,
-                        "metricsRevision": 2,
+                        "usageStartReqId": null,
+                        "usageStarted": "2020-04-29T21:37:59.856Z",
+                        "usageEnds": "2020-05-10T22:37:59.856Z",
+                        "rightToUseRevision": 12,
+                        "metricsRevision": 1,
                         "rightToUseActive": true,
-                        "creator": "alex-agr-user",
-                        "created": "2020-01-27T15:59:24.515Z",
-                        "modifier": "alex-agr-user",
-                        "modified": "2020-04-03T18:58:49.060Z",
+                        "creator": "unit-test-userId",
+                        "created": "2020-05-29T21:37:57.377Z",
+                        "modifier": "unit-test-assetUsageAgreementId-user",
+                        "modified": "2020-05-29T21:37:59.957Z",
                         "closer": null,
                         "closed": null,
                         "closureReason": null,
-                        "metricsModifierReqId": "f7eaff6a-9a9c-4fb8-8963-4e84b1fae98b",
-                        "metricsModified": "2020-01-30T20:07:52.950Z"
+                        "metricsModifierReqId": "beb41a9e-2813-426f-9a2d-212b2c29a729",
+                        "metricsModified": "2020-05-29T21:37:58.809Z"
                     }
                 ]
             }
@@ -4846,15 +4845,15 @@
         {
             "sqlCmd": "INSERT INTO \"snapshot\" (\"softwareLicensorId\",\"snapshotType\",\"snapshotKey\",\"snapshotRevision\" , \"snapshotBody\",\"creator\",\"requestId\",\"txStep\") VALUES (($1),($2),($3),($4) , ($5),($6),($7),($8)) ON CONFLICT (\"softwareLicensorId\",\"snapshotType\",\"snapshotKey\",\"snapshotRevision\") DO NOTHING",
             "sqlVals": [
-                "swlic",
+                "unit-test-softwareLicensorId",
                 "rightToUse",
-                "62c0c901-4880-4780-980d-5b2fa7ee85e7",
-                57,
+                "b1f498ee-7f50-4187-83e6-a9c7a11143c3",
+                12,
                 {
-                    "assetUsageRuleId": "62c0c901-4880-4780-980d-5b2fa7ee85e7",
-                    "softwareLicensorId": "swlic",
-                    "assetUsageAgreementId": "alex-agr",
-                    "rightToUseId": "perm-1",
+                    "assetUsageRuleId": "b1f498ee-7f50-4187-83e6-a9c7a11143c3",
+                    "softwareLicensorId": "unit-test-softwareLicensorId",
+                    "assetUsageAgreementId": "unit-test-assetUsageAgreementId",
+                    "rightToUseId": "unit-test-permission-1",
                     "assetUsageRuleType": "permission",
                     "actions": [
                         "acumos:deploy",
@@ -4890,7 +4889,7 @@
                             "operator": "lum:in",
                             "leftOperand": "lum:swPersistentId",
                             "rightOperand": [
-                                "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                                "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                 "cbf31f26-4590-4323-8991-000d9f290901",
                                 "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                             ]
@@ -4906,7 +4905,7 @@
                                 "alex",
                                 "justin",
                                 "michelle",
-                                "unit-test"
+                                "unit-test-userId"
                             ]
                         },
                         "lum:countUniqueUsers": {
@@ -4938,7 +4937,7 @@
                                 "dataType": "date",
                                 "operator": "lt",
                                 "leftOperand": "date",
-                                "rightOperand": "2021-01-01",
+                                "rightOperand": "2099-01-01",
                                 "consumeStatus": "groomed"
                             },
                             {
@@ -4952,7 +4951,7 @@
                                 "dataType": "date",
                                 "operator": "lteq",
                                 "leftOperand": "date",
-                                "rightOperand": "2020-12-31",
+                                "rightOperand": "2098-12-31",
                                 "consumeStatus": "consumed"
                             },
                             {
@@ -4964,8 +4963,8 @@
                                 "rightOperandComparable": 2592000000
                             },
                             {
-                                "expireOn": "2020-12-31",
-                                "consumeStatus": "overridden"
+                                "expireOn": "2099-11-30",
+                                "consumeStatus": "ignored"
                             },
                             {
                                 "goodFor": "P30D",
@@ -5026,7 +5025,7 @@
                                 "operator": "lum:in",
                                 "leftOperand": "lum:swPersistentId",
                                 "rightOperand": [
-                                    "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                                    "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                     "cbf31f26-4590-4323-8991-000d9f290901",
                                     "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                 ],
@@ -5068,35 +5067,34 @@
                     "licenseKeys": null,
                     "isPerpetual": false,
                     "enableOn": null,
-                    "expireOn": "2020-11-30T00:00:00.000Z",
+                    "expireOn": "2098-12-31",
                     "goodFor": {
                         "days": 10,
                         "hours": 25
                     },
                     "assigneeMetrics": {
                         "users": [
-                            "alex",
-                            "alex-usage"
+                            "unit-test-userId"
                         ]
                     },
-                    "usageStartReqId": "8fd38d62-b6a9-46a7-8913-d2cc9c694b0e",
-                    "usageStarted": "2020-01-27T16:13:20.279Z",
-                    "usageEnds": "2020-02-07T17:13:20.279Z",
-                    "rightToUseRevision": 57,
-                    "metricsRevision": 2,
+                    "usageStartReqId": null,
+                    "usageStarted": "2020-04-29T21:37:59.856Z",
+                    "usageEnds": "2020-05-10T22:37:59.856Z",
+                    "rightToUseRevision": 12,
+                    "metricsRevision": 1,
                     "rightToUseActive": true,
-                    "creator": "alex-agr-user",
-                    "created": "2020-01-27T15:59:24.515Z",
-                    "modifier": "alex-agr-user",
-                    "modified": "2020-04-03T18:58:49.060Z",
+                    "creator": "unit-test-userId",
+                    "created": "2020-05-29T21:37:57.377Z",
+                    "modifier": "unit-test-assetUsageAgreementId-user",
+                    "modified": "2020-05-29T21:37:59.957Z",
                     "closer": null,
                     "closed": null,
                     "closureReason": null,
-                    "metricsModifierReqId": "f7eaff6a-9a9c-4fb8-8963-4e84b1fae98b",
-                    "metricsModified": "2020-01-30T20:07:52.950Z"
+                    "metricsModifierReqId": "beb41a9e-2813-426f-9a2d-212b2c29a729",
+                    "metricsModified": "2020-05-29T21:37:58.809Z"
                 },
-                "alex-agr-user",
-                "a51d9d30-cc49-4f21-992a-cec32f352d08",
+                "unit-test-assetUsageAgreementId-user",
+                "5383f3fa-b69d-45b9-a9e3-5dc0e23156d9",
                 "[04] putRightToUse"
             ],
             "result": {
@@ -5108,9 +5106,9 @@
         {
             "sqlCmd": "INSERT INTO \"rightToUse\" AS rtu (\"softwareLicensorId\",\"assetUsageAgreementId\",\"rightToUseId\" , \"assetUsageRuleType\",\"actions\",\"targetRefinement\",\"assigneeRefinement\",\"usageConstraints\",\"consumedConstraints\",\"isPerpetual\",\"enableOn\",\"expireOn\",\"rightToUseRevision\" , \"goodFor\" , \"rightToUseActive\",\"modifier\",\"closer\",\"closed\",\"closureReason\" , \"assetUsageRuleId\",\"assigneeMetrics\",\"metricsRevision\",\"creator\", \"created\", \"modified\") VALUES (($1),($2),($3) , ($4),($5),($6),($7),($8),($9),($10),($11),($12),($13) , ($14) , ($15),($16),($17),($18),($19) , ($20),($21),($22),($23), NOW(), NOW()) ON CONFLICT (\"softwareLicensorId\",\"assetUsageAgreementId\",\"rightToUseId\") DO UPDATE SET \"modified\" = NOW(), \"usageEnds\" = rtu.\"usageStarted\" + ($14)::INTERVAL , \"assetUsageRuleType\" = ($4),\"actions\" = ($5),\"targetRefinement\" = ($6),\"assigneeRefinement\" = ($7),\"usageConstraints\" = ($8),\"consumedConstraints\" = ($9),\"isPerpetual\" = ($10),\"enableOn\" = ($11),\"expireOn\" = ($12),\"rightToUseRevision\" = ($13) , \"goodFor\" = ($14) , \"rightToUseActive\" = ($15),\"modifier\" = ($16),\"closer\" = ($17),\"closed\" = ($18),\"closureReason\" = ($19) WHERE rtu.\"rightToUseActive\" = FALSE OR rtu.\"assetUsageRuleType\" IS DISTINCT FROM ($4) OR rtu.\"actions\" IS DISTINCT FROM ($5) OR rtu.\"targetRefinement\" IS DISTINCT FROM ($6) OR rtu.\"assigneeRefinement\" IS DISTINCT FROM ($7) OR rtu.\"usageConstraints\" IS DISTINCT FROM ($8) OR rtu.\"consumedConstraints\" IS DISTINCT FROM ($9) OR rtu.\"isPerpetual\" IS DISTINCT FROM ($10) OR rtu.\"enableOn\" IS DISTINCT FROM ($11) OR rtu.\"expireOn\" IS DISTINCT FROM ($12) OR rtu.\"rightToUseRevision\" IS DISTINCT FROM ($13) OR rtu.\"goodFor\" IS DISTINCT FROM ($14) RETURNING *",
             "sqlVals": [
-                "swlic",
-                "alex-agr",
-                "proh-2",
+                "unit-test-softwareLicensorId",
+                "unit-test-assetUsageAgreementId",
+                "unit-test-prohibition-2",
                 "prohibition",
                 [
                     "acumos:deploy--",
@@ -5148,9 +5146,9 @@
                         "operator": "lum:in",
                         "leftOperand": "lum:swPersistentId",
                         "rightOperand": [
-                            "123456",
                             "654789321",
                             "789456123",
+                            "a218c795-ae2c-4ff9-894d-462baa768dfc",
                             "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                         ],
                         "dataType": "string",
@@ -5214,8 +5212,8 @@
                             "operator": "lum:in",
                             "leftOperand": "lum:swPersistentId",
                             "rightOperand": [
-                                "123456",
                                 "789456123",
+                                "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                 "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                             ],
                             "dataType": "string"
@@ -5225,9 +5223,9 @@
                             "operator": "lum:in",
                             "leftOperand": "lum:swPersistentId",
                             "rightOperand": [
-                                "123456",
                                 "654789321",
                                 "789456123",
+                                "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                 "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                             ],
                             "dataType": "string",
@@ -5278,10 +5276,10 @@
                 true,
                 null,
                 null,
-                57,
+                12,
                 null,
                 true,
-                "alex-agr-user",
+                "unit-test-assetUsageAgreementId-user",
                 null,
                 null,
                 null,
@@ -5290,17 +5288,17 @@
                     "users": []
                 },
                 0,
-                "alex-agr-user"
+                "unit-test-assetUsageAgreementId-user"
             ],
             "result": {
                 "command": "INSERT",
                 "rowCount": 1,
                 "rows": [
                     {
-                        "assetUsageRuleId": "7aa519f3-30c6-45fc-8fd6-bb210f3ceb42",
-                        "softwareLicensorId": "swlic",
-                        "assetUsageAgreementId": "alex-agr",
-                        "rightToUseId": "proh-2",
+                        "assetUsageRuleId": "ba03f2c3-9546-4972-9ef3-8c7d33e784d5",
+                        "softwareLicensorId": "unit-test-softwareLicensorId",
+                        "assetUsageAgreementId": "unit-test-assetUsageAgreementId",
+                        "rightToUseId": "unit-test-prohibition-2",
                         "assetUsageRuleType": "prohibition",
                         "actions": [
                             "acumos:deploy--",
@@ -5340,9 +5338,9 @@
                                 "operator": "lum:in",
                                 "leftOperand": "lum:swPersistentId",
                                 "rightOperand": [
-                                    "123456",
                                     "654789321",
                                     "789456123",
+                                    "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                     "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                 ]
                             }
@@ -5428,8 +5426,8 @@
                                     "operator": "lum:in",
                                     "leftOperand": "lum:swPersistentId",
                                     "rightOperand": [
-                                        "123456",
                                         "789456123",
+                                        "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                         "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                     ],
                                     "consumeStatus": "expanded"
@@ -5440,9 +5438,9 @@
                                     "operator": "lum:in",
                                     "leftOperand": "lum:swPersistentId",
                                     "rightOperand": [
-                                        "123456",
                                         "654789321",
                                         "789456123",
+                                        "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                         "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                     ],
                                     "consumeStatus": "expanded"
@@ -5476,13 +5474,13 @@
                         "usageStartReqId": null,
                         "usageStarted": null,
                         "usageEnds": null,
-                        "rightToUseRevision": 57,
+                        "rightToUseRevision": 12,
                         "metricsRevision": 0,
                         "rightToUseActive": true,
-                        "creator": "alex-agr-user",
-                        "created": "2020-01-27T15:59:24.515Z",
-                        "modifier": "alex-agr-user",
-                        "modified": "2020-04-03T18:58:49.060Z",
+                        "creator": "unit-test-userId",
+                        "created": "2020-05-29T21:37:57.377Z",
+                        "modifier": "unit-test-assetUsageAgreementId-user",
+                        "modified": "2020-05-29T21:37:59.957Z",
                         "closer": null,
                         "closed": null,
                         "closureReason": null,
@@ -5495,15 +5493,15 @@
         {
             "sqlCmd": "INSERT INTO \"snapshot\" (\"softwareLicensorId\",\"snapshotType\",\"snapshotKey\",\"snapshotRevision\" , \"snapshotBody\",\"creator\",\"requestId\",\"txStep\") VALUES (($1),($2),($3),($4) , ($5),($6),($7),($8)) ON CONFLICT (\"softwareLicensorId\",\"snapshotType\",\"snapshotKey\",\"snapshotRevision\") DO NOTHING",
             "sqlVals": [
-                "swlic",
+                "unit-test-softwareLicensorId",
                 "rightToUse",
-                "7aa519f3-30c6-45fc-8fd6-bb210f3ceb42",
-                57,
+                "ba03f2c3-9546-4972-9ef3-8c7d33e784d5",
+                12,
                 {
-                    "assetUsageRuleId": "7aa519f3-30c6-45fc-8fd6-bb210f3ceb42",
-                    "softwareLicensorId": "swlic",
-                    "assetUsageAgreementId": "alex-agr",
-                    "rightToUseId": "proh-2",
+                    "assetUsageRuleId": "ba03f2c3-9546-4972-9ef3-8c7d33e784d5",
+                    "softwareLicensorId": "unit-test-softwareLicensorId",
+                    "assetUsageAgreementId": "unit-test-assetUsageAgreementId",
+                    "rightToUseId": "unit-test-prohibition-2",
                     "assetUsageRuleType": "prohibition",
                     "actions": [
                         "acumos:deploy--",
@@ -5543,9 +5541,9 @@
                             "operator": "lum:in",
                             "leftOperand": "lum:swPersistentId",
                             "rightOperand": [
-                                "123456",
                                 "654789321",
                                 "789456123",
+                                "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                 "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                             ]
                         }
@@ -5631,8 +5629,8 @@
                                 "operator": "lum:in",
                                 "leftOperand": "lum:swPersistentId",
                                 "rightOperand": [
-                                    "123456",
                                     "789456123",
+                                    "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                     "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                 ],
                                 "consumeStatus": "expanded"
@@ -5643,9 +5641,9 @@
                                 "operator": "lum:in",
                                 "leftOperand": "lum:swPersistentId",
                                 "rightOperand": [
-                                    "123456",
                                     "654789321",
                                     "789456123",
+                                    "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                     "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                 ],
                                 "consumeStatus": "expanded"
@@ -5679,21 +5677,21 @@
                     "usageStartReqId": null,
                     "usageStarted": null,
                     "usageEnds": null,
-                    "rightToUseRevision": 57,
+                    "rightToUseRevision": 12,
                     "metricsRevision": 0,
                     "rightToUseActive": true,
-                    "creator": "alex-agr-user",
-                    "created": "2020-01-27T15:59:24.515Z",
-                    "modifier": "alex-agr-user",
-                    "modified": "2020-04-03T18:58:49.060Z",
+                    "creator": "unit-test-userId",
+                    "created": "2020-05-29T21:37:57.377Z",
+                    "modifier": "unit-test-assetUsageAgreementId-user",
+                    "modified": "2020-05-29T21:37:59.957Z",
                     "closer": null,
                     "closed": null,
                     "closureReason": null,
                     "metricsModifierReqId": null,
                     "metricsModified": null
                 },
-                "alex-agr-user",
-                "a51d9d30-cc49-4f21-992a-cec32f352d08",
+                "unit-test-assetUsageAgreementId-user",
+                "5383f3fa-b69d-45b9-a9e3-5dc0e23156d9",
                 "[04] putRightToUse"
             ],
             "result": {
@@ -5705,9 +5703,9 @@
         {
             "sqlCmd": "INSERT INTO \"rightToUse\" AS rtu (\"softwareLicensorId\",\"assetUsageAgreementId\",\"rightToUseId\" , \"assetUsageRuleType\",\"actions\",\"targetRefinement\",\"assigneeRefinement\",\"usageConstraints\",\"consumedConstraints\",\"isPerpetual\",\"enableOn\",\"expireOn\",\"rightToUseRevision\" , \"goodFor\" , \"rightToUseActive\",\"modifier\",\"closer\",\"closed\",\"closureReason\" , \"assetUsageRuleId\",\"assigneeMetrics\",\"metricsRevision\",\"creator\", \"created\", \"modified\") VALUES (($1),($2),($3) , ($4),($5),($6),($7),($8),($9),($10),($11),($12),($13) , ($14) , ($15),($16),($17),($18),($19) , ($20),($21),($22),($23), NOW(), NOW()) ON CONFLICT (\"softwareLicensorId\",\"assetUsageAgreementId\",\"rightToUseId\") DO UPDATE SET \"modified\" = NOW(), \"usageEnds\" = rtu.\"usageStarted\" + ($14)::INTERVAL , \"assetUsageRuleType\" = ($4),\"actions\" = ($5),\"targetRefinement\" = ($6),\"assigneeRefinement\" = ($7),\"usageConstraints\" = ($8),\"consumedConstraints\" = ($9),\"isPerpetual\" = ($10),\"enableOn\" = ($11),\"expireOn\" = ($12),\"rightToUseRevision\" = ($13) , \"goodFor\" = ($14) , \"rightToUseActive\" = ($15),\"modifier\" = ($16),\"closer\" = ($17),\"closed\" = ($18),\"closureReason\" = ($19) WHERE rtu.\"rightToUseActive\" = FALSE OR rtu.\"assetUsageRuleType\" IS DISTINCT FROM ($4) OR rtu.\"actions\" IS DISTINCT FROM ($5) OR rtu.\"targetRefinement\" IS DISTINCT FROM ($6) OR rtu.\"assigneeRefinement\" IS DISTINCT FROM ($7) OR rtu.\"usageConstraints\" IS DISTINCT FROM ($8) OR rtu.\"consumedConstraints\" IS DISTINCT FROM ($9) OR rtu.\"isPerpetual\" IS DISTINCT FROM ($10) OR rtu.\"enableOn\" IS DISTINCT FROM ($11) OR rtu.\"expireOn\" IS DISTINCT FROM ($12) OR rtu.\"rightToUseRevision\" IS DISTINCT FROM ($13) OR rtu.\"goodFor\" IS DISTINCT FROM ($14) RETURNING *",
             "sqlVals": [
-                "swlic",
-                "alex-agr",
-                "proh-3",
+                "unit-test-softwareLicensorId",
+                "unit-test-assetUsageAgreementId",
+                "unit-test-prohibition-3",
                 "prohibition",
                 [
                     "acumos:deploy==",
@@ -5735,8 +5733,8 @@
                         "operator": "lum:in",
                         "leftOperand": "lum:swPersistentId",
                         "rightOperand": [
-                            "123456",
                             "789456123",
+                            "a218c795-ae2c-4ff9-894d-462baa768dfc",
                             "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                         ],
                         "dataType": "string"
@@ -5750,7 +5748,7 @@
                             "alex",
                             "justin",
                             "michelle",
-                            "unit-test"
+                            "unit-test-userId"
                         ],
                         "dataType": "string"
                     }
@@ -5814,10 +5812,10 @@
                 true,
                 null,
                 null,
-                57,
+                12,
                 null,
                 true,
-                "alex-agr-user",
+                "unit-test-assetUsageAgreementId-user",
                 null,
                 null,
                 null,
@@ -5826,17 +5824,17 @@
                     "users": []
                 },
                 0,
-                "alex-agr-user"
+                "unit-test-assetUsageAgreementId-user"
             ],
             "result": {
                 "command": "INSERT",
                 "rowCount": 1,
                 "rows": [
                     {
-                        "assetUsageRuleId": "6cf495a1-3be1-43c7-874e-a814d69097c9",
-                        "softwareLicensorId": "swlic",
-                        "assetUsageAgreementId": "alex-agr",
-                        "rightToUseId": "proh-3",
+                        "assetUsageRuleId": "0d6dfc25-a009-4469-bdf4-f2be15a5839a",
+                        "softwareLicensorId": "unit-test-softwareLicensorId",
+                        "assetUsageAgreementId": "unit-test-assetUsageAgreementId",
+                        "rightToUseId": "unit-test-prohibition-3",
                         "assetUsageRuleType": "prohibition",
                         "actions": [
                             "acumos:deploy==",
@@ -5865,8 +5863,8 @@
                                 "operator": "lum:in",
                                 "leftOperand": "lum:swPersistentId",
                                 "rightOperand": [
-                                    "123456",
                                     "789456123",
+                                    "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                     "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                 ]
                             }
@@ -5880,7 +5878,7 @@
                                     "alex",
                                     "justin",
                                     "michelle",
-                                    "unit-test"
+                                    "unit-test-userId"
                                 ]
                             }
                         },
@@ -5951,13 +5949,13 @@
                         "usageStartReqId": null,
                         "usageStarted": null,
                         "usageEnds": null,
-                        "rightToUseRevision": 57,
+                        "rightToUseRevision": 12,
                         "metricsRevision": 0,
                         "rightToUseActive": true,
-                        "creator": "alex-agr-user",
-                        "created": "2020-01-27T16:01:50.112Z",
-                        "modifier": "alex-agr-user",
-                        "modified": "2020-04-03T18:58:49.060Z",
+                        "creator": "unit-test-userId",
+                        "created": "2020-05-29T21:37:57.694Z",
+                        "modifier": "unit-test-assetUsageAgreementId-user",
+                        "modified": "2020-05-29T21:37:59.957Z",
                         "closer": null,
                         "closed": null,
                         "closureReason": null,
@@ -5970,15 +5968,15 @@
         {
             "sqlCmd": "INSERT INTO \"snapshot\" (\"softwareLicensorId\",\"snapshotType\",\"snapshotKey\",\"snapshotRevision\" , \"snapshotBody\",\"creator\",\"requestId\",\"txStep\") VALUES (($1),($2),($3),($4) , ($5),($6),($7),($8)) ON CONFLICT (\"softwareLicensorId\",\"snapshotType\",\"snapshotKey\",\"snapshotRevision\") DO NOTHING",
             "sqlVals": [
-                "swlic",
+                "unit-test-softwareLicensorId",
                 "rightToUse",
-                "6cf495a1-3be1-43c7-874e-a814d69097c9",
-                57,
+                "0d6dfc25-a009-4469-bdf4-f2be15a5839a",
+                12,
                 {
-                    "assetUsageRuleId": "6cf495a1-3be1-43c7-874e-a814d69097c9",
-                    "softwareLicensorId": "swlic",
-                    "assetUsageAgreementId": "alex-agr",
-                    "rightToUseId": "proh-3",
+                    "assetUsageRuleId": "0d6dfc25-a009-4469-bdf4-f2be15a5839a",
+                    "softwareLicensorId": "unit-test-softwareLicensorId",
+                    "assetUsageAgreementId": "unit-test-assetUsageAgreementId",
+                    "rightToUseId": "unit-test-prohibition-3",
                     "assetUsageRuleType": "prohibition",
                     "actions": [
                         "acumos:deploy==",
@@ -6007,8 +6005,8 @@
                             "operator": "lum:in",
                             "leftOperand": "lum:swPersistentId",
                             "rightOperand": [
-                                "123456",
                                 "789456123",
+                                "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                 "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                             ]
                         }
@@ -6022,7 +6020,7 @@
                                 "alex",
                                 "justin",
                                 "michelle",
-                                "unit-test"
+                                "unit-test-userId"
                             ]
                         }
                     },
@@ -6093,21 +6091,21 @@
                     "usageStartReqId": null,
                     "usageStarted": null,
                     "usageEnds": null,
-                    "rightToUseRevision": 57,
+                    "rightToUseRevision": 12,
                     "metricsRevision": 0,
                     "rightToUseActive": true,
-                    "creator": "alex-agr-user",
-                    "created": "2020-01-27T16:01:50.112Z",
-                    "modifier": "alex-agr-user",
-                    "modified": "2020-04-03T18:58:49.060Z",
+                    "creator": "unit-test-userId",
+                    "created": "2020-05-29T21:37:57.694Z",
+                    "modifier": "unit-test-assetUsageAgreementId-user",
+                    "modified": "2020-05-29T21:37:59.957Z",
                     "closer": null,
                     "closed": null,
                     "closureReason": null,
                     "metricsModifierReqId": null,
                     "metricsModified": null
                 },
-                "alex-agr-user",
-                "a51d9d30-cc49-4f21-992a-cec32f352d08",
+                "unit-test-assetUsageAgreementId-user",
+                "5383f3fa-b69d-45b9-a9e3-5dc0e23156d9",
                 "[04] putRightToUse"
             ],
             "result": {
@@ -6119,12 +6117,12 @@
         {
             "sqlCmd": "UPDATE \"rightToUse\" SET \"rightToUseRevision\" = \"rightToUseRevision\" + 1, \"closed\" = NOW() , \"rightToUseActive\" = ($5),\"closer\" = ($6),\"closureReason\" = ($7) WHERE \"softwareLicensorId\" = ($1) AND \"assetUsageAgreementId\" = ($2) AND \"rightToUseActive\" = ($3) AND NOT (\"rightToUseRevision\" = ($4)) RETURNING *",
             "sqlVals": [
-                "swlic",
-                "alex-agr",
+                "unit-test-softwareLicensorId",
+                "unit-test-assetUsageAgreementId",
                 true,
-                57,
+                12,
                 false,
-                "alex-agr-user",
+                "unit-test-assetUsageAgreementId-user",
                 "revoked"
             ],
             "result": {
@@ -6166,18 +6164,18 @@
         {
             "sqlCmd": "SELECT \"softwareLicensorId\",\"assetUsageAgreementId\", \"agreement\",\"agreementRestriction\",\"groomedAgreement\",\"assetUsageAgreementRevision\",\"assetUsageAgreementActive\",\"creator\",\"created\",\"modifier\",\"modified\",\"closer\",\"closed\",\"closureReason\" FROM \"assetUsageAgreement\" WHERE \"softwareLicensorId\" = ($1) AND \"assetUsageAgreementId\" = ($2) FOR SHARE",
             "sqlVals": [
-                "swlic",
-                "alex-agr"
+                "unit-test-softwareLicensorId",
+                "unit-test-assetUsageAgreementId"
             ],
             "result": {
                 "command": "SELECT",
                 "rowCount": 1,
                 "rows": [
                     {
-                        "softwareLicensorId": "swlic",
-                        "assetUsageAgreementId": "alex-agr",
+                        "softwareLicensorId": "unit-test-softwareLicensorId",
+                        "assetUsageAgreementId": "unit-test-assetUsageAgreementId",
                         "agreement": {
-                            "uid": "agr-123",
+                            "uid": "unit-test-assetUsageAgreementId-uid",
                             "@type": "Agreement",
                             "target": {
                                 "refinement": [
@@ -6220,11 +6218,11 @@
                                 ]
                             },
                             "assigner": {
-                                "uid": "ass"
+                                "uid": "unit-test-assigner-uid"
                             },
                             "permission": [
                                 {
-                                    "uid": "perm-1",
+                                    "uid": "unit-test-permission-1",
                                     "action": [
                                         "acumos:deploy",
                                         "acumos:download"
@@ -6236,7 +6234,7 @@
                                                 "leftOperand": "lum:swPersistentId",
                                                 "rightOperand": [
                                                     "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                                    "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                                                    "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                     "cbf31f26-4590-4323-8991-000d9f290901"
                                                 ]
                                             }
@@ -6263,7 +6261,7 @@
                                         {
                                             "operator": "lt",
                                             "leftOperand": "date",
-                                            "rightOperand": "2021-01-01"
+                                            "rightOperand": "2099-01-01"
                                         },
                                         {
                                             "operator": "lteq",
@@ -6275,7 +6273,7 @@
                             ],
                             "prohibition": [
                                 {
-                                    "uid": "proh-2",
+                                    "uid": "unit-test-prohibition-2",
                                     "action": [
                                         "acumos:deploy--",
                                         "acumos:download--"
@@ -6287,7 +6285,7 @@
                                                 "leftOperand": "lum:swPersistentId",
                                                 "rightOperand": [
                                                     "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                                    "123456",
+                                                    "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                     "789456123"
                                                 ]
                                             },
@@ -6312,7 +6310,7 @@
                             ]
                         },
                         "agreementRestriction": {
-                            "uid": "agr-123",
+                            "uid": "unit-test-assetUsageAgreementId-uid",
                             "@type": "Agreement",
                             "target": {
                                 "refinement": [
@@ -6349,17 +6347,17 @@
                                             "alex",
                                             "justin",
                                             "michelle",
-                                            "unit-test"
+                                            "unit-test-userId"
                                         ]
                                     }
                                 ]
                             },
                             "assigner": {
-                                "uid": "ass-restrictioner"
+                                "uid": "unit-test-assigner-uid-restr"
                             },
                             "permission": [
                                 {
-                                    "uid": "perm-1",
+                                    "uid": "unit-test-permission-1",
                                     "action": [
                                         "acumos:deploy",
                                         "acumos:download"
@@ -6371,7 +6369,7 @@
                                                 "leftOperand": "lum:swPersistentId",
                                                 "rightOperand": [
                                                     "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                                    "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                                                    "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                     "cbf31f26-4590-4323-8991-000d9f290901"
                                                 ]
                                             }
@@ -6398,7 +6396,7 @@
                                         {
                                             "operator": "lt",
                                             "leftOperand": "date",
-                                            "rightOperand": "2020-12-01"
+                                            "rightOperand": "2099-12-01"
                                         },
                                         {
                                             "operator": "lteq",
@@ -6410,7 +6408,7 @@
                             ],
                             "prohibition": [
                                 {
-                                    "uid": "proh-2",
+                                    "uid": "unit-test-prohibition-2",
                                     "action": [
                                         "acumos:deploy--",
                                         "acumos:download"
@@ -6422,7 +6420,7 @@
                                                 "leftOperand": "lum:swPersistentId",
                                                 "rightOperand": [
                                                     "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                                    "123456",
+                                                    "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                     "789456123",
                                                     "654789321"
                                                 ]
@@ -6446,7 +6444,7 @@
                                     ]
                                 },
                                 {
-                                    "uid": "proh-3",
+                                    "uid": "unit-test-prohibition-3",
                                     "action": [
                                         "acumos:deploy==",
                                         "acumos:download"
@@ -6458,7 +6456,7 @@
                                                 "leftOperand": "lum:swPersistentId",
                                                 "rightOperand": [
                                                     "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                                    "123456",
+                                                    "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                     "789456123"
                                                 ]
                                             },
@@ -6483,17 +6481,17 @@
                             ]
                         },
                         "groomedAgreement": {
-                            "uid": "agr-123",
+                            "uid": "unit-test-assetUsageAgreementId-uid",
                             "permission": {
-                                "perm-1": {
-                                    "uid": "perm-1",
+                                "unit-test-permission-1": {
+                                    "uid": "unit-test-permission-1",
                                     "actions": [
                                         "acumos:deploy",
                                         "acumos:download"
                                     ],
                                     "goodFor": "P10DT25H",
                                     "enableOn": null,
-                                    "expireOn": "2020-11-30",
+                                    "expireOn": "2098-12-31",
                                     "isPerpetual": false,
                                     "actionProvided": true,
                                     "assigneeMetrics": {
@@ -6529,7 +6527,7 @@
                                             "operator": "lum:in",
                                             "leftOperand": "lum:swPersistentId",
                                             "rightOperand": [
-                                                "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                                                "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                 "cbf31f26-4590-4323-8991-000d9f290901",
                                                 "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                             ]
@@ -6555,7 +6553,7 @@
                                                 "alex",
                                                 "justin",
                                                 "michelle",
-                                                "unit-test"
+                                                "unit-test-userId"
                                             ]
                                         },
                                         "lum:countUniqueUsers": {
@@ -6578,7 +6576,7 @@
                                                 "dataType": "date",
                                                 "operator": "lt",
                                                 "leftOperand": "date",
-                                                "rightOperand": "2021-01-01",
+                                                "rightOperand": "2099-01-01",
                                                 "consumeStatus": "groomed"
                                             },
                                             {
@@ -6592,7 +6590,7 @@
                                                 "dataType": "date",
                                                 "operator": "lteq",
                                                 "leftOperand": "date",
-                                                "rightOperand": "2020-12-31",
+                                                "rightOperand": "2098-12-31",
                                                 "consumeStatus": "consumed"
                                             },
                                             {
@@ -6604,8 +6602,8 @@
                                                 "rightOperandComparable": 2592000000
                                             },
                                             {
-                                                "expireOn": "2020-12-31",
-                                                "consumeStatus": "overridden"
+                                                "expireOn": "2099-11-30",
+                                                "consumeStatus": "ignored"
                                             },
                                             {
                                                 "goodFor": "P30D",
@@ -6666,7 +6664,7 @@
                                                 "operator": "lum:in",
                                                 "leftOperand": "lum:swPersistentId",
                                                 "rightOperand": [
-                                                    "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                                                    "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                     "cbf31f26-4590-4323-8991-000d9f290901",
                                                     "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                                 ],
@@ -6708,8 +6706,8 @@
                                 }
                             },
                             "prohibition": {
-                                "proh-2": {
-                                    "uid": "proh-2",
+                                "unit-test-prohibition-2": {
+                                    "uid": "unit-test-prohibition-2",
                                     "actions": [
                                         "acumos:deploy--",
                                         "acumos:download--",
@@ -6756,9 +6754,9 @@
                                             "operator": "lum:in",
                                             "leftOperand": "lum:swPersistentId",
                                             "rightOperand": [
-                                                "123456",
                                                 "654789321",
                                                 "789456123",
+                                                "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                 "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                             ]
                                         }
@@ -6845,8 +6843,8 @@
                                                 "operator": "lum:in",
                                                 "leftOperand": "lum:swPersistentId",
                                                 "rightOperand": [
-                                                    "123456",
                                                     "789456123",
+                                                    "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                     "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                                 ],
                                                 "consumeStatus": "expanded"
@@ -6857,9 +6855,9 @@
                                                 "operator": "lum:in",
                                                 "leftOperand": "lum:swPersistentId",
                                                 "rightOperand": [
-                                                    "123456",
                                                     "654789321",
                                                     "789456123",
+                                                    "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                     "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                                 ],
                                                 "consumeStatus": "expanded"
@@ -6883,8 +6881,8 @@
                                         ]
                                     }
                                 },
-                                "proh-3": {
-                                    "uid": "proh-3",
+                                "unit-test-prohibition-3": {
+                                    "uid": "unit-test-prohibition-3",
                                     "actions": [
                                         "acumos:deploy==",
                                         "acumos:download"
@@ -6920,8 +6918,8 @@
                                             "operator": "lum:in",
                                             "leftOperand": "lum:swPersistentId",
                                             "rightOperand": [
-                                                "123456",
                                                 "789456123",
+                                                "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                 "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                             ]
                                         }
@@ -6937,7 +6935,7 @@
                                                 "alex",
                                                 "justin",
                                                 "michelle",
-                                                "unit-test"
+                                                "unit-test-userId"
                                             ]
                                         }
                                     },
@@ -6999,17 +6997,17 @@
                                 }
                             },
                             "restriction": {
-                                "uid": "agr-123",
+                                "uid": "unit-test-assetUsageAgreementId-uid",
                                 "permission": {
-                                    "perm-1": {
-                                        "uid": "perm-1",
+                                    "unit-test-permission-1": {
+                                        "uid": "unit-test-permission-1",
                                         "actions": [
                                             "acumos:deploy",
                                             "acumos:download"
                                         ],
                                         "goodFor": "P10DT25H",
                                         "enableOn": null,
-                                        "expireOn": "2020-11-30",
+                                        "expireOn": "2099-11-30",
                                         "isPerpetual": false,
                                         "actionProvided": true,
                                         "assigneeMetrics": {
@@ -7041,7 +7039,7 @@
                                                 "operator": "lum:in",
                                                 "leftOperand": "lum:swPersistentId",
                                                 "rightOperand": [
-                                                    "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                                                    "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                     "cbf31f26-4590-4323-8991-000d9f290901",
                                                     "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                                 ]
@@ -7067,7 +7065,7 @@
                                                     "alex",
                                                     "justin",
                                                     "michelle",
-                                                    "unit-test"
+                                                    "unit-test-userId"
                                                 ]
                                             },
                                             "lum:countUniqueUsers": {
@@ -7091,7 +7089,7 @@
                                                     "dataType": "date",
                                                     "operator": "lt",
                                                     "leftOperand": "date",
-                                                    "rightOperand": "2020-12-01",
+                                                    "rightOperand": "2099-12-01",
                                                     "consumeStatus": "groomed"
                                                 },
                                                 {
@@ -7105,7 +7103,7 @@
                                                     "dataType": "date",
                                                     "operator": "lteq",
                                                     "leftOperand": "date",
-                                                    "rightOperand": "2020-11-30",
+                                                    "rightOperand": "2099-11-30",
                                                     "consumeStatus": "consumed"
                                                 },
                                                 {
@@ -7145,8 +7143,8 @@
                                     }
                                 },
                                 "prohibition": {
-                                    "proh-2": {
-                                        "uid": "proh-2",
+                                    "unit-test-prohibition-2": {
+                                        "uid": "unit-test-prohibition-2",
                                         "actions": [
                                             "acumos:deploy--",
                                             "acumos:download"
@@ -7183,9 +7181,9 @@
                                                 "operator": "lum:in",
                                                 "leftOperand": "lum:swPersistentId",
                                                 "rightOperand": [
-                                                    "123456",
                                                     "654789321",
                                                     "789456123",
+                                                    "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                     "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                                 ]
                                             }
@@ -7202,7 +7200,7 @@
                                                     "alex",
                                                     "justin",
                                                     "michelle",
-                                                    "unit-test"
+                                                    "unit-test-userId"
                                                 ]
                                             }
                                         },
@@ -7262,8 +7260,8 @@
                                             ]
                                         }
                                     },
-                                    "proh-3": {
-                                        "uid": "proh-3",
+                                    "unit-test-prohibition-3": {
+                                        "uid": "unit-test-prohibition-3",
                                         "actions": [
                                             "acumos:deploy==",
                                             "acumos:download"
@@ -7299,8 +7297,8 @@
                                                 "operator": "lum:in",
                                                 "leftOperand": "lum:swPersistentId",
                                                 "rightOperand": [
-                                                    "123456",
                                                     "789456123",
+                                                    "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                     "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                                 ]
                                             }
@@ -7316,7 +7314,7 @@
                                                     "alex",
                                                     "justin",
                                                     "michelle",
-                                                    "unit-test"
+                                                    "unit-test-userId"
                                                 ]
                                             }
                                         },
@@ -7379,7 +7377,7 @@
                                 }
                             },
                             "initialAgreement": {
-                                "uid": "agr-123",
+                                "uid": "unit-test-assetUsageAgreementId-uid",
                                 "@type": "Agreement",
                                 "target": {
                                     "refinement": [
@@ -7422,11 +7420,11 @@
                                     ]
                                 },
                                 "assigner": {
-                                    "uid": "ass"
+                                    "uid": "unit-test-assigner-uid"
                                 },
                                 "permission": [
                                     {
-                                        "uid": "perm-1",
+                                        "uid": "unit-test-permission-1",
                                         "action": [
                                             "acumos:deploy",
                                             "acumos:download"
@@ -7438,7 +7436,7 @@
                                                     "leftOperand": "lum:swPersistentId",
                                                     "rightOperand": [
                                                         "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                                        "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                                                        "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                         "cbf31f26-4590-4323-8991-000d9f290901"
                                                     ]
                                                 }
@@ -7465,7 +7463,7 @@
                                             {
                                                 "operator": "lt",
                                                 "leftOperand": "date",
-                                                "rightOperand": "2021-01-01"
+                                                "rightOperand": "2099-01-01"
                                             },
                                             {
                                                 "operator": "lteq",
@@ -7477,7 +7475,7 @@
                                 ],
                                 "prohibition": [
                                     {
-                                        "uid": "proh-2",
+                                        "uid": "unit-test-prohibition-2",
                                         "action": [
                                             "acumos:deploy--",
                                             "acumos:download--"
@@ -7489,7 +7487,7 @@
                                                     "leftOperand": "lum:swPersistentId",
                                                     "rightOperand": [
                                                         "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                                        "123456",
+                                                        "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                         "789456123"
                                                     ]
                                                 },
@@ -7515,8 +7513,8 @@
                             },
                             "ignoredPermissionRestrictions": {},
                             "ignoredProhibitionRestrictions": {
-                                "proh-2": {
-                                    "uid": "proh-2",
+                                "unit-test-prohibition-2": {
+                                    "uid": "unit-test-prohibition-2",
                                     "targetRefinement": {},
                                     "usageConstraints": {},
                                     "assigneeRefinement": {
@@ -7529,19 +7527,19 @@
                                                 "alex",
                                                 "justin",
                                                 "michelle",
-                                                "unit-test"
+                                                "unit-test-userId"
                                             ]
                                         }
                                     }
                                 }
                             }
                         },
-                        "assetUsageAgreementRevision": 57,
+                        "assetUsageAgreementRevision": 12,
                         "assetUsageAgreementActive": true,
-                        "creator": "alex-agr-user",
-                        "created": "2020-01-27T15:59:24.515Z",
-                        "modifier": "alex-agr-user",
-                        "modified": "2020-04-03T18:58:49.060Z",
+                        "creator": "unit-test-userId",
+                        "created": "2020-05-29T21:37:57.377Z",
+                        "modifier": "unit-test-assetUsageAgreementId-user",
+                        "modified": "2020-05-29T21:37:59.957Z",
                         "closer": null,
                         "closed": null,
                         "closureReason": null
@@ -7560,22 +7558,23 @@
     ],
     "req": {
         "method": "PUT",
-        "path": "/api/v1/asset-usage-agreement-restriction?softwareLicensorId=swlic&assetUsageAgreementId=alex-agr",
+        "path": "/api/v1/asset-usage-agreement-restriction?softwareLicensorId=unit-test-softwareLicensorId&assetUsageAgreementId=unit-test-assetUsageAgreementId",
         "content-type": "application/json; charset=utf-8",
+        "X-ACUMOS-RequestID": "5383f3fa-b69d-45b9-a9e3-5dc0e23156d9",
         "send": {
-            "requestId": "a51d9d30-cc49-4f21-992a-cec32f352d08",
-            "requested": "2020-04-03T18:58:49.055Z",
-            "userId": "alex-agr-user",
+            "requestId": "5383f3fa-b69d-45b9-a9e3-5dc0e23156d9",
+            "requested": "2020-05-29T21:37:59.955Z",
+            "userId": "unit-test-assetUsageAgreementId-user",
             "assetUsageAgreement": {
-                "softwareLicensorId": "swlic",
-                "assetUsageAgreementId": "alex-agr",
+                "softwareLicensorId": "unit-test-softwareLicensorId",
+                "assetUsageAgreementId": "unit-test-assetUsageAgreementId",
                 "agreementRestriction": {
-                    "uid": "agr-123",
+                    "uid": "unit-test-assetUsageAgreementId-uid",
                     "@context": {},
                     "@type": "Agreement",
                     "profile": "prof-restr",
                     "assigner": {
-                        "uid": "ass-restrictioner"
+                        "uid": "unit-test-assigner-uid-restr"
                     },
                     "assignee": {
                         "refinement": [
@@ -7591,7 +7590,7 @@
                                     "alex",
                                     "justin",
                                     "michelle",
-                                    "unit-test"
+                                    "unit-test-userId"
                                 ]
                             }
                         ]
@@ -7617,7 +7616,7 @@
                     },
                     "permission": [
                         {
-                            "uid": "perm-1",
+                            "uid": "unit-test-permission-1",
                             "action": [
                                 "acumos:deploy",
                                 "acumos:download"
@@ -7641,7 +7640,7 @@
                                         "operator": "lum:in",
                                         "rightOperand": [
                                             "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                            "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                                            "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                             "cbf31f26-4590-4323-8991-000d9f290901"
                                         ]
                                     }
@@ -7656,7 +7655,7 @@
                                 {
                                     "leftOperand": "date",
                                     "operator": "lt",
-                                    "rightOperand": "2020-12-01"
+                                    "rightOperand": "2099-12-01"
                                 },
                                 {
                                     "leftOperand": "lum:goodFor",
@@ -7668,7 +7667,7 @@
                     ],
                     "prohibition": [
                         {
-                            "uid": "proh-2",
+                            "uid": "unit-test-prohibition-2",
                             "action": [
                                 "acumos:deploy--",
                                 "acumos:download"
@@ -7680,7 +7679,7 @@
                                         "operator": "lum:in",
                                         "rightOperand": [
                                             "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                            "123456",
+                                            "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                             "789456123",
                                             "654789321"
                                         ]
@@ -7704,7 +7703,7 @@
                             ]
                         },
                         {
-                            "uid": "proh-3",
+                            "uid": "unit-test-prohibition-3",
                             "action": [
                                 "acumos:deploy==",
                                 "acumos:download"
@@ -7716,7 +7715,7 @@
                                         "operator": "lum:in",
                                         "rightOperand": [
                                             "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                            "123456",
+                                            "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                             "789456123"
                                         ]
                                     },
@@ -7746,14 +7745,14 @@
     "res": {
         "statusCode": 200,
         "body": {
-            "userId": "alex-agr-user",
-            "requestId": "a51d9d30-cc49-4f21-992a-cec32f352d08",
-            "requested": "2020-04-03T18:58:49.055Z",
+            "userId": "unit-test-assetUsageAgreementId-user",
+            "requestId": "5383f3fa-b69d-45b9-a9e3-5dc0e23156d9",
+            "requested": "__type__dateTime__",
             "assetUsageAgreement": {
-                "softwareLicensorId": "swlic",
-                "assetUsageAgreementId": "alex-agr",
+                "softwareLicensorId": "unit-test-softwareLicensorId",
+                "assetUsageAgreementId": "unit-test-assetUsageAgreementId",
                 "agreement": {
-                    "uid": "agr-123",
+                    "uid": "unit-test-assetUsageAgreementId-uid",
                     "@type": "Agreement",
                     "target": {
                         "refinement": [
@@ -7796,11 +7795,11 @@
                         ]
                     },
                     "assigner": {
-                        "uid": "ass"
+                        "uid": "unit-test-assigner-uid"
                     },
                     "permission": [
                         {
-                            "uid": "perm-1",
+                            "uid": "unit-test-permission-1",
                             "action": [
                                 "acumos:deploy",
                                 "acumos:download"
@@ -7812,7 +7811,7 @@
                                         "leftOperand": "lum:swPersistentId",
                                         "rightOperand": [
                                             "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                            "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                                            "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                             "cbf31f26-4590-4323-8991-000d9f290901"
                                         ]
                                     }
@@ -7839,7 +7838,7 @@
                                 {
                                     "operator": "lt",
                                     "leftOperand": "date",
-                                    "rightOperand": "2021-01-01"
+                                    "rightOperand": "2099-01-01"
                                 },
                                 {
                                     "operator": "lteq",
@@ -7851,7 +7850,7 @@
                     ],
                     "prohibition": [
                         {
-                            "uid": "proh-2",
+                            "uid": "unit-test-prohibition-2",
                             "action": [
                                 "acumos:deploy--",
                                 "acumos:download--"
@@ -7863,7 +7862,7 @@
                                         "leftOperand": "lum:swPersistentId",
                                         "rightOperand": [
                                             "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                            "123456",
+                                            "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                             "789456123"
                                         ]
                                     },
@@ -7888,7 +7887,7 @@
                     ]
                 },
                 "agreementRestriction": {
-                    "uid": "agr-123",
+                    "uid": "unit-test-assetUsageAgreementId-uid",
                     "@type": "Agreement",
                     "target": {
                         "refinement": [
@@ -7925,17 +7924,17 @@
                                     "alex",
                                     "justin",
                                     "michelle",
-                                    "unit-test"
+                                    "unit-test-userId"
                                 ]
                             }
                         ]
                     },
                     "assigner": {
-                        "uid": "ass-restrictioner"
+                        "uid": "unit-test-assigner-uid-restr"
                     },
                     "permission": [
                         {
-                            "uid": "perm-1",
+                            "uid": "unit-test-permission-1",
                             "action": [
                                 "acumos:deploy",
                                 "acumos:download"
@@ -7947,7 +7946,7 @@
                                         "leftOperand": "lum:swPersistentId",
                                         "rightOperand": [
                                             "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                            "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                                            "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                             "cbf31f26-4590-4323-8991-000d9f290901"
                                         ]
                                     }
@@ -7974,7 +7973,7 @@
                                 {
                                     "operator": "lt",
                                     "leftOperand": "date",
-                                    "rightOperand": "2020-12-01"
+                                    "rightOperand": "2099-12-01"
                                 },
                                 {
                                     "operator": "lteq",
@@ -7986,7 +7985,7 @@
                     ],
                     "prohibition": [
                         {
-                            "uid": "proh-2",
+                            "uid": "unit-test-prohibition-2",
                             "action": [
                                 "acumos:deploy--",
                                 "acumos:download"
@@ -7998,7 +7997,7 @@
                                         "leftOperand": "lum:swPersistentId",
                                         "rightOperand": [
                                             "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                            "123456",
+                                            "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                             "789456123",
                                             "654789321"
                                         ]
@@ -8022,7 +8021,7 @@
                             ]
                         },
                         {
-                            "uid": "proh-3",
+                            "uid": "unit-test-prohibition-3",
                             "action": [
                                 "acumos:deploy==",
                                 "acumos:download"
@@ -8034,7 +8033,7 @@
                                         "leftOperand": "lum:swPersistentId",
                                         "rightOperand": [
                                             "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                            "123456",
+                                            "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                             "789456123"
                                         ]
                                     },
@@ -8059,17 +8058,17 @@
                     ]
                 },
                 "groomedAgreement": {
-                    "uid": "agr-123",
+                    "uid": "unit-test-assetUsageAgreementId-uid",
                     "permission": {
-                        "perm-1": {
-                            "uid": "perm-1",
+                        "unit-test-permission-1": {
+                            "uid": "unit-test-permission-1",
                             "actions": [
                                 "acumos:deploy",
                                 "acumos:download"
                             ],
                             "goodFor": "P10DT25H",
                             "enableOn": null,
-                            "expireOn": "2020-11-30",
+                            "expireOn": "2098-12-31",
                             "isPerpetual": false,
                             "actionProvided": true,
                             "assigneeMetrics": {
@@ -8105,7 +8104,7 @@
                                     "operator": "lum:in",
                                     "leftOperand": "lum:swPersistentId",
                                     "rightOperand": [
-                                        "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                                        "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                         "cbf31f26-4590-4323-8991-000d9f290901",
                                         "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                     ]
@@ -8131,7 +8130,7 @@
                                         "alex",
                                         "justin",
                                         "michelle",
-                                        "unit-test"
+                                        "unit-test-userId"
                                     ]
                                 },
                                 "lum:countUniqueUsers": {
@@ -8154,7 +8153,7 @@
                                         "dataType": "date",
                                         "operator": "lt",
                                         "leftOperand": "date",
-                                        "rightOperand": "2021-01-01",
+                                        "rightOperand": "2099-01-01",
                                         "consumeStatus": "groomed"
                                     },
                                     {
@@ -8168,7 +8167,7 @@
                                         "dataType": "date",
                                         "operator": "lteq",
                                         "leftOperand": "date",
-                                        "rightOperand": "2020-12-31",
+                                        "rightOperand": "2098-12-31",
                                         "consumeStatus": "consumed"
                                     },
                                     {
@@ -8180,8 +8179,8 @@
                                         "rightOperandComparable": 2592000000
                                     },
                                     {
-                                        "expireOn": "2020-12-31",
-                                        "consumeStatus": "overridden"
+                                        "expireOn": "2099-11-30",
+                                        "consumeStatus": "ignored"
                                     },
                                     {
                                         "goodFor": "P30D",
@@ -8242,7 +8241,7 @@
                                         "operator": "lum:in",
                                         "leftOperand": "lum:swPersistentId",
                                         "rightOperand": [
-                                            "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                                            "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                             "cbf31f26-4590-4323-8991-000d9f290901",
                                             "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                         ],
@@ -8284,8 +8283,8 @@
                         }
                     },
                     "prohibition": {
-                        "proh-2": {
-                            "uid": "proh-2",
+                        "unit-test-prohibition-2": {
+                            "uid": "unit-test-prohibition-2",
                             "actions": [
                                 "acumos:deploy--",
                                 "acumos:download--",
@@ -8332,9 +8331,9 @@
                                     "operator": "lum:in",
                                     "leftOperand": "lum:swPersistentId",
                                     "rightOperand": [
-                                        "123456",
                                         "654789321",
                                         "789456123",
+                                        "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                         "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                     ]
                                 }
@@ -8421,8 +8420,8 @@
                                         "operator": "lum:in",
                                         "leftOperand": "lum:swPersistentId",
                                         "rightOperand": [
-                                            "123456",
                                             "789456123",
+                                            "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                             "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                         ],
                                         "consumeStatus": "expanded"
@@ -8433,9 +8432,9 @@
                                         "operator": "lum:in",
                                         "leftOperand": "lum:swPersistentId",
                                         "rightOperand": [
-                                            "123456",
                                             "654789321",
                                             "789456123",
+                                            "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                             "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                         ],
                                         "consumeStatus": "expanded"
@@ -8459,8 +8458,8 @@
                                 ]
                             }
                         },
-                        "proh-3": {
-                            "uid": "proh-3",
+                        "unit-test-prohibition-3": {
+                            "uid": "unit-test-prohibition-3",
                             "actions": [
                                 "acumos:deploy==",
                                 "acumos:download"
@@ -8496,8 +8495,8 @@
                                     "operator": "lum:in",
                                     "leftOperand": "lum:swPersistentId",
                                     "rightOperand": [
-                                        "123456",
                                         "789456123",
+                                        "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                         "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                     ]
                                 }
@@ -8513,7 +8512,7 @@
                                         "alex",
                                         "justin",
                                         "michelle",
-                                        "unit-test"
+                                        "unit-test-userId"
                                     ]
                                 }
                             },
@@ -8575,17 +8574,17 @@
                         }
                     },
                     "restriction": {
-                        "uid": "agr-123",
+                        "uid": "unit-test-assetUsageAgreementId-uid",
                         "permission": {
-                            "perm-1": {
-                                "uid": "perm-1",
+                            "unit-test-permission-1": {
+                                "uid": "unit-test-permission-1",
                                 "actions": [
                                     "acumos:deploy",
                                     "acumos:download"
                                 ],
                                 "goodFor": "P10DT25H",
                                 "enableOn": null,
-                                "expireOn": "2020-11-30",
+                                "expireOn": "2099-11-30",
                                 "isPerpetual": false,
                                 "actionProvided": true,
                                 "assigneeMetrics": {
@@ -8617,7 +8616,7 @@
                                         "operator": "lum:in",
                                         "leftOperand": "lum:swPersistentId",
                                         "rightOperand": [
-                                            "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                                            "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                             "cbf31f26-4590-4323-8991-000d9f290901",
                                             "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                         ]
@@ -8643,7 +8642,7 @@
                                             "alex",
                                             "justin",
                                             "michelle",
-                                            "unit-test"
+                                            "unit-test-userId"
                                         ]
                                     },
                                     "lum:countUniqueUsers": {
@@ -8667,7 +8666,7 @@
                                             "dataType": "date",
                                             "operator": "lt",
                                             "leftOperand": "date",
-                                            "rightOperand": "2020-12-01",
+                                            "rightOperand": "2099-12-01",
                                             "consumeStatus": "groomed"
                                         },
                                         {
@@ -8681,7 +8680,7 @@
                                             "dataType": "date",
                                             "operator": "lteq",
                                             "leftOperand": "date",
-                                            "rightOperand": "2020-11-30",
+                                            "rightOperand": "2099-11-30",
                                             "consumeStatus": "consumed"
                                         },
                                         {
@@ -8721,8 +8720,8 @@
                             }
                         },
                         "prohibition": {
-                            "proh-2": {
-                                "uid": "proh-2",
+                            "unit-test-prohibition-2": {
+                                "uid": "unit-test-prohibition-2",
                                 "actions": [
                                     "acumos:deploy--",
                                     "acumos:download"
@@ -8759,9 +8758,9 @@
                                         "operator": "lum:in",
                                         "leftOperand": "lum:swPersistentId",
                                         "rightOperand": [
-                                            "123456",
                                             "654789321",
                                             "789456123",
+                                            "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                             "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                         ]
                                     }
@@ -8778,7 +8777,7 @@
                                             "alex",
                                             "justin",
                                             "michelle",
-                                            "unit-test"
+                                            "unit-test-userId"
                                         ]
                                     }
                                 },
@@ -8838,8 +8837,8 @@
                                     ]
                                 }
                             },
-                            "proh-3": {
-                                "uid": "proh-3",
+                            "unit-test-prohibition-3": {
+                                "uid": "unit-test-prohibition-3",
                                 "actions": [
                                     "acumos:deploy==",
                                     "acumos:download"
@@ -8875,8 +8874,8 @@
                                         "operator": "lum:in",
                                         "leftOperand": "lum:swPersistentId",
                                         "rightOperand": [
-                                            "123456",
                                             "789456123",
+                                            "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                             "fab0954c-d4e5-443a-8d3e-cf7620e80455"
                                         ]
                                     }
@@ -8892,7 +8891,7 @@
                                             "alex",
                                             "justin",
                                             "michelle",
-                                            "unit-test"
+                                            "unit-test-userId"
                                         ]
                                     }
                                 },
@@ -8955,7 +8954,7 @@
                         }
                     },
                     "initialAgreement": {
-                        "uid": "agr-123",
+                        "uid": "unit-test-assetUsageAgreementId-uid",
                         "@type": "Agreement",
                         "target": {
                             "refinement": [
@@ -8998,11 +8997,11 @@
                             ]
                         },
                         "assigner": {
-                            "uid": "ass"
+                            "uid": "unit-test-assigner-uid"
                         },
                         "permission": [
                             {
-                                "uid": "perm-1",
+                                "uid": "unit-test-permission-1",
                                 "action": [
                                     "acumos:deploy",
                                     "acumos:download"
@@ -9014,7 +9013,7 @@
                                             "leftOperand": "lum:swPersistentId",
                                             "rightOperand": [
                                                 "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                                "c01c4e06-557c-4c21-bc22-2afd757ee7af",
+                                                "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                 "cbf31f26-4590-4323-8991-000d9f290901"
                                             ]
                                         }
@@ -9041,7 +9040,7 @@
                                     {
                                         "operator": "lt",
                                         "leftOperand": "date",
-                                        "rightOperand": "2021-01-01"
+                                        "rightOperand": "2099-01-01"
                                     },
                                     {
                                         "operator": "lteq",
@@ -9053,7 +9052,7 @@
                         ],
                         "prohibition": [
                             {
-                                "uid": "proh-2",
+                                "uid": "unit-test-prohibition-2",
                                 "action": [
                                     "acumos:deploy--",
                                     "acumos:download--"
@@ -9065,7 +9064,7 @@
                                             "leftOperand": "lum:swPersistentId",
                                             "rightOperand": [
                                                 "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                                                "123456",
+                                                "a218c795-ae2c-4ff9-894d-462baa768dfc",
                                                 "789456123"
                                             ]
                                         },
@@ -9091,8 +9090,8 @@
                     },
                     "ignoredPermissionRestrictions": {},
                     "ignoredProhibitionRestrictions": {
-                        "proh-2": {
-                            "uid": "proh-2",
+                        "unit-test-prohibition-2": {
+                            "uid": "unit-test-prohibition-2",
                             "targetRefinement": {},
                             "usageConstraints": {},
                             "assigneeRefinement": {
@@ -9105,19 +9104,19 @@
                                         "alex",
                                         "justin",
                                         "michelle",
-                                        "unit-test"
+                                        "unit-test-userId"
                                     ]
                                 }
                             }
                         }
                     }
                 },
-                "assetUsageAgreementRevision": 57,
+                "assetUsageAgreementRevision": 12,
                 "assetUsageAgreementActive": true,
-                "creator": "alex-agr-user",
-                "created": "2020-01-27T15:59:24.515Z",
-                "modifier": "alex-agr-user",
-                "modified": "2020-04-03T18:58:49.060Z",
+                "creator": "unit-test-userId",
+                "created": "__type__dateTime__",
+                "modifier": "unit-test-assetUsageAgreementId-user",
+                "modified": "__type__dateTime__",
                 "closer": null,
                 "closed": null,
                 "closureReason": null

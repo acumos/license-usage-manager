@@ -4,17 +4,29 @@
         "method": "PUT",
         "path": "/admin/config",
         "content-type": "application/json; charset=utf-8",
-        "send": {"config":{"logging":{"logLevel":"info","logTo":{"acumos":false}}}}
+        "X-ACUMOS-RequestID": "21d03696-413b-47e8-bc22-78148f9508c8",
+        "send": {
+            "requestId": "21d03696-413b-47e8-bc22-78148f9508c8",
+            "requested": "2020-06-03T16:52:30.690Z",
+            "config": {
+                "logging": {
+                    "logLevel": "info",
+                    "logTo": {
+                        "acumos": false
+                    }
+                }
+            }
+        }
     },
     "res": {
         "statusCode": 200,
         "body": {
-            "requestId": "__type__uuid__",
+            "requestId": "21d03696-413b-47e8-bc22-78148f9508c8",
             "requested": "__type__dateTime__",
             "config": {
                 "database": {
                     "user": "lumdb",
-                    "password": "***-sha256(66c199d8a03e95599c1043bc484995d44619be2f2c0d82fe6b3d66fb838533a4)***",
+                    "password": "hmac(8e97a9ac003fccfd332b)",
                     "host": "__type__ignore__",
                     "database": "lumdb",
                     "port": 5432,
@@ -24,7 +36,7 @@
                 "serverName": "lum-server",
                 "maxTxRetryCount": 10,
                 "port": 2080,
-                "logging":{
+                "logging": {
                     "logLevel": "info",
                     "logTo": {
                         "console": true,

@@ -27,7 +27,7 @@ module.exports = {
             serverName: lumServer.config.serverName,
             serverVersion: serverVersion,
             apiVersion: serverVersion,
-            nodeVersion: process.env.NODE_VERSION,
+            nodeVersion: process.env.NODE_VERSION || null,
             databaseInfo: null,
             serverRunInstanceId: utils.uuid(),
             serverStarted: lumServer.started,

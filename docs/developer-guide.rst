@@ -277,9 +277,9 @@ Technology and frameworks
    :header: "framework", "version", "link"
    :widths: 10 5 20
 
-    node.js, ``12.16.1``, https://nodejs.org
+    node.js, ``12.18.1``, https://nodejs.org
     express.js, ``4.17.1``, http://expressjs.com/
-    node-postgres, ``7.18.2``, https://node-postgres.com/
+    node-postgres, ``8.2.1``, https://node-postgres.com/
     openapi, ``3.0.3``, https://swagger.io/specification/
     postgres database, ``11.5``, https://www.postgresql.org/
 

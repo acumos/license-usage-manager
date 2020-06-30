@@ -2,31 +2,84 @@
     "db": [
         {
             "sqlCmd": "BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ",
-            "result": {"command": "BEGIN", "rowCount": 1, "rows": []}
+            "result": {
+                "command": "BEGIN",
+                "rowCount": 1,
+                "rows": []
+            }
         },
         {
             "sqlCmd": "SELECT TXID_CURRENT() AS txid, PG_BACKEND_PID() AS pid, NOW() AS tx_now",
-            "result": {"command": "SELECT", "rowCount": 1,
-                "rows": [{"txid": 123, "pid": 456, "tx_now": "__to_date__|2019-12-19T11:43:20.952Z"}]
+            "result": {
+                "command": "SELECT",
+                "rowCount": 1,
+                "rows": [
+                    {
+                        "txid": 123,
+                        "pid": 456,
+                        "tx_now": "__to_date__|2019-12-19T11:43:20.952Z"
+                    }
+                ]
             }
         },
         {
             "sqlCmd": "INSERT INTO \"licenseProfile\" AS lp (\"licenseProfileId\" , \"licenseProfile\",\"isRtuRequired\",\"licenseTxt\",\"licenseName\",\"licenseDescription\",\"licenseNotes\",\"softwareLicensorId\" , \"licenseProfileActive\",\"modifier\",\"closer\",\"closed\",\"closureReason\" , \"creator\", \"created\", \"modified\") VALUES (($1) , ($2),($3),($4),($5),($6),($7),($8) , ($9),($10),($11),($12),($13) , ($14), NOW(), NOW()) ON CONFLICT (\"licenseProfileId\") DO UPDATE SET \"licenseProfileRevision\" = lp.\"licenseProfileRevision\" + 1 , \"licenseProfile\" = ($2),\"isRtuRequired\" = ($3),\"licenseTxt\" = ($4),\"licenseName\" = ($5),\"licenseDescription\" = ($6),\"licenseNotes\" = ($7),\"softwareLicensorId\" = ($8) , \"licenseProfileActive\" = ($9),\"modifier\" = ($10),\"closer\" = ($11),\"closed\" = ($12),\"closureReason\" = ($13), \"modified\" = NOW() WHERE lp.\"licenseProfileActive\" = FALSE OR lp.\"licenseProfile\" IS DISTINCT FROM ($2) OR lp.\"isRtuRequired\" IS DISTINCT FROM ($3) OR lp.\"licenseTxt\" IS DISTINCT FROM ($4) OR lp.\"licenseName\" IS DISTINCT FROM ($5) OR lp.\"licenseDescription\" IS DISTINCT FROM ($6) OR lp.\"licenseNotes\" IS DISTINCT FROM ($7) OR lp.\"softwareLicensorId\" IS DISTINCT FROM ($8) RETURNING *",
-            "sqlVals": ["d817cbd1-d799-44af-8a5e-693163812e98",null,true,null,null,null,null,"swlic",true,"alex-dev",null,null,null,"alex-dev"],
-            "result": {"command": "INSERT","rowCount": 0,"rows": []}
+            "sqlVals": [
+                "cec51e7d-d977-41d2-abc6-ef5f069491b8",
+                null,
+                true,
+                null,
+                null,
+                null,
+                null,
+                "unit-test-softwareLicensorId",
+                true,
+                "unit-test-userId",
+                null,
+                null,
+                null,
+                "unit-test-userId"
+            ],
+            "result": {
+                "command": "INSERT",
+                "rowCount": 0,
+                "rows": []
+            }
         },
         {
             "sqlCmd": "INSERT INTO \"swidTag\" AS swt (\"swTagId\" , \"swPersistentId\",\"swVersion\",\"swVersionComparable\",\"licenseProfileId\",\"softwareLicensorId\",\"swCategory\",\"swCreators\",\"swProductName\",\"swidTagDetails\",\"swCatalogs\" , \"swidTagActive\",\"modifier\",\"closer\",\"closed\",\"closureReason\" , \"creator\", \"created\", \"modified\") VALUES (($1) , ($2),($3),($4),($5),($6),($7),($8),($9),($10),($11) , ($12),($13),($14),($15),($16) , ($17), NOW(), NOW()) ON CONFLICT (\"swTagId\") DO UPDATE SET \"swidTagRevision\" = swt.\"swidTagRevision\" + 1 , \"swPersistentId\" = ($2),\"swVersion\" = ($3),\"swVersionComparable\" = ($4),\"licenseProfileId\" = ($5),\"softwareLicensorId\" = ($6),\"swCategory\" = ($7),\"swCreators\" = ($8),\"swProductName\" = ($9),\"swidTagDetails\" = ($10),\"swCatalogs\" = ($11) , \"swidTagActive\" = ($12),\"modifier\" = ($13),\"closer\" = ($14),\"closed\" = ($15),\"closureReason\" = ($16), \"modified\" = NOW() WHERE swt.\"swidTagActive\" = FALSE OR swt.\"swPersistentId\" IS DISTINCT FROM ($2) OR swt.\"swVersion\" IS DISTINCT FROM ($3) OR swt.\"swVersionComparable\" IS DISTINCT FROM ($4) OR swt.\"licenseProfileId\" IS DISTINCT FROM ($5) OR swt.\"softwareLicensorId\" IS DISTINCT FROM ($6) OR swt.\"swCategory\" IS DISTINCT FROM ($7) OR swt.\"swCreators\" IS DISTINCT FROM ($8) OR swt.\"swProductName\" IS DISTINCT FROM ($9) OR swt.\"swidTagDetails\" IS DISTINCT FROM ($10) OR swt.\"swCatalogs\" IS DISTINCT FROM ($11) RETURNING *",
-            "sqlVals": ["alex-1","fab0954c-d4e5-443a-8d3e-cf7620e80455","1","1","d817cbd1-d799-44af-8a5e-693163812e98","swlic","image-processing",["alex-sw-creator"],"alex-product2020",null,"[{\"swCatalogId\":\"XYZ models\",\"swCatalogType\":\"restricted\"},{\"swCatalogId\":\"ABC models\",\"swCatalogType\":\"restricted\"}]",true,"alex-dev",null,null,null,"alex-dev"],
-            "result": {"command": "INSERT", "rowCount": 1,
+            "sqlVals": [
+                "unit-test-swTagId",
+                "a218c795-ae2c-4ff9-894d-462baa768dfc",
+                "2",
+                "2",
+                "cec51e7d-d977-41d2-abc6-ef5f069491b8",
+                "unit-test-softwareLicensorId",
+                "image-processing",
+                [
+                    "unit-test-userId-sw-creator"
+                ],
+                "unit-test-product25",
+                null,
+                "[{\"swCatalogId\":\"XYZ models\",\"swCatalogType\":\"restricted\"},{\"swCatalogId\":\"ABC models\",\"swCatalogType\":\"restricted\"}]",
+                true,
+                "unit-test-userId",
+                null,
+                null,
+                null,
+                "unit-test-userId"
+            ],
+            "result": {
+                "command": "INSERT",
+                "rowCount": 1,
                 "rows": [
                     {
-                        "swTagId": "alex-1",
-                        "swPersistentId": "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                        "swVersion": "1",
-                        "swVersionComparable": "1",
-                        "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
-                        "softwareLicensorId": "swlic",
+                        "swTagId": "unit-test-swTagId",
+                        "swPersistentId": "a218c795-ae2c-4ff9-894d-462baa768dfc",
+                        "swVersion": "2",
+                        "swVersionComparable": "2",
+                        "licenseProfileId": "cec51e7d-d977-41d2-abc6-ef5f069491b8",
+                        "softwareLicensorId": "unit-test-softwareLicensorId",
                         "swCategory": "image-processing",
                         "swCatalogs": [
                             {
@@ -39,16 +92,16 @@
                             }
                         ],
                         "swCreators": [
-                            "alex-sw-creator"
+                            "unit-test-userId-sw-creator"
                         ],
-                        "swProductName": "alex-product2020",
+                        "swProductName": "unit-test-product25",
                         "swidTagDetails": null,
                         "swidTagRevision": 2,
                         "swidTagActive": true,
-                        "creator": "alex-dev",
-                        "created": "2019-10-23T15:14:21.888Z",
-                        "modifier": "alex-dev",
-                        "modified": "2019-12-19T16:26:11.433Z",
+                        "creator": "unit-test-userId",
+                        "created": "2020-05-29T21:37:56.912Z",
+                        "modifier": "unit-test-userId",
+                        "modified": "2020-05-29T21:37:57.092Z",
                         "closer": null,
                         "closed": null,
                         "closureReason": null
@@ -58,40 +111,105 @@
         },
         {
             "sqlCmd": "INSERT INTO \"snapshot\" (\"softwareLicensorId\",\"snapshotType\",\"snapshotKey\",\"snapshotRevision\" , \"snapshotBody\",\"creator\",\"requestId\",\"txStep\") VALUES (($1),($2),($3),($4) , ($5),($6),($7),($8)) ON CONFLICT (\"softwareLicensorId\",\"snapshotType\",\"snapshotKey\",\"snapshotRevision\") DO NOTHING",
-            "sqlVals": ["swlic","swidTag","alex-1",2,{"swTagId":"alex-1","swPersistentId":"fab0954c-d4e5-443a-8d3e-cf7620e80455","swVersion":"1","swVersionComparable":"1","licenseProfileId":"d817cbd1-d799-44af-8a5e-693163812e98","softwareLicensorId":"swlic","swCategory":"image-processing","swCatalogs":[{"swCatalogId":"XYZ models","swCatalogType":"restricted"},{"swCatalogId":"ABC models","swCatalogType":"restricted"}],"swCreators":["alex-sw-creator"],"swProductName":"alex-product2020","swidTagDetails":null,"swidTagRevision":2,"swidTagActive":true,"creator":"alex-dev","created":"2019-10-23T15:14:21.888Z","modifier":"alex-dev","modified":"2019-12-19T16:26:11.433Z","closer":null,"closed":null,"closureReason":null},"alex-dev","47d38b14-ee99-476e-be3f-0f5b1c809dba","[02] putSwidTag"],
-            "result": {"command": "INSERT","rowCount": 1,"rows": []}
+            "sqlVals": [
+                "unit-test-softwareLicensorId",
+                "swidTag",
+                "unit-test-swTagId",
+                2,
+                {
+                    "swTagId": "unit-test-swTagId",
+                    "swPersistentId": "a218c795-ae2c-4ff9-894d-462baa768dfc",
+                    "swVersion": "2",
+                    "swVersionComparable": "2",
+                    "licenseProfileId": "cec51e7d-d977-41d2-abc6-ef5f069491b8",
+                    "softwareLicensorId": "unit-test-softwareLicensorId",
+                    "swCategory": "image-processing",
+                    "swCatalogs": [
+                        {
+                            "swCatalogId": "XYZ models",
+                            "swCatalogType": "restricted"
+                        },
+                        {
+                            "swCatalogId": "ABC models",
+                            "swCatalogType": "restricted"
+                        }
+                    ],
+                    "swCreators": [
+                        "unit-test-userId-sw-creator"
+                    ],
+                    "swProductName": "unit-test-product25",
+                    "swidTagDetails": null,
+                    "swidTagRevision": 2,
+                    "swidTagActive": true,
+                    "creator": "unit-test-userId",
+                    "created": "2020-05-29T21:37:56.912Z",
+                    "modifier": "unit-test-userId",
+                    "modified": "2020-05-29T21:37:57.092Z",
+                    "closer": null,
+                    "closed": null,
+                    "closureReason": null
+                },
+                "unit-test-userId",
+                "0b1a6f91-de5f-4ec4-b612-47099e440be8",
+                "[02] putSwidTag"
+            ],
+            "result": {
+                "command": "INSERT",
+                "rowCount": 1,
+                "rows": []
+            }
         },
         {
             "sqlCmd": "COMMIT",
-            "result": {"command": "COMMIT", "rowCount": 1, "rows": []}
+            "result": {
+                "command": "COMMIT",
+                "rowCount": 1,
+                "rows": []
+            }
         },
         {
             "sqlCmd": "BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ",
-            "result": {"command": "BEGIN", "rowCount": 1, "rows": []}
+            "result": {
+                "command": "BEGIN",
+                "rowCount": 1,
+                "rows": []
+            }
         },
         {
             "sqlCmd": "SELECT TXID_CURRENT() AS txid, PG_BACKEND_PID() AS pid, NOW() AS tx_now",
-            "result": {"command": "SELECT", "rowCount": 1,
-                "rows": [{"txid": 123, "pid": 456, "tx_now": "__to_date__|2019-12-19T11:43:20.952Z"}]
+            "result": {
+                "command": "SELECT",
+                "rowCount": 1,
+                "rows": [
+                    {
+                        "txid": 123,
+                        "pid": 456,
+                        "tx_now": "__to_date__|2019-12-19T11:43:20.952Z"
+                    }
+                ]
             }
         },
         {
             "sqlCmd": "SELECT \"swTagId\", \"swPersistentId\",\"swVersion\",\"swVersionComparable\",\"licenseProfileId\",\"softwareLicensorId\",\"swCategory\",\"swCreators\",\"swProductName\",\"swidTagDetails\",\"swCatalogs\",\"swidTagRevision\",\"swidTagActive\",\"creator\",\"created\",\"modifier\",\"modified\",\"closer\",\"closed\",\"closureReason\" FROM \"swidTag\" WHERE \"swTagId\" IN (($1)) FOR SHARE",
-            "sqlVals": ["alex-1"],
-            "result": {"command": "SELECT", "rowCount": 1,
+            "sqlVals": [
+                "unit-test-swTagId"
+            ],
+            "result": {
+                "command": "SELECT",
+                "rowCount": 1,
                 "rows": [
                     {
-                        "swTagId": "alex-1",
-                        "swPersistentId": "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                        "swVersion": "1",
-                        "swVersionComparable": "1",
-                        "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
-                        "softwareLicensorId": "swlic",
+                        "swTagId": "unit-test-swTagId",
+                        "swPersistentId": "a218c795-ae2c-4ff9-894d-462baa768dfc",
+                        "swVersion": "2",
+                        "swVersionComparable": "2",
+                        "licenseProfileId": "cec51e7d-d977-41d2-abc6-ef5f069491b8",
+                        "softwareLicensorId": "unit-test-softwareLicensorId",
                         "swCategory": "image-processing",
                         "swCreators": [
-                            "alex-sw-creator"
+                            "unit-test-userId-sw-creator"
                         ],
-                        "swProductName": "alex-product2020",
+                        "swProductName": "unit-test-product25",
                         "swidTagDetails": null,
                         "swCatalogs": [
                             {
@@ -105,10 +223,10 @@
                         ],
                         "swidTagRevision": 2,
                         "swidTagActive": true,
-                        "creator": "alex-dev",
-                        "created": "2019-10-23T15:14:21.888Z",
-                        "modifier": "alex-dev",
-                        "modified": "2019-12-19T16:26:11.433Z",
+                        "creator": "unit-test-userId",
+                        "created": "2020-05-29T21:37:56.912Z",
+                        "modifier": "unit-test-userId",
+                        "modified": "2020-05-29T21:37:57.092Z",
                         "closer": null,
                         "closed": null,
                         "closureReason": null
@@ -118,11 +236,15 @@
         },
         {
             "sqlCmd": "SELECT \"licenseProfileId\", \"licenseProfile\",\"isRtuRequired\",\"licenseTxt\",\"licenseName\",\"licenseDescription\",\"licenseNotes\",\"licenseProfileRevision\",\"licenseProfileActive\",\"creator\",\"created\",\"modifier\",\"modified\",\"closer\",\"closed\",\"closureReason\" FROM \"licenseProfile\" WHERE \"licenseProfileId\" IN (($1)) FOR SHARE",
-            "sqlVals": ["d817cbd1-d799-44af-8a5e-693163812e98"],
-            "result": {"command": "SELECT", "rowCount": 1,
+            "sqlVals": [
+                "cec51e7d-d977-41d2-abc6-ef5f069491b8"
+            ],
+            "result": {
+                "command": "SELECT",
+                "rowCount": 1,
                 "rows": [
                     {
-                        "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                        "licenseProfileId": "cec51e7d-d977-41d2-abc6-ef5f069491b8",
                         "licenseProfile": null,
                         "isRtuRequired": true,
                         "licenseTxt": null,
@@ -131,10 +253,10 @@
                         "licenseNotes": null,
                         "licenseProfileRevision": 1,
                         "licenseProfileActive": true,
-                        "creator": "alex-dev",
-                        "created": "2019-10-23T15:14:21.888Z",
-                        "modifier": "alex-dev",
-                        "modified": "2019-10-23T15:14:21.888Z",
+                        "creator": "unit-test-userId",
+                        "created": "2020-05-29T21:37:56.912Z",
+                        "modifier": "unit-test-userId",
+                        "modified": "2020-05-29T21:37:56.912Z",
                         "closer": null,
                         "closed": null,
                         "closureReason": null
@@ -144,24 +266,30 @@
         },
         {
             "sqlCmd": "COMMIT",
-            "result": {"command": "COMMIT", "rowCount": 1, "rows": []}
+            "result": {
+                "command": "COMMIT",
+                "rowCount": 1,
+                "rows": []
+            }
         }
     ],
     "req": {
         "method": "PUT",
-        "path": "/api/v1/swid-tag?swTagId=alex-1",
+        "path": "/api/v1/swid-tag?swTagId=unit-test-swTagId",
         "content-type": "application/json; charset=utf-8",
+        "X-ACUMOS-RequestID": "0b1a6f91-de5f-4ec4-b612-47099e440be8",
         "send": {
-            "requestId": "47d38b14-ee99-476e-be3f-0f5b1c809dba",
-            "requested":"2019-12-19T16:26:11.424Z",
-            "userId": "alex-dev",
+            "requestId": "0b1a6f91-de5f-4ec4-b612-47099e440be8",
+            "requested": "2020-05-29T21:37:57.089Z",
+            "userId": "unit-test-userId",
+            "swTagId": "unit-test-swTagId",
             "swidTag": {
-                "swTagId": "alex-1",
-                "swPersistentId": "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                "swVersion": "1",
-                "swVersionComparable": "1",
-                "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
-                "softwareLicensorId": "swlic",
+                "swTagId": "unit-test-swTagId",
+                "swPersistentId": "a218c795-ae2c-4ff9-894d-462baa768dfc",
+                "swVersion": "2",
+                "swVersionComparable": "2",
+                "licenseProfileId": "cec51e7d-d977-41d2-abc6-ef5f069491b8",
+                "softwareLicensorId": "unit-test-softwareLicensorId",
                 "swCategory": "image-processing",
                 "swCatalogs": [
                     {
@@ -174,13 +302,13 @@
                     }
                 ],
                 "swCreators": [
-                    "alex-sw-creator"
+                    "unit-test-userId-sw-creator"
                 ],
-                "swProductName": "alex-product2020",
+                "swProductName": "unit-test-product25",
                 "swidTagDetails": null
             },
             "licenseProfile": {
-                "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                "licenseProfileId": "cec51e7d-d977-41d2-abc6-ef5f069491b8",
                 "licenseProfile": null,
                 "isRtuRequired": true,
                 "licenseTxt": null,
@@ -193,21 +321,22 @@
     "res": {
         "statusCode": 200,
         "body": {
-            "requestId": "47d38b14-ee99-476e-be3f-0f5b1c809dba",
-            "requested": "2019-12-19T16:26:11.424Z",
-            "userId": "alex-dev",
+            "userId": "unit-test-userId",
+            "swTagId": "unit-test-swTagId",
+            "requestId": "0b1a6f91-de5f-4ec4-b612-47099e440be8",
+            "requested": "__type__dateTime__",
             "swidTag": {
-                "swTagId": "alex-1",
-                "swPersistentId": "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                "swVersion": "1",
-                "swVersionComparable": "1",
-                "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
-                "softwareLicensorId": "swlic",
+                "swTagId": "unit-test-swTagId",
+                "swPersistentId": "a218c795-ae2c-4ff9-894d-462baa768dfc",
+                "swVersion": "2",
+                "swVersionComparable": "2",
+                "licenseProfileId": "cec51e7d-d977-41d2-abc6-ef5f069491b8",
+                "softwareLicensorId": "unit-test-softwareLicensorId",
                 "swCategory": "image-processing",
                 "swCreators": [
-                    "alex-sw-creator"
+                    "unit-test-userId-sw-creator"
                 ],
-                "swProductName": "alex-product2020",
+                "swProductName": "unit-test-product25",
                 "swidTagDetails": null,
                 "swCatalogs": [
                     {
@@ -221,16 +350,16 @@
                 ],
                 "swidTagRevision": 2,
                 "swidTagActive": true,
-                "creator": "alex-dev",
-                "created": "2019-10-23T15:14:21.888Z",
-                "modifier": "alex-dev",
-                "modified": "2019-12-19T16:26:11.433Z",
+                "creator": "unit-test-userId",
+                "created": "__type__dateTime__",
+                "modifier": "unit-test-userId",
+                "modified": "__type__dateTime__",
                 "closer": null,
                 "closed": null,
                 "closureReason": null
             },
             "licenseProfile": {
-                "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                "licenseProfileId": "cec51e7d-d977-41d2-abc6-ef5f069491b8",
                 "licenseProfile": null,
                 "isRtuRequired": true,
                 "licenseTxt": null,
@@ -239,10 +368,10 @@
                 "licenseNotes": null,
                 "licenseProfileRevision": 1,
                 "licenseProfileActive": true,
-                "creator": "alex-dev",
-                "created": "2019-10-23T15:14:21.888Z",
-                "modifier": "alex-dev",
-                "modified": "2019-10-23T15:14:21.888Z",
+                "creator": "unit-test-userId",
+                "created": "__type__dateTime__",
+                "modifier": "unit-test-userId",
+                "modified": "__type__dateTime__",
                 "closer": null,
                 "closed": null,
                 "closureReason": null
@@ -252,7 +381,7 @@
     "acuLogs": [
         {
             "LogTimestamp": "__type__dateTime__",
-            "RequestID": "47d38b14-ee99-476e-be3f-0f5b1c809dba",
+            "RequestID": "0b1a6f91-de5f-4ec4-b612-47099e440be8",
             "InvocationID": "PUT /api/v1/swid-tag",
             "InstanceID": "__type__uuid__",
             "Thread": "main",
@@ -267,20 +396,19 @@
             "ClientIPAddress": "__type__ignore__",
             "TargetEntity": null,
             "TargetServiceName": null,
-            "User": "alex-dev",
+            "User": "unit-test-userId",
             "Logger": "__type__ignore__",
             "Mdc": null,
             "Message": {
-                "requestId": "47d38b14-ee99-476e-be3f-0f5b1c809dba",
-                "requested": "2019-12-19T16:26:11.424Z",
-                "userId": "alex-dev",
+                "userId": "unit-test-userId",
+                "swTagId": "unit-test-swTagId",
                 "swidTag": {
-                    "swTagId": "alex-1",
-                    "swPersistentId": "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                    "swVersion": "1",
-                    "swVersionComparable": "1",
-                    "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
-                    "softwareLicensorId": "swlic",
+                    "swTagId": "unit-test-swTagId",
+                    "swPersistentId": "a218c795-ae2c-4ff9-894d-462baa768dfc",
+                    "swVersion": "2",
+                    "swVersionComparable": "2",
+                    "licenseProfileId": "cec51e7d-d977-41d2-abc6-ef5f069491b8",
+                    "softwareLicensorId": "unit-test-softwareLicensorId",
                     "swCategory": "image-processing",
                     "swCatalogs": [
                         {
@@ -293,26 +421,27 @@
                         }
                     ],
                     "swCreators": [
-                        "alex-sw-creator"
+                        "unit-test-userId-sw-creator"
                     ],
-                    "swProductName": "alex-product2020",
+                    "swProductName": "unit-test-product25",
                     "swidTagDetails": null
                 },
                 "licenseProfile": {
-                    "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                    "licenseProfileId": "cec51e7d-d977-41d2-abc6-ef5f069491b8",
                     "licenseProfile": null,
                     "isRtuRequired": true,
                     "licenseTxt": null,
                     "licenseName": null,
                     "licenseDescription": null,
                     "licenseNotes": null
-                }
+                },
+                "requested": "__type__dateTime__"
             },
             "Marker": "ENTRY"
         },
         {
             "LogTimestamp": "__type__dateTime__",
-            "RequestID": "47d38b14-ee99-476e-be3f-0f5b1c809dba",
+            "RequestID": "0b1a6f91-de5f-4ec4-b612-47099e440be8",
             "InvocationID": "response",
             "InstanceID": "__type__uuid__",
             "Thread": "main",
@@ -327,25 +456,26 @@
             "ClientIPAddress": "__type__ignore__",
             "TargetEntity": null,
             "TargetServiceName": null,
-            "User": "alex-dev",
+            "User": "unit-test-userId",
             "Logger": "__type__ignore__",
             "Mdc": null,
             "Message": {
-                "requestId": "47d38b14-ee99-476e-be3f-0f5b1c809dba",
-                "requested": "2019-12-19T16:26:11.424Z",
-                "userId": "alex-dev",
+                "requestId": "0b1a6f91-de5f-4ec4-b612-47099e440be8",
+                "requested": "2020-05-29T21:37:57.089Z",
+                "userId": "unit-test-userId",
+                "swTagId": "unit-test-swTagId",
                 "swidTag": {
-                    "swTagId": "alex-1",
-                    "swPersistentId": "fab0954c-d4e5-443a-8d3e-cf7620e80455",
-                    "swVersion": "1",
-                    "swVersionComparable": "1",
-                    "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
-                    "softwareLicensorId": "swlic",
+                    "swTagId": "unit-test-swTagId",
+                    "swPersistentId": "a218c795-ae2c-4ff9-894d-462baa768dfc",
+                    "swVersion": "2",
+                    "swVersionComparable": "2",
+                    "licenseProfileId": "cec51e7d-d977-41d2-abc6-ef5f069491b8",
+                    "softwareLicensorId": "unit-test-softwareLicensorId",
                     "swCategory": "image-processing",
                     "swCreators": [
-                        "alex-sw-creator"
+                        "unit-test-userId-sw-creator"
                     ],
-                    "swProductName": "alex-product2020",
+                    "swProductName": "unit-test-product25",
                     "swidTagDetails": null,
                     "swCatalogs": [
                         {
@@ -359,16 +489,16 @@
                     ],
                     "swidTagRevision": 2,
                     "swidTagActive": true,
-                    "creator": "alex-dev",
-                    "created": "2019-10-23T15:14:21.888Z",
-                    "modifier": "alex-dev",
-                    "modified": "2019-12-19T16:26:11.433Z",
+                    "creator": "unit-test-userId",
+                    "created": "2020-05-29T21:37:56.912Z",
+                    "modifier": "unit-test-userId",
+                    "modified": "2020-05-29T21:37:57.092Z",
                     "closer": null,
                     "closed": null,
                     "closureReason": null
                 },
                 "licenseProfile": {
-                    "licenseProfileId": "d817cbd1-d799-44af-8a5e-693163812e98",
+                    "licenseProfileId": "cec51e7d-d977-41d2-abc6-ef5f069491b8",
                     "licenseProfile": null,
                     "isRtuRequired": true,
                     "licenseTxt": null,
@@ -377,10 +507,10 @@
                     "licenseNotes": null,
                     "licenseProfileRevision": 1,
                     "licenseProfileActive": true,
-                    "creator": "alex-dev",
-                    "created": "2019-10-23T15:14:21.888Z",
-                    "modifier": "alex-dev",
-                    "modified": "2019-10-23T15:14:21.888Z",
+                    "creator": "unit-test-userId",
+                    "created": "2020-05-29T21:37:56.912Z",
+                    "modifier": "unit-test-userId",
+                    "modified": "2020-05-29T21:37:56.912Z",
                     "closer": null,
                     "closed": null,
                     "closureReason": null
