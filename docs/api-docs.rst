@@ -65,4 +65,8 @@ If lum-server is installed and running
 
 ----
 
+See :doc:`asset-usage-denials` for the list of possible denials on asset-usage request
+
+----
+
 :doc:`back to LUM index <index>`

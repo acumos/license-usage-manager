@@ -80,9 +80,9 @@ const putAssetUsage = async (req, res, next) => {
 
     for (const includedAssetUsage of res.locals.reqBody.assetUsageReq.includedAssetUsage || []) {
         res.locals.includedAssetUsageIds.push(includedAssetUsage.includedAssetUsageId);
-        const assetUsage = dbAssetUsage.convertToAssetUsage(includedAssetUsage);
-        res.locals.assetUsages[assetUsage.assetUsageId] = assetUsage;
-        utils.addSwidTag(res.locals.dbdata.swidTags, assetUsage.swTagId, assetUsage.isIncludedAsset);
+        const assetUsageIncluded = dbAssetUsage.convertToAssetUsage(includedAssetUsage);
+        res.locals.assetUsages[assetUsageIncluded.assetUsageId] = assetUsageIncluded;
+        utils.addSwidTag(res.locals.dbdata.swidTags, assetUsageIncluded.swTagId, assetUsageIncluded.isIncludedAsset);
     }
 
     await pgclient.runTx(res,
