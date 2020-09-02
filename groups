@@ -1,3 +1,5 @@
-42f0c83244389e408b42fa668348002012ecba46	GitHub Replication
-global:Registered-Users	Registered Users
+# UUID                                                                                  	Group Name
+#
+41a205a41687fd3d2a8225669203a5ad9864cc59                                                	saml/acumos-gerrit-license-usage-manager-committers
+42f0c83244389e408b42fa668348002012ecba46                                                	GitHub Replication
 ldap:cn=acumos-gerrit-license-usage-manager-committers,ou=Groups,dc=freestandards,dc=org	ldap/acumos-gerrit-license-usage-manager-committers
